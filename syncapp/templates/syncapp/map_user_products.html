@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Products Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { width: 100vw; height: 100vh; }
+    .popup-image { max-width: 200px; height: auto; border-radius: 5px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Products for User on Map</h2>
+  <div id="map"></div>
+
+  <script>
+    const userID = "o7Iwscx0RYeV84l5Pc7p28OL1tX2";
+    const map = L.map('map').setView([19.1, 72.8], 10);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = L.markerClusterGroup();
+
+    fetch(`/consumer-user-geojson/${userID}/`)
+      .then(res => res.json())
+      .then(data => {
+        const features = data.features;
+        if (!features.length) {
+          alert("No features found for this userID!");
+          return;
+        }
+
+        // Group by coordinates + product name
+        const grouped = {};
+        features.forEach(f => {
+          if (!f.geometry || !f.geometry.coordinates || !f.properties.data) return;
+
+          const lat = f.geometry.coordinates[1];
+          const lon = f.geometry.coordinates[0];
+          const name = f.properties.data.name?.trim().toLowerCase() || "N/A";
+          const key = `${lon}_${lat}_${name}`;
+
+          if (!grouped[key]) {
+            grouped[key] = {
+              lat,
+              lon,
+              name: name.charAt(0).toUpperCase() + name.slice(1),
+              image: f.properties.data.image || null,
+              totalQuantity: 0,
+              latestDate: null
+            };
+          }
+
+          const rec = f.properties.data;
+          grouped[key].totalQuantity += Number(rec.quantity || 0);
+
+          let recDate = null;
+          if (rec.createdAt && !isNaN(Date.parse(rec.createdAt))) {
+            recDate = new Date(rec.createdAt);
+          } else if (rec.location?.timestamp) {
+            recDate = new Date(Number(rec.location.timestamp));
+          }
+
+          if (!grouped[key].latestDate || (recDate && recDate > grouped[key].latestDate)) {
+            grouped[key].latestDate = recDate;
+          }
+        });
+
+        // Add markers
+        Object.values(grouped).forEach(g => {
+          let popup = `<strong>${g.name}</strong><br>`;
+          popup += `<strong>Total Quantity:</strong> ${g.totalQuantity}<br>`;
+          popup += `<strong>Latest Date:</strong> ${g.latestDate ? g.latestDate.toLocaleDateString() : "N/A"}<br>`;
+          if (g.image) popup += `<img src="${g.image}" class="popup-image"/>`;
+
+          const marker = L.marker([g.lat, g.lon]);
+          marker.bindPopup(popup);
+          markers.addLayer(marker);
+        });
+
+        map.addLayer(markers);
+        if (markers.getLayers().length) map.fitBounds(markers.getBounds());
+      })
+      .catch(err => console.error("Error loading GeoJSON:", err));
+  </script>
+</body>
+</html>

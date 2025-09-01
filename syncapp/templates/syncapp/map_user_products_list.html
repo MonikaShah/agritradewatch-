@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Products Map with Filter</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet core -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- MarkerCluster plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { width: 100vw; height: 90vh; }
+    .popup-image { max-width: 200px; height: auto; border-radius: 5px; margin-top: 5px; }
+    #controls { padding: 5px; background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label>UserID: </label>
+    <select id="useridSelect"><option value="">All</option></select>
+
+    <label>Product: </label>
+    <select id="productSelect"><option value="">All</option></select>
+
+    <button id="filterBtn">Filter</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    const map = L.map('map').setView([19.1, 72.8], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = L.markerClusterGroup();
+
+    // Populate dropdowns from Django endpoint
+    fetch("/user_products_list/")
+      .then(res => res.json())
+      .then(data => {
+        const uidSelect = document.getElementById('useridSelect');
+        uidSelect.innerHTML = '<option value="">All</option>';
+        data.userIDs.forEach(uid => {
+          if (uid && uid.trim()) {
+            uidSelect.innerHTML += `<option value="${uid}">${uid}</option>`;
+          }
+        });
+
+        const productSelect = document.getElementById('productSelect');
+        productSelect.innerHTML = '<option value="">All</option>';
+        data.products.forEach(p => {
+          if (p && p.trim()) {
+            productSelect.innerHTML += `<option value="${p}">${p}</option>`;
+          }
+        });
+      });
+
+    function loadFeatures(userID = '', product = '') {
+      fetch(`/consumer-user-geojson/${userID || ''}/`)
+        .then(res => res.json())
+        .then(data => {
+          const allFeatures = data.features || [];
+
+          // Filter locally for product
+          const filtered = allFeatures.filter(f => {
+            if (!f.properties?.data || !f.geometry?.coordinates) return false;
+            const uidMatch = userID ? f.properties.data.userID === userID : true;
+            const productMatch = product ? f.properties.data.name?.toLowerCase() === product.toLowerCase() : true;
+            return uidMatch && productMatch;
+          });
+
+          drawMarkers(filtered);
+        })
+        .catch(err => console.error(err));
+    }
+
+    function drawMarkers(features) {
+      markers.clearLayers();
+
+      if (!features.length) {
+        alert("No features found for this filter!");
+        return;
+      }
+
+      const grouped = {};
+      features.forEach(f => {
+        const lat = f.geometry.coordinates[1];
+        const lon = f.geometry.coordinates[0];
+        const name = f.properties.data.name?.trim().toLowerCase() || "N/A";
+        const key = `${lon}_${lat}_${name}`;
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            lat,
+            lon,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            image: f.properties.data.image || null,
+            totalQuantity: 0,
+            latestDate: null
+          };
+        }
+
+        const rec = f.properties.data;
+        grouped[key].totalQuantity += Number(rec.quantity || 0);
+
+        let recDate = null;
+        if (rec.createdAt && !isNaN(Date.parse(rec.createdAt))) recDate = new Date(rec.createdAt);
+        else if (rec.location?.timestamp) recDate = new Date(Number(rec.location.timestamp));
+
+        if (!grouped[key].latestDate || (recDate && recDate > grouped[key].latestDate)) {
+          grouped[key].latestDate = recDate;
+        }
+      });
+
+      Object.values(grouped).forEach(g => {
+        let popup = `<strong>${g.name}</strong><br>`;
+        popup += `<strong>Total Quantity:</strong> ${g.totalQuantity}<br>`;
+        popup += `<strong>Latest Date:</strong> ${g.latestDate ? g.latestDate.toLocaleDateString() : "N/A"}<br>`;
+        if (g.image) popup += `<img src="${g.image}" class="popup-image"/>`;
+
+        const marker = L.marker([g.lat, g.lon]);
+        marker.bindPopup(popup);
+        markers.addLayer(marker);
+      });
+
+      map.addLayer(markers);
+      if (markers.getLayers().length) {
+        map.fitBounds(markers.getBounds());
+      }
+    }
+
+    document.getElementById('filterBtn').addEventListener('click', () => {
+      const uid = document.getElementById('useridSelect').value;
+      const product = document.getElementById('productSelect').value;
+      loadFeatures(uid, product); // reload from server every time
+    });
+
+    // Initial load
+    loadFeatures();
+  </script>
+</body>
+</html>

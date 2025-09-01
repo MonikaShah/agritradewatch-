@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Consumers Map (Merged)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      width: 100vw;
+      height: 100vh;
+    }
+    .popup-image {
+      max-width: 300px;
+      max-height: 200px;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Consumers Map (Merged)</h2>
+  <div id="map"></div>
+
+  <script>
+    const map = L.map('map').setView([19.2, 73.0], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = L.markerClusterGroup();
+
+    fetch("/consumers-geojson/")
+      .then(res => res.json())
+      .then(data => {
+        const groups = {};
+
+        data.features.forEach(feature => {
+          const props = feature.properties || {};
+          const d = props.data || {};
+          const coords = feature.geometry.coordinates;
+
+          // Normalize name: trim + first letter uppercase + rest lowercase
+          let name = (props.name || "").trim();
+          name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+
+          // Round coordinates for grouping (~1m accuracy)
+          const lat = coords[1].toFixed(5);
+          const lon = coords[0].toFixed(5);
+          const key = `${name}_${lat}_${lon}`;
+
+          if (!groups[key]) {
+            groups[key] = {
+              name: name,
+              lat: parseFloat(lat),
+              lon: parseFloat(lon),
+              quantity: d.quantity || "N/A",
+              records: []
+            };
+          }
+
+          groups[key].records.push({
+            date: d.date,
+            pricePerUnit: d.pricePerUnit,
+            quantity: d.quantity,
+            location: d.location || {}
+          });
+        });
+
+        Object.values(groups).forEach(group => {
+          let popupContent = `<strong>Name:</strong> ${group.name}<br>`;
+          popupContent += `<strong>Quantity:</strong> ${group.quantity}<br>`;
+          popupContent += `<strong>Total Entries:</strong> ${group.records.length}<br><hr>`;
+
+          group.records.forEach(r => {
+              let dateFormatted = "N/A";
+              console.log("Record for", group.name, ":", r);
+
+              // 1. Try direct date string
+              if (r.date && typeof r.date === "string" && !isNaN(Date.parse(r.date))) {
+                  dateFormatted = new Date(r.date).toLocaleDateString();
+              }
+              // 2. Try timestamp number
+              else if (r.date && !isNaN(Number(r.date))) {
+                  dateFormatted = new Date(Number(r.date)).toLocaleDateString();
+              }
+              // 3. Try Mongo-style object
+              else if (r.date && typeof r.date === "object") {
+                  let innerDate = r.date.$date || r.date.value || "";
+                  if (innerDate && !isNaN(Date.parse(innerDate))) {
+                      dateFormatted = new Date(innerDate).toLocaleDateString();
+                  }
+              }
+              // 4. Fallback: use location timestamp
+              else if (r.location && r.location.timestamp && !isNaN(Number(r.location.timestamp))) {
+                  dateFormatted = new Date(Number(r.location.timestamp)).toLocaleDateString();
+              }
+
+              popupContent += `<strong>Date:</strong> ${dateFormatted}<br>`;
+              popupContent += `<strong>Price per Unit:</strong> ${r.pricePerUnit || "N/A"}<br>`;
+              popupContent += `<strong>Quantity:</strong> ${r.quantity || "N/A"}<br><br>`;
+          });
+
+          const marker = L.marker([group.lat, group.lon]);
+          marker.bindPopup(popupContent);
+          markers.addLayer(marker);
+        });
+
+        map.addLayer(markers);
+        map.fitBounds(markers.getBounds());
+      })
+      .catch(err => console.error("Error loading GeoJSON:", err));
+  </script>
+</body>
+</html>

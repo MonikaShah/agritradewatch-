@@ -1,0 +1,3185 @@
+{
+    "consumers": {
+        "0KYbekRjr11IIMJleUJp": {
+            "pricePerUnit": "52",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-04 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728000000000
+            }
+        },
+        "1zSeoiTr75y09X9259jQ": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-21 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729468800000
+            }
+        },
+        "2lQeToeg5xXb3J4gEcDj": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 06:50:05.271000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "20",
+            "name": "coriander",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740207001451?alt=media&token=73221785-cdae-45d2-ae90-8522ecf9c9c9",
+            "pricePerUnit": "1"
+        },
+        "3dUEMLKvOgIVjNRS393i": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-01 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735689600000
+            }
+        },
+        "443mVYNUI5wNCvutOIfF": {
+            "pricePerUnit": "20",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-19 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731974400000
+            }
+        },
+        "4H2Su6wycwVFjvSBmoyV": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 56.525943756103516,
+                    "heading": 0,
+                    "latitude": 19.1338107,
+                    "longitude": 72.9083908,
+                    "altitude": -5.300000190734863,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1755990794750
+            },
+            "createdAt": "2025-08-23 23:13:55.422000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755990827422?alt=media&token=5fe9250e-0efa-46f2-b946-428f49d87d34",
+            "pricePerUnit": "50"
+        },
+        "5Nx7pCR8qVLaPyx53LBN": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:48:58.469000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "garlic",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738392534883?alt=media&token=4746fbfe-40f7-4878-b83d-96ac25828e78",
+            "pricePerUnit": "400"
+        },
+        "5iC4dlKoaN0smZU7v3EJ": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:50:17.539000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "lemon",
+            "image": "",
+            "pricePerUnit": "5"
+        },
+        "6BgCCR845Zac0VGqFidX": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1342931,
+                    "longitude": 72.9161661,
+                    "altitude": 0.6000000238418579,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1738325055379
+            },
+            "createdAt": "2025-01-31 12:06:57.698000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738325213298?alt=media&token=e6a1f60d-2d00-45fd-8d7c-2860b69618f6",
+            "pricePerUnit": "40"
+        },
+        "6EpeDFzvyxySMwdNHqaY": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-08 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736294400000
+            }
+        },
+        "6Z4XhbSqjLtL1Z9tzGVU": {
+            "pricePerUnit": "55",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-11 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728604800000
+            }
+        },
+        "6cbPCSIPnCPuvIMPUE4L": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 17.069801330566406,
+                    "latitude": 19.1243326,
+                    "longitude": 72.9167604,
+                    "altitude": -5.200000286102295,
+                    "speed": 0.5920168161392212,
+                    "accuracy": 14.817000389099121
+                },
+                "mocked": false,
+                "timestamp": 1738393864517
+            },
+            "createdAt": "2025-02-01 07:11:32.609000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "grape",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738393888798?alt=media&token=1d20fedc-483f-49ed-86c8-f7a339c380dc",
+            "pricePerUnit": "160"
+        },
+        "6jUNhPHcKHxDGh7ZUEiV": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:47:56.777000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738392472841?alt=media&token=68fefa37-899f-49c5-86da-7d8e453aa313",
+            "pricePerUnit": "40"
+        },
+        "6kAUPMToZtmIV5bbrvYS": {
+            "pricePerUnit": "24",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-28 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730073600000
+            }
+        },
+        "78EWyWUuhxrwqvM6TAav": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-24 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737676800000
+            }
+        },
+        "7BzmG6crU5M8GqAK59pF": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.0986329,
+                    "longitude": 72.9164509,
+                    "altitude": -24.100000381469727,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1739107237538
+            },
+            "createdAt": "2025-02-09 13:22:25.211000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1739107340976?alt=media&token=5a4f890c-6dd8-43c5-8a9e-f3623cb7fcd0",
+            "pricePerUnit": "120"
+        },
+        "7h3GrNCWTibFBSPuq5yh": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1253346,
+                    "longitude": 72.915409,
+                    "altitude": -12.5,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1747463712345
+            },
+            "createdAt": "2025-05-17 06:44:55.253000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1747464290696?alt=media&token=15cd1e43-1826-4c14-89fe-22bc393d5571",
+            "pricePerUnit": "40"
+        },
+        "7mAyh4fPcOGlVqty8IC3": {
+            "pricePerUnit": "24",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-29 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730160000000
+            }
+        },
+        "7uHTqBxRg8Ov8DaIdhmh": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1245306,
+                    "longitude": 72.9176387,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1737810607353
+            },
+            "createdAt": "2025-01-25 13:13:19.049000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1737810795052?alt=media&token=086e26af-2fe8-4aad-be48-9b1131ce7ed3",
+            "pricePerUnit": "160"
+        },
+        "8KU77FFDy5ADs63utsNm": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:59:01.510000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738393137212?alt=media&token=2ab1d7f6-e4fb-4700-9b47-ddf34728aa3f",
+            "pricePerUnit": "50"
+        },
+        "8XzXYv59pHsd5Wmk32ga": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 3.1563539505004883,
+                    "heading": 0,
+                    "latitude": 19.1290938,
+                    "longitude": 72.9193316,
+                    "altitude": -7.200000286102295,
+                    "speed": 0,
+                    "accuracy": 31.035999298095703
+                },
+                "mocked": false,
+                "timestamp": 1739892366630
+            },
+            "createdAt": "2025-02-18 15:27:29.413000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1739892445794?alt=media&token=5abd0f47-b7ef-458f-9adc-0d1804f03b20",
+            "pricePerUnit": "35"
+        },
+        "8a6JECGU7IrrwlN46OUy": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 83.86161041259766,
+                    "heading": 0,
+                    "latitude": 19.1337738,
+                    "longitude": 72.9083803,
+                    "altitude": -5.300000190734863,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1755991663168
+            },
+            "createdAt": "2025-08-23 23:27:51.717000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755991668254?alt=media&token=dec3361b-bb28-41cd-9539-d19c593eb8eb",
+            "pricePerUnit": "50"
+        },
+        "8avAgy7X10sLn4w1hDiI": {
+            "pricePerUnit": "30",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-05 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733356800000
+            }
+        },
+        "8rJLjcV88pVAixWhQtp5": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 115.82405853271484,
+                    "latitude": 19.1247877,
+                    "longitude": 72.9185014,
+                    "altitude": -5.900000095367432,
+                    "speed": 0.3912123143672943,
+                    "accuracy": 13.196000099182129
+                },
+                "mocked": false,
+                "timestamp": 1751697780853
+            },
+            "createdAt": "2025-07-05 06:45:01.064000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751697897262?alt=media&token=70dcd1a7-e20c-4d26-af94-16353aa5a4d4",
+            "pricePerUnit": "160"
+        },
+        "9EjuA7zBPh8Y9IHnhB2D": {
+            "pricePerUnit": "49",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-14 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728864000000
+            }
+        },
+        "9dU2r7FBjCR1oP7xc5wT": {
+            "pricePerUnit": "52",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-12 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728691200000
+            }
+        },
+        "9mhTY5KSwaLbRLaUrVoT": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:27:32.675000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679249619?alt=media&token=be06ba8a-be63-43c7-af8e-bc519a62675a",
+            "pricePerUnit": "80"
+        },
+        "9pLzDelLXRjgjkFvIDod": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-15 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728950400000
+            }
+        },
+        "ARvTgYE6ZDtlx376mNqV": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 3.236661911010742,
+                    "heading": 7.522287368774414,
+                    "latitude": 19.1334001,
+                    "longitude": 72.9147567,
+                    "altitude": -6.400000095367432,
+                    "speed": 0.7067731618881226,
+                    "accuracy": 7.895999908447266
+                },
+                "mocked": false,
+                "timestamp": 1756191222426
+            },
+            "createdAt": "2025-08-26 06:54:29.269000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756191250356?alt=media&token=8da49faa-160d-4375-8f3c-bdf130ab56c4",
+            "pricePerUnit": "30"
+        },
+        "B5XsjqqnN7jThSncxh4T": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1353454,
+                    "longitude": 72.9081371,
+                    "altitude": -10.59999942779541,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1738346167419
+            },
+            "createdAt": "2025-01-31 18:00:10.582000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "wheat",
+            "image": "",
+            "pricePerUnit": "50"
+        },
+        "B8uLsJpgcOzUQ8FV7nhv": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 07:03:17.061000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "20",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740207793435?alt=media&token=147d75f8-a783-4308-9762-6e1393cc021f",
+            "pricePerUnit": "80"
+        },
+        "BHr8qtpVVUVWR9yOdcdn": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 2.0062825679779053,
+                    "heading": 0,
+                    "latitude": 19.1307888,
+                    "longitude": 72.8309991,
+                    "altitude": -48.80000305175781,
+                    "speed": 0,
+                    "accuracy": 33.08599853515625
+                },
+                "mocked": false,
+                "timestamp": 1743939054953
+            },
+            "createdAt": "2025-04-06 11:32:26.723000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1743939142302?alt=media&token=63352a71-4d21-4ba1-aea2-fada521e4d38",
+            "pricePerUnit": "22"
+        },
+        "BQlmAoUYD3MlxYa4MT2G": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-26 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735171200000
+            }
+        },
+        "BqID58LBtYaxGJYEzjLR": {
+            "pricePerUnit": "34",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-03 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733184000000
+            }
+        },
+        "CHFJvIQyRZThMcObIgXU": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:23:34.701000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679011261?alt=media&token=4c9c5768-51cd-4bb1-b675-2f023d86a426",
+            "pricePerUnit": "40"
+        },
+        "CTQD3Qzx3zzaZBQPszyX": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-31 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735603200000
+            }
+        },
+        "Cg5xbxjOKSOKcWPv5s0A": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-11 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733875200000
+            }
+        },
+        "DLLs4Y3QYZrRGcSLOYnd": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 06:53:57.957000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740207234530?alt=media&token=d20456b7-e6c1-42ca-975f-baa11919a3de",
+            "pricePerUnit": "50"
+        },
+        "DVIbvUpdHk5vEkbeyNmU": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 49.405670166015625,
+                    "heading": 0,
+                    "latitude": 19.1252327,
+                    "longitude": 72.9220113,
+                    "altitude": -4.800000190734863,
+                    "speed": 0,
+                    "accuracy": 51.6150016784668
+                },
+                "mocked": false,
+                "timestamp": 1735903855818
+            },
+            "createdAt": "2025-01-03 11:32:45.771000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "47",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1735903962067?alt=media&token=566da4eb-330a-4744-85b1-884ae700b8ec",
+            "pricePerUnit": "120"
+        },
+        "E1ryurnMReP9UQdU5zay": {
+            "pricePerUnit": "16",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-09 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731110400000
+            }
+        },
+        "EWQuenfBQDc19byNFybb": {
+            "pricePerUnit": "23",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-07 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733529600000
+            }
+        },
+        "Eafgij1ZKVMtmigUz3qy": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 22.41934585571289,
+                    "heading": 0,
+                    "latitude": 19.1253748,
+                    "longitude": 72.9154706,
+                    "altitude": -7.000000476837158,
+                    "speed": 0,
+                    "accuracy": 83.15039825439453
+                },
+                "mocked": false,
+                "timestamp": 1739022480717
+            },
+            "createdAt": "2025-02-08 15:01:50.822000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1739026906181?alt=media&token=f53d8757-7f9f-42aa-9460-812d3e51972a",
+            "pricePerUnit": "40"
+        },
+        "F38Q9lCDovTynHsOLFCP": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-11 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731283200000
+            }
+        },
+        "Fol0ByBTdfTL7QdKQ1Yc": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 188.29766845703125,
+                    "latitude": 19.1247029,
+                    "longitude": 72.9185714,
+                    "altitude": -5.800000190734863,
+                    "speed": 0.1758858859539032,
+                    "accuracy": 18.895999908447266
+                },
+                "mocked": false,
+                "timestamp": 1748701539473
+            },
+            "createdAt": "2025-05-31 14:26:01.410000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1748701557238?alt=media&token=5bdf1d31-5ee0-4691-8073-0f603f2d872b",
+            "pricePerUnit": "30"
+        },
+        "GFce2Et3ImXL3Aj6bwGL": {
+            "pricePerUnit": "24",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-23 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732320000000
+            }
+        },
+        "GOnrwKMiQz532L5JTe69": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-06 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736121600000
+            }
+        },
+        "GVMYp470Mxi1jVPzrpNa": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1245306,
+                    "longitude": 72.9176387,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1737810607353
+            },
+            "createdAt": "2025-01-25 13:11:35.835000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "0.5",
+            "name": "garlic",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1737810691722?alt=media&token=08f9b160-5e9a-4075-8d5a-e8aed4bc5381",
+            "pricePerUnit": "320"
+        },
+        "GkPqB1XpprbAUblAZyEY": {
+            "pricePerUnit": "11",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-18 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737158400000
+            }
+        },
+        "HIpd2Pmc1jVjFwIw9XJH": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1.9987046718597412,
+                    "heading": 0,
+                    "latitude": 19.134329,
+                    "longitude": 72.9161794,
+                    "altitude": 0.4999999701976776,
+                    "speed": 0,
+                    "accuracy": 14.61400032043457
+                },
+                "mocked": false,
+                "timestamp": 1737718108479
+            },
+            "createdAt": "2025-01-24 11:29:45.811000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "rice",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1737718183318?alt=media&token=437b5530-5ecb-4719-88c4-2ca3aa14a35b",
+            "pricePerUnit": "85"
+        },
+        "HrpSaRpF43SpatBhw8UU": {
+            "pricePerUnit": "42",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-19 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729296000000
+            }
+        },
+        "I76ZNAf1YJRVIKITBZIG": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-23 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734912000000
+            }
+        },
+        "IoTRvmYZOljTLHilic3N": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1248003,
+                    "longitude": 72.9184193,
+                    "altitude": -5.600000381469727,
+                    "speed": 0,
+                    "accuracy": 12.746999740600586
+                },
+                "mocked": false,
+                "timestamp": 1742480790844
+            },
+            "createdAt": "2025-03-20 14:27:16.634000+00:00",
+            "userID": "T52NoraURScDEhxjOtYrLSh0okr2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1742480832676?alt=media&token=f88f4f9c-26c8-4dfb-b2d1-f044e0f77e5b",
+            "pricePerUnit": "30"
+        },
+        "JsSyoaPWjAqGPPAprQ0P": {
+            "pricePerUnit": "9",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-30 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1738195200000
+            }
+        },
+        "Kf4qVQS4KdlOhiGoN9pn": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1338167,
+                    "longitude": 72.9083927,
+                    "altitude": -5.300000190734863,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1755983027367
+            },
+            "createdAt": "2025-08-23 21:04:42.463000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755983078317?alt=media&token=8219319b-dc44-4e93-a163-ae1988273d95",
+            "pricePerUnit": "50"
+        },
+        "KniAFjYd9M4WdqZsnBLX": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-27 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732665600000
+            }
+        },
+        "L1zRpJ0FJyOt9RN2kvRk": {
+            "pricePerUnit": "50",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-09 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728432000000
+            }
+        },
+        "MFEDV52eKj3qDU1hyAjG": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-24 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734998400000
+            }
+        },
+        "N2KS4Saef5QijDxbL0ku": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-14 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736812800000
+            }
+        },
+        "NBBL2FmWtmiz71h4lX7q": {
+            "pricePerUnit": "23",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-15 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731628800000
+            }
+        },
+        "NO14QseZI92Km4BJiCYn": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-06 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733443200000
+            }
+        },
+        "NrSM7rO7iqWS60bfN1Er": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6345841,
+                    "longitude": 77.3336772,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1733937634290
+            },
+            "createdAt": "2024-12-11 17:21:06.001000+00:00",
+            "userID": "CYJbc7f9OUbxxaWyUkGq4odG15w1",
+            "quantity": "90",
+            "name": "rice",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1733937661413?alt=media&token=bf3e7a1e-9f57-4b25-b658-f06717e1fcb2",
+            "pricePerUnit": "21"
+        },
+        "O7FsJZChv5PiYHIm0umY": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 2.0062825679779053,
+                    "heading": 0,
+                    "latitude": 19.1307888,
+                    "longitude": 72.8309991,
+                    "altitude": -48.80000305175781,
+                    "speed": 0,
+                    "accuracy": 33.08599853515625
+                },
+                "mocked": false,
+                "timestamp": 1743939054953
+            },
+            "createdAt": "2025-04-06 11:31:35.083000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1743939090887?alt=media&token=6e8627e9-0e8c-4c91-b396-34282b1b8d54",
+            "pricePerUnit": "15"
+        },
+        "OUTZVZzha9fRFdlfzY3B": {
+            "pricePerUnit": "21",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-17 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734393600000
+            }
+        },
+        "OhdZCarLtU7VaOsBivcy": {
+            "pricePerUnit": "50",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-01 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1727740800000
+            }
+        },
+        "P1PIgsMYJ6vLfOh4lCIt": {
+            "pricePerUnit": "52",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-10 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728518400000
+            }
+        },
+        "PBvoINpuJtOzxBnyJFa9": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 22.41934585571289,
+                    "heading": 0,
+                    "latitude": 19.1253748,
+                    "longitude": 72.9154706,
+                    "altitude": -7.000000476837158,
+                    "speed": 0,
+                    "accuracy": 83.15039825439453
+                },
+                "mocked": false,
+                "timestamp": 1739022480717
+            },
+            "createdAt": "2025-02-08 15:04:56.769000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "grape",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1739027092877?alt=media&token=c40f37a2-12b6-43c6-9090-b9443179ee3c",
+            "pricePerUnit": "200"
+        },
+        "PoS2dJ7C2ORqqkfp6VA7": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-16 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736985600000
+            }
+        },
+        "QIY0EarMGItd6dvhm3JC": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1253346,
+                    "longitude": 72.915409,
+                    "altitude": -12.5,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1747463712345
+            },
+            "createdAt": "2025-05-17 06:36:11.679000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1747463766206?alt=media&token=97e67093-26aa-4b58-972b-f5fe3ca09c6f",
+            "pricePerUnit": "20"
+        },
+        "QgAnyBGpsX1Yt45gvdCO": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:29:38.019000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "coriander",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679374357?alt=media&token=2a202253-c67c-44e9-a0a9-3c45146cf998",
+            "pricePerUnit": "20"
+        },
+        "Qk35N2g6xhVN6CiHHmiQ": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 19.79663848876953,
+                    "heading": 0,
+                    "latitude": 28.6324401,
+                    "longitude": 77.3336987,
+                    "altitude": 164.90000915527344,
+                    "speed": 0,
+                    "accuracy": 600
+                },
+                "mocked": false,
+                "timestamp": 1747501257410
+            },
+            "createdAt": "2025-05-17 17:01:29.222000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "rice",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1747501286379?alt=media&token=4d215008-d161-4e96-b821-e67d98fe18a8",
+            "pricePerUnit": "20"
+        },
+        "RbjzMGdVH9ISsUbnY0Rt": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 55.955780029296875,
+                    "heading": 0,
+                    "latitude": 28.6346307,
+                    "longitude": 77.3336548,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1733939039076
+            },
+            "createdAt": "2024-12-11 17:45:38.793000+00:00",
+            "userID": "CYJbc7f9OUbxxaWyUkGq4odG15w1",
+            "quantity": "11",
+            "name": "corn",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1733939134114?alt=media&token=c8c455fb-e2e4-46f1-9d6d-222a82ba6341",
+            "pricePerUnit": "12"
+        },
+        "S5Pz51Rpo4dA9500b8a8": {
+            "pricePerUnit": "18",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-13 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734048000000
+            }
+        },
+        "SgRhO90VIqDZn0IO8KTj": {
+            "pricePerUnit": "33",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-02 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733097600000
+            }
+        },
+        "TdrUkC1lHwX5ifjD1QxW": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:25:12.474000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679108830?alt=media&token=44ed41b8-6f0a-49f2-951d-0ec12af5f6a5",
+            "pricePerUnit": "50"
+        },
+        "U01iLgwOvV9yKyNzjEaF": {
+            "pricePerUnit": "9",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-22 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737504000000
+            }
+        },
+        "UQAtQvvAEBsqWTzXwzeY": {
+            "pricePerUnit": "20",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-18 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734480000000
+            }
+        },
+        "UsH9v3V7AmbcQbAdJLTG": {
+            "pricePerUnit": "9",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-21 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737417600000
+            }
+        },
+        "VlydXfqXd1lvhxBQSgWQ": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-22 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729555200000
+            }
+        },
+        "VxevbZ1yQ0sBprQ42Rpb": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 06:53:32.154000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "garlic",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740207209350?alt=media&token=6036a0cf-17c4-46d1-b737-da8502056b84",
+            "pricePerUnit": "200"
+        },
+        "WCL5aKnlD2geHwoZku8x": {
+            "pricePerUnit": "35",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-26 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729900800000
+            }
+        },
+        "Wahht5AyD5ceVRny9k7l": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1342331,
+                    "longitude": 72.9160173,
+                    "altitude": 4.099999904632568,
+                    "speed": 0,
+                    "accuracy": 15.927000045776367
+                },
+                "mocked": false,
+                "timestamp": 1756188551906
+            },
+            "createdAt": "2025-08-26 09:12:08.286000+00:00",
+            "userID": "o7Iwscx0RYeV84l5Pc7p28OL1tX2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756199524694?alt=media&token=e5d14f19-cc25-4dfa-a0f2-a689c2633cb8",
+            "pricePerUnit": "45"
+        },
+        "WtIyVyu2cvi13RmNNIPY": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 323.3114318847656,
+                    "latitude": 19.1247259,
+                    "longitude": 72.9187116,
+                    "altitude": -5.800000190734863,
+                    "speed": 0.3834034502506256,
+                    "accuracy": 23.14900016784668
+                },
+                "mocked": false,
+                "timestamp": 1751093360666
+            },
+            "createdAt": "2025-06-28 06:56:35.076000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751093791003?alt=media&token=cc16b03c-c1e3-4e9b-bb09-ea0a76d7ceec",
+            "pricePerUnit": "40"
+        },
+        "WuqaRnlp2Bmjdo91aPFb": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-07 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730937600000
+            }
+        },
+        "XlZpjtHxDNFXinDzxy9H": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 323.3114318847656,
+                    "latitude": 19.1247259,
+                    "longitude": 72.9187116,
+                    "altitude": -5.800000190734863,
+                    "speed": 0.3834034502506256,
+                    "accuracy": 23.14900016784668
+                },
+                "mocked": false,
+                "timestamp": 1751093360666
+            },
+            "createdAt": "2025-06-28 06:53:36.997000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "coriander",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751093613003?alt=media&token=0e24eb01-378a-4fa4-bf70-669f11d70780",
+            "pricePerUnit": "20"
+        },
+        "XnjzZLy7xbTqHdfZoCLM": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-10 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733788800000
+            }
+        },
+        "YMUUlpEaX52fbS9uBKO9": {
+            "pricePerUnit": "42",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-17 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729123200000
+            }
+        },
+        "YO2B5ZZBIFCjJ8clh21e": {
+            "pricePerUnit": "20",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-21 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734739200000
+            }
+        },
+        "YZ1kNpYXEgTF39NDv7um": {
+            "pricePerUnit": "27",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-09 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733702400000
+            }
+        },
+        "Z5A02f3BdATrCq48qLfb": {
+            "pricePerUnit": "20",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-16 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734307200000
+            }
+        },
+        "alrWKCk1cVRnYeBkLCJB": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 115.82405853271484,
+                    "latitude": 19.1247877,
+                    "longitude": 72.9185014,
+                    "altitude": -5.900000095367432,
+                    "speed": 0.3912123143672943,
+                    "accuracy": 13.196000099182129
+                },
+                "mocked": false,
+                "timestamp": 1751697780853
+            },
+            "createdAt": "2025-07-05 06:43:21.353000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751697797450?alt=media&token=a45abc81-e0ca-4f42-a9d3-bdd3fb47adc2",
+            "pricePerUnit": "40"
+        },
+        "bC5rPUo9w58OzD3zOGAx": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1342331,
+                    "longitude": 72.9160173,
+                    "altitude": 4.099999904632568,
+                    "speed": 0,
+                    "accuracy": 15.927000045776367
+                },
+                "mocked": false,
+                "timestamp": 1756188551906
+            },
+            "createdAt": "2025-08-26 06:10:23.557000+00:00",
+            "userID": "o7Iwscx0RYeV84l5Pc7p28OL1tX2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756188619678?alt=media&token=85f648f2-cbd3-4f4f-842f-9d68dd30581d",
+            "pricePerUnit": "40"
+        },
+        "bHet6oIgi2RTDJKQBgKV": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1353454,
+                    "longitude": 72.9081371,
+                    "altitude": -10.59999942779541,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1738346167419
+            },
+            "createdAt": "2025-01-31 18:01:13.760000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738346469171?alt=media&token=3b341bf3-27eb-498f-8a36-ce5bd5366f95",
+            "pricePerUnit": "20"
+        },
+        "bHnk3KPK9FHyFR0dKkrb": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6345841,
+                    "longitude": 77.3336772,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1733936283785
+            },
+            "createdAt": "2024-12-11 17:14:51.930000+00:00",
+            "userID": "CYJbc7f9OUbxxaWyUkGq4odG15w1",
+            "quantity": "90",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1733937287834?alt=media&token=4c495ebf-0c75-427a-b465-2ea1a6e5963b",
+            "pricePerUnit": "32"
+        },
+        "bSePYB387NNpwkDBEEmz": {
+            "pricePerUnit": "29",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-04 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730678400000
+            }
+        },
+        "c1XL3tdYWV9mivr5r7a5": {
+            "location": {},
+            "createdAt": "2025-08-13 09:24:44.581000+00:00",
+            "userID": "o7Iwscx0RYeV84l5Pc7p28OL1tX2",
+            "quantity": "2",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755077080375?alt=media&token=734c4990-5242-45ba-bd1e-61efde43eaee",
+            "pricePerUnit": "40"
+        },
+        "c8pgmUdyJMNBMqd0NKcw": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-25 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735084800000
+            }
+        },
+        "cKJhTHVslIgQOtUnX1ES": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-05 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730764800000
+            }
+        },
+        "cLNr4rFbAnPHhYSU4EUE": {
+            "pricePerUnit": "43",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-18 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729209600000
+            }
+        },
+        "cWiKE4dXUEf0i8RzuKMm": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 22.41934585571289,
+                    "heading": 0,
+                    "latitude": 19.1253748,
+                    "longitude": 72.9154706,
+                    "altitude": -7.000000476837158,
+                    "speed": 0,
+                    "accuracy": 83.15039825439453
+                },
+                "mocked": false,
+                "timestamp": 1739022480717
+            },
+            "createdAt": "2025-02-08 15:02:15.780000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1739026932227?alt=media&token=516c95bc-e7b4-4063-ae3e-31f812bcc997",
+            "pricePerUnit": "30"
+        },
+        "csQ2fx2ki3BSRpMYZagk": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 115.82405853271484,
+                    "latitude": 19.1247877,
+                    "longitude": 72.9185014,
+                    "altitude": -5.900000095367432,
+                    "speed": 0.3912123143672943,
+                    "accuracy": 13.196000099182129
+                },
+                "mocked": false,
+                "timestamp": 1751697780853
+            },
+            "createdAt": "2025-07-05 06:54:41.362000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751698477053?alt=media&token=2ed042a0-463d-45ad-abd6-53841f11fdf7",
+            "pricePerUnit": "35"
+        },
+        "dFG03V9b6i0YQNRrwNBa": {
+            "pricePerUnit": "15",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-28 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735344000000
+            }
+        },
+        "dHX0mcb9mS6xsPiHzJns": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6346167,
+                    "longitude": 77.3336926,
+                    "altitude": 164.8000030517578,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1734619710947
+            },
+            "createdAt": "2024-12-19 14:49:00.908000+00:00",
+            "userID": "k5JgqHbrchSHNf0N2RVLl3MXcuv2",
+            "quantity": "11",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1734619736560?alt=media&token=9dbd538b-513d-46db-8cff-6fe9d15df4f9",
+            "pricePerUnit": "12"
+        },
+        "doYwjmUV55KNCN22o1s9": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 48.842506408691406,
+                    "heading": 0,
+                    "latitude": 28.634653,
+                    "longitude": 77.333679,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1751043428158
+            },
+            "createdAt": "2025-06-27 16:57:57.971000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751043476344?alt=media&token=c5b60a11-5a1a-458c-8e54-1e0da7ec2320",
+            "pricePerUnit": "50"
+        },
+        "eGUTvfwzVn8k4PL3iCIL": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-13 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731456000000
+            }
+        },
+        "eSGop1sMWdkG0k7CRsM6": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1.3260020017623901,
+                    "heading": 0,
+                    "latitude": 19.1246959,
+                    "longitude": 72.9188004,
+                    "altitude": -5.800000190734863,
+                    "speed": 0,
+                    "accuracy": 169.2949981689453
+                },
+                "mocked": false,
+                "timestamp": 1740830527143
+            },
+            "createdAt": "2025-03-01 12:02:32.560000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740830548484?alt=media&token=1af86fb1-d92d-4abb-90c7-eb8c02e4a867",
+            "pricePerUnit": "50"
+        },
+        "elvnEHUNpVo1q0EbiJZK": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6345921,
+                    "longitude": 77.3336229,
+                    "altitude": 164.70001220703125,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1734633738469
+            },
+            "createdAt": "2024-12-19 18:42:47.550000+00:00",
+            "userID": "k5JgqHbrchSHNf0N2RVLl3MXcuv2",
+            "quantity": "12",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1734633765774?alt=media&token=3ae871d9-1074-4a85-a2d9-e8f2202a03b5",
+            "pricePerUnit": "20"
+        },
+        "eupeCPRbNJflUdeJ4RSJ": {
+            "pricePerUnit": "13",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-15 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736899200000
+            }
+        },
+        "fT0g3NPAy5r7AHUXL9Dh": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 27.571109771728516,
+                    "heading": 0,
+                    "latitude": 19.1212991,
+                    "longitude": 72.9052673,
+                    "altitude": -5.300000190734863,
+                    "speed": 0,
+                    "accuracy": 1000
+                },
+                "mocked": false,
+                "timestamp": 1755991923090
+            },
+            "createdAt": "2025-08-23 23:32:12.506000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "1",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755991926783?alt=media&token=28e41dfa-6b80-4f1d-b85e-7f57ea601cb2",
+            "pricePerUnit": "60"
+        },
+        "fWYhsJlrEWjwVfedvvtN": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1245306,
+                    "longitude": 72.9176387,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1737810607353
+            },
+            "createdAt": "2025-01-25 13:10:36.312000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "3",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1737810632130?alt=media&token=0136a65e-3374-42c9-a6d8-62087ec7e127",
+            "pricePerUnit": "40"
+        },
+        "fbWCCSMj6cuZZdfHmf0q": {
+            "pricePerUnit": "11",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-23 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737590400000
+            }
+        },
+        "ffl12Vn5QNFbFnHr206x": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-09 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736380800000
+            }
+        },
+        "gWrCaahPqpJ0l0xIHnZk": {
+            "pricePerUnit": "13",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-02 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735776000000
+            }
+        },
+        "gd1ldgn1bT54f0TioqpD": {
+            "pricePerUnit": "55",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-05 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1728086400000
+            }
+        },
+        "gh5uuddFabaoMcrkhduY": {
+            "pricePerUnit": "16",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-07 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736208000000
+            }
+        },
+        "h21G3CiqRIe0a2WXxB5t": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-16 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731715200000
+            }
+        },
+        "h68itGFuaw18GlSZRhkP": {
+            "pricePerUnit": "20",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-18 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731888000000
+            }
+        },
+        "hFMkD4BOVfUaiTe1PR7e": {
+            "pricePerUnit": "10",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-20 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737331200000
+            }
+        },
+        "hLAfMoYrQu9bupauDcpu": {
+            "pricePerUnit": "23",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-25 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732492800000
+            }
+        },
+        "hMw2eEWuTy7v6AAHdJzs": {
+            "pricePerUnit": "21",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-12 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733961600000
+            }
+        },
+        "hbTFHTaHZ2HpCnPpgFVF": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-12 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731369600000
+            }
+        },
+        "hjF1AvlgSPRMMlrKzAa5": {
+            "pricePerUnit": "30",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-04 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1733270400000
+            }
+        },
+        "htOZhKkiiyxVzowCPbQJ": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-28 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732752000000
+            }
+        },
+        "hxC0Cx8Twdf7tySXPjYA": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1253346,
+                    "longitude": 72.915409,
+                    "altitude": -12.5,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1747463712345
+            },
+            "createdAt": "2025-05-17 06:40:57.784000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "lemon",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1747464052807?alt=media&token=a5c88b2c-0f96-4419-ac37-1b3d87fc55ed",
+            "pricePerUnit": "6.5"
+        },
+        "iVPRy8ryfLIzxoxOazDz": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-21 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732147200000
+            }
+        },
+        "ieMzmwfC7kZNTXRbwsXW": {
+            "pricePerUnit": "24",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-26 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732579200000
+            }
+        },
+        "jxgHBnqHZWo9DB24GOyA": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-22 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1732233600000
+            }
+        },
+        "kOJzAjlmvcmID1wZvjdD": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1342596,
+                    "longitude": 72.9161318,
+                    "altitude": 6.900000095367432,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1737718058203
+            },
+            "createdAt": "2025-01-24 11:42:46.116000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "21",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1737718961943?alt=media&token=a246b991-4417-4a6e-9600-3eee075a610e",
+            "pricePerUnit": "20"
+        },
+        "l0Ibruuvn5VWMn6L8i1e": {
+            "location": {},
+            "createdAt": "2025-08-10 11:53:37.356000+00:00",
+            "userID": "o7Iwscx0RYeV84l5Pc7p28OL1tX2",
+            "quantity": "100",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1754826815063?alt=media&token=a328a275-2060-4f4d-9c42-ac2390037140",
+            "pricePerUnit": "55"
+        },
+        "lE88lEQvkVidwzQkwjTZ": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 323.3114318847656,
+                    "latitude": 19.1247259,
+                    "longitude": 72.9187116,
+                    "altitude": -5.800000190734863,
+                    "speed": 0.3834034502506256,
+                    "accuracy": 23.14900016784668
+                },
+                "mocked": false,
+                "timestamp": 1751093360666
+            },
+            "createdAt": "2025-06-28 06:50:38.367000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751093435040?alt=media&token=7092304c-a634-4cdc-bc96-5c58da5b6933",
+            "pricePerUnit": "40"
+        },
+        "leRT7ZbmKrk0rBV3YxHq": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 323.3114318847656,
+                    "latitude": 19.1247259,
+                    "longitude": 72.9187116,
+                    "altitude": -5.800000190734863,
+                    "speed": 0.3834034502506256,
+                    "accuracy": 23.14900016784668
+                },
+                "mocked": false,
+                "timestamp": 1751093360666
+            },
+            "createdAt": "2025-06-28 06:49:44.475000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751093380157?alt=media&token=b9a1e6a6-9dc2-4a8a-8c99-1d26e1dc1e18",
+            "pricePerUnit": "30"
+        },
+        "lssbA71CN3gzZ3hzXfMB": {
+            "pricePerUnit": "19",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-06 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730851200000
+            }
+        },
+        "mBE530GPxy1vO73PcrAJ": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-29 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1738108800000
+            }
+        },
+        "ma8pDpLEBznBzny0p60n": {
+            "pricePerUnit": "18",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-08 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731024000000
+            }
+        },
+        "n7iZaAp7f8NPzJpAANBy": {
+            "location": {},
+            "createdAt": "2025-08-23 19:56:45.241000+00:00",
+            "userID": "DMLfUkoTYUQbsHZeXrvcX4YQp9V2",
+            "quantity": "12",
+            "name": "lemon",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755979001062?alt=media&token=28150173-043f-42c7-b77e-e18ce690db1e",
+            "pricePerUnit": "10"
+        },
+        "nNNK4XxsfjVVGzkyP1Ju": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 06:52:53.516000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "60",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740207169498?alt=media&token=5f35df0e-8f54-4ee5-b1f0-33358a9cb16e",
+            "pricePerUnit": "1"
+        },
+        "oAefyhhTtdn93st306tG": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:24:17.021000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679052998?alt=media&token=be7cbfc5-32bb-489c-aa60-a6777891f211",
+            "pricePerUnit": "30"
+        },
+        "oKhakXUTTyA20034LPwj": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-14 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1731542400000
+            }
+        },
+        "ohB8CPicbOV3NAFie99Z": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 2.496145009994507,
+                    "heading": 0,
+                    "latitude": 19.1343019,
+                    "longitude": 72.9161955,
+                    "altitude": -0.6999999284744263,
+                    "speed": 0,
+                    "accuracy": 14.152000427246094
+                },
+                "mocked": false,
+                "timestamp": 1756199907763
+            },
+            "createdAt": "2025-08-26 09:19:09.851000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756199944600?alt=media&token=8600fb74-11f8-4001-b028-513cbb619432",
+            "pricePerUnit": "30"
+        },
+        "olmCMt2yT8v0wyNdQol1": {
+            "pricePerUnit": "25",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-30 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730246400000
+            }
+        },
+        "oxifO8NoRsjvSaQQPwhH": {
+            "pricePerUnit": "35",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-25 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729814400000
+            }
+        },
+        "oyjZtK34RcH93srhlTPW": {
+            "pricePerUnit": "11",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-17 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737072000000
+            }
+        },
+        "p29WdRwSLuZDyBblyHMJ": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-24 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729728000000
+            }
+        },
+        "p7Ldr8jCeHTUhJ1AkSZC": {
+            "pricePerUnit": "16",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-14 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734134400000
+            }
+        },
+        "pxpqhZXAKhBOsTkyvCeS": {
+            "pricePerUnit": "24",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-11-02 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1730505600000
+            }
+        },
+        "qZtlLFtVlZh03ml28KaR": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1243534,
+                    "longitude": 72.9167583,
+                    "altitude": -7.8000006675720215,
+                    "speed": 0,
+                    "accuracy": 16.226999282836914
+                },
+                "mocked": false,
+                "timestamp": 1740210431987
+            },
+            "createdAt": "2025-02-22 07:47:42.287000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "grape",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740210459329?alt=media&token=e96ef747-ef03-41c6-8af4-afd5d0fa2cc3",
+            "pricePerUnit": "160"
+        },
+        "r5SkqU5BmLJ3pHTh01Nu": {
+            "pricePerUnit": "9",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-31 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1738281600000
+            }
+        },
+        "raeqZCEVV7OaxAchnPxF": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 37.4220936,
+                    "longitude": -122.083922,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 600
+                },
+                "mocked": false,
+                "timestamp": 1734160254080
+            },
+            "createdAt": "2024-12-14 07:12:31.388000+00:00",
+            "userID": "gL5N7H3XlAY8Wv4njdIGKlXyGCO2",
+            "quantity": "50",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1734160350096?alt=media&token=d43bf509-2f34-4fc7-bdfe-b146dca1bd1e",
+            "pricePerUnit": "20"
+        },
+        "rcNbTzCYSp1MJdp67eaI": {
+            "pricePerUnit": "280",
+            "createdAt": "2025-02-01 07:01:03.167000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "garlic",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738393259899?alt=media&token=1dbee09c-df5e-43a8-954d-ca5af71b67a5",
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            }
+        },
+        "rfBPBqKMliRCVQpsYqk3": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-03 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735862400000
+            }
+        },
+        "tjkqf8n45byEDEX2WQyg": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:24:48.459000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "garlic",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679085079?alt=media&token=37370f45-fa07-4ee0-bc5e-f57157ebd07d",
+            "pricePerUnit": "200"
+        },
+        "tuXYTKq5ZGPC30Jk1Fj4": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-23 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1729641600000
+            }
+        },
+        "uUjqZVUtHeyi7YHpejUz": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-28 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1738022400000
+            }
+        },
+        "vOwXrpFsbhurLUZdvJn4": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 2.452214479446411,
+                    "heading": 134.00013732910156,
+                    "latitude": 18.2987622,
+                    "longitude": 74.7617337,
+                    "altitude": 442.6000061035156,
+                    "speed": 0.1899869590997696,
+                    "accuracy": 244.4969940185547
+                },
+                "mocked": false,
+                "timestamp": 1743414241065
+            },
+            "createdAt": "2025-03-31 09:44:31.355000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "grape",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1743414269908?alt=media&token=fc29cb05-4fad-449b-a9a6-85c1d85d7b24",
+            "pricePerUnit": "100"
+        },
+        "vU5dGS41OW5zLug3Xawp": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247816,
+                    "longitude": 72.9186518,
+                    "altitude": -5.400000095367432,
+                    "speed": 0,
+                    "accuracy": 13.527999877929688
+                },
+                "mocked": false,
+                "timestamp": 1755869739945
+            },
+            "createdAt": "2025-08-22 13:36:06.369000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1755869763373?alt=media&token=e61808cc-4c2e-4f21-8068-0545ec8f70cd",
+            "pricePerUnit": "30"
+        },
+        "vUSVHM6HIMhugiRVdN5i": {
+            "pricePerUnit": "45",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-10-03 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1727913600000
+            }
+        },
+        "vYDKfkU44gTnjd3gAwgd": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1246549,
+                    "longitude": 72.9187957,
+                    "altitude": -3.3000001907348633,
+                    "speed": 0,
+                    "accuracy": 16.253000259399414
+                },
+                "mocked": false,
+                "timestamp": 1738678964466
+            },
+            "createdAt": "2025-02-04 14:30:12.679000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "lemon",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738679409345?alt=media&token=4e29b609-0ccb-4c19-9cac-97ff66dbed4b",
+            "pricePerUnit": "5"
+        },
+        "vkRLxWRU5BWYOi0Qq0Sk": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 19.1253346,
+                    "longitude": 72.915409,
+                    "altitude": -12.5,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1747463712345
+            },
+            "createdAt": "2025-05-17 06:35:41.013000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1747463735154?alt=media&token=e5bf8aa5-6fa7-4915-ad6c-ba3ea0a82397",
+            "pricePerUnit": "30"
+        },
+        "vm8DSAbhkjdAOp7FDnB6": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 0,
+                    "latitude": 19.1247443,
+                    "longitude": 72.9183568,
+                    "altitude": -5.5,
+                    "speed": 0,
+                    "accuracy": 16.17099952697754
+                },
+                "mocked": false,
+                "timestamp": 1740206234313
+            },
+            "createdAt": "2025-02-22 06:39:59.072000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1740206394273?alt=media&token=e137a2fb-4fcd-48b6-a7d8-40f938e491a9",
+            "pricePerUnit": "30"
+        },
+        "vzuwMx2PBJjVlOonvW9X": {
+            "pricePerUnit": "14",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-10 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1736467200000
+            }
+        },
+        "wGgZwE6KLbo1vFlLeEBS": {
+            "pricePerUnit": "22",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-19 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734566400000
+            }
+        },
+        "wL7a2hiX5X1jju1i0USD": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 1,
+                    "heading": 115.82405853271484,
+                    "latitude": 19.1247877,
+                    "longitude": 72.9185014,
+                    "altitude": -5.900000095367432,
+                    "speed": 0.3912123143672943,
+                    "accuracy": 13.196000099182129
+                },
+                "mocked": false,
+                "timestamp": 1751697780853
+            },
+            "createdAt": "2025-07-05 06:45:54.741000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751697951837?alt=media&token=586efc5a-3558-4de9-a489-3fd6b9acc323",
+            "pricePerUnit": "160"
+        },
+        "wR2BjSl87KafFLK2d5Mb": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:59:53.507000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738393190795?alt=media&token=cdfca08e-dba7-4a21-8e41-a1344c00d5d6",
+            "pricePerUnit": "40"
+        },
+        "xQZzDiZgj4qdfyvlkhkq": {
+            "pricePerUnit": "21",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-20 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1734652800000
+            }
+        },
+        "xbqQy6eHeox3FM5nkHi7": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6346286,
+                    "longitude": 77.333643,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1733941139265
+            },
+            "createdAt": "2024-12-11 18:20:43.708000+00:00",
+            "userID": "CYJbc7f9OUbxxaWyUkGq4odG15w1",
+            "quantity": "21",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1733941239898?alt=media&token=11aa2e01-0c9a-49e6-84f8-2709f5648c1e",
+            "pricePerUnit": "56"
+        },
+        "xcmYoH69mjsDra5CpsFV": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 16.24102020263672,
+                    "heading": 0,
+                    "latitude": 19.1253694,
+                    "longitude": 72.9154583,
+                    "altitude": -7.099999904632568,
+                    "speed": 0,
+                    "accuracy": 58.2666015625
+                },
+                "mocked": false,
+                "timestamp": 1738382601958
+            },
+            "createdAt": "2025-02-01 06:51:37.126000+00:00",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "coriander",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1738392693717?alt=media&token=4a383540-77b1-4b7a-bc43-6851997b5dbb",
+            "pricePerUnit": "20"
+        },
+        "y1CDCozBj41Th1qbOTob": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-30 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735516800000
+            }
+        },
+        "y55PcWBZYrvMvxKmlL85": {
+            "pricePerUnit": "13",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-04 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735948800000
+            }
+        },
+        "y9rHFQjq7uKRdid5GT8O": {
+            "pricePerUnit": "12",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2025-01-25 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1737763200000
+            }
+        },
+        "zewMYXq6zEiWHSiQgIMt": {
+            "pricePerUnit": "15",
+            "userID": "JL0eHbFsNcN7Y6P1UUtERO7hMsx2",
+            "quantity": "1",
+            "name": "tomato",
+            "date": "2024-12-27 00:00:00+00:00",
+            "location": {
+                "coords": {
+                    "latitude": 19.0765109187907,
+                    "longitude": 73.0073049435745
+                },
+                "timestamp": 1735257600000
+            }
+        }
+    },
+    "farmers": {
+        "4fMAGFxUy77swza4eCn3": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 17.6774137,
+                    "longitude": 75.3209929,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 1799.9990234375
+                },
+                "mocked": false,
+                "timestamp": 1756257109321
+            },
+            "createdAt": "2025-08-27 01:43:11.978000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "1",
+            "name": "tomato",
+            "image": "",
+            "pricePerUnit": "19"
+        },
+        "8KeBLuMTpBm1cE0vhcEi": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 40.4295468,
+                    "longitude": -86.9145635,
+                    "altitude": 156.8000030517578,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1756222510419
+            },
+            "createdAt": "2025-08-26 15:36:00.744000+00:00",
+            "userID": "A3MvzWFcDxbanTwf7R1GUcKoTxE2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756222555804?alt=media&token=e8718520-4bf5-49e3-b11b-fe36666a6c19",
+            "pricePerUnit": "30"
+        },
+        "Bb4B81hICwoTf9AwmtnQ": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 56.22522735595703,
+                    "heading": 0,
+                    "latitude": 19.1346007,
+                    "longitude": 72.9083432,
+                    "altitude": -2.000000238418579,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1756037672698
+            },
+            "createdAt": "2025-08-24 12:15:01.828000+00:00",
+            "userID": "Lfht1tFuuvgebLJjldo1cfrKu833",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756037698070?alt=media&token=1d245e3b-6566-4a82-829a-904795e89711",
+            "pricePerUnit": "60"
+        },
+        "CI92C2mugSXo4XybA7Q0": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 76.09562683105469,
+                    "heading": 0,
+                    "latitude": 28.6345813,
+                    "longitude": 77.3336657,
+                    "altitude": 161.3000030517578,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1751044304448
+            },
+            "createdAt": "2025-06-27 17:12:17.517000+00:00",
+            "userID": "Lfht1tFuuvgebLJjldo1cfrKu833",
+            "quantity": "1",
+            "name": "wheat",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1751044336019?alt=media&token=a3cc544d-c60d-4cc9-b7e4-3d48f4f7b755",
+            "pricePerUnit": "12"
+        },
+        "VwwuGsP6J07nla9cJj8T": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 17.6774137,
+                    "longitude": 75.3209929,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 1799.9990234375
+                },
+                "mocked": false,
+                "timestamp": 1756257109321
+            },
+            "createdAt": "2025-08-27 01:38:42.378000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "1",
+            "name": "drumstick",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756258718798?alt=media&token=284d26a9-8a36-4634-8331-a6ca09b9dbc5",
+            "pricePerUnit": "40"
+        },
+        "function v4(a0, a1, a2) { [bytecode] }": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 100,
+                    "heading": 0,
+                    "latitude": 28.6345841,
+                    "longitude": 77.3336772,
+                    "altitude": 164.60000610351562,
+                    "speed": 0,
+                    "accuracy": 100
+                },
+                "mocked": false,
+                "timestamp": 1733936283785
+            },
+            "createdAt": "2024-12-11 17:12:25.702000+00:00",
+            "userID": "CYJbc7f9OUbxxaWyUkGq4odG15w1",
+            "quantity": "89",
+            "name": "rice",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1733937140970?alt=media&token=5885fc53-e359-43d8-acf3-afacb6373be1",
+            "pricePerUnit": "23"
+        },
+        "j4wGAKDYtbMCOgoJ5sUk": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 17.6774137,
+                    "longitude": 75.3209929,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 1799.9990234375
+                },
+                "mocked": false,
+                "timestamp": 1756257109321
+            },
+            "createdAt": "2025-08-27 01:30:00.082000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "1",
+            "name": "onion",
+            "image": "https://firebasestorage.googleapis.com/v0/b/agritradewatch-ea2dc.firebasestorage.app/o/images%2F1756258196379?alt=media&token=fdf09a71-5a2d-4a35-8f84-daebc26faa67",
+            "pricePerUnit": "20"
+        },
+        "qzc433CT1IkxRWUauvfu": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 17.7152939,
+                    "longitude": 75.2025055,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 3000
+                },
+                "mocked": false,
+                "timestamp": 1756222394310
+            },
+            "createdAt": "2025-08-26 15:34:01.781000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "2000",
+            "name": "onion",
+            "image": "",
+            "pricePerUnit": "60"
+        },
+        "ut6keVOyQzF5YbNXwaUw": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 0,
+                    "heading": 0,
+                    "latitude": 17.6774137,
+                    "longitude": 75.3209929,
+                    "altitude": 0,
+                    "speed": 0,
+                    "accuracy": 1799.9990234375
+                },
+                "mocked": false,
+                "timestamp": 1756257109321
+            },
+            "createdAt": "2025-08-27 01:39:32.832000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "1",
+            "name": "lemon",
+            "image": "",
+            "pricePerUnit": "40"
+        },
+        "wZvXPJV9whe0lrk06Xnh": {
+            "location": {
+                "coords": {
+                    "altitudeAccuracy": 19.756933212280273,
+                    "heading": 0,
+                    "latitude": 17.676914,
+                    "longitude": 75.3213959,
+                    "altitude": 390.5,
+                    "speed": 0,
+                    "accuracy": 99.44338989257812
+                },
+                "mocked": false,
+                "timestamp": 1756259217421
+            },
+            "createdAt": "2025-08-27 01:47:15.910000+00:00",
+            "userID": "g4bKG9yYO4aqjGMPBNqvu4LiwOc2",
+            "quantity": "1",
+            "name": "garlic",
+            "image": "",
+            "pricePerUnit": "90"
+        }
+    },
+    "users": {
+        "1Abbjvp85FZy7SSsL0VhCUW1Iwl2": {
+            "phoneNumber": "9899315572",
+            "createdAt": "2024-12-08 09:36:50.234000+00:00",
+            "job": "consumer",
+            "email": "devsingal10357@gmail.com",
+            "name": "Dev Singal",
+            "username": "Dev123"
+        },
+        "43MgxRZXB8QkHmcQVvXSVCrMEt73": {
+            "phoneNumber": "8630415241",
+            "createdAt": "2025-08-25 13:26:16.108000+00:00",
+            "job": "consumer",
+            "email": "shamaila.fatima2909@gmail.com",
+            "name": "Shamaila Fatima ",
+            "username": "shamaila_fatima"
+        },
+        "A3MvzWFcDxbanTwf7R1GUcKoTxE2": {
+            "phoneNumber": "9970559258",
+            "createdAt": "2025-08-26 15:21:33.528000+00:00",
+            "job": "farmer",
+            "email": "prasadrankhambe1997@gmail.com",
+            "name": "Prasad Rankhambe",
+            "username": "prankham"
+        },
+        "CYJbc7f9OUbxxaWyUkGq4odG15w1": {
+            "phoneNumber": "9899315572",
+            "createdAt": "2024-12-11 16:49:31.567000+00:00",
+            "job": "consumer",
+            "email": "Singal@gmail.com",
+            "name": "Dev singal",
+            "username": "Singal123"
+        },
+        "DMLfUkoTYUQbsHZeXrvcX4YQp9V2": {
+            "phoneNumber": "9899315572",
+            "createdAt": "2024-12-22 08:45:11.604000+00:00",
+            "job": "consumer",
+            "email": "devsingal2000@gmail.com",
+            "name": "Dev singal",
+            "username": "Dev123"
+        },
+        "JL0eHbFsNcN7Y6P1UUtERO7hMsx2": {
+            "phoneNumber": "7400020712",
+            "createdAt": "2025-01-24 11:28:28.473000+00:00",
+            "job": "consumer",
+            "email": "udmale@iitb.ac.in",
+            "name": "Parmeshwar Udmale",
+            "username": "Udmale"
+        },
+        "Lfht1tFuuvgebLJjldo1cfrKu833": {
+            "phoneNumber": "9876543212",
+            "createdAt": "2025-06-27 17:11:44.947000+00:00",
+            "job": "farmer",
+            "email": "Dummy@gmail.com",
+            "name": "DummyUser",
+            "username": "DummyUser"
+        },
+        "T52NoraURScDEhxjOtYrLSh0okr2": {
+            "phoneNumber": "7400164291",
+            "createdAt": "2025-02-01 06:43:25.505000+00:00",
+            "job": "consumer",
+            "email": "udmaleseema@gmail.com",
+            "name": "Seema Udmale ",
+            "username": "udmaleseema@gmail.com"
+        },
+        "TmtwB1AnZjPgBH2mcZp8uM8KRYJ3": {
+            "phoneNumber": "7400020712",
+            "createdAt": "2024-12-20 17:50:38.401000+00:00",
+            "job": "consumer",
+            "email": "pd.udmale2@gmail.com",
+            "name": "Poonam Udmale ",
+            "username": "Poonam_Udmale"
+        },
+        "TxEr0bokUIYsk6hquC0UnhFa1aB2": {
+            "phoneNumber": "9351964711",
+            "createdAt": "2025-08-26 06:58:06.343000+00:00",
+            "job": "farmer",
+            "email": "jackpks123@gmail.com",
+            "name": "Jack",
+            "username": "Pk12"
+        },
+        "g4bKG9yYO4aqjGMPBNqvu4LiwOc2": {
+            "phoneNumber": "8380816366",
+            "createdAt": "2025-08-26 15:27:26.926000+00:00",
+            "job": "farmer",
+            "email": "vaibhavrankhambe2001@gmail.com",
+            "name": "Vaibhav ",
+            "username": "Vaibhav "
+        },
+        "gL5N7H3XlAY8Wv4njdIGKlXyGCO2": {
+            "phoneNumber": "9205415572",
+            "createdAt": "2024-12-14 07:10:56.436000+00:00",
+            "job": "consumer",
+            "email": "rekha@gmail.com",
+            "name": "rekha",
+            "username": "rekha"
+        },
+        "k5JgqHbrchSHNf0N2RVLl3MXcuv2": {
+            "phoneNumber": "9205415572",
+            "createdAt": "2024-12-19 14:48:31.168000+00:00",
+            "job": "consumer",
+            "email": "Maya@gmail.com",
+            "name": "Mayanka",
+            "username": "Maya"
+        },
+        "o7Iwscx0RYeV84l5Pc7p28OL1tX2": {
+            "phoneNumber": "9414285894",
+            "createdAt": "2025-08-10 11:07:13.381000+00:00",
+            "job": "consumer",
+            "email": "Monikapatira@gmail.com",
+            "name": "Monika",
+            "username": "Monikapatira@gmail.com"
+        }
+    }
+}

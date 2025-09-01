@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Consumers Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- For marker clusters -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      width: 100vw;   /* Full viewport width */
+      height: 100vh;  /* Full viewport height */
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+
+    .popup-image {
+      max-width: 300px;
+      max-height: 200px;
+      width: 100%;
+      height: auto;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: block;
+      margin-top: 5px;
+    }
+
+    /* For smaller screens */
+    @media (max-width: 480px) {
+      .popup-image {
+        max-width: 90vw;  /* 90% of viewport width */
+        max-height: 150px;
+      }
+    }
+
+    /* Leaflet popup container fixes */
+    .leaflet-popup-content-wrapper {
+      max-width: 90vw !important;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+    }
+
+    .leaflet-popup-content {
+      overflow: hidden;
+      max-width: 90vw !important;
+      max-height: 50vh;
+      word-wrap: break-word;
+      box-sizing: border-box;
+    }
+
+  </style>
+</head>
+<body>
+  <h2>Consumers Map</h2>
+  <div id="map"></div>
+
+  <script>
+    const map = L.map('map').setView([19.2, 73.0], 7);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Create a marker cluster group
+const markers = L.markerClusterGroup();
+
+fetch("/consumers-geojson/")
+  .then(res => res.json())
+  .then(data => {
+    const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
+
+    const filteredFeatures = data.features.filter(feature => {
+      const coords = feature.geometry.coordinates;
+      // coords is [lon, lat]
+      const latlng = L.latLng(coords[1], coords[0]);
+      return indiaBounds.contains(latlng);
+    });
+
+// Then create a new GeoJSON object with filtered features
+    const filteredGeoJSON = {
+      type: "FeatureCollection",
+      features: filteredFeatures
+    };
+
+
+    // const geojsonLayer = L.geoJSON(data, {
+    const geojsonLayer = L.geoJSON(filteredGeoJSON, {
+      onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.name) {
+          let popupContent = `<strong>Name:</strong> ${feature.properties.name}<br>`;
+          if (feature.properties.data) {
+            const data = feature.properties.data;
+            console.log(data);
+            if (data.date) {
+                popupContent += `<strong>Date:</strong> ${new Date(data.date).toLocaleString()}<br>`;
+            }
+            if (data.pricePerUnit) {
+                popupContent += `<strong>Price per Unit:</strong> ${data.pricePerUnit}<br>`;
+            }
+            if (data.quantity) {
+                popupContent += `<strong>Quantity:</strong> ${data.quantity}<br>`;
+            }
+            if (data.image) {
+                popupContent += `<strong>Photo:</strong><br><img src="${data.image}" alt="Photo" class="popup-image"/>`;            }
+            // Add more fields as needed
+        }
+        layer.bindPopup(popupContent, {
+          maxWidth: window.innerWidth * 0.9,
+          minWidth: 150,
+          maxHeight: window.innerHeight * 0.5,
+          autoPan: true,
+          keepInView: true
+        });
+        }
+      },
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+          radius: 8,
+          fillColor: "#ff7800",
+          color: "#000",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8
+        });
+      }
+    });
+    
+    markers.addLayer(geojsonLayer); // Add GeoJSON layer to cluster group
+    map.addLayer(markers);          // Add cluster group to map
+
+    map.fitBounds(markers.getBounds()); // Zoom to cluster bounds
+  })
+  .catch(err => console.error("Error loading GeoJSON:", err));
+
+  </script>
+</body>
+</html>
