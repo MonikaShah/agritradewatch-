@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
+
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +30,7 @@ SECRET_KEY = 'django-insecure-2acdn_!1^g!f^3w4mwn04y^w7i0vk19*_ox5ewc+^y^2vgvkz+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS')
+ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2')]
 
 
 # Application definition
@@ -130,3 +133,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    BASE_DIR/ 'static',
+)
+
+STATIC_ROOT = BASE_DIR/ 'staticfiles'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
