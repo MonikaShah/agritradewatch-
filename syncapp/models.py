@@ -95,3 +95,67 @@ class MarketPrices(models.Model):
     class Meta:
         db_table = 'market_prices'
         
+class User1(models.Model):
+    id = models.CharField(primary_key=True, max_length=100)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    job = models.CharField(max_length=100, blank=True, null=True)
+    username = models.CharField(max_length=100, blank=True, null=True)
+    createdat = models.DateTimeField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'syncapp_users1'
+
+
+# -------------------------------
+# Farmer model
+# -------------------------------
+class Farmer1(models.Model):
+    id = models.CharField(primary_key=True, max_length=100)
+    commodity = models.CharField(max_length=100)
+    sellingprice = models.IntegerField(blank=True, null=True)
+    receipt = models.TextField(blank=True, null=True)
+    quantitysold = models.FloatField(blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
+    image = models.TextField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'syncapp_farmers1'
+
+
+# -------------------------------
+# Consumer model
+# -------------------------------
+class Consumer1(models.Model):
+    id = models.CharField(primary_key=True, max_length=100)
+    commodity = models.CharField(max_length=100)
+    buyingprice = models.IntegerField(blank=True, null=True)
+    quantitybought = models.FloatField(blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'syncapp_consumers1'
+
+
+# -------------------------------
+# Webdata model
+# -------------------------------
+class WebData(models.Model):
+    source = models.CharField(primary_key=True, max_length=100)
+    commodity = models.CharField(max_length=100)
+    minprice = models.IntegerField(blank=True, null=True)
+    maxprice = models.IntegerField(blank=True, null=True)
+    modalprice = models.IntegerField(blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'webdata'
