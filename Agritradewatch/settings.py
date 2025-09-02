@@ -93,7 +93,7 @@ DATABASES = {
             'options': '-c search_path=public'
     }
 }
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
