@@ -1,10 +1,11 @@
 from django.http import JsonResponse
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.serializers import serialize
-from .models import Consumer  # or Farmer, UserData if they have geometry
+from .models import Consumer,Consumer1,User1,Farmer1,WebData  # or Farmer, UserData if they have geometry
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import viewsets
 from .serializers import ConsumerGeoSerializer
 import json
 import requests
@@ -13,6 +14,8 @@ import pandas as pd
 from datetime import datetime
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
+
 
 
 @api_view(['GET'])
@@ -185,3 +188,22 @@ def avg_consumer_price(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+
+
+# //New model 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User1.objects.all()
+    serializer_class = UserSerializer
+
+class FarmerViewSet(viewsets.ModelViewSet):
+    queryset = Farmer1.objects.all()
+    serializer_class = FarmerSerializer
+
+class ConsumerViewSet(viewsets.ModelViewSet):
+    queryset = Consumer1.objects.all()
+    serializer_class = ConsumerSerializer
+
+class WebDataViewSet(viewsets.ModelViewSet):
+    queryset = WebData.objects.all()
+    serializer_class = WebDataSerializer
