@@ -1,0 +1,16 @@
+{% load static %}
+<header>
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
+
+  <div class="header-container">
+    <h1>🌾 Agri Trade Watch</h1>
+    <nav>
+      <ul>
+        <li><a href="{% url 'page_detail' slug='aboutus' %}">About Us</a></li>
+        <li><a href="{% url 'map_chart' %}">Dashboard</a></li>
+        <li><a href="#">Placeholder</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
