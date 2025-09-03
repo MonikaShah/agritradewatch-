@@ -1,0 +1,258 @@
+/* ====== Base layout ====== */
+body, html {
+  margin: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: #2d6a4f;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  margin-left: 20px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Footer */
+footer {
+  background: #2d6a4f;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+/* ====== Main content layout ====== */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* Map container */
+#map-container {
+  position: relative;
+  flex: 2;
+  min-height: 400px;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* Map controls (floating) */
+#map-controls {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  width: auto;          /* fits content */
+  max-width: 200px;     /* prevent it from being too wide */
+  background: rgba(255,255,255,0.95);
+  padding: 8px 12px;
+  border-radius: 6px;
+  z-index: 1500;
+}
+
+/* Left panel (filters) */
+#left-panel {
+  width: 150px;
+  background: #f9f9f9;
+  padding: 10px;
+  box-shadow: 2px 0px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: all 0.3s ease;
+}
+
+/* Hidden state */
+#left-panel.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#left-panel button {
+  padding: 10px;
+  width: 100%;
+  border: none;
+  background: #4CAF50;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+#left-panel button:hover { background: #45a049; }
+
+#left-panel label { font-size: 14px; }
+#left-panel input[type=range] { width: 100%; }
+
+/* Right panel (charts & info) */
+#right-panel {
+  flex: 1;
+  background: #f9f9f9;
+  border-left: 2px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  max-width: 100%;
+}
+
+.box {
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.box:last-child { border-bottom: none; }
+
+.box h3 {
+  margin-top: 0;
+  font-size: 1em;
+  border-bottom: 1px solid #aaa;
+  padding-bottom: 4px;
+}
+
+/* Charts */
+canvas {
+  width: 100% !important;
+  height: 200px !important;
+}
+
+/* ====== Page content styling ====== */
+.page-content {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  line-height: 1.6;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.page-content h1 { font-size: 32px; margin-bottom: 20px; font-weight: 700; color: #2c3e50; }
+.page-content h2 { font-size: 28px; margin-bottom: 18px; font-weight: 600; }
+.page-content h3 { font-size: 22px; margin-bottom: 12px; font-weight: 500; }
+
+.page-content p, .page-content .page-text p { margin-bottom: 15px; }
+.page-content strong { font-weight: 600; }
+.page-content em { font-style: italic; }
+
+.page-content ul, .page-content ol { margin-left: 30px; margin-bottom: 15px; }
+.page-content li { margin-bottom: 8px; }
+
+.page-content img { max-width: 100%; height: auto; display: block; margin: 15px auto; }
+.page-content a { color: #007bff; text-decoration: none; }
+.page-content a:hover { text-decoration: underline; }
+
+/* ====== Mobile responsiveness ====== */
+@media (max-width: 1024px) {
+  #map-container { min-height: 350px; }
+  #left-panel { width: 180px; }
+}
+
+@media (max-width: 768px) {
+  main {
+      flex-direction: column;
+      overflow: visible;
+  }
+  #map-container {
+      flex: none;
+      height: 300px;
+      margin-bottom: 10px;
+  }
+  #right-panel {
+      flex: none;
+      width: 100%;
+      border-left: none;
+      border-top: 2px solid #ccc;
+  }
+  #map-controls {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    width: auto;          /* fits content */
+    max-width: 200px;     /* prevent it from being too wide */
+    background: rgba(255,255,255,0.95);
+    padding: 8px 12px;
+    border-radius: 6px;
+    z-index: 1500;
+  }
+  
+  #left-panel {
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+  }
+  #left-panel button {
+      flex: 1 1 48%;
+      margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  #map-container { height: 250px; }
+  #left-panel { gap: 8px; padding: 10px; }
+  #map-controls { font-size: 0.8em; padding: 6px 8px; }
+  .page-content { margin: 15px; padding: 10px; font-size: 14px; }
+  .page-content h1 { font-size: 24px; }
+  .page-content h2 { font-size: 20px; }
+  .page-content h3 { font-size: 18px; }
+}
+
+/* Map controls toggle hidden state */
+#map-controls.collapsed {
+  transform: translateX(-240px);
+  opacity: 0;
+}
+
+/* Toggle button styling */
+#toggle-map-controls {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  z-index: 1100;
+  padding: 8px 10px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 2000;
+}
+
+#toggle-map-controls:hover { background: #45a049; }

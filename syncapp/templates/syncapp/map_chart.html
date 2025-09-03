@@ -1,204 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Consumers Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'syncapp/base.html' %}
+{% load static %}
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% block title %}Consumers Map{% endblock %}
 
-  <!-- Marker Cluster -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+{% block extra_head %}
+<!-- Any page-specific CSS -->
+<link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
+{% endblock %}
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
-  <style>
-    body, html {
-      margin: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      background: #2d6a4f;
-      color: white;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.2em;
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      margin: 0;
-      padding: 0;
-    }
-
-    nav ul li {
-      margin-left: 20px;
-    }
-
-    nav ul li a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    /* Dropdown filter */
-    #filter-bar {
-      background: #f1f1f1;
-      padding: 8px 20px;
-      border-bottom: 1px solid #ccc;
-    }
-    #crop-select {
-      padding: 5px;
-      font-size: 1em;
-    }
-
-    footer {
-      background: #2d6a4f;
-      color: white;
-      padding: 8px;
-      text-align: center;
-      font-size: 0.9em;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-      overflow: hidden;
-    }
-
-    #map {
-      flex: 2;
-      height: 100%;
-    }
-
-    #right-panel {
-      flex: 1;
-      background: #f9f9f9;
-      border-left: 2px solid #ccc;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .box {
-      flex: 1;
-      border-bottom: 1px solid #ddd;
-      padding: 10px;
-      overflow-y: auto;
-    }
-
-    .box:last-child { border-bottom: none; }
-
-    .box h3 {
-      margin-top: 0;
-      font-size: 1em;
-      border-bottom: 1px solid #aaa;
-      padding-bottom: 4px;
-    }
-
-    canvas {
-      width: 100% !important;
-      height: 200px !important;
-    }
-
-    @media (max-width: 768px) {
-      main { flex-direction: column; }
-      #map { flex: none; height: 300px; }
-      #right-panel {
-        flex: none;
-        width: 100%;
-        border-left: none;
-        border-top: 2px solid #ccc;
-      }
-    }
-    #map-container {
-      position: relative;
-      flex: 2;
-    }
-    #map {
-      height: 100%;
-    }
-    #map-controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 6px 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      font-size: 0.9em;
-      z-index: 1000;
-    }
-    #left-panel {
-      width: 220px;
-      background: #f9f9f9;
-      padding: 15px;
-      box-shadow: 2px 0px 6px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    #left-panel button {
-      padding: 10px;
-      width: 100%;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    #left-panel button:hover { background: #45a049; }
-    #left-panel label { font-size: 14px; }
-    #left-panel input[type=range] { width: 100%; }
-    
-
-  </style>
-</head>
-<body>
-  <header>
-    <h1>🌾 Consumers Map Dashboard</h1>
-    <nav>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="#">Placeholder</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <!-- 🔽 Dropdown Filter Bar -->
-  <!-- <div id="filter-bar">
-    <label for="crop-select"><strong>Select Crop:</strong></label>
-    <select id="crop-select">
-      <option value="onion" selected>Onion</option>
-      <option value="tomato">Tomato</option>
-      <option value="drumstick">Drumstick</option>
-      <option value="lemon">Lemon</option>
-    </select>
-  </div> -->
-  <main>
-  
+{% block content %}
 
 <div id="map-container">
-  <div id="map"></div>
+ <div id="map"></div>
   <div id="map-controls">
+    <!-- <button id="toggle-left-panel">☰ Filters</button><br><br> -->
+     <!-- Toggle button -->
     <label for="crop-select"><strong>Select Crop:</strong></label>
     <select id="crop-select">
       <option value="onion" selected>Onion</option>
@@ -208,401 +24,125 @@
     </select>
     <hr>
     <div id="left-panel">
-      <!-- <label for="loca-select"><strong>Select Location:</strong></label> -->
       <button id="locateBtn">📍 My Location</button>
-      
-      <!-- <button id="selectLocationBtn">Select Location</button> -->
-
       <label>Radius: <span id="radiusValue">100</span> m</label>
-      <input type="range" id="radiusSlider" min="50" max="700" step ="50" value="100"list="tickmarks">
+      <input type="range" id="radiusSlider" min="50" max="700" step="50" value="100" list="tickmarks">
       <datalist id="tickmarks">
-          <option value="10" label="50m"></option>
-          <option value="100" label="100m"></option>
-          <option value="200" label="200m"></option>
-          <option value="300" label="300m"></option>
-          <option value="400" label="400m"></option>
-          <option value="500" label="500m"></option>
-          <option value="600" label="600m"></option>
-          <option value="700" label="700m"></option>
+        <option value="50" label="50m"></option>
+        <option value="100" label="100m"></option>
+        <option value="200" label="200m"></option>
+        <option value="300" label="300m"></option>
+        <option value="400" label="400m"></option>
+        <option value="500" label="500m"></option>
+        <option value="600" label="600m"></option>
+        <option value="700" label="700m"></option>
       </datalist>
-      <!-- <span id="radiusValue">100m</span> -->
     </div>
-
-    <br><br>
   </div>
+  <button id="toggle-map-controls">⚙️ Hide/Show</button>
 </div>
 
-
-    <!-- <div id="map"></div> -->
-
-    <div id="right-panel">
-      <div class="box" id="graph-box">
-        <h3>Consumer Reported Buying Price : <span id="selected-crop"></span></h3>
-        <div id="box1-consumer">
-          Average Consumer Price: <span id="avg-price">--</span>
-        </div>
-      </h3>
-      
-      <script>
-        // Get current value of select
-        const cropSelect = document.getElementById("crop-select");
-        const selectedCropSpan = document.getElementById("selected-crop");
-      
-        // Show initial value
-        selectedCropSpan.innerText = cropSelect.value;
-      
-        // Update whenever user changes
-        cropSelect.addEventListener("change", function() {
-          selectedCropSpan.innerText = this.value;
-        });
-      </script>
-
-        
-        <canvas id="chartCanvas"></canvas>
-      </div>
-      
-      <div class="box" id="farmer-box">
-        <h3>Farmer Reported Selling Price</h3>
-        <div id="farmer-info"></div>
-      </div>
-
-      <div class="box" id="agrowon-box">
-        <h3>Agrowon Price</h3>
-        <div id="agrowon-info">Click on a marker</div>
-        <canvas id="agrowonBoxChart"></canvas>
-      </div>
+<div id="right-panel">
+  <div class="box" id="graph-box">
+    <h3>Consumer Reported Buying Price : <span id="selected-crop"></span></h3>
+    <div id="box1-consumer">
+      Average Consumer Price: <span id="avg-price">--</span>
     </div>
-  </main>
+    <canvas id="chartCanvas"></canvas>
+  </div>
 
-  <footer>
-    &copy; 2025 Agri Dashboard | Powered by Leaflet & Chart.js
-  </footer>
+  <div class="box" id="farmer-box">
+    <h3>Farmer Reported Selling Price</h3>
+    <div id="farmer-info"></div>
+  </div>
 
-  <script>
-    const map = L.map('map',{
-      zoomControl: false
-    }).setView([19.2, 73.0], 7);
+  <div class="box" id="agrowon-box">
+    <h3>Agrowon Price</h3>
+    <div id="agrowon-info">Click on a marker</div>
+    <canvas id="agrowonBoxChart"></canvas>
+  </div>
+</div>
+{% endblock %}
 
-    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //   attribution: '&copy; OpenStreetMap contributors'
-    // }).addTo(map);
-    
-    
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap'
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cropSelect = document.getElementById("crop-select");
+    const selectedCropSpan = document.getElementById("selected-crop");
+    selectedCropSpan.innerText = cropSelect.value;
+
+    cropSelect.addEventListener("change", function() {
+        selectedCropSpan.innerText = this.value;
     });
-    const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google'
-    });
 
-    googleSat.addTo(map);  // default layer
+    const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
-    const baseMaps = {
-      "OpenStreetMap": osm,
-      "Google Satellite": googleSat
-    };
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
+    const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
+    googleSat.addTo(map);
 
+    const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
     L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-
-    L.control.zoom({
-      position: 'topright'
-    }).addTo(map);
-
-    
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
     const markers = L.markerClusterGroup();
     let chartInstance = null;
     let geojsonLayer = null;
     let allData = null;
 
-    // Function to update markers based on crop filter
     function updateMarkers(crop) {
-      markers.clearLayers();
-      if (geojsonLayer) {
-        map.removeLayer(geojsonLayer);
-      }
+        markers.clearLayers();
+        if (geojsonLayer) map.removeLayer(geojsonLayer);
 
-      const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
-      const filteredFeatures = allData.features.filter(feature => {
-        const coords = feature.geometry.coordinates;
-        const latlng = L.latLng(coords[1], coords[0]);
-        const d = feature.properties.data || {};
-        return indiaBounds.contains(latlng) && feature.properties.name === crop;
-      });
-
-      const filteredGeoJSON = { type: "FeatureCollection", features: filteredFeatures };
-
-      geojsonLayer = L.geoJSON(filteredGeoJSON, {
-        onEachFeature: function (feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            const d = feature.properties.data || {};
-            const popupContent = `
-              <strong>${feature.properties.name}</strong><br>
-              ${d.createdAt ? `<em>${new Date(d.createdAt).toLocaleDateString('en-GB')}</em><br>` : ""}
-              Consumer Buying Price: ${d.pricePerUnit || 'NA'}
-            `;
-            layer.bindPopup(popupContent);
-
-            layer.on("click", () => {
-              
-
-              const sameProductUserData = allData.features
-                .filter(f =>
-                  f.properties.name === feature.properties.name &&
-                  f.properties.data?.userID === d.userID
-                )
-                .map(f => ({
-                  date: f.properties.data.createdAt,
-                  price: parseFloat(f.properties.data.pricePerUnit)
-                }))
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-              const labels = sameProductUserData.map(p =>
-                new Date(p.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })
-              );
-              const prices = sameProductUserData.map(p => p.price);
-
-              function getUnitForCrop(crop) {
-                  switch (crop) {
-                      case "onion":
-                      case "tomato":
-                          return "Kg";
-                      case "lemon":
-                          return "Piece";
-                      case "drumstick":
-                          return "Bundle";
-                      default:
-                          return "Unit";
-                  }
-              }
-
-              if (chartInstance) chartInstance.destroy();
-              let crop = document.getElementById("crop-select").value;
-              let unit = getUnitForCrop(crop);
-
-              chartInstance = new Chart(document.getElementById("chartCanvas"), {
-                type: 'line',
-                data: {
-                  labels: labels,
-                  datasets: [{
-                    label: `Price per ${unit}`,
-                    data: prices,
-                    borderColor: 'green',
-                    backgroundColor: 'lightgreen',
-                    tension: 0.2
-                  }]
-                },
-                options: {
-                  responsive: true,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: { title: { display: true, text: 'Date' } },
-                    y: { title: { display: true, text: `Price per ${unit}` } }
-                  }
-                }
-              });
-            });
-          }
-        },
-        pointToLayer: (feature, latlng) => {
-          return L.circleMarker(latlng, {
-            radius: 8,
-            fillColor: "#ff7800",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-          });
-        }
-      });
-
-      markers.addLayer(geojsonLayer);
-      map.addLayer(markers);
-      if (filteredFeatures.length > 0) {
-        map.fitBounds(markers.getBounds());
-      }
-    }
-
-    // Load GeoJSON
-    fetch("/consumers-geojson/")
-      .then(res => res.json())
-      .then(data => {
-        allData = data;
-        updateMarkers("onion");  // Default crop
-      })
-      .catch(err => console.error("Error loading GeoJSON:", err));
-
-    // Dropdown change event
-    document.getElementById("crop-select").addEventListener("change", function() {
-      updateMarkers(this.value);
-    });
-
-
-    // --- Single Marker + Circle ---
-  let mainMarker = null;
-  let mainCircle = null;
-  let selectionMode = false;
-
-  function createMarkerAndCircle(latlng) {
-    if (mainMarker) {
-      mainMarker.setLatLng(latlng);
-      mainCircle.setLatLng(latlng);
-    } else {
-      // Marker (draggable)
-      mainMarker = L.marker(latlng, {
-        draggable: true,
-        icon: L.icon({
-          iconUrl: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
-          iconSize: [32, 32],
-          iconAnchor: [16, 32]
-        })
-      }).addTo(map);
-
-      // Circle
-      const radius = document.getElementById("radiusSlider").value;
-      mainCircle = L.circle(latlng, {
-        radius: radius,
-        color: "red",
-        fillColor: "red",
-        fillOpacity: 0.2
-      }).addTo(map);
-
-      // When marker is dragged, move circle too
-      mainMarker.on("drag", function (e) {
-        mainCircle.setLatLng(e.latlng);
-      });
-    }
-    map.setView(latlng, 15);
-  }
-
-  // --- My Location ---
-  document.getElementById("locateBtn").addEventListener("click", function () {
-   
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        createMarkerAndCircle([lat, lng]);
-      },
-      (err) => {
-        alert("Unable to retrieve your location: " + err.message);
-      }
-    );
-  });
-
-  // --- Select Location ---
-  document.getElementById('locateBtn').addEventListener('click', function() {
-    selectionMode = true;
-    alert("Drag the marker pin to select a different location.");
-  });
-
-  map.on('click', function(e) {
-    if (selectionMode) {
-      createMarkerAndCircle(e.latlng);
-      selectionMode = false;
-    }
-  });
-
-  // --- Radius Slider ---
-  document.getElementById("radiusSlider").addEventListener("input", function () {
-    document.getElementById("radiusValue").innerText = this.value;
-    if (mainCircle) {
-      mainCircle.setRadius(this.value);
-    }
-  });
-
-// 2️⃣ Function to fetch avg consumer price
-function fetchAvgConsumerPrice() {
-    if (!mainMarker) return; // marker not yet placed
-    const lat = mainMarker.getLatLng().lat;
-    const lng = mainMarker.getLatLng().lng;
-    const radius = document.getElementById("radiusSlider").value;
-    const product = document.getElementById("crop-select").value;
-
-    console.log("Fetching avg price for:", lat, lng, radius, product);
-
-    fetch(`/api/avg_consumer_price?lat=${lat}&lng=${lng}&radius=${radius}&product=${product}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("avg-price").textContent =
-                data.avg_price !== null ? data.avg_price.toFixed(2) : "No data";
-        })
-        .catch(err => console.error("Error fetching avg consumer price:", err));
-}
-
-  // 3️⃣ Call function on marker drag, slider change, product change
-  
-  if (mainMarker) {
-    mainMarker.on('dragend', fetchAvgConsumerPrice);
-  }
-  document.getElementById("radiusSlider").addEventListener("input", function() {
-      document.getElementById("radiusValue").textContent = this.value;
-      fetchAvgConsumerPrice();
-  });
-  document.getElementById("crop-select").addEventListener("change", fetchAvgConsumerPrice);
-
-  // 4️⃣ Optional: fetch initially
-  fetchAvgConsumerPrice();
-
-
-// Function to fetch Agrowon prices
-  const cropNameMap = {
-  "onion": "कांदा",
-  "tomato": "टोमॅटो",
-  "drumstick": "शेवगा",
-  "lemon": "लिंबू"
-};
-let agrowonBoxChart = null;
-
-function fetchAgrowonPrice(product) {
-    const agrowonDiv = document.getElementById("agrowon-info");
-    agrowonDiv.innerHTML = "Loading...";
-
-    const marathiName = cropNameMap[product] || product;
-
-    fetch(`/agrowon_prices/?product=${encodeURIComponent(marathiName)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || data.length === 0) {
-                agrowonDiv.innerHTML = "No Agrowon data for this crop.";
-                if (agrowonBoxChart) agrowonBoxChart.destroy();
-                return;
-            }
-
-            // Show list
-            let html = "<ul>";
-            data.forEach(item => {
-                html += `<li><strong>${item.apmc_name}</strong> | ${item.variety_name} | Min: ₹${item.min || "NA"} | Max: ₹${item.max || "NA"} | Unit: ${item.unit || "NA"}</li>`;
-            });
-            html += "</ul>";
-            agrowonDiv.innerHTML = html;
-
-           
-        })
-        .catch(err => {
-            console.error(err);
-            agrowonDiv.innerHTML = "Error loading Agrowon data.";
+        const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
+        const filteredFeatures = allData.features.filter(feature => {
+            const coords = feature.geometry.coordinates;
+            const latlng = L.latLng(coords[1], coords[0]);
+            return indiaBounds.contains(latlng) && feature.properties.name === crop;
         });
-}
 
+        const filteredGeoJSON = { type: "FeatureCollection", features: filteredFeatures };
 
-// On page load, fetch for default crop
+        geojsonLayer = L.geoJSON(filteredGeoJSON, {
+            pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+                radius: 8, fillColor: "#ff7800", color: "#000",
+                weight: 1, opacity: 1, fillOpacity: 0.8
+            }),
+            onEachFeature: function(feature, layer) {
+                if (feature.properties && feature.properties.name) {
+                    const d = feature.properties.data || {};
+                    const popupContent = `<strong>${feature.properties.name}</strong><br>${d.createdAt ? `<em>${new Date(d.createdAt).toLocaleDateString('en-GB')}</em><br>` : ""}Consumer Buying Price: ${d.pricePerUnit || 'NA'}`;
+                    layer.bindPopup(popupContent);
+                }
+            }
+        });
 
-fetchAgrowonPrice(cropSelect.value);
+        markers.addLayer(geojsonLayer);
+        map.addLayer(markers);
+        if (filteredFeatures.length > 0) map.fitBounds(markers.getBounds());
+    }
 
-// Update when crop changes
-cropSelect.addEventListener("change", function() {
-    document.getElementById("selected-crop").innerText = this.value;
-    fetchAgrowonPrice(this.value);
+    fetch("/consumers-geojson/")
+        .then(res => res.json())
+        .then(data => { allData = data; updateMarkers("onion"); })
+        .catch(err => console.error("Error loading GeoJSON:", err));
+
+    cropSelect.addEventListener("change", function() { updateMarkers(this.value); });
+});
+
+// const toggleBtn = document.getElementById("toggle-left-panel");
+// const leftPanel = document.getElementById("map-controls");
+
+// toggleBtn.addEventListener("click", () => {
+//   leftPanel.classList.toggle("collapsed");
+// });
+
+const mapControls = document.getElementById('map-controls');
+const toggleMapBtn = document.getElementById('toggle-map-controls');
+
+toggleMapBtn.addEventListener('click', () => {
+  mapControls.classList.toggle('collapsed');
 });
 
 </script>
-
-
-</body>
-</html>
+{% endblock %}
