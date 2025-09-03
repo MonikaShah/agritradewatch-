@@ -1,6 +1,6 @@
 # Create your models here.
 from django.contrib.gis.db import models
-
+from ckeditor.fields import RichTextField
 
 # class Consumer(models.Model):
 #     id = models.CharField(max_length=100, primary_key=True)
@@ -159,3 +159,45 @@ class WebData(models.Model):
 
     class Meta:
         db_table = 'webdata'
+
+class Page(models.Model):
+    STATUS_CHOICES = (
+        (True, 'Active'),
+        (False, 'Inactive'),
+    )
+
+    slug = models.SlugField(unique=True, help_text="URL-friendly unique identifier, e.g., 'about-us'")
+    title = models.CharField(max_length=255)
+    content = RichTextField(help_text="Page content with formatting (bold, bullets, images, etc.)")
+    image = models.ImageField(upload_to='page_images/', blank=True, null=True)  # ✅ New field
+    status = models.BooleanField(default=True, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "pages"
+        managed = False  # keep this as False
+        ordering = ['title']
+        verbose_name = "Page"
+        verbose_name_plural = "Pages"
+
+    def __str__(self):
+        return self.title
+    
+
+class Commodity(models.Model):
+    TYPE_CHOICES = [
+        ('vegetable', 'Vegetable'),
+        ('fruit', 'Fruit'),
+        ('pulse', 'Pulse'),
+    ]
+
+    name = models.CharField(max_length=255, unique=True)
+    alias_marathi = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        db_table = "commodity"
+        managed = False  # keep this as False

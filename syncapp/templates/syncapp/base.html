@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Agri Trade Watch{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <h1>🌾 Agri Trade Watch</h1>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'page_detail' slug='aboutus' %}">About Us</a></li>
+                    <li><a href="{% url 'map_chart' %}">Dashboard</a></li>
+                    <li><a href="#">Placeholder</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        {% block content %}
+        <!-- This is where page-specific content or map will be injected -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2025 Agri Dashboard | Powered by Leaflet & Chart.js
+    </footer>
+
+    <!-- JS Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
+
+    <!-- Custom JS -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
