@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from django.core.serializers import serialize
 from django.http import JsonResponse
 import json
+from django.utils.timezone import make_aware
 from .models import Consumer
-
 from .models import Consumer1,User1,Farmer1,WebData  # or Farmer, UserData if they have geometry
 from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 
@@ -27,16 +27,51 @@ class WebDataViewSet(viewsets.ModelViewSet):
     serializer_class = WebDataSerializer
 
 @api_view(['GET'])
+# def consumers_geojson(request):
+#     geojson_str = serialize(
+#         'geojson',
+#         Consumer.objects.exclude(geom__isnull=True),  # skip null geometry
+#         geometry_field='geom',
+#         fields=('id', 'name', 'data')
+#     )
+#     geojson_obj = json.loads(geojson_str)  # convert string to Python dict
+#     return JsonResponse(geojson_obj)  # now Leaflet gets valid JSON
 def consumers_geojson(request):
-    geojson_str = serialize(
-        'geojson',
-        Consumer.objects.exclude(geom__isnull=True),  # skip null geometry
-        geometry_field='geom',
-        fields=('id', 'name', 'data')
-    )
-    geojson_obj = json.loads(geojson_str)  # convert string to Python dict
-    return JsonResponse(geojson_obj)  # now Leaflet gets valid JSON
+    # Get cutoff date from query param, fallback to today if not provided
+    cutoff_str = request.GET.get("date")
+    if cutoff_str:
+        try:
+            cutoff_date = make_aware(datetime.strptime(cutoff_str, "%Y-%m-%d"))
+        except ValueError:
+            return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
+    else:
+        cutoff_date = make_aware(datetime.now())  # default = today
 
+    consumers = Consumer.objects.filter(createdAt__gte=cutoff_date)
+
+    features = []
+    for c in consumers:
+        features.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [c.longitude, c.latitude],
+            },
+            "properties": {
+                "name": c.crop,
+                "data": {
+                    "pricePerUnit": c.pricePerUnit,
+                    "createdAt": c.createdAt.isoformat()
+                }
+            }
+        })
+
+    geojson = {
+        "type": "FeatureCollection",
+        "features": features
+    }
+
+    return JsonResponse(geojson)
 def consumer_user_geojson(request, user_id):
     # Filter by userID
     consumers = Consumer.objects.filter(data__userID=user_id, geom__isnull=False)

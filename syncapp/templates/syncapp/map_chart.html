@@ -122,10 +122,13 @@ document.addEventListener("DOMContentLoaded", function() {
         if (filteredFeatures.length > 0) map.fitBounds(markers.getBounds());
     }
 
-    fetch("/consumers-geojson/")
-        .then(res => res.json())
-        .then(data => { allData = data; updateMarkers("onion"); })
-        .catch(err => console.error("Error loading GeoJSON:", err));
+    fetch("/consumers-geojson/?date=2025-08-30")
+    .then(res => res.json())
+    .then(data => {
+        allData = data;
+        updateMarkers("onion");
+    })
+    .catch(err => console.error("Error loading GeoJSON:", err));
 
     cropSelect.addEventListener("change", function() { updateMarkers(this.value); });
 });

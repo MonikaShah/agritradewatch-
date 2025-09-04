@@ -12,6 +12,8 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 
+def landingpage(request):
+    return render(request, "syncapp/landingpage.html")
 
 def map_chart(request):
     return render(request, "syncapp/map_chart.html")
