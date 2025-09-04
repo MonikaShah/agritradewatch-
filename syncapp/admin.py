@@ -17,13 +17,17 @@ class PageAdmin(admin.ModelAdmin):
         return "-"
     image_tag.short_description = 'Image'
 
+class Users1Admin(admin.ModelAdmin):
+    list_display = ('name', 'mobile')
+    list_filter = ('name', 'mobile', 'username')            # filters in sidebar
+    search_fields = ('name', 'mobile', 'username')                          # search bar
 
 
 # Register models
 admin.site.register(MarketPrices, MarketPricesAdmin)
 admin.site.register(Consumer1)
 admin.site.register(Farmer1)
-admin.site.register(User1)
+admin.site.register(User1,Users1Admin)
 admin.site.register(WebData)
 admin.site.register(Page,PageAdmin)
 admin.site.register(Commodity)
