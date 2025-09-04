@@ -22,10 +22,21 @@ class Users1Admin(admin.ModelAdmin):
     list_filter = ('name', 'mobile', 'username')            # filters in sidebar
     search_fields = ('name', 'mobile', 'username')                          # search bar
 
+class Consumers1Admin(admin.ModelAdmin):
+    list_display = ('id', 'user_name')  # Show id and name
+
+    def user_name(self, obj):
+        try:
+            # Look up the name in users1 using the id from consumers1
+            user = User1.objects.get(id=obj.userid)
+            return user.name
+        except User1.DoesNotExist:
+            return '-'  # fallback if no match
+    user_name.short_description = 'Name'  # Column header
 
 # Register models
 admin.site.register(MarketPrices, MarketPricesAdmin)
-admin.site.register(Consumer1)
+admin.site.register(Consumer1,Consumers1Admin)
 admin.site.register(Farmer1)
 admin.site.register(User1,Users1Admin)
 admin.site.register(WebData)
