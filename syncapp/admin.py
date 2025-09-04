@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import MarketPrices,Commodity,Consumer1,Farmer1,User1,WebData,Page  # replace with your actual models
 from django.utils.html import format_html
+from django.db.models import F  # Make sure to import F
 
 class MarketPricesAdmin(admin.ModelAdmin):
     list_display = ('arrival_date', 'market', 'commodity', 'variety', 'min_price','max_price','modal_price')  # columns to show
@@ -23,16 +24,22 @@ class Users1Admin(admin.ModelAdmin):
     search_fields = ('name', 'mobile', 'username')                          # search bar
 
 class Consumers1Admin(admin.ModelAdmin):
-    list_display = ('id', 'user_name')  # Show id and name
+    list_display = ('date', 'user_name')
+    list_filter = ['date']
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Order by date descending, NULLs last
+        return qs.order_by(F('date').desc(nulls_last=True))
 
     def user_name(self, obj):
         try:
-            # Look up the name in users1 using the id from consumers1
             user = User1.objects.get(id=obj.userid)
             return user.name
         except User1.DoesNotExist:
-            return '-'  # fallback if no match
-    user_name.short_description = 'Name'  # Column header
+            return '-'
+
+    user_name.short_description = 'Name'
 
 # Register models
 admin.site.register(MarketPrices, MarketPricesAdmin)
