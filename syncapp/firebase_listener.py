@@ -1,12 +1,13 @@
-import threading
+import os,threading
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore,initialize_app
 from django.contrib.gis.geos import Point
 from .models import Consumer1, Farmer1, User1
 from django.utils import timezone
 
 # Initialize Firebase only once
 if not firebase_admin._apps:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     cred = credentials.Certificate("appConfig.json")
     firebase_admin.initialize_app(cred)
 
