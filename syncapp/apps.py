@@ -7,7 +7,8 @@ class SyncappConfig(AppConfig):
 
     def ready(self):
         # Import the function from your existing firebase_listener.py
-        from .firebase_listener import fetch_firestore_and_insert
+        # from .firebase_listener import fetch_firestore_and_insert
 
-        # Run Firestore → Postgres sync in a separate thread
-        threading.Thread(target=fetch_firestore_and_insert, daemon=True).start()
+        # # Run Firestore → Postgres sync in a separate thread
+        # threading.Thread(target=fetch_firestore_and_insert, daemon=True).start()
+        pass
