@@ -41,7 +41,7 @@ class WebDataViewSet(viewsets.ModelViewSet):
 logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def consumers_geojson(request):
-    cutoff_date = timezone.make_aware(datetime(2024, 1, 1))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
+    cutoff_date = timezone.make_aware(datetime(2025,8,30))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
     qs = Consumer1.objects.filter(date__gte=cutoff_date)
 
     # Filter consumers
