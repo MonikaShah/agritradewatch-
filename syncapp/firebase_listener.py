@@ -1,100 +1,82 @@
 import threading
 import firebase_admin
-from datetime import datetime
 from firebase_admin import credentials, firestore
-from .models import Consumer, Farmer, UserData
 from django.contrib.gis.geos import Point
+from .models import Consumer1, Farmer1, User1
+from django.utils import timezone
 
-# Firebase credentials
-cred = credentials.Certificate("appConfig.json")
-firebase_admin.initialize_app(cred)
+# Initialize Firebase only once
+if not firebase_admin._apps:
+    cred = credentials.Certificate("appConfig.json")
+    firebase_admin.initialize_app(cred)
+
 db = firestore.client()
 
-def convert_firestore_types(obj):
-    if isinstance(obj, dict):
-        return {k: convert_firestore_types(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_firestore_types(i) for i in obj]
-    elif hasattr(obj, 'ToDatetime'):  # Firestore timestamp objects have ToDatetime()
-        return obj.ToDatetime().isoformat()
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
-    else:
-        return obj
+def make_aware_if_needed(dt):
+    if dt and timezone.is_naive(dt):
+        return timezone.make_aware(dt)
+    return dt
 
-from django.contrib.gis.geos import Point
-
-def convert_firestore_types(obj):
-    if isinstance(obj, dict):
-        return {k: convert_firestore_types(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_firestore_types(i) for i in obj]
-    elif hasattr(obj, "ToDatetime"):  # Firestore timestamp object
-        return obj.ToDatetime().isoformat()
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
-    else:
-        return obj
+def convert_firestore_types(data):
+    """
+    Optional: convert Firestore Timestamp / other types if needed
+    """
+    return data
 
 
-def handle_change(change, model_class, geom=False):
-    data = change.document.to_dict()
+def handle_document(col_name, doc):
+    data = doc.to_dict()
+    if not data:
+        return
+
+    doc_id = doc.id
     data = convert_firestore_types(data)
-    doc_id = change.document.id
 
-    # Safe conversions
-    def to_float(val):
-        try:
-            return float(val)
-        except (TypeError, ValueError):
-            return 0
+    if col_name == "consumers":
+        lat = data.get("location", {}).get("coords", {}).get("latitude")
+        lon = data.get("location", {}).get("coords", {}).get("longitude")
+        geom_point = Point(lon, lat) if lat and lon else None
 
-    price = to_float(data.get("pricePerUnit"))
-    quantity = to_float(data.get("quantity"))
-
-    # Coordinates
-    lat = data.get("location", {}).get("coords", {}).get("latitude")
-    lon = data.get("location", {}).get("coords", {}).get("longitude")
-    geom_point = Point(lon, lat) if geom and lat is not None and lon is not None else None
-
-    # Product/unit
-    product = data.get("name")
-    unit = data.get("unit", "kg")
-
-    # Timestamps
-    created_at = data.get("createdAt") or data.get("date")
-    timestamp = data.get("timestamp")
-
-    defaults = {
-        "name": data.get("name"),
-        "product": product,
-        "price_per_unit": price,
-        "quantity": quantity,
-        "unit": unit,
-        "lat": lat,
-        "lng": lon,
-        "timestamp": timestamp,
-        "created_at": created_at,
-    }
-
-    if geom_point:
-        defaults["geom"] = geom_point
-
-    try:
-        model_class.objects.update_or_create(id=doc_id, defaults=defaults)
-    except Exception as e:
-        print(f"Failed to insert/update {doc_id}: {e}")
-
-def start_listeners():
-    listeners = [
-        (db.collection("consumers"), Consumer, True),
-        (db.collection("farmers"), Farmer, True),
-        (db.collection("users"), UserData, False),
-    ]
-    for col_ref, model_class, geom in listeners:
-        col_ref.on_snapshot(
-            lambda snap, changes, read_time, m=model_class, g=geom:
-            [handle_change(c, m, g) for c in changes]
+        Consumer1.objects.update_or_create(
+            id=doc.id,
+            defaults={
+                "commodity": data.get("name"),
+                "buyingprice": float(data.get("pricePerUnit") or 0),
+                "quantitybought": float(data.get("quantity") or 0),
+                "unit": data.get("unit", "kg"),
+                "latitude": lat,
+                "longitude": lon,
+                "date": make_aware_if_needed(data.get("date")),
+                # "geom": geom_point,
+            }
         )
-    print("Firebase real-time sync running...")
-    threading.Event().wait()
+
+    elif col_name == "farmers":
+        # similar logic for Farmer1
+        pass
+
+    elif col_name == "users":
+        User1.objects.update_or_create(
+            id=doc.id,
+            defaults={
+            "name": data.get("name"),
+            "mobile": data.get("mobile"),
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "job": data.get("job"),
+            "username": data.get("username"),
+            "createdat": data.get("createdAt"),
+        },
+        )
+
+
+def fetch_firestore_and_insert():
+    """
+    Fetch all collections from Firestore and insert/update Postgres
+    """
+    collections = db.collections()
+    for col in collections:
+        for doc in col.stream():
+            handle_document(col.id, doc)
+
+    print("✅ Firestore data synced to Postgres")

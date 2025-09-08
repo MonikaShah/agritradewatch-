@@ -96,10 +96,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
         const filteredFeatures = allData.features.filter(feature => {
-            const coords = feature.geometry.coordinates;
-            const latlng = L.latLng(coords[1], coords[0]);
-            return indiaBounds.contains(latlng) && feature.properties.name === crop;
+        const coords = feature.geometry.coordinates;
+          const latlng = L.latLng(coords[1], coords[0]);
+          return indiaBounds.contains(latlng) && 
+                feature.properties.name.toLowerCase() === crop.toLowerCase();
         });
+
 
         const filteredGeoJSON = { type: "FeatureCollection", features: filteredFeatures };
 
@@ -109,26 +111,31 @@ document.addEventListener("DOMContentLoaded", function() {
                 weight: 1, opacity: 1, fillOpacity: 0.8
             }),
             onEachFeature: function(feature, layer) {
-                if (feature.properties && feature.properties.name) {
-                    const d = feature.properties.data || {};
-                    const popupContent = `<strong>${feature.properties.name}</strong><br>${d.createdAt ? `<em>${new Date(d.createdAt).toLocaleDateString('en-GB')}</em><br>` : ""}Consumer Buying Price: ${d.pricePerUnit || 'NA'}`;
-                    layer.bindPopup(popupContent);
-                }
-            }
+              if (feature.properties && feature.properties.name) {
+                  const p = feature.properties;
+                  const popupContent = `
+                      <strong>${p.name}</strong><br>
+                      ${p.date ? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>` : ""}
+                      Consumer Buying Price: ${p.buyingprice || 'NA'}
+                  `;
+                  layer.bindPopup(popupContent);
+              }
+          }
         });
 
         markers.addLayer(geojsonLayer);
         map.addLayer(markers);
         if (filteredFeatures.length > 0) map.fitBounds(markers.getBounds());
     }
-
-    fetch("/consumers-geojson/?date=2025-08-30")
-    .then(res => res.json())
-    .then(data => {
-        allData = data;
-        updateMarkers("onion");
-    })
-    .catch(err => console.error("Error loading GeoJSON:", err));
+    const defaultCrop = "onion";
+    fetch("/api/consumers_geojson/")
+      .then(res => res.json())
+      .then(data => {
+          console.log("GeoJSON from backend:", data);  // 👀 check in browser console
+          allData = data;
+          updateMarkers("defaultCrop");
+      })
+      .catch(err => console.error("Error loading GeoJSON:", err));
 
     cropSelect.addEventListener("change", function() { updateMarkers(this.value); });
 });

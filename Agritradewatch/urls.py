@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
 
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('', include('syncapp.urls')),
+#     path('api/', include('syncapp.urls')),  # all API endpoints start with /api/
+# ]
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('syncapp.urls')),
-]
+    path('', include('syncapp.urls')),        # front-end pages
+    path('api/', include('syncapp.api_urls')), # all API endpoints start with /api/
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

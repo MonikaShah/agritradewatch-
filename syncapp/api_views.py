@@ -2,11 +2,18 @@ from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from django.core.serializers import serialize
 from django.http import JsonResponse
-import json
+import json, logging
 from django.utils.timezone import make_aware
-from .models import Consumer
+# from .models import Consumer
 from .models import Consumer1,User1,Farmer1,WebData  # or Farmer, UserData if they have geometry
 from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
+import requests
+import pandas as pd
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from django.utils import timezone
+from django.contrib.gis.geos import Point
+from django.db.models import Count
 
 
 # //New model 
@@ -21,118 +28,121 @@ class FarmerViewSet(viewsets.ModelViewSet):
 class ConsumerViewSet(viewsets.ModelViewSet):
     queryset = Consumer1.objects.all()
     serializer_class = ConsumerSerializer
+    def get_queryset(self):
+        # Filter for date >= 30 Aug 2025
+        filter_date = timezone.make_aware(datetime(2025, 8, 30, 0, 0, 0))
+        return Consumer1.objects.filter(date__gte=filter_date)
+    
 
 class WebDataViewSet(viewsets.ModelViewSet):
     queryset = WebData.objects.all()
     serializer_class = WebDataSerializer
 
+logger = logging.getLogger(__name__)
 @api_view(['GET'])
-# def consumers_geojson(request):
-#     geojson_str = serialize(
-#         'geojson',
-#         Consumer.objects.exclude(geom__isnull=True),  # skip null geometry
-#         geometry_field='geom',
-#         fields=('id', 'name', 'data')
-#     )
-#     geojson_obj = json.loads(geojson_str)  # convert string to Python dict
-#     return JsonResponse(geojson_obj)  # now Leaflet gets valid JSON
 def consumers_geojson(request):
-    # Get cutoff date from query param, fallback to today if not provided
-    cutoff_str = request.GET.get("date")
-    if cutoff_str:
-        try:
-            cutoff_date = make_aware(datetime.strptime(cutoff_str, "%Y-%m-%d"))
-        except ValueError:
-            return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
-    else:
-        cutoff_date = make_aware(datetime.now())  # default = today
+    cutoff_date = timezone.make_aware(datetime(2024, 1, 1))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
+    qs = Consumer1.objects.filter(date__gte=cutoff_date)
 
-    consumers = Consumer.objects.filter(createdAt__gte=cutoff_date)
+    # Filter consumers
+    consumers = Consumer1.objects.filter(date__gte=cutoff_date)
+    for c in qs:
+        print(f"{c.id} | {c.commodity} | {c.date} | {c.latitude}, {c.longitude}")
+
+    print("🔍 Cutoff date:", cutoff_date)
+    print("📊 Total records in DB:", Consumer1.objects.count())
+    print("✅ Matching records after filter:", qs.count())
+    print(f"🕒 DB date example: {Consumer1.objects.last().date}")
+    print(f"🕒 Cutoff date: {cutoff_date}")
+
+    for obj in qs:
+        print(f"➡️ Record: {obj.id}, {obj.commodity}, {obj.date}, {obj.latitude}, {obj.longitude}")
+        print(Consumer1.objects.values('commodity').annotate(total=Count('id')))
+    # ✅ Log debug info
+    logger.info(f"[consumers_geojson] Filtering consumers with date >= {cutoff_date}")
+    logger.info(f"[consumers_geojson] Found {consumers.count()} records")
 
     features = []
     for c in consumers:
-        features.append({
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [c.longitude, c.latitude],
-            },
-            "properties": {
-                "name": c.crop,
-                "data": {
-                    "pricePerUnit": c.pricePerUnit,
-                    "createdAt": c.createdAt.isoformat()
-                }
-            }
-        })
+        logger.debug(f"Consumer {c.id}: {c.commodity}, date={c.date}, "
+                     f"lat={c.latitude}, lon={c.longitude}")
+
+        if c.latitude is not None and c.longitude is not None:
+            features.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [c.longitude, c.latitude],
+                },
+                "properties": {
+                    "id": c.id,
+                    "name": c.commodity,
+                    # "mobile": c.mobile,
+                    "date": c.date.isoformat() if c.date else None,
+                    "buyingprice": c.buyingprice,   # <-- flatten this
+                    # "sellingprice": c.sellingprice,
+                },
+            })
 
     geojson = {
         "type": "FeatureCollection",
-        "features": features
+        "features": features,
     }
 
+    logger.info(f"[consumers_geojson] Returning {len(features)} GeoJSON features")
     return JsonResponse(geojson)
-def consumer_user_geojson(request, user_id):
-    # Filter by userID
-    consumers = Consumer.objects.filter(data__userID=user_id, geom__isnull=False)
 
-    # Convert to GeoJSON
-    geojson_str = serialize('geojson', consumers,
-                            geometry_field='geom',
-                            fields=('data', 'name'))
-    geojson_obj = json.loads(geojson_str)
+# def consumer_user_geojson(request, user_id):
+#     # Filter by userID
+#     consumers = Consumer.objects.filter(data__userID=user_id, geom__isnull=False)
 
-    # You can merge quantities and pick latest date here if needed
-    # For now, send raw filtered GeoJSON
-    return JsonResponse(geojson_obj)
+#     # Convert to GeoJSON
+#     geojson_str = serialize('geojson', consumers,
+#                             geometry_field='geom',
+#                             fields=('data', 'name'))
+#     geojson_obj = json.loads(geojson_str)
 
-@api_view(['GET'])
-def consumers_geojson(request):
-    geojson_str = serialize(
-        'geojson',
-        Consumer.objects.exclude(geom__isnull=True),  # skip null geometry
-        geometry_field='geom',
-        fields=('id', 'name', 'data')
-    )
-    geojson_obj = json.loads(geojson_str)  # convert string to Python dict
-    return JsonResponse(geojson_obj)  # now Leaflet gets valid JSON
+#     # You can merge quantities and pick latest date here if needed
+#     # For now, send raw filtered GeoJSON
+#     return JsonResponse(geojson_obj)
+
 
 @api_view(['GET'])
-def avg_consumer_price(request):
-    """
-    Compute average consumer-reported price within a radius
-    ?lat=<lat>&lng=<lng>&radius=<meters>&product=<product_name>
-    """
-    try:
-        lat = float(request.GET.get("lat"))
-        lng = float(request.GET.get("lng"))
-        radius = float(request.GET.get("radius", 500))  # default 1 km
-        product_name = request.GET.get("product")
+# def avg_consumer_price(request):
+#     """
+#     Compute average consumer-reported price within a radius
+#     ?lat=<lat>&lng=<lng>&radius=<meters>&product=<product_name>
+#     """
+#     try:
+#         lat = float(request.GET.get("lat"))
+#         lng = float(request.GET.get("lng"))
+#         radius = float(request.GET.get("radius", 500))  # default 1 km
+#         product_name = request.GET.get("product")
 
-        if not product_name:
-            return JsonResponse({"error": "Missing ?product=<name>"}, status=400)
+#         if not product_name:
+#             return JsonResponse({"error": "Missing ?product=<name>"}, status=400)
 
-        user_point = Point(lng, lat, srid=4326)
+#         user_point = Point(lng, lat, srid=4326)
 
-        consumers = Consumer.objects.filter(
-            geom__distance_lte=(user_point, radius),
-            data__name=product_name
-        )
+#         consumers = Consumer.objects.filter(
+#             geom__distance_lte=(user_point, radius),
+#             data__name=product_name
+#         )
 
-        prices = [
-            float(c.data.get("pricePerUnit", 0))
-            for c in consumers if c.data.get("pricePerUnit") not in (None, "")
-        ]
+#         prices = [
+#             float(c.data.get("pricePerUnit", 0))
+#             for c in consumers if c.data.get("pricePerUnit") not in (None, "")
+#         ]
 
-        avg_price = sum(prices)/len(prices) if prices else None
+#         avg_price = sum(prices)/len(prices) if prices else None
 
-        return JsonResponse({
-            "avg_price": avg_price,
-            "consumer_count": len(prices)
-        })
+#         return JsonResponse({
+#             "avg_price": avg_price,
+#             "consumer_count": len(prices)
+#         })
 
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
     
 
 @api_view(['GET'])
