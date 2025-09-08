@@ -10,6 +10,7 @@ if not firebase_admin._apps:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     cred = credentials.Certificate("appConfig.json")
     firebase_admin.initialize_app(cred)
+    initialize_app(cred)
 
 db = firestore.client()
 
