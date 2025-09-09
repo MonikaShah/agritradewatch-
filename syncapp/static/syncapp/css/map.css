@@ -167,7 +167,28 @@ canvas {
   background: #f8f8f8;
   font-style: italic;
 }
+#stats-container {
+  display: flex;
+  flex-direction: row;      /* force horizontal layout */
+  justify-content: space-between; /* space out the two boxes */
+  gap: 20px;
+  flex-wrap: wrap;          /* allow wrapping on small screens */
+}
 
+#stats-container > div {
+  flex: 1 1 45%;            /* each box takes ~45% of width */
+  min-width: 250px;         /* don't shrink too much */
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  #stats-container {
+    flex-direction: column;
+  }
+}
 
 .page-content h1 { font-size: 32px; margin-bottom: 20px; font-weight: 700; color: #2c3e50; }
 .page-content h2 { font-size: 28px; margin-bottom: 18px; font-weight: 600; }
