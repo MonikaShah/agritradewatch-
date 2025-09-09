@@ -1,22 +1,42 @@
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer,Page  # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity  # or Farmer, UserData if they have geometry
 from django.shortcuts import render,get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import ConsumerGeoSerializer
-import requests
+import requests,logging
 import xml.etree.ElementTree as ET
 import pandas as pd
 from datetime import datetime
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from django.db.models import Q
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
-
+logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
 
 def map_chart(request):
-    return render(request, "syncapp/map_chart.html")
+    commodities = Commodity.objects.all().order_by("type", "name")
+    grouped_commodities = {}
+
+    for c in commodities:
+        has_valid_data = Consumer1.objects.filter(
+            Q(commodity__iexact=c.name),  # case-insensitive match
+            latitude__isnull=False,
+            longitude__isnull=False,
+            date__isnull=False
+        ).exists()
+
+        grouped_commodities.setdefault(c.type, []).append({
+            "name": c.name,
+            "disabled": not has_valid_data
+        })
+
+    return render(request, "syncapp/map_chart.html", {
+        "grouped_commodities": grouped_commodities,
+    })
+    # return render(request, "syncapp/map_chart.html")
 
 def aboutus(request):
     return render(request, 'syncapp/aboutus.html')

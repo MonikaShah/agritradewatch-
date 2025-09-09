@@ -4,7 +4,6 @@
 {% block title %}Consumers Map{% endblock %}
 
 {% block extra_head %}
-<!-- Any page-specific CSS -->
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
 {% endblock %}
 
@@ -13,15 +12,19 @@
 <div id="map-container">
  <div id="map"></div>
   <div id="map-controls">
-    <!-- <button id="toggle-left-panel">☰ Filters</button><br><br> -->
-     <!-- Toggle button -->
-    <label for="crop-select"><strong>Select Crop:</strong></label>
-    <select id="crop-select">
-      <option value="onion" selected>Onion</option>
-      <option value="tomato">Tomato</option>
-      <option value="drumstick">Drumstick</option>
-      <option value="lemon">Lemon</option>
+    <label for="commoditySelect"><b>Select Commodity</b></label>
+    <select id="commoditySelect" class="form-control">
+      {% for type, items in grouped_commodities.items %}
+        <optgroup label="{{ type }}">
+          {% for item in items %}
+            <option value="{{ item.name }}" {% if item.disabled %}disabled{% endif %}>
+              {{ item.name }}
+            </option>
+          {% endfor %}
+        </optgroup>
+      {% endfor %}
     </select>
+        
     <hr>
     <div id="left-panel">
       <button id="locateBtn">📍 My Location</button>
@@ -44,7 +47,7 @@
 
 <div id="right-panel">
   <div class="box" id="graph-box">
-    <h3>Consumer Reported Buying Price : <span id="selected-crop"></span></h3>
+    <h3>Consumer Reported Buying Price : <span id="selected-commodity"></span></h3>
     <div id="box1-consumer">
       Average Consumer Price: <span id="avg-price">--</span>
     </div>
@@ -64,16 +67,13 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const cropSelect = document.getElementById("crop-select");
-    const selectedCropSpan = document.getElementById("selected-crop");
-    selectedCropSpan.innerText = cropSelect.value;
-
-    cropSelect.addEventListener("change", function() {
-        selectedCropSpan.innerText = this.value;
-    });
+    const commoditySelect = document.getElementById("commoditySelect");
+    const selectedCommoditySpan = document.getElementById("selected-commodity");
+    selectedCommoditySpan.innerText = commoditySelect.value;
 
     const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
@@ -86,73 +86,150 @@ document.addEventListener("DOMContentLoaded", function() {
     L.control.zoom({ position: 'topright' }).addTo(map);
 
     const markers = L.markerClusterGroup();
-    let chartInstance = null;
     let geojsonLayer = null;
     let allData = null;
 
-    function updateMarkers(crop) {
+    let userLocation = null;
+    let userMarker = null;
+    let radiusCircle = null;
+
+    const radiusSlider = document.getElementById("radiusSlider");
+    const radiusValue = document.getElementById("radiusValue");
+
+    // 📍 Get My Location
+    document.getElementById("locateBtn").addEventListener("click", () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                userLocation = L.latLng(lat, lng);
+
+                // Drop a draggable pin
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.marker(userLocation, { draggable: true, title: "My Location" }).addTo(map);
+
+                // When marker is dragged, update location, circle and markers
+                userMarker.on("dragend", function(e) {
+                    userLocation = e.target.getLatLng();
+                    drawCircle(parseInt(radiusSlider.value));
+                    updateMarkers(commoditySelect.value, true); // zoom after drag
+                });
+
+                // Draw circle
+                const radius = parseInt(radiusSlider.value);
+                drawCircle(radius);
+
+                // Refresh markers with radius coloring and zoom
+                updateMarkers(commoditySelect.value, true);
+            });
+        } else {
+            alert("Geolocation not supported by your browser.");
+        }
+    });
+
+    // 🎯 Draw circle function
+    function drawCircle(radius) {
+        if (radiusCircle) map.removeLayer(radiusCircle);
+        radiusCircle = L.circle(userLocation, { radius: radius, color: "red", fillOpacity: 0.05 });
+        radiusCircle.addTo(map);
+    }
+
+    // 🎚️ Radius slider
+    radiusSlider.addEventListener("input", function() {
+        const radius = parseInt(this.value);
+        radiusValue.textContent = radius;
+        if (userLocation) {
+            drawCircle(radius);
+            updateMarkers(commoditySelect.value, false); // no zoom when just adjusting radius
+        }
+    });
+
+    // 🟢🔴 Update markers (inside green, outside red)
+    function updateMarkers(commodity, zoomToBounds=false) {
         markers.clearLayers();
         if (geojsonLayer) map.removeLayer(geojsonLayer);
 
         const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
         const filteredFeatures = allData.features.filter(feature => {
-        const coords = feature.geometry.coordinates;
-          const latlng = L.latLng(coords[1], coords[0]);
-          return indiaBounds.contains(latlng) && 
-                feature.properties.name.toLowerCase() === crop.toLowerCase();
+            const coords = feature.geometry.coordinates;
+            const latlng = L.latLng(coords[1], coords[0]);
+            return indiaBounds.contains(latlng) &&
+                   feature.properties.name.toLowerCase() === commodity.toLowerCase();
         });
-
 
         const filteredGeoJSON = { type: "FeatureCollection", features: filteredFeatures };
 
         geojsonLayer = L.geoJSON(filteredGeoJSON, {
-            pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
-                radius: 8, fillColor: "#ff7800", color: "#000",
-                weight: 1, opacity: 1, fillOpacity: 0.8
-            }),
+            pointToLayer: (feature, latlng) => {
+                let markerColor = "red"; // default outside radius
+
+                if (userLocation) {
+                    const distance = userLocation.distanceTo(latlng);
+                    const radius = parseInt(radiusSlider.value);
+                    if (distance <= radius) {
+                        markerColor = "green"; // inside radius
+                    }
+                }
+
+                return L.circleMarker(latlng, {
+                    radius: 8,
+                    fillColor: markerColor,
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+            },
             onEachFeature: function(feature, layer) {
-              if (feature.properties && feature.properties.name) {
-                  const p = feature.properties;
-                  const popupContent = `
-                      <strong>${p.name}</strong><br>
-                      ${p.date ? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>` : ""}
-                      Consumer Buying Price: ${p.buyingprice || 'NA'}
-                  `;
-                  layer.bindPopup(popupContent);
-              }
-          }
+                if (feature.properties && feature.properties.name) {
+                    const p = feature.properties;
+                    const popupContent = `
+                        <strong>${p.name}</strong><br>
+                        ${p.date ? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>` : ""}
+                        Consumer Buying Price: ${p.buyingprice || 'NA'}
+                    `;
+                    layer.bindPopup(popupContent);
+                }
+            }
         });
 
         markers.addLayer(geojsonLayer);
         map.addLayer(markers);
-        if (filteredFeatures.length > 0) map.fitBounds(markers.getBounds());
+
+        // 📌 Decide zoom target
+        if (zoomToBounds && (filteredFeatures.length > 0 || userLocation)) {
+            let bounds = markers.getBounds();
+
+            if (userLocation) {
+                bounds.extend(userLocation);
+                if (radiusCircle) bounds.extend(radiusCircle.getBounds());
+            }
+
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
     }
-    const defaultCrop = "onion";
+
+    // 📦 Load data
     fetch("/api/consumers_geojson/")
       .then(res => res.json())
       .then(data => {
-          console.log("GeoJSON from backend:", data);  // 👀 check in browser console
           allData = data;
-          updateMarkers("defaultCrop");
+          updateMarkers(commoditySelect.value, true); // default commodity with zoom
       })
       .catch(err => console.error("Error loading GeoJSON:", err));
 
-    cropSelect.addEventListener("change", function() { updateMarkers(this.value); });
+    // 🥕 On commodity change → update + zoom
+    commoditySelect.addEventListener("change", function() { 
+        selectedCommoditySpan.innerText = this.value;
+        updateMarkers(this.value, true);
+    });
+
+    // ⚙️ Toggle map controls
+    const mapControls = document.getElementById('map-controls');
+    const toggleMapBtn = document.getElementById('toggle-map-controls');
+    toggleMapBtn.addEventListener('click', () => {
+      mapControls.classList.toggle('collapsed');
+    });
 });
-
-// const toggleBtn = document.getElementById("toggle-left-panel");
-// const leftPanel = document.getElementById("map-controls");
-
-// toggleBtn.addEventListener("click", () => {
-//   leftPanel.classList.toggle("collapsed");
-// });
-
-const mapControls = document.getElementById('map-controls');
-const toggleMapBtn = document.getElementById('toggle-map-controls');
-
-toggleMapBtn.addEventListener('click', () => {
-  mapControls.classList.toggle('collapsed');
-});
-
 </script>
 {% endblock %}
