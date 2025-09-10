@@ -40,13 +40,17 @@ class Consumers1Admin(admin.ModelAdmin):
             return '-'
 
     user_name.short_description = 'Name'
+class WebdataAdmin(admin.ModelAdmin):
+    list_display = ('commodity', 'source', 'date', 'apmc')
+    list_filter = ['date']
 
+    
 # Register models
 admin.site.register(MarketPrices, MarketPricesAdmin)
 admin.site.register(Consumer1,Consumers1Admin)
 admin.site.register(Farmer1)
 admin.site.register(User1,Users1Admin)
-admin.site.register(WebData)
+admin.site.register(WebData,WebdataAdmin)
 admin.site.register(Page,PageAdmin)
 admin.site.register(Commodity)
 
