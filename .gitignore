@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment files
+*.env
+
+# Django collected static files
+/staticfiles/
+/media/
+
+# Local config
+appConfig.json
