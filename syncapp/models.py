@@ -2,11 +2,7 @@
 from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
 
-# class Consumer(models.Model):
-#     id = models.CharField(max_length=100, primary_key=True)
-#     name = models.CharField(max_length=255, null=True, blank=True)
-#     geom = models.PointField(null=True, blank=True)
-#     data = models.JSONField(null=True, blank=True)
+
 class Consumer(models.Model):
     id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
     name = models.CharField(max_length=200)                  # commodity name
@@ -27,10 +23,6 @@ class Consumer(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.user_id})"
-# syncapp/models.py
-
-
-
 
 class Farmer(models.Model):
     id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
@@ -50,16 +42,6 @@ class Farmer(models.Model):
     def __str__(self):
         return f"{self.name} - {self.product} ({self.price_per_unit}/{self.unit})"
 
-# class Farmer(models.Model):
-#     id = models.CharField(max_length=100, primary_key=True)
-#     name = models.CharField(max_length=255, null=True, blank=True)
-#     geom = models.PointField(null=True, blank=True)
-#     # data = models.JSONField(blank=True, null=True)  # Add this field to store Firestore data
-
-
-# class UserData(models.Model):
-#     id = models.CharField(max_length=100, primary_key=True)
-#     data = models.JSONField()
 class UserData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     timestamp = models.DateTimeField(null=True, blank=True)
@@ -144,14 +126,34 @@ class Consumer1(models.Model):
 
     class Meta:
         db_table = 'syncapp_consumers1'
+  
 
+class Commodity(models.Model):
+    TYPE_CHOICES = [
+        ('vegetable', 'Vegetable'),
+        ('fruit', 'Fruit'),
+        ('pulse', 'Pulse'),
+    ]
+
+    name = models.CharField(max_length=255, unique=True)
+    alias_marathi = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        db_table = "commodity"
+        managed = False  # keep this as False
 
 # -------------------------------
 # Webdata model
 # -------------------------------
 class WebData(models.Model):
-    source = models.CharField(primary_key=True, max_length=100)
-    commodity = models.CharField(max_length=100)
+    id = models.AutoField(primary_key=True)
+    source = models.CharField(max_length=100)
+    commodity = models.CharField(max_length=255)  # store alias_marathi directly
+    variety = models.CharField(max_length=100, blank=True, null=True)
+    apmc = models.CharField(max_length=100, blank=True, null=True)
     minprice = models.IntegerField(blank=True, null=True)
     maxprice = models.IntegerField(blank=True, null=True)
     modalprice = models.IntegerField(blank=True, null=True)
@@ -160,6 +162,9 @@ class WebData(models.Model):
 
     class Meta:
         db_table = 'webdata'
+        unique_together = ("source", "commodity", "variety", "apmc", "date")
+
+    
 
 class Page(models.Model):
     STATUS_CHOICES = (
@@ -184,21 +189,4 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
-    
-
-class Commodity(models.Model):
-    TYPE_CHOICES = [
-        ('vegetable', 'Vegetable'),
-        ('fruit', 'Fruit'),
-        ('pulse', 'Pulse'),
-    ]
-
-    name = models.CharField(max_length=255, unique=True)
-    alias_marathi = models.CharField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-
-    def __str__(self):
-        return self.name
-    class Meta:
-        db_table = "commodity"
-        managed = False  # keep this as False
+  

@@ -5,7 +5,7 @@ from django.http import JsonResponse
 import json, logging
 from django.utils.timezone import make_aware
 # from .models import Consumer
-from .models import Consumer1,User1,Farmer1,WebData  # or Farmer, UserData if they have geometry
+from .models import Consumer1,User1,Farmer1,WebData,Commodity  # or Farmer, UserData if they have geometry
 from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 import requests
 import pandas as pd
@@ -41,7 +41,9 @@ class WebDataViewSet(viewsets.ModelViewSet):
 logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def consumers_geojson(request):
-    cutoff_date = timezone.make_aware(datetime(2025,8,30))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
+    cutoff_date = timezone.make_aware(datetime(2024, 1, 1))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
+
+    # cutoff_date = timezone.make_aware(datetime(2025,8,30))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
     qs = Consumer1.objects.filter(date__gte=cutoff_date)
 
     # Filter consumers
@@ -55,9 +57,9 @@ def consumers_geojson(request):
     print(f"🕒 DB date example: {Consumer1.objects.last().date}")
     print(f"🕒 Cutoff date: {cutoff_date}")
 
-    for obj in qs:
-        print(f"➡️ Record: {obj.id}, {obj.commodity}, {obj.date}, {obj.latitude}, {obj.longitude}")
-        print(Consumer1.objects.values('commodity').annotate(total=Count('id')))
+    # for obj in qs:
+    #     print(f"➡️ Record: {obj.id}, {obj.commodity}, {obj.date}, {obj.latitude}, {obj.longitude}")
+    #     print(Consumer1.objects.values('commodity').annotate(total=Count('id')))
     # ✅ Log debug info
     logger.info(f"[consumers_geojson] Filtering consumers with date >= {cutoff_date}")
     logger.info(f"[consumers_geojson] Found {consumers.count()} records")
@@ -80,7 +82,8 @@ def consumers_geojson(request):
                     # "mobile": c.mobile,
                     "date": c.date.isoformat() if c.date else None,
                     "buyingprice": c.buyingprice,   # <-- flatten this
-                    # "sellingprice": c.sellingprice,
+                    "quantitybought": c.quantitybought,   # ✅ add this
+                    "unit": c.unit,                       # ✅ optional, but useful
                 },
             })
 
@@ -92,101 +95,51 @@ def consumers_geojson(request):
     logger.info(f"[consumers_geojson] Returning {len(features)} GeoJSON features")
     return JsonResponse(geojson)
 
-# def consumer_user_geojson(request, user_id):
-#     # Filter by userID
-#     consumers = Consumer.objects.filter(data__userID=user_id, geom__isnull=False)
-
-#     # Convert to GeoJSON
-#     geojson_str = serialize('geojson', consumers,
-#                             geometry_field='geom',
-#                             fields=('data', 'name'))
-#     geojson_obj = json.loads(geojson_str)
-
-#     # You can merge quantities and pick latest date here if needed
-#     # For now, send raw filtered GeoJSON
-#     return JsonResponse(geojson_obj)
-
-
-@api_view(['GET'])
-# def avg_consumer_price(request):
-#     """
-#     Compute average consumer-reported price within a radius
-#     ?lat=<lat>&lng=<lng>&radius=<meters>&product=<product_name>
-#     """
-#     try:
-#         lat = float(request.GET.get("lat"))
-#         lng = float(request.GET.get("lng"))
-#         radius = float(request.GET.get("radius", 500))  # default 1 km
-#         product_name = request.GET.get("product")
-
-#         if not product_name:
-#             return JsonResponse({"error": "Missing ?product=<name>"}, status=400)
-
-#         user_point = Point(lng, lat, srid=4326)
-
-#         consumers = Consumer.objects.filter(
-#             geom__distance_lte=(user_point, radius),
-#             data__name=product_name
-#         )
-
-#         prices = [
-#             float(c.data.get("pricePerUnit", 0))
-#             for c in consumers if c.data.get("pricePerUnit") not in (None, "")
-#         ]
-
-#         avg_price = sum(prices)/len(prices) if prices else None
-
-#         return JsonResponse({
-#             "avg_price": avg_price,
-#             "consumer_count": len(prices)
-#         })
-
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=500)
-    
-
 @api_view(['GET'])
 def agrowon_prices(request):
-    product_name = request.GET.get("product")
-    if not product_name:
-        return JsonResponse({"error": "Missing ?product=<marathi_name>"}, status=400)
+    # def fetch_agrowon_prices(request):
+    product = request.GET.get("product", "").strip()
+    if not product:
+        return JsonResponse({"error": "No product provided"}, status=400)
 
-    url = "http://agrowon.esakal.com/feapi/msamb"
-    today_str = datetime.now().strftime("%d-%m-%Y")
+    try:
+        commodity = Commodity.objects.get(alias_marathi=product)
+    except Commodity.DoesNotExist:
+        return JsonResponse({"error": f"No commodity found for {product}"}, status=404)
 
-    soap_body = f"""
-    <?xml version="1.0" encoding="utf-8"?>
-    <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                     xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                     xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-      <soap12:Body>
-        <get_selected_data xmlns="http://tempuri.org/">
-          <from_date>{today_str}</from_date>
-          <to_date>{today_str}</to_date>
-        </get_selected_data>
-      </soap12:Body>
-    </soap12:Envelope>
-    """
+    # 🔹 Example URL (replace with correct Agrowon API/HTML scraping)
+    url = f"https://www.agrowon.com/market-daily-price/{product}"
+    resp = requests.get(url)
+    if resp.status_code != 200:
+        return JsonResponse({"error": "Failed to fetch data from Agrowon"}, status=500)
 
-    headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
-    resp = requests.post(url, data=soap_body.encode("utf-8"), headers=headers, timeout=10)
-    resp.encoding = "utf-8"
+    # 🔹 Parse response (adjust parser as per Agrowon HTML/JSON)
+    data = parse_agrowon_response(resp.text)
 
-    root = ET.fromstring(resp.text)
-    records = []
-    for msamb_data in root.iter("msamb_data"):
-        record = {
-            tag: (msamb_data.find(tag).text if msamb_data.find(tag) is not None else "")
-            for tag in ["r_date", "comm_name", "apmc_name", "variety_name", "unit", "arrivals", "min", "max", "Model"]
+    # 🔹 Save into WebData
+    web_entry, created = WebData.objects.update_or_create(
+        source="agrowon",
+        commodity=commodity.commodity,
+        date=timezone.now().date(),   # today's date
+        defaults={
+            "minprice": data.get("min"),
+            "maxprice": data.get("max"),
+            "modalprice": data.get("modal"),
+            "unit": data.get("unit", "क्विंटल"),
+        },
+    )
+
+    return JsonResponse({
+        "message": "Data saved",
+        "commodity": commodity.commodity,
+        "alias_marathi": commodity.alias_marathi,
+        "saved": {
+            "min": web_entry.minprice,
+            "max": web_entry.maxprice,
+            "modal": web_entry.modalprice,
+            "unit": web_entry.unit,
         }
-        records.append(record)
-
-    df = pd.DataFrame(records)
-    df = df[df["comm_name"] == product_name]
-    df["farmer_rate"] = None
-
-    return JsonResponse(df.to_dict(orient="records"), safe=False)
-
+    })
 
 
 # def dashboard(request):
@@ -194,7 +147,7 @@ def agrowon_prices(request):
 
 
 # Crops in Marathi
-wanted_crops = ["कांदा", "टोमॅटो", "शेवगा शेंगा", "लिंबू"]
+# wanted_crops = ["कांदा", "टोमॅटो", "शेवगा शेंगा", "लिंबू"]
 
 # def fetch_agrowon_data():
 #     url = "https://agrowon.esakal.com/feapi/price_by_commodity"
@@ -231,3 +184,42 @@ wanted_crops = ["कांदा", "टोमॅटो", "शेवगा शे
 #     except Exception as e:
 #         return JsonResponse({"status": "error", "message": str(e)})
 
+def webdata_prices(request):
+    commodity_name = request.GET.get('commodity')
+    if not commodity_name:
+        return JsonResponse({'error': 'Commodity parameter required'}, status=400)
+
+    today = timezone.localdate()
+
+    # Try exact match on WebData.commodity (case-insensitive) for today
+    data_qs = WebData.objects.filter(
+        commodity__iexact=commodity_name,
+        date__date=today
+    )
+
+    if not data_qs.exists():
+        # If not found, try looking up Commodity table
+        commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
+        if commodity_obj and commodity_obj.alias_marathi:
+            data_qs = WebData.objects.filter(
+                commodity__iexact=commodity_obj.alias_marathi,
+                date__date=today
+            )
+
+    if not data_qs.exists():
+        return JsonResponse({'error': 'No data found for today'}, status=404)
+
+    results = []
+    for data in data_qs:
+        results.append({
+            'commodity': data.commodity,
+            'apmc': data.apmc,
+            'variety': data.variety,
+            'minprice': data.minprice,
+            'maxprice': data.maxprice,
+            'modalprice': data.modalprice,
+            'unit': data.unit,
+            'date': data.date.isoformat() if data.date else None
+        })
+
+    return JsonResponse(results, safe=False)

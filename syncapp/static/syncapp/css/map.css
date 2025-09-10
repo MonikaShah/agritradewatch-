@@ -147,7 +147,8 @@ main {
 /* Charts */
 canvas {
   width: 100% !important;
-  height: 200px !important;
+  height: auto !important; /* let height adjust automatically */
+  max-height: 300px;       /* prevent it from being too tall on large screens */
 }
 
 /* ====== Page content styling ====== */
@@ -171,13 +172,13 @@ canvas {
   display: flex;
   flex-direction: row;      /* force horizontal layout */
   justify-content: space-between; /* space out the two boxes */
-  gap: 20px;
+  gap: 15px;
   flex-wrap: wrap;          /* allow wrapping on small screens */
 }
 
 #stats-container > div {
   flex: 1 1 45%;            /* each box takes ~45% of width */
-  min-width: 250px;         /* don't shrink too much */
+  min-width: 220px;         /* don't shrink too much */
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 5px;
@@ -190,6 +191,11 @@ canvas {
   }
 }
 
+
+#agrowonChart {
+  width: 100% !important;
+  height: 250px !important;  /* comfortable for laptop view */
+}
 .page-content h1 { font-size: 32px; margin-bottom: 20px; font-weight: 700; color: #2c3e50; }
 .page-content h2 { font-size: 28px; margin-bottom: 18px; font-weight: 600; }
 .page-content h3 { font-size: 22px; margin-bottom: 12px; font-weight: 500; }
@@ -221,11 +227,11 @@ canvas {
       height: 300px;
       margin-bottom: 10px;
   }
-  #right-panel {
-      flex: none;
-      width: 100%;
-      border-left: none;
-      border-top: 2px solid #ccc;
+  #right-panel .box {
+    width: 100%;
+    overflow-x: hidden;       /* hide horizontal scroll */
+    padding: 10px;
+    box-sizing: border-box;
   }
   #map-controls {
     position: absolute;

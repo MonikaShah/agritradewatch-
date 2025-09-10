@@ -5,6 +5,9 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
+<!-- <script src="https://unpkg.com/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/chartjs-chart-box-and-violin-plot@4.0.1/dist/chartjs-chart-box-and-violin-plot.min.js"></script> -->
+
 {% endblock %}
 
 {% block content %}
@@ -67,15 +70,16 @@
     <canvas id="chartCanvas"></canvas>
   </div>
 
-  <div class="box" id="farmer-box">
+  <!-- <div class="box" id="farmer-box">
     <h3>Farmer Reported Selling Price</h3>
     <div id="farmer-info"></div>
-  </div>
+  </div> -->
 
   <div class="box" id="agrowon-box">
     <h3>Agrowon Price</h3>
     <div id="agrowon-info">Click on a marker</div>
-    <canvas id="agrowonBoxChart"></canvas>
+    <!-- <canvas id="agrowonBoxChart"></canvas> -->
+    <canvas id="agrowonChart"></canvas>
   </div>
 </div>
 {% endblock %}
@@ -87,6 +91,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const selectedCommoditySpan = document.getElementById("selected-commodity");
     selectedCommoditySpan.innerText = commoditySelect.value;
 
+    const agrowonCanvas = document.getElementById("agrowonChart");
+    const infoDiv = document.getElementById("agrowon-info");
+    // let agrowonChart = null;
+    
     const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
@@ -221,7 +229,14 @@ document.addEventListener("DOMContentLoaded", function() {
             onEachFeature: (feature, layer)=>{
                 if(feature.properties && feature.properties.name){
                     const p = feature.properties;
-                    layer.bindPopup(`<strong>${p.name}</strong><br>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price: ${p.buyingprice||'NA'}`);
+                    layer.bindPopup(`
+                    <strong>${p.name}</strong><br>
+                     ${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}
+                    Consumer Buying Price: ${p.buyingprice||'NA'}
+                    <br>Quantity: ${p.quantitybought || '-'}
+                     ${p.unit || ''}<br>
+                    
+                    `);
                 }
             }
         });
@@ -256,6 +271,93 @@ document.addEventListener("DOMContentLoaded", function() {
     const mapControls = document.getElementById('map-controls');
     const toggleMapBtn = document.getElementById('toggle-map-controls');
     toggleMapBtn.addEventListener('click', ()=> mapControls.classList.toggle('collapsed'));
+
+    // const agrowonCanvas = document.getElementById("agrowonChart");
+    let agrowonChart = null;
+    function fetchAgrowonPrices(commodity) {
+    fetch(`/api/webdata_prices/?commodity=${commodity}`)
+        .then(res => res.json())
+        .then(dataList => {
+            if (!dataList || dataList.length === 0) return;
+
+            const labels = dataList.map(d => d.apmc || 'NA');
+            const minData = dataList.map(d => Number(d.minprice) || 0);
+            const modalData = dataList.map(d => (Number(d.modalprice) || 0) - (Number(d.minprice) || 0));
+            const maxData = dataList.map(d => (Number(d.maxprice) || 0) - (Number(d.modalprice) || 0));
+
+            const chartData = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Min',
+                        data: minData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Modal',
+                        data: modalData,
+                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Max',
+                        data: maxData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            const options = {
+              responsive: true,
+              maintainAspectRatio: false,  // let canvas height adjust
+              plugins: {
+                  legend: { position: 'top' },
+                  tooltip: { enabled: true }
+              },
+              scales: {
+                  x: { stacked: true, title: { display: true, text: 'APMC' } },
+                  y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Price (₹)/Qunital' } }
+              }
+          };
+
+            if (agrowonChart) {
+                agrowonChart.data = chartData;
+                agrowonChart.options = options;
+                agrowonChart.update();
+            } else {
+                agrowonChart = new Chart(agrowonCanvas, {
+                    type: 'bar',
+                    data: chartData,
+                    options: options
+                });
+            }
+
+            // Optional info for first APMC
+            const first = dataList[0];
+            infoDiv.innerHTML = `
+                <strong>Commodity:</strong> ${first.commodity}<br>
+                <strong>Variety:</strong> ${first.variety || 'NA'}<br>
+                <strong>Date:</strong> ${first.date || 'NA'}
+            `;
+        })
+        .catch(err => console.error("Error fetching Agrowon data:", err));
+}
+
+
+
+// Initial load
+  fetchAgrowonPrices(commoditySelect.value);
+
+  // Update on commodity change
+  commoditySelect.addEventListener("change", function() {
+      fetchAgrowonPrices(this.value);
+  });
 });
+
 </script>
 {% endblock %}
