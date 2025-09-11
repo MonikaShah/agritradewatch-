@@ -1,5 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+
 from django.core.serializers import serialize
 from django.http import JsonResponse
 import json, logging
@@ -20,26 +23,33 @@ from django.db.models import Count
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User1.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
 class FarmerViewSet(viewsets.ModelViewSet):
     queryset = Farmer1.objects.all()
     serializer_class = FarmerSerializer
+    permission_classes = [IsAuthenticated]
 
 class ConsumerViewSet(viewsets.ModelViewSet):
     queryset = Consumer1.objects.all()
     serializer_class = ConsumerSerializer
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         # Filter for date >= 30 Aug 2025
         filter_date = timezone.make_aware(datetime(2025, 8, 30, 0, 0, 0))
         return Consumer1.objects.filter(date__gte=filter_date)
-    
+
 
 class WebDataViewSet(viewsets.ModelViewSet):
     queryset = WebData.objects.all()
     serializer_class = WebDataSerializer
+    permission_classes = [IsAuthenticated]
+
 
 logger = logging.getLogger(__name__)
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def consumers_geojson(request):
     cutoff_date = timezone.make_aware(datetime(2024, 1, 1))    # qs = Consumer1.objects.filter(date__gte=cutoff_date)
 
@@ -96,6 +106,7 @@ def consumers_geojson(request):
     return JsonResponse(geojson)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def agrowon_prices(request):
     # def fetch_agrowon_prices(request):
     product = request.GET.get("product", "").strip()
@@ -140,50 +151,8 @@ def agrowon_prices(request):
             "unit": web_entry.unit,
         }
     })
-
-
-# def dashboard(request):
-#     return render(request, "syncapp/dashboard.html")
-
-
-# Crops in Marathi
-# wanted_crops = ["कांदा", "टोमॅटो", "शेवगा शेंगा", "लिंबू"]
-
-# def fetch_agrowon_data():
-#     url = "https://agrowon.esakal.com/feapi/price_by_commodity"
-#     response = requests.get(url)
-#     print(response.text)
-
-#     if response.status_code != 200:
-#         return []
-
-#     root = ET.fromstring(response.content)
-#     data = []
-#     for item in root.findall("item"):
-#         try:
-#             crop = item.find("comm_name").text if item.find("comm_name") is not None else ""
-#             variety = item.find("variety").text if item.find("variety") is not None else ""
-#             modal_price = item.find("modal_price").text if item.find("modal_price") is not None else ""
-#             mandi = item.find("market").text if item.find("market") is not None else ""
-
-#             data.append({
-#                 "crop": crop,
-#                 "variety": variety,
-#                 "modal_price": modal_price,
-#                 "mandi": mandi,
-#             })
-#         except Exception as e:
-#             print("Parse error:", e)
-#     return data
-
-# def agrowon_data(request):
-#     try:
-#         data = fetch_agrowon_data()
-        
-#         return JsonResponse({"status": "success", "data": data})
-#     except Exception as e:
-#         return JsonResponse({"status": "error", "message": str(e)})
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def webdata_prices(request):
     commodity_name = request.GET.get('commodity')
     if not commodity_name:
