@@ -8,6 +8,7 @@ urlpatterns = [
     path('consumers_geojson/', api_views.consumers_geojson, name='consumers_geojson'),
     path('agrowon_prices/', api_views.agrowon_prices, name='agrowon_prices'),
     path('webdata_prices/', api_views.webdata_prices, name='webdata_prices'),
+    path('register/', api_views.api_register, name='api_register'),
 
     # Mobile JWT APIs
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

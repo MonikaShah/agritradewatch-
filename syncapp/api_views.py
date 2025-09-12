@@ -19,7 +19,7 @@ import json, logging
 from django.utils.timezone import make_aware
 # from .models import Consumer
 from .models import Consumer1,User1,Farmer1,WebData,Commodity  # or Farmer, UserData if they have geometry
-from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
+from .serializers import RegisterSerializer,UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 import requests
 import pandas as pd
 import xml.etree.ElementTree as ET
@@ -27,7 +27,14 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.gis.geos import Point
 from django.db.models import Count
+from rest_framework import generics, permissions
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.settings import api_settings
+from django.contrib.auth.models import User
 
+
+User = get_user_model()  # this gives syncapp.User1
 
 # //New model 
 class UserViewSet(viewsets.ModelViewSet):
@@ -56,6 +63,11 @@ class WebDataViewSet(viewsets.ModelViewSet):
     serializer_class = WebDataSerializer
     permission_classes = [IsAuthenticated]
 
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RegisterSerializer
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +80,6 @@ def profile(request):
         "username": request.user.username,
     })
 
-User = get_user_model()  # this gives syncapp.User1
 @csrf_exempt
 def api_login(request):
     if request.method == "POST":
@@ -243,23 +254,31 @@ def webdata_prices(request):
     return JsonResponse(results, safe=False)
 
 
-def portal_login(request):
+@csrf_exempt
+def api_register(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)  # Django session created
-            return redirect("syncapp/map_chart")
-        else:
-            return render(request, "login.html", {"error": "Invalid credentials"})
-    return render(request, "login.html")
+        data = json.loads(request.body.decode("utf-8"))
+        username, email, password = data["username"], data["email"], make_password(data["password"])
 
-def portal_logout(request):
-    logout(request)
-    return redirect("portal_login")
+        if User1.objects.filter(username=username).exists():
+            return JsonResponse({"status": "error", "message": "Username already taken"}, status=400)
 
-def dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect("portal_login")
-    return render(request, "syncapp/map_chart.html", {"user": request.user})
+        user = User1.objects.create(username=username, email=email, password=password)
+        return JsonResponse({"status": "success", "user_id": user.id})
+
+    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+
+
+# Login API
+class CustomAuthToken(ObtainAuthToken):
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        return Response({
+            'token': token.key,
+            'user_id': token.user_id,
+            'username': token.user.username
+        })

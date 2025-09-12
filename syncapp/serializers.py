@@ -27,3 +27,17 @@ class WebDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebData
         fields = '__all__'
+
+# 🔹 Serializer for user registration (using Django's default User model)
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User1
+        fields = ['username', 'password', 'email']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        return User1.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email'),
+            password=validated_data['password']
+        )

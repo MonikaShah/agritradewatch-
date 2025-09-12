@@ -1,16 +1,22 @@
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer1,Page,Commodity  # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity,User1 # or Farmer, UserData if they have geometry
 from django.shortcuts import render,get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import ConsumerGeoSerializer
-import requests,logging
+import requests,logging,json
 import xml.etree.ElementTree as ET
 import pandas as pd
 from datetime import datetime
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
+
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 logger = logging.getLogger(__name__)
 def landingpage(request):
@@ -71,3 +77,34 @@ def page_detail(request, slug):
     """
     page = get_object_or_404(Page, slug=slug)
     return render(request, 'pages/page_detail.html', {'page': page})
+
+def web_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        try:
+            user = User1.objects.get(username=username)
+            if check_password(password, user.password):
+                request.session["user_id"] = user.id
+                messages.success(request, "Login successful!")
+                return redirect("/")  # change to dashboard
+            else:
+                messages.error(request, "Invalid password")
+        except User1.DoesNotExist:
+            messages.error(request, "User not found")
+    return render(request, "syncapp/login.html")
+
+
+def web_register(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = make_password(request.POST.get("password"))
+
+        if User1.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken")
+        else:
+            User1.objects.create(username=username, email=email, password=password)
+            messages.success(request, "Registration successful, please login")
+            return redirect("login")
+    return render(request, "syncapp/register.html")

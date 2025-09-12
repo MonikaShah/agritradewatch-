@@ -4,6 +4,7 @@ from rest_framework import routers
 from . import api_views
 from django.conf import settings
 from django.conf.urls.static import static
+from .api_views import RegisterView, CustomAuthToken
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -15,6 +16,8 @@ router.register(r'users', api_views.UserViewSet)
 router.register(r'farmers', api_views.FarmerViewSet)
 router.register(r'consumers', api_views.ConsumerViewSet)
 router.register(r'webdata', api_views.WebDataViewSet)
+
+
 
 urlpatterns = [
     # path('map/', views.consumers_map_view, name='consumers-map'),
@@ -39,6 +42,13 @@ urlpatterns = [
     
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
+    
+     # custom login & register
+    path('api/register/', RegisterView.as_view(), name='api-register'),
+    path('api/login/', CustomAuthToken.as_view(), name='api-login'),
+
+    # path('login/', views.web_login, name='login'),
+    # path('register/', views.web_register, name='register'),
 ]
 
 if settings.DEBUG:
