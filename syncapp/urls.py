@@ -4,7 +4,8 @@ from rest_framework import routers
 from . import api_views
 from django.conf import settings
 from django.conf.urls.static import static
-from .api_views import RegisterView, CustomAuthToken
+# from .api_views import RegisterView, CustomAuthToken
+from .api_views import RegisterView, api_login, profile, consumers_geojson, agrowon_prices
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -45,7 +46,8 @@ urlpatterns = [
     
      # custom login & register for mobile app
     path('api/register/', RegisterView.as_view(), name='api-register'),
-    path('api/login/', CustomAuthToken.as_view(), name='api-login'),
+    # path('api/login/', CustomAuthToken.as_view(), name='api-login'),
+    path('api/login/', api_login, name='api-login'),
 
     # custom login & register for web portal
     path('login/', views.web_login, name='login'),
