@@ -43,12 +43,13 @@ urlpatterns = [
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     
-     # custom login & register
+     # custom login & register for mobile app
     path('api/register/', RegisterView.as_view(), name='api-register'),
     path('api/login/', CustomAuthToken.as_view(), name='api-login'),
 
-    # path('login/', views.web_login, name='login'),
-    # path('register/', views.web_register, name='register'),
+    # custom login & register for web portal
+    path('login/', views.web_login, name='login'),
+    path('register/', views.web_register, name='register'),
 ]
 
 if settings.DEBUG:
