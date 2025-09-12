@@ -1,4 +1,6 @@
 # Create your models here.
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
 
@@ -76,20 +78,32 @@ class MarketPrices(models.Model):
 
     class Meta:
         db_table = 'market_prices'
-        
-class User1(models.Model):
+
+# class User1Manager(BaseUserManager):
+#     def create_user(self, username, mobile=None, password=None, **extra_fields):
+#         if not username:
+#             raise ValueError("The Username is required")
+#         user = self.model(username=username, mobile=mobile, **extra_fields)
+#         user.set_password(password)  # stores a hashed password
+#         user.save(using=self._db)
+#         return user
+
+#     def create_superuser(self, username, password=None, **extra_fields):
+#         extra_fields.setdefault("is_staff", True)
+#         extra_fields.setdefault("is_superuser", True)
+#         return self.create_user(username, password=password, **extra_fields)
+
+
+class User1(AbstractUser):
     id = models.CharField(primary_key=True, max_length=100)
     name = models.CharField(max_length=255, blank=True, null=True)
-    mobile = models.CharField(max_length=20, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True, unique=True)
     job = models.CharField(max_length=100, blank=True, null=True)
-    username = models.CharField(max_length=100, blank=True, null=True)
-    createdat = models.DateTimeField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
 
     class Meta:
-        db_table = 'syncapp_users1'
-
+        db_table = "syncapp_users1"
 
 # -------------------------------
 # Farmer model

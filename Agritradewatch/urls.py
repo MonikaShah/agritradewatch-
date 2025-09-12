@@ -19,6 +19,7 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 # urlpatterns = [
 #     path('admin/', admin.site.urls),
 #     path('', include('syncapp.urls')),
@@ -28,4 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('syncapp.urls')),        # front-end pages
     path('api/', include('syncapp.api_urls')), # all API endpoints start with /api/
+    # path('api/webdata_prices/', api_views.webdata_prices, name='webdata_prices'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

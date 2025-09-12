@@ -5,12 +5,23 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
-<!-- <script src="https://unpkg.com/chart.js@4.5.1/dist/chart.umd.min.js"></script>
-<script src="https://unpkg.com/chartjs-chart-box-and-violin-plot@4.0.1/dist/chartjs-chart-box-and-violin-plot.min.js"></script> -->
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.0.1/dist/Chart.BoxPlot.js"></script>
 {% endblock %}
 
 {% block content %}
+<!-- Login Modal -->
+<div id="loginModal" style="display:block; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+  <div style="background:white; padding:20px; margin:100px auto; width:300px; border-radius:5px;">
+    <h3>Login</h3>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required style="width:100%; margin-bottom:10px;">
+      <input type="password" id="password" placeholder="Password" required style="width:100%; margin-bottom:10px;">
+      <button type="submit" style="width:100%;">Login</button>
+    </form>
+    <div id="loginMessage" style="margin-top:10px; color:red;"></div>
+  </div>
+</div>
 
 <div id="map-container">
  <div id="map"></div>
@@ -51,34 +62,26 @@
 <div id="right-panel">
   <div class="box" id="graph-box">
     <h3>Consumer Reported Buying Price : <span id="selected-commodity"></span></h3>
-  <div id="stats-container" style="display: flex; gap: 20px;">
-    <div id="global-stats" style="margin-top: 4px;">
-      <strong>All Consumers:</strong><br>
-      Average Price: <span id="avg-price">--</span><br>
-      Weighted Average: <span id="weighted-avg">--</span><br>
-      Modal Price: <span id="modal-price">--</span>
+    <div id="stats-container" style="display: flex; gap: 20px;">
+      <div id="global-stats" style="margin-top: 4px;">
+        <strong>All Consumers:</strong><br>
+        Average Price: <span id="avg-price">--</span><br>
+        Weighted Average: <span id="weighted-avg">--</span><br>
+        Modal Price: <span id="modal-price">--</span>
+      </div>
+      <div id="radius-stats" style="margin-top: 4px;">
+        <strong>Within Selected Radius:</strong><br>
+        Average Price: <span id="avg-price-radius">--</span><br>
+        Weighted Average: <span id="weighted-avg-radius">--</span><br>
+        Modal Price: <span id="modal-price-radius">--</span>
+      </div>
     </div>
-    
-    <div id="radius-stats" style="margin-top: 4px;">
-      <strong>Within Selected Radius:</strong><br>
-      Average Price: <span id="avg-price-radius">--</span><br>
-      Weighted Average: <span id="weighted-avg-radius">--</span><br>
-      Modal Price: <span id="modal-price-radius">--</span>
-    </div>
-  </div>
-    
     <canvas id="chartCanvas"></canvas>
   </div>
-
-  <!-- <div class="box" id="farmer-box">
-    <h3>Farmer Reported Selling Price</h3>
-    <div id="farmer-info"></div>
-  </div> -->
 
   <div class="box" id="agrowon-box">
     <h3>Agrowon Price</h3>
     <div id="agrowon-info">Click on a marker</div>
-    <!-- <canvas id="agrowonBoxChart"></canvas> -->
     <canvas id="agrowonChart"></canvas>
   </div>
 </div>
@@ -87,277 +90,232 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const commoditySelect = document.getElementById("commoditySelect");
-    const selectedCommoditySpan = document.getElementById("selected-commodity");
-    selectedCommoditySpan.innerText = commoditySelect.value;
 
-    const agrowonCanvas = document.getElementById("agrowonChart");
-    const infoDiv = document.getElementById("agrowon-info");
-    // let agrowonChart = null;
-    
-    const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
+  const loginModal = document.getElementById("loginModal");
+  const loginForm = document.getElementById("loginForm");
+  const loginMessage = document.getElementById("loginMessage");
 
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
-    const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
-    googleSat.addTo(map);
+  // Auth fetch helper
+  async function authFetch(url, options={}) {
+      const token = sessionStorage.getItem("api_token");
+      if(!token){
+          alert("You must log in first!");
+          return null;
+      }
+      options.headers = {
+          ...options.headers,
+          "Authorization": `Bearer ${token}`,   // <-- JWT uses Bearer
+          "Content-Type": "application/json"
+      };
+      return fetch(url, options).then(res=>{
+          if(!res.ok) throw new Error("API request failed");
+          return res.json();
+      });
+  }
 
-    const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
-    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-    L.control.zoom({ position: 'topright' }).addTo(map);
+  // Login form
+  document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
-    const markers = L.markerClusterGroup();
-    let geojsonLayer = null;
-    let allData = null;
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-    let userLocation = null;
-    let userMarker = null;
-    let radiusCircle = null;
+    fetch("/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+          if (data.status === "success") {
+            // Save token for later API calls
+            sessionStorage.setItem("api_token", data.access);
 
-    const radiusSlider = document.getElementById("radiusSlider");
-    const radiusValue = document.getElementById("radiusValue");
-
-    // 📍 Get My Location
-    document.getElementById("locateBtn").addEventListener("click", () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                userLocation = L.latLng(lat, lng);
-
-                if (userMarker) map.removeLayer(userMarker);
-                userMarker = L.marker(userLocation, { draggable: true, title: "My Location" }).addTo(map);
-
-                userMarker.on("dragend", function(e) {
-                    userLocation = e.target.getLatLng();
-                    drawCircle(parseInt(radiusSlider.value));
-                    updateStatsForRadius();
-                    updateMarkers(commoditySelect.value, true);
-                });
-
-                drawCircle(parseInt(radiusSlider.value));
-                updateStatsForRadius();
-                updateMarkers(commoditySelect.value, true);
-            });
+            document.getElementById("loginModal").style.display = "none";
+            initMap();  // start map after successful login
         } else {
-            alert("Geolocation not supported by your browser.");
+            document.getElementById("loginMessage").innerText = data.message || "Login failed!";
         }
+    })
+    .catch(err => {
+        console.error("Login error:", err);
+        document.getElementById("loginMessage").innerText = "Server error!";
     });
-
-    function drawCircle(radius) {
-        if (radiusCircle) map.removeLayer(radiusCircle);
-        radiusCircle = L.circle(userLocation, { radius: radius, color: "red", fillOpacity: 0.05 });
-        radiusCircle.addTo(map);
-    }
-
-    radiusSlider.addEventListener("input", function() {
-        const radius = parseInt(this.value);
-        radiusValue.textContent = radius;
-        if (userLocation) {
-            drawCircle(radius);
-            updateStatsForRadius();
-            updateMarkers(commoditySelect.value, false);
-        }
-    });
-
-    function computeStats(features, center=null, radius=null) {
-        let filtered = features;
-        if(center && radius){
-            filtered = features.filter(f=>{
-                const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
-                return center.distanceTo(latlng) <= radius;
-            });
-        }
-        if(filtered.length===0) return {avg:null, weighted:null, modal:null};
-        const prices = filtered.map(f=>f.properties.buyingprice).filter(v=>v!==null);
-        const quantities = filtered.map(f=>f.properties.quantitybought).map(q=>q||1);
-        // Average
-        const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
-        // Weighted avg
-        const weighted = prices.reduce((sum,p,i)=>sum + p*quantities[i],0) / quantities.reduce((a,b)=>a+b,0);
-        // Modal price
-        const freq = {};
-        prices.forEach(p=> freq[p]=(freq[p]||0)+1);
-        let modal = prices[0];
-        let maxCount=0;
-        for(const key in freq){ if(freq[key]>maxCount){ modal=key; maxCount=freq[key]; } }
-        return {avg, weighted, modal};
-    }
-
-    function showGlobalStats(stats){
-        document.getElementById("avg-price").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
-        document.getElementById("weighted-avg").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
-        document.getElementById("modal-price").innerText = stats.modal!==null ? stats.modal : "No data";
-    }
-
-    function showRadiusStats(stats){
-        document.getElementById("avg-price-radius").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
-        document.getElementById("weighted-avg-radius").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
-        document.getElementById("modal-price-radius").innerText = stats.modal!==null ? stats.modal : "No data";
-    }
-
-    function updateStatsForRadius(){
-        if(!allData) return;
-        const commodity = commoditySelect.value.toLowerCase();
-        const filtered = allData.features.filter(f=>f.properties.name.toLowerCase()===commodity);
-        showGlobalStats(computeStats(filtered));
-        if(userLocation){
-            showRadiusStats(computeStats(filtered, userLocation, parseInt(radiusSlider.value)));
-        } else {
-            showRadiusStats({avg:null, weighted:null, modal:null});
-        }
-    }
-
-    function updateMarkers(commodity, zoomToBounds=false){
-        markers.clearLayers();
-        if(geojsonLayer) map.removeLayer(geojsonLayer);
-
-        const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
-        const filteredFeatures = allData.features.filter(f=>{
-            const coords = f.geometry.coordinates;
-            const latlng = L.latLng(coords[1], coords[0]);
-            return indiaBounds.contains(latlng) &&
-                   f.properties.name.toLowerCase()===commodity.toLowerCase();
-        });
-
-        const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
-        geojsonLayer = L.geoJSON(filteredGeoJSON, {
-            pointToLayer: (feature, latlng)=>{
-                let color="red";
-                if(userLocation && userLocation.distanceTo(latlng)<=parseInt(radiusSlider.value)) color="green";
-                return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
-            },
-            onEachFeature: (feature, layer)=>{
-                if(feature.properties && feature.properties.name){
-                    const p = feature.properties;
-                    layer.bindPopup(`
-                    <strong>${p.name}</strong><br>
-                     ${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}
-                    Consumer Buying Price: ${p.buyingprice||'NA'}
-                    <br>Quantity: ${p.quantitybought || '-'}
-                     ${p.unit || ''}<br>
-                    
-                    `);
-                }
-            }
-        });
-        markers.addLayer(geojsonLayer);
-        map.addLayer(markers);
-
-        if(zoomToBounds && (filteredFeatures.length>0 || userLocation)){
-            let bounds = markers.getBounds();
-            if(userLocation){
-                bounds.extend(userLocation);
-                if(radiusCircle) bounds.extend(radiusCircle.getBounds());
-            }
-            map.fitBounds(bounds,{padding:[30,30]});
-        }
-    }
-
-    fetch("/api/consumers_geojson/")
-      .then(res=>res.json())
-      .then(data=>{
-          allData = data;
-          updateStatsForRadius();
-          updateMarkers(commoditySelect.value,true);
-      })
-      .catch(err=>console.error("Error loading GeoJSON:", err));
-
-    commoditySelect.addEventListener("change", function(){
-        selectedCommoditySpan.innerText = this.value;
-        updateStatsForRadius();
-        updateMarkers(this.value,true);
-    });
-
-    const mapControls = document.getElementById('map-controls');
-    const toggleMapBtn = document.getElementById('toggle-map-controls');
-    toggleMapBtn.addEventListener('click', ()=> mapControls.classList.toggle('collapsed'));
-
-    // const agrowonCanvas = document.getElementById("agrowonChart");
-    let agrowonChart = null;
-    function fetchAgrowonPrices(commodity) {
-    fetch(`/api/webdata_prices/?commodity=${commodity}`)
-        .then(res => res.json())
-        .then(dataList => {
-            if (!dataList || dataList.length === 0) return;
-
-            const labels = dataList.map(d => d.apmc || 'NA');
-            const minData = dataList.map(d => Number(d.minprice) || 0);
-            const modalData = dataList.map(d => (Number(d.modalprice) || 0) - (Number(d.minprice) || 0));
-            const maxData = dataList.map(d => (Number(d.maxprice) || 0) - (Number(d.modalprice) || 0));
-
-            const chartData = {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Min',
-                        data: minData,
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Modal',
-                        data: modalData,
-                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
-                        borderColor: 'rgba(255, 206, 86, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Max',
-                        data: maxData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            };
-
-            const options = {
-              responsive: true,
-              maintainAspectRatio: false,  // let canvas height adjust
-              plugins: {
-                  legend: { position: 'top' },
-                  tooltip: { enabled: true }
-              },
-              scales: {
-                  x: { stacked: true, title: { display: true, text: 'APMC' } },
-                  y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Price (₹)/Qunital' } }
-              }
-          };
-
-            if (agrowonChart) {
-                agrowonChart.data = chartData;
-                agrowonChart.options = options;
-                agrowonChart.update();
-            } else {
-                agrowonChart = new Chart(agrowonCanvas, {
-                    type: 'bar',
-                    data: chartData,
-                    options: options
-                });
-            }
-
-            // Optional info for first APMC
-            const first = dataList[0];
-            infoDiv.innerHTML = `
-                <strong>Commodity:</strong> ${first.commodity}<br>
-                <strong>Variety:</strong> ${first.variety || 'NA'}<br>
-                <strong>Date:</strong> ${first.date || 'NA'}
-            `;
-        })
-        .catch(err => console.error("Error fetching Agrowon data:", err));
-}
-
-
-
-// Initial load
-  fetchAgrowonPrices(commoditySelect.value);
-
-  // Update on commodity change
-  commoditySelect.addEventListener("change", function() {
-      fetchAgrowonPrices(this.value);
-  });
 });
 
+  // Auto-init if token exists
+  if(sessionStorage.getItem("api_token")){
+      loginModal.style.display = "none";
+      initMap();
+  }
+
+  function initMap(){
+
+      const commoditySelect = document.getElementById("commoditySelect");
+      const selectedCommoditySpan = document.getElementById("selected-commodity");
+      selectedCommoditySpan.innerText = commoditySelect.value;
+
+      const agrowonCanvas = document.getElementById("agrowonChart");
+      const infoDiv = document.getElementById("agrowon-info");
+      let agrowonChart = null;
+
+      const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
+      const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
+      googleSat.addTo(map);
+      const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
+      L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+      L.control.zoom({ position: 'topright' }).addTo(map);
+
+      const markers = L.markerClusterGroup();
+      let geojsonLayer = null;
+      let allData = null;
+      let userLocation = null;
+      let userMarker = null;
+      let radiusCircle = null;
+      const radiusSlider = document.getElementById("radiusSlider");
+      const radiusValue = document.getElementById("radiusValue");
+
+      // --- Utility functions ---
+      function drawCircle(radius){
+          if(!userLocation) return;
+          if(radiusCircle) map.removeLayer(radiusCircle);
+          radiusCircle = L.circle(userLocation, { radius: radius, color:"red", fillOpacity:0.05 }).addTo(map);
+      }
+
+      function computeStats(features, center=null, radius=null){
+          let filtered = features;
+          if(center && radius){
+              filtered = features.filter(f=>{
+                  const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+                  return center.distanceTo(latlng)<=radius;
+              });
+          }
+          if(filtered.length===0) return {avg:null, weighted:null, modal:null};
+          const prices = filtered.map(f=>f.properties.buyingprice).filter(v=>v!==null);
+          const quantities = filtered.map(f=>f.properties.quantitybought).map(q=>q||1);
+          const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
+          const weighted = prices.reduce((sum,p,i)=>sum+p*quantities[i],0)/quantities.reduce((a,b)=>a+b,0);
+          const freq={}; prices.forEach(p=>freq[p]=(freq[p]||0)+1);
+          let modal=prices[0], maxCount=0;
+          for(const k in freq){ if(freq[k]>maxCount){ modal=k; maxCount=freq[k]; } }
+          return {avg, weighted, modal};
+      }
+
+      function showGlobalStats(stats){
+          document.getElementById("avg-price").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
+          document.getElementById("weighted-avg").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
+          document.getElementById("modal-price").innerText = stats.modal!==null ? stats.modal : "No data";
+      }
+
+      function showRadiusStats(stats){
+          document.getElementById("avg-price-radius").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
+          document.getElementById("weighted-avg-radius").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
+          document.getElementById("modal-price-radius").innerText = stats.modal!==null ? stats.modal : "No data";
+      }
+
+      function updateStatsForRadius(){
+          if(!allData) return;
+          const commodity = commoditySelect.value.toLowerCase();
+          const filtered = allData.features.filter(f=>f.properties.name.toLowerCase()===commodity);
+          showGlobalStats(computeStats(filtered));
+          if(userLocation) showRadiusStats(computeStats(filtered, userLocation, parseInt(radiusSlider.value)));
+          else showRadiusStats({avg:null, weighted:null, modal:null});
+      }
+
+      function updateMarkers(commodity, zoomToBounds=false){
+          markers.clearLayers();
+          if(geojsonLayer) map.removeLayer(geojsonLayer);
+          const indiaBounds = L.latLngBounds([6.5,68.0],[35.5,97.5]);
+          const filteredFeatures = allData.features.filter(f=>{
+              const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+              return indiaBounds.contains(latlng) && f.properties.name.toLowerCase()===commodity.toLowerCase();
+          });
+          const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
+          geojsonLayer = L.geoJSON(filteredGeoJSON, {
+              pointToLayer:(f,latlng)=>{
+                  let color="red";
+                  if(userLocation && userLocation.distanceTo(latlng)<=parseInt(radiusSlider.value)) color="green";
+                  return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
+              },
+              onEachFeature:(f,layer)=>{
+                  const p=f.properties;
+                  layer.bindPopup(`<strong>${p.name}</strong><br>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price: ${p.buyingprice||'NA'}<br>Quantity: ${p.quantitybought||'-'} ${p.unit||''}<br>`);
+              }
+          });
+          markers.addLayer(geojsonLayer); map.addLayer(markers);
+          if(zoomToBounds && (filteredFeatures.length>0 || userLocation)){
+              let bounds = markers.getBounds();
+              if(userLocation){ bounds.extend(userLocation); if(radiusCircle) bounds.extend(radiusCircle.getBounds()); }
+              map.fitBounds(bounds,{padding:[30,30]});
+          }
+      }
+
+      // --- Geolocation ---
+      document.getElementById("locateBtn").addEventListener("click", ()=>{
+          if(navigator.geolocation){
+              navigator.geolocation.getCurrentPosition(pos=>{
+                  userLocation = L.latLng(pos.coords.latitude,pos.coords.longitude);
+                  if(userMarker) map.removeLayer(userMarker);
+                  userMarker = L.marker(userLocation,{draggable:true,title:"My Location"}).addTo(map);
+                  userMarker.on("dragend",e=>{ userLocation=e.target.getLatLng(); drawCircle(parseInt(radiusSlider.value)); updateStatsForRadius(); updateMarkers(commoditySelect.value,true); });
+                  drawCircle(parseInt(radiusSlider.value));
+                  updateStatsForRadius();
+                  updateMarkers(commoditySelect.value,true);
+              });
+          } else alert("Geolocation not supported by your browser.");
+      });
+
+      radiusSlider.addEventListener("input", function(){
+          radiusValue.textContent=this.value;
+          if(userLocation){ drawCircle(parseInt(this.value)); updateStatsForRadius(); updateMarkers(commoditySelect.value,false); }
+      });
+
+      // --- Fetch Data ---
+      authFetch("/api/consumers_geojson/").then(data=>{
+          if(data){ allData=data; updateStatsForRadius(); updateMarkers(commoditySelect.value,true); }
+      }).catch(err=>console.error("Error loading GeoJSON:", err));
+
+      commoditySelect.addEventListener("change", function(){
+          selectedCommoditySpan.innerText=this.value;
+          updateStatsForRadius();
+          updateMarkers(this.value,true);
+          fetchAgrowonPrices(this.value);
+      });
+
+      async function fetchAgrowonPrices(commodity){
+          try{
+              const dataList = await authFetch(`/api/webdata_prices/?commodity=${commodity}`);
+              if(!dataList || dataList.length===0) return;
+
+              const labels = dataList.map(d => d.apmc || 'NA');
+              const minData = dataList.map(d => Number(d.minprice)||0);
+              const modalData = dataList.map(d => (Number(d.modalprice)||0)-(Number(d.minprice)||0));
+              const maxData = dataList.map(d => (Number(d.maxprice)||0)-(Number(d.modalprice)||0));
+
+              const chartData = {
+                  labels,
+                  datasets:[
+                      {label:'Min',data:minData,backgroundColor:'rgba(75,192,192,0.7)',borderColor:'rgba(75,192,192,1)',borderWidth:1},
+                      {label:'Modal',data:modalData,backgroundColor:'rgba(255,206,86,0.7)',borderColor:'rgba(255,206,86,1)',borderWidth:1},
+                      {label:'Max',data:maxData,backgroundColor:'rgba(255,99,132,0.7)',borderColor:'rgba(255,99,132,1)',borderWidth:1}
+                  ]
+              };
+
+              const options = {responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{stacked:true,title:{display:true,text:'APMC'}},y:{stacked:true,beginAtZero:true,title:{display:true,text:'Price (₹)/Qunital'}}}};
+
+              if(agrowonChart){ agrowonChart.data=chartData; agrowonChart.options=options; agrowonChart.update(); }
+              else agrowonChart = new Chart(agrowonCanvas,{type:'bar',data:chartData,options:options});
+
+              const first = dataList[0];
+              infoDiv.innerHTML=`<strong>Commodity:</strong> ${first.commodity}<br><strong>Variety:</strong> ${first.variety||'NA'}<br><strong>Date:</strong> ${first.date||'NA'}`;
+          } catch(err){ console.error(err); }
+      }
+
+      fetchAgrowonPrices(commoditySelect.value);
+
+      document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
+  }
+});
 </script>
 {% endblock %}

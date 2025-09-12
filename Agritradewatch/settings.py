@@ -13,7 +13,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from decouple import config
 import os
-
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
 
 
 
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     'syncapp',
     'django.contrib.gis',
     'rest_framework',
+    'rest_framework_simplejwt',
     'ckeditor',
 ]
 
@@ -60,7 +65,8 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',      # for web portal
+        'rest_framework_simplejwt.authentication.JWTAuthentication' # for mobile app
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # default: block unless logged in
@@ -104,7 +110,12 @@ DATABASES = {
     }
 }
 }
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
+
+AUTH_USER_MODEL = "syncapp.User1"
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

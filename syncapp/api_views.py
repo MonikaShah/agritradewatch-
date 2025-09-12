@@ -1,8 +1,18 @@
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 
+
+from django.contrib.auth import get_user_model
+
+from django.contrib.auth import authenticate,login,logout
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt  # ← import here
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.serializers import serialize
 from django.http import JsonResponse
 import json, logging
@@ -48,6 +58,44 @@ class WebDataViewSet(viewsets.ModelViewSet):
 
 
 logger = logging.getLogger(__name__)
+
+# API endpoint for testing after login in mobile app
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    return Response({
+        "message": "Welcome Mobile User!",
+        "username": request.user.username,
+    })
+
+User = get_user_model()  # this gives syncapp.User1
+@csrf_exempt
+def api_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            # Session login for web
+            login(request, user)
+
+            # JWT for mobile
+            refresh = RefreshToken.for_user(user)
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Login successful",
+                "session": True,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            })
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid credentials"}, status=401)
+    else:
+        return JsonResponse({"status": "error", "message": "POST required"}, status=405)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def consumers_geojson(request):
@@ -98,6 +146,7 @@ def consumers_geojson(request):
             })
 
     geojson = {
+        "message": f"You are authenticated, {request.user.username}",
         "type": "FeatureCollection",
         "features": features,
     }
@@ -192,3 +241,25 @@ def webdata_prices(request):
         })
 
     return JsonResponse(results, safe=False)
+
+
+def portal_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)  # Django session created
+            return redirect("syncapp/map_chart")
+        else:
+            return render(request, "login.html", {"error": "Invalid credentials"})
+    return render(request, "login.html")
+
+def portal_logout(request):
+    logout(request)
+    return redirect("portal_login")
+
+def dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect("portal_login")
+    return render(request, "syncapp/map_chart.html", {"user": request.user})

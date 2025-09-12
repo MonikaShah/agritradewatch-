@@ -19,9 +19,8 @@ class PageAdmin(admin.ModelAdmin):
     image_tag.short_description = 'Image'
 
 class Users1Admin(admin.ModelAdmin):
-    list_display = ('name', 'mobile')
-    list_filter = ('name', 'mobile', 'username')            # filters in sidebar
-    search_fields = ('name', 'mobile', 'username')                          # search bar
+    list_display = ('username', 'name', 'mobile')
+    list_filter = ('username', 'job', 'is_staff')                          # search bar
 
 class Consumers1Admin(admin.ModelAdmin):
     list_display = ('date', 'user_name')
