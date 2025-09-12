@@ -30,14 +30,32 @@ class WebDataSerializer(serializers.ModelSerializer):
 
 # 🔹 Serializer for user registration (using Django's default User model)
 class RegisterSerializer(serializers.ModelSerializer):
+    job = serializers.ChoiceField(choices=[('consumer', 'Consumer'), ('farmer', 'Farmer')], required=True)
+    latitude = serializers.FloatField(required=False)
+    longitude = serializers.FloatField(required=False)
+
     class Meta:
         model = User1
-        fields = ['username', 'password', 'email']
+        fields = ['username', 'password', 'email', 'mobile', 'job', 'latitude', 'longitude']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        return User1.objects.create_user(
+        job = validated_data.pop('job', None)
+        latitude = validated_data.pop('latitude', None)
+        longitude = validated_data.pop('longitude', None)
+
+        user = User1.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email'),
             password=validated_data['password']
         )
+
+        user.mobile = validated_data.get('mobile', '')
+        user.job = job
+
+        if latitude is not None and longitude is not None:
+            user.latitude = latitude
+            user.longitude = longitude
+
+        user.save()
+        return user

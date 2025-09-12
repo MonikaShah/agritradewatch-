@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
+from rest_framework.authtoken.views import ObtainAuthToken
+from django.contrib.auth.hashers import make_password
 
 
 from django.contrib.auth import get_user_model
@@ -257,28 +259,69 @@ def webdata_prices(request):
 @csrf_exempt
 def api_register(request):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        username, email, password = data["username"], data["email"], make_password(data["password"])
+        try:
+            data = json.loads(request.body.decode("utf-8"))
 
-        if User1.objects.filter(username=username).exists():
-            return JsonResponse({"status": "error", "message": "Username already taken"}, status=400)
+            username = data.get("username")
+            email = data.get("email")
+            mobile = data.get("mobile")
+            password = make_password(data.get("password"))
+            job = data.get("job")  # 'consumer' or 'farmer'
+            latitude = data.get("latitude")
+            longitude = data.get("longitude")
 
-        user = User1.objects.create(username=username, email=email, password=password)
-        return JsonResponse({"status": "success", "user_id": user.id})
+            if User1.objects.filter(username=username).exists():
+                return JsonResponse({"status": "error", "message": "Username already taken"}, status=400)
+
+            user = User1.objects.create(
+                username=username,
+                email=email,
+                password=password,
+                mobile=mobile,
+                job=job,
+                latitude=latitude if latitude else None,
+                longitude=longitude if longitude else None
+            )
+
+            return JsonResponse({
+                "status": "success",
+                "message": "User registered successfully",
+                "data": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "mobile": user.mobile,
+                    "job": user.job,
+                    "latitude": user.latitude,
+                    "longitude": user.longitude
+                }
+            }, status=201)
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
-
-
-
 # Login API
-class CustomAuthToken(ObtainAuthToken):
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+# class CustomAuthToken(ObtainAuthToken):
+#     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
+#     def post(self, request, *args, **kwargs):
+#         response = super().post(request, *args, **kwargs)
+#         token = Token.objects.get(key=response.data['token'])
+#         return Response({
+#             'token': token.key,
+#             'user_id': token.user_id,
+#             'username': token.user.username
+#         })
+class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        # token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
-            'user_id': token.user_id,
-            'username': token.user.username
+            'user_id': user.pk,
+            'username': user.username
         })

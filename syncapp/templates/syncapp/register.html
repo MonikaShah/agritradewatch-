@@ -4,7 +4,7 @@
 
 {% block content %}
 <style>
-    /* Hide any header if present */
+    /* Hide header/navigation if any */
     header, nav {
         display: none !important;
     }
@@ -31,7 +31,8 @@
         color: #555;
     }
 
-    .form-floating input:focus {
+    .form-floating input:focus,
+    .form-floating select:focus {
         border-color: #6c63ff;
         box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
     }
@@ -59,11 +60,9 @@
         .register-card {
             padding: 1.5rem;
         }
-
         h2 {
             font-size: 1.5rem;
         }
-
         .btn {
             font-size: 0.95rem;
             padding: 0.5rem 0;
@@ -75,48 +74,70 @@
             padding: 1.8rem;
         }
     }
-
-    @media (min-width: 768px) and (max-width: 992px) {
-        .register-card {
-            padding: 2rem;
-        }
-    }
 </style>
 
 <div class="d-flex justify-content-center align-items-center w-100 py-5">
     <div class="register-card">
         <h2 class="text-center mb-4">Register for MandiGo</h2>
         
-        <form method="post">
+        <form method="post" id="registerForm">
             {% csrf_token %}
 
+            <!-- Username -->
             <div class="form-floating mb-3">
                 <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
                 <label for="username">Username</label>
-            </div><br>
+            </div>
 
+            <!-- Email -->
             <div class="form-floating mb-3">
                 <input type="email" name="email" id="email" class="form-control" placeholder="Email" required>
                 <label for="email">Email</label>
             </div>
-            <br>
+
+            <!-- Mobile Number -->
             <div class="form-floating mb-3">
                 <input type="text" name="mobile_number" id="mobile_number" class="form-control" placeholder="Mobile Number" required>
                 <label for="mobile_number">Mobile Number</label>
             </div>
-            <br>
+
+            <!-- Job -->
+            <div class="form-floating mb-3">
+                <select name="job" id="job" class="form-select" required>
+                    <option value="" disabled selected>Select Job</option>
+                    <option value="consumer">Consumer</option>
+                    <option value="farmer">Farmer</option>
+                </select>
+                <label for="job">Job</label>
+            </div>
+
+            <!-- Password -->
             <div class="form-floating mb-4">
                 <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
                 <label for="password">Password</label>
             </div>
-            <br><br>
+
+            <!-- Hidden latitude and longitude -->
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+
             <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
         </form>
 
         <p class="text-center mt-3 mb-0">
-            Already have an account? 
-            <a href="{% url 'login' %}">Login here</a>
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
         </p>
     </div>
 </div>
+
+<script>
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+    }, function(error) {
+        console.warn("Geolocation error:", error);
+    });
+}
+</script>
 {% endblock %}
