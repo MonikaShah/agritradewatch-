@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='api-register'),
     # path('api/login/', CustomAuthToken.as_view(), name='api-login'),
     path('api/login/', api_login, name='api-login'),
+    path("api/debug-headers/", api_views.debug_headers),
 
     # custom login & register for web portal
     path('login/', views.web_login, name='login'),

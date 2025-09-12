@@ -289,3 +289,8 @@ def api_register(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def debug_headers(request):
+    return Response({"headers": dict(request.headers)})
