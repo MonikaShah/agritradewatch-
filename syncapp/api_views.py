@@ -4,6 +4,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework import status
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import viewsets
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.hashers import make_password
@@ -83,6 +87,7 @@ def profile(request):
     })
 
 @csrf_exempt
+@api_view(["POST"])
 def api_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -313,15 +318,28 @@ def api_register(request):
 #             'user_id': token.user_id,
 #             'username': token.user.username
 #         })
-class CustomAuthToken(ObtainAuthToken):
+class CustomAuthToken(APIView):
+    permission_classes = []  # Allow any
+    authentication_classes = []
+
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        # token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'username': user.username
-        })
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response({"status": "error", "message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            # JWT tokens
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "status": "success",
+                "message": "Login successful",
+                "user_id": user.id,
+                "username": user.username,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            })
+        else:
+            return Response({"status": "error", "message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
