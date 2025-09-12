@@ -1,0 +1,101 @@
+{% extends "syncapp/base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+    /* Hide header and nav */
+    header, nav {
+        display: none !important;
+    }
+
+    body {
+        background: linear-gradient(135deg, #6c63ff, #00d4ff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .login-card {
+        border-radius: 12px;
+        padding: 2rem;
+        background-color: #ffffff;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .form-floating label {
+        color: #555;
+    }
+
+    .form-floating input:focus {
+        border-color: #6c63ff;
+        box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #6c63ff;
+        border-color: #6c63ff;
+    }
+
+    .btn-primary:hover {
+        background-color: #5848c2;
+        border-color: #5848c2;
+    }
+
+    a {
+        color: #6c63ff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 576px) {
+        .login-card {
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+        }
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center w-100 py-5">
+    <div class="login-card">
+        <h2 class="text-center mb-4">Login</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+                <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+                <label for="username">Username</label>
+            </div>
+            <br>
+            <div class="form-floating mb-4">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                <label for="password">Password</label>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
+        </form>
+
+        <p class="text-center mt-3 mb-0">
+            New user? 
+            <a href="{% url 'register' %}">Register here</a>
+        </p>
+    </div>
+</div>
+<br><br>
+{% endblock %}
