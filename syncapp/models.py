@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
+import uuid
 
 
 class Consumer(models.Model):
@@ -95,12 +96,18 @@ class MarketPrices(models.Model):
 
 
 class User1(AbstractUser):
-    id = models.CharField(primary_key=True, max_length=100)
+    id = models.CharField(primary_key=True, max_length=50, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=20, blank=True, null=True, unique=True)
     job = models.CharField(max_length=100, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+
+    USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
+    REQUIRED_FIELDS = ['email', 'mobile_number']
+
+    def __str__(self):
+        return self.username
 
     class Meta:
         db_table = "syncapp_users1"
