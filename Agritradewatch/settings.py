@@ -67,7 +67,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',      # for web portal
+        # 'rest_framework.authentication.SessionAuthentication',      # for web portal
         'rest_framework_simplejwt.authentication.JWTAuthentication' # for mobile app
     ),
     'DEFAULT_PERMISSION_CLASSES': (
