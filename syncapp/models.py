@@ -191,6 +191,7 @@ class WebData(models.Model):
 
     class Meta:
         db_table = 'webdata'
+        managed = False
         unique_together = ("source", "commodity", "variety", "apmc", "date")
 
     
