@@ -16,7 +16,8 @@ import os
 from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),'USER_ID_FIELD': 'id',        # ← use your CharField PK
+    'USER_ID_CLAIM': 'user_id',   # ← the claim name in the JWT payload
 }
 
 
