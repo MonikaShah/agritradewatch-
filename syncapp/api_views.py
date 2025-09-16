@@ -25,6 +25,7 @@ from .serializers import (
     ConsumerSerializer,
     WebDataSerializer,
 )
+from django.utils.decorators import method_decorator
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -298,8 +299,11 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 # ✅ Optional: Test endpoint
+@csrf_exempt
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+# @method_decorator(csrf_exempt, name='dispatch')
+
 def whoami(request):
     return Response({
         "id": request.user.id,
