@@ -1,12 +1,12 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import User1, Farmer1, Consumer1, WebData,Consumer
+from .models import User1, Farmer1, Consumer1, WebData
 from rest_framework import serializers   # <-- this import is required
 
-class ConsumerGeoSerializer(GeoFeatureModelSerializer):
-    class Meta:
-        model = Consumer
-        geo_field = "geom"  # your PointField name
-        fields = ('id', 'name','data')  # fields to include in properties
+# class ConsumerGeoSerializer(GeoFeatureModelSerializer):
+#     class Meta:
+#         model = Consumer
+#         geo_field = "geom"  # your PointField name
+#         fields = ('id', 'name','data')  # fields to include in properties
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

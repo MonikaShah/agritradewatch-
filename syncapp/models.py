@@ -6,79 +6,79 @@ from ckeditor.fields import RichTextField
 import uuid
 
 
-class Consumer(models.Model):
-    id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
-    name = models.CharField(max_length=200)                  # commodity name
-    user_id = models.CharField(max_length=200, db_index=True)
-    price_per_unit = models.FloatField(default=0)
-    quantity = models.FloatField(default=0)
-    geom = models.PointField(blank=True, null=True)      # PostGIS Point
-    date = models.DateTimeField(blank=True, null=True)       # Firestore date
-    timestamp = models.BigIntegerField(blank=True, null=True)  # raw Firestore timestamp
-    created_at = models.DateTimeField(blank=True, null=True)
-    image = models.URLField(blank=True, null=True)
-    lat = models.FloatField(null=True, blank=True)
-    lng = models.FloatField(null=True, blank=True)
-    product = models.CharField(max_length=100, null=True, blank=True)
-    unit = models.CharField(max_length=50, null=True, blank=True)
+# class Consumer(models.Model):
+#     id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
+#     name = models.CharField(max_length=200)                  # commodity name
+#     user_id = models.CharField(max_length=200, db_index=True)
+#     price_per_unit = models.FloatField(default=0)
+#     quantity = models.FloatField(default=0)
+#     geom = models.PointField(blank=True, null=True)      # PostGIS Point
+#     date = models.DateTimeField(blank=True, null=True)       # Firestore date
+#     timestamp = models.BigIntegerField(blank=True, null=True)  # raw Firestore timestamp
+#     created_at = models.DateTimeField(blank=True, null=True)
+#     image = models.URLField(blank=True, null=True)
+#     lat = models.FloatField(null=True, blank=True)
+#     lng = models.FloatField(null=True, blank=True)
+#     product = models.CharField(max_length=100, null=True, blank=True)
+#     unit = models.CharField(max_length=50, null=True, blank=True)
 
 
 
-    def __str__(self):
-        return f"{self.name} ({self.user_id})"
+#     def __str__(self):
+#         return f"{self.name} ({self.user_id})"
 
-class Farmer(models.Model):
-    id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
-    name = models.CharField(max_length=255)  # farmer name (if present in Firebase)
-    product = models.CharField(max_length=255, blank=True, null=True)  # <-- add this
-    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # total available
-    unit = models.CharField(max_length=50, null=True, blank=True)   # Add this
-    geom = models.PointField(null=True, blank=True)     
-    location = models.CharField(max_length=255, null=True, blank=True)
-    lat = models.FloatField(null=True, blank=True)
-    lng = models.FloatField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    timestamp = models.BigIntegerField(null=True, blank=True)       # Firestore timestamp
-
-
-    def __str__(self):
-        return f"{self.name} - {self.product} ({self.price_per_unit}/{self.unit})"
-
-class UserData(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    timestamp = models.DateTimeField(null=True, blank=True)
-    name = models.CharField(max_length=100)
-    lat = models.FloatField()
-    lng = models.FloatField()
-    product = models.CharField(max_length=100)
-    quantity = models.FloatField()
-    unit = models.CharField(max_length=50)
-    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.name} - {self.product}"
+# class Farmer(models.Model):
+#     id = models.CharField(primary_key=True, max_length=50)  # Firebase ID
+#     name = models.CharField(max_length=255)  # farmer name (if present in Firebase)
+#     product = models.CharField(max_length=255, blank=True, null=True)  # <-- add this
+#     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+#     quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # total available
+#     unit = models.CharField(max_length=50, null=True, blank=True)   # Add this
+#     geom = models.PointField(null=True, blank=True)     
+#     location = models.CharField(max_length=255, null=True, blank=True)
+#     lat = models.FloatField(null=True, blank=True)
+#     lng = models.FloatField(null=True, blank=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     timestamp = models.BigIntegerField(null=True, blank=True)       # Firestore timestamp
 
 
-class MarketPrices(models.Model):
-    arrival_date = models.DateField()
-    market = models.CharField(max_length=100)
+#     def __str__(self):
+#         return f"{self.name} - {self.product} ({self.price_per_unit}/{self.unit})"
 
-    commodity = models.CharField(max_length=100)
-    variety = models.CharField(max_length=100)
-    min_price = models.FloatField()
-    max_price = models.FloatField()
-    modal_price = models.FloatField()
-    source = models.CharField(max_length=100)
-    id = models.CharField(max_length=100, primary_key=True)
+# class UserData(models.Model):
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     timestamp = models.DateTimeField(null=True, blank=True)
+#     name = models.CharField(max_length=100)
+#     lat = models.FloatField()
+#     lng = models.FloatField()
+#     product = models.CharField(max_length=100)
+#     quantity = models.FloatField()
+#     unit = models.CharField(max_length=50)
+#     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+
+#     def __str__(self):
+#         return f"{self.name} - {self.product}"
 
 
-    def __str__(self):
-        return f"{self.commodity} ({self.variety}) at {self.market} on {self.arrival_date}"
+# class MarketPrices(models.Model):
+#     arrival_date = models.DateField()
+#     market = models.CharField(max_length=100)
+
+#     commodity = models.CharField(max_length=100)
+#     variety = models.CharField(max_length=100)
+#     min_price = models.FloatField()
+#     max_price = models.FloatField()
+#     modal_price = models.FloatField()
+#     source = models.CharField(max_length=100)
+#     id = models.CharField(max_length=100, primary_key=True)
+
+
+#     def __str__(self):
+#         return f"{self.commodity} ({self.variety}) at {self.market} on {self.arrival_date}"
     
 
-    class Meta:
-        db_table = 'market_prices'
+#     class Meta:
+#         db_table = 'market_prices'
 
 # class User1Manager(BaseUserManager):
 #     def create_user(self, username, mobile=None, password=None, **extra_fields):
@@ -96,18 +96,26 @@ class MarketPrices(models.Model):
 
 
 class User1(AbstractUser):
-    id = models.CharField(primary_key=True, max_length=50, default=uuid.uuid4, editable=False)
+    id = models.CharField(primary_key=True, max_length=50)  # Firebase UID as string
     name = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=20, blank=True, null=True, unique=True)
     job = models.CharField(max_length=100, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)  # Needed for admin login
+
 
     USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
-    REQUIRED_FIELDS = ['email', 'mobile_number']
+    REQUIRED_FIELDS = ['email', 'mobile']
 
     def __str__(self):
         return self.username
+    # def has_perm(self, perm, obj=None):
+    #     return self.is_staff  # minimal implementation for admin
+
+    # def has_module_perms(self, app_label):
+    #     return self.is_staff
 
     class Meta:
         db_table = "syncapp_users1"

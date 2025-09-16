@@ -14,4 +14,5 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', api_views.profile, name='profile'),
+    path("whoami/", api_views.whoami, name="whoami"),
 ]

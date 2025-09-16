@@ -3,7 +3,7 @@ from .models import Consumer1,Page,Commodity,User1 # or Farmer, UserData if they
 from django.shortcuts import render,get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import ConsumerGeoSerializer
+# from .serializers import ConsumerGeoSerializer
 import requests,logging,json
 import xml.etree.ElementTree as ET
 import pandas as pd

@@ -1,4 +1,4 @@
-import logging, json, requests
+import logging, json, requests, uuid
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Consumer1, User1, Farmer1, WebData, Commodity
 from .serializers import (
@@ -246,30 +248,21 @@ def webdata_prices(request):
 
 @csrf_exempt
 def api_register(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode("utf-8"))
+            data = json.loads(request.body)
 
-            username = data.get("username")
-            email = data.get("email")
-            mobile = data.get("mobile")
-            password = make_password(data.get("password"))
-            job = data.get("job")  # 'consumer' or 'farmer'
-            latitude = data.get("latitude")
-            longitude = data.get("longitude")
-
-            if User1.objects.filter(username=username).exists():
-                return JsonResponse({"status": "error", "message": "Username already taken"}, status=400)
-
-            user = User1.objects.create(
-                username=username,
-                email=email,
-                password=password,
-                mobile=mobile,
-                job=job,
-                latitude=latitude if latitude else None,
-                longitude=longitude if longitude else None
+            user = User1(
+                id=str(uuid.uuid4()),  # ✅ text UUID
+                username=data['username'],
+                email=data.get('email', ''),
+                mobile=data.get('mobile', ''),
+                job=data.get('job', ''),
+                latitude=data.get('latitude'),
+                longitude=data.get('longitude')
             )
+            user.set_password(data['password'])
+            user.save()
 
             return JsonResponse({
                 "status": "success",
@@ -283,14 +276,33 @@ def api_register(request):
                     "latitude": user.latitude,
                     "longitude": user.longitude
                 }
-            }, status=201)
-
+            })
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-
-    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
-
+            return JsonResponse({"status": "error", "message": str(e)})
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def debug_headers(request):
     return Response({"headers": dict(request.headers)})
+
+
+# ✅ Custom token serializer (optional: include username in response)
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # add custom claims
+        token["username"] = user.username
+        return token
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+# ✅ Optional: Test endpoint
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def whoami(request):
+    return Response({
+        "id": request.user.id,
+        "username": request.user.username,
+        "auth": str(type(request.auth))  # shows if JWT or session
+    })

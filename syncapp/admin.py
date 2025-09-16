@@ -1,12 +1,12 @@
 from django.contrib import admin
-from .models import MarketPrices,Commodity,Consumer1,Farmer1,User1,WebData,Page  # replace with your actual models
+from .models import Commodity,Consumer1,Farmer1,User1,WebData,Page  # replace with your actual models
 from django.utils.html import format_html
 from django.db.models import F  # Make sure to import F
 
-class MarketPricesAdmin(admin.ModelAdmin):
-    list_display = ('arrival_date', 'market', 'commodity', 'variety', 'min_price','max_price','modal_price')  # columns to show
-    list_filter = ('market', 'commodity', 'variety', 'arrival_date')            # filters in sidebar
-    search_fields = ('market', 'commodity', 'variety')                          # search bar
+# class MarketPricesAdmin(admin.ModelAdmin):
+#     list_display = ('arrival_date', 'market', 'commodity', 'variety', 'min_price','max_price','modal_price')  # columns to show
+#     list_filter = ('market', 'commodity', 'variety', 'arrival_date')            # filters in sidebar
+#     search_fields = ('market', 'commodity', 'variety')                          # search bar
 
 class PageAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'image_tag')
@@ -45,7 +45,7 @@ class WebdataAdmin(admin.ModelAdmin):
 
     
 # Register models
-admin.site.register(MarketPrices, MarketPricesAdmin)
+# admin.site.register(MarketPrices, MarketPricesAdmin)
 admin.site.register(Consumer1,Consumers1Admin)
 admin.site.register(Farmer1)
 admin.site.register(User1,Users1Admin)

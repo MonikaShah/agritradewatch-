@@ -44,10 +44,10 @@ urlpatterns = [
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     
-     # custom login & register for mobile app
-    path('api/register/', RegisterView.as_view(), name='api-register'),
-    # path('api/login/', CustomAuthToken.as_view(), name='api-login'),
-    path('api/login/', api_login, name='api-login'),
+    # custom login & register for mobile app
+    # path('api/register/', RegisterView.as_view(), name='api-register'),
+    
+    # path('api/login/', api_login, name='api-login'),
     path("api/debug-headers/", api_views.debug_headers),
 
     # custom login & register for web portal
