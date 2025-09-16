@@ -105,6 +105,8 @@ class User1(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)  # Needed for admin login
 
+    # Make username non-nullable
+    username = models.CharField(max_length=150, unique=True, null=False, blank=False)
 
     USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
     REQUIRED_FIELDS = ['email', 'mobile']
