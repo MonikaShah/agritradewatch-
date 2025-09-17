@@ -90,6 +90,12 @@
     <canvas id="chartCanvas"></canvas>
   </div>
 
+  <div class="box" id="agmark-box">
+    <h3>Agmarknet Price</h3>
+    <div id="agmark-info">Click on a commodity</div>
+    <canvas id="agmarkChart"></canvas>
+  </div>
+
   <div class="box" id="agrowon-box">
     <h3>Agrowon Price</h3>
     <div id="agrowon-info">Click on a marker</div>
@@ -353,8 +359,75 @@ document.addEventListener("DOMContentLoaded", function() {
           selectedCommoditySpan.innerText=this.value;
           updateStatsForRadius();
           updateMarkers(this.value,true);
+          fetchAgmarkPrices(this.value);
           fetchAgrowonPrices(this.value);
       });
+
+let agmarkChart = null;   // global variable
+async function fetchAgmarkPrices(commodity) {
+    const agmarkInfo = document.getElementById("agmark-info");
+    const agmarkCanvas = document.getElementById("agmarkChart");
+
+    try {
+        const dataList = await authFetch(`/api/webdata_prices/?commodity=${commodity}&source=agmark`);
+
+        if (!dataList || dataList.length === 0) {
+            agmarkInfo.innerText = "No data found for this commodity";
+
+            if (agmarkChart) {
+                agmarkChart.destroy();
+                agmarkChart = null;
+            }
+            return;
+        }
+
+        const labels = dataList.map(d => d.apmc || 'NA');
+        // Convert all prices from ₹/quintal to ₹/kg
+        const minData = dataList.map(d => (Number(d.minprice) || 0) / 100);
+        const modalData = dataList.map(d => ((Number(d.modalprice) || 0) - (Number(d.minprice) || 0)) / 100);
+        const maxData = dataList.map(d => ((Number(d.maxprice) || 0) - (Number(d.modalprice) || 0)) / 100);
+
+        const chartData = {
+            labels,
+            datasets: [
+                { label: 'Min', data: minData, backgroundColor: 'rgba(54, 162, 235, 0.7)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
+                { label: 'Modal', data: modalData, backgroundColor: 'rgba(255, 206, 86, 0.7)', borderColor: 'rgba(255, 206, 86, 1)', borderWidth: 1 },
+                { label: 'Max', data: maxData, backgroundColor: 'rgba(75, 192, 192, 0.7)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }
+            ]
+        };
+
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                x: { stacked: true, title: { display: true, text: 'APMC' } },
+                y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Price (₹)/Quintal' } }
+            }
+        };
+
+        // ✅ destroy old chart before creating new one
+        if (agmarkChart) {
+            agmarkChart.destroy();
+            agmarkChart = null;
+        }
+
+        // ✅ use getContext("2d") instead of passing canvas directly
+        const ctx = agmarkCanvas.getContext("2d");
+        agmarkChart = new Chart(ctx, { type: 'bar', data: chartData, options });
+
+        const first = dataList[0];
+        agmarkInfo.innerHTML =
+            `<strong>Commodity:</strong> ${first.commodity}<br>
+             <strong>Variety:</strong> ${first.variety || 'NA'}<br>
+             <strong>Date:</strong> ${first.date || 'NA'}`;
+
+    } catch (err) {
+        console.error("Agmark fetch error:", err);
+        agmarkInfo.innerText = "Error fetching Agmark data";
+    }
+}
+
 
       async function fetchAgrowonPrices(commodity){
         const infoDiv = document.getElementById("agrowon-info");
@@ -403,6 +476,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       fetchAgrowonPrices(commoditySelect.value);
+      fetchAgmarkPrices(commoditySelect.value);
 
       document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
   }
