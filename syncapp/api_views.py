@@ -26,6 +26,7 @@ from .serializers import (
     WebDataSerializer,
 )
 from django.utils.decorators import method_decorator
+from django.db.models import Max, Q
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -144,6 +145,7 @@ def consumers_geojson(request):
                 },
                 "properties": {
                     "id": c.id,
+                    "name": c.commodity,
                     "commodity": c.commodity,
                     "date": c.date.isoformat() if c.date else None,
                     "buyingprice": c.buyingprice,
@@ -206,7 +208,7 @@ def agrowon_prices(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def webdata_prices(request):
     commodity_name = request.GET.get('commodity')
     if not commodity_name:
@@ -214,14 +216,14 @@ def webdata_prices(request):
 
     today = timezone.localdate()
 
-    # Try exact match on WebData.commodity (case-insensitive) for today
+    # 1️⃣ Try today's data
     data_qs = WebData.objects.filter(
         commodity__iexact=commodity_name,
         date__date=today
     )
 
+    # 2️⃣ If not found, try alias from Commodity table
     if not data_qs.exists():
-        # If not found, try looking up Commodity table
         commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
         if commodity_obj and commodity_obj.alias_marathi:
             data_qs = WebData.objects.filter(
@@ -229,12 +231,24 @@ def webdata_prices(request):
                 date__date=today
             )
 
+    # 3️⃣ If still not found, fetch latest available date
     if not data_qs.exists():
-        return JsonResponse({'error': 'No data found for today'}, status=404)
+        latest_date = WebData.objects.filter(
+            Q(commodity__iexact=commodity_name) |
+            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
+        ).aggregate(Max("date"))["date__max"]
 
-    results = []
-    for data in data_qs:
-        results.append({
+        if not latest_date:
+            return JsonResponse({'error': 'No data found'}, status=404)
+
+        data_qs = WebData.objects.filter(date=latest_date).filter(
+            Q(commodity__iexact=commodity_name) |
+            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
+        )
+
+    # 4️⃣ Serialize results
+    results = [
+        {
             'commodity': data.commodity,
             'apmc': data.apmc,
             'variety': data.variety,
@@ -242,8 +256,11 @@ def webdata_prices(request):
             'maxprice': data.maxprice,
             'modalprice': data.modalprice,
             'unit': data.unit,
-            'date': data.date.isoformat() if data.date else None
-        })
+            'date': data.date.isoformat() if data.date else None,
+            'is_latest': (data.date.date() != today)  # flag if not today's
+        }
+        for data in data_qs
+    ]
 
     return JsonResponse(results, safe=False)
 

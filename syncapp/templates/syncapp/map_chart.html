@@ -114,33 +114,33 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Login form
-  document.getElementById("loginForm").addEventListener("submit", function(e) {
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    fetch("/api/login/", {
+    fetch("/api/token/", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ username, password })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
     })
-    .then(res => res.json())
+    .then(response => response.json())
     .then(data => {
-          if (data.status === "success") {
-            // Save token for later API calls
+        if (data.access) {
+            // Save tokens
             sessionStorage.setItem("api_token", data.access);
+            sessionStorage.setItem("refresh_token", data.refresh);
 
             document.getElementById("loginModal").style.display = "none";
-            initMap();  // start map after successful login
+            initMap();
         } else {
-            document.getElementById("loginMessage").innerText = data.message || "Login failed!";
+            document.getElementById("loginMessage").innerText =
+                data.detail || "Login failed!";
         }
-    })
-    .catch(err => {
-        console.error("Login error:", err);
-        document.getElementById("loginMessage").innerText = "Server error!";
-    });
+      });
+  
+  
 });
 
   // Auto-init if token exists
@@ -217,7 +217,11 @@ document.addEventListener("DOMContentLoaded", function() {
       function updateStatsForRadius(){
           if(!allData) return;
           const commodity = commoditySelect.value.toLowerCase();
-          const filtered = allData.features.filter(f=>f.properties.name.toLowerCase()===commodity);
+          const filtered = allData.features.filter(f => {
+              const name = f.properties?.commodity;
+              return name && name.toLowerCase() === commodity;
+          });
+
           showGlobalStats(computeStats(filtered));
           if(userLocation) showRadiusStats(computeStats(filtered, userLocation, parseInt(radiusSlider.value)));
           else showRadiusStats({avg:null, weighted:null, modal:null});
@@ -229,7 +233,10 @@ document.addEventListener("DOMContentLoaded", function() {
           const indiaBounds = L.latLngBounds([6.5,68.0],[35.5,97.5]);
           const filteredFeatures = allData.features.filter(f=>{
               const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
-              return indiaBounds.contains(latlng) && f.properties.name.toLowerCase()===commodity.toLowerCase();
+              return indiaBounds.contains(latlng) && 
+                  f.properties.commodity &&
+                  f.properties.commodity.toLowerCase() === commodity.toLowerCase();
+
           });
           const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
           geojsonLayer = L.geoJSON(filteredGeoJSON, {
@@ -240,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function() {
               },
               onEachFeature:(f,layer)=>{
                   const p=f.properties;
-                  layer.bindPopup(`<strong>${p.name}</strong><br>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price: ${p.buyingprice||'NA'}<br>Quantity: ${p.quantitybought||'-'} ${p.unit||''}<br>`);
+                  layer.bindPopup(`<strong>${p.commodity || "Unknown"}</strong><br>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price: ${p.buyingprice||'NA'}<br>Quantity: ${p.quantitybought||'-'} ${p.unit||''}<br>`);
               }
           });
           markers.addLayer(geojsonLayer); map.addLayer(markers);
