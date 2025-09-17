@@ -4,9 +4,20 @@
 {% block title %}Consumers Map{% endblock %}
 
 {% block extra_head %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+/>
+
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.0.1/dist/Chart.BoxPlot.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.0.1/dist/chartjs-chart-box-and-violin-plot.umd.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -95,53 +106,100 @@ document.addEventListener("DOMContentLoaded", function() {
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
 
+  // --------------------------
+  // Token helpers
+  // --------------------------
+
+  async function refreshToken(){
+      const refresh = sessionStorage.getItem("refresh_token");
+      if(!refresh) return false;
+
+      try {
+          const res = await fetch("/api/token/refresh/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refresh })
+          });
+          if(res.ok){
+              const data = await res.json();
+              sessionStorage.setItem("api_token", data.access);
+              return true;
+          } else {
+              console.warn("Refresh token failed");
+              return false;
+          }
+      } catch(err){
+          console.error("Refresh token error:", err);
+          return false;
+      }
+  }
   // Auth fetch helper
-  async function authFetch(url, options={}) {
+  async function authFetch(url, options={}, retry=true) {
       const token = sessionStorage.getItem("api_token");
       if(!token){
-          alert("You must log in first!");
-          return null;
+        loginModal.style.display = "block";
+        throw new Error("No token found");
+        
       }
       options.headers = {
           ...options.headers,
           "Authorization": `Bearer ${token}`,   // <-- JWT uses Bearer
           "Content-Type": "application/json"
       };
-      return fetch(url, options).then(res=>{
-          if(!res.ok) throw new Error("API request failed");
-          return res.json();
-      });
-  }
+      try {
+        let res = await fetch(url, options);
+        if(res.status === 401 && retry){ 
+            // token might be expired, try refresh
+            const refreshed = await refreshToken();
+            if(refreshed) 
+              return authFetch(url, options, false); // retry once
+            else { 
+              loginModal.style.display = "block"; 
+              throw new Error("Session expired, login required"); }
+        }
+  //       if(!res.ok) 
+  //         throw new Error(`API request failed: ${res.status}`);
+  //         return await res.json();
+  //     } catch(err){
+  //         console.error("authFetch error:", err);
+  //         throw err;
+  //     }
+  // }
+      const data = await res.json();
+            return data;  // return JSON even for 404 or other non-ok status
+        } catch(err){
+            console.error("authFetch error:", err);
+            return { error: err.message }; // fallback
+        }
+    }
 
   // Login form
-  document.getElementById("loginForm").addEventListener("submit", function (e) {
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    fetch("/api/token/", {
+    try {
+      const res = await fetch("/api/token/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.access) {
-            // Save tokens
-            sessionStorage.setItem("api_token", data.access);
-            sessionStorage.setItem("refresh_token", data.refresh);
-
-            document.getElementById("loginModal").style.display = "none";
-            initMap();
-        } else {
-            document.getElementById("loginMessage").innerText =
-                data.detail || "Login failed!";
-        }
-      });
-  
-  
-});
+    });
+    const data = await res.json();
+    if(data.access){
+              sessionStorage.setItem("api_token", data.access);
+              sessionStorage.setItem("refresh_token", data.refresh);
+              loginModal.style.display = "none";
+              initMap();
+          } else {
+              loginMessage.innerText = data.detail || "Login failed!";
+          }
+      } catch(err){
+          console.error("Login error:", err);
+          loginMessage.innerText = "Login failed! Check console.";
+      }
+  });
 
   // Auto-init if token exists
   if(sessionStorage.getItem("api_token")){
@@ -149,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
       initMap();
   }
 
-  function initMap(){
+  async function initMap(){
 
       const commoditySelect = document.getElementById("commoditySelect");
       const selectedCommoditySpan = document.getElementById("selected-commodity");
@@ -265,7 +323,10 @@ document.addEventListener("DOMContentLoaded", function() {
                   userLocation = L.latLng(pos.coords.latitude,pos.coords.longitude);
                   if(userMarker) map.removeLayer(userMarker);
                   userMarker = L.marker(userLocation,{draggable:true,title:"My Location"}).addTo(map);
-                  userMarker.on("dragend",e=>{ userLocation=e.target.getLatLng(); drawCircle(parseInt(radiusSlider.value)); updateStatsForRadius(); updateMarkers(commoditySelect.value,true); });
+                  userMarker.on("dragend",e=>{ 
+                  userLocation=e.target.getLatLng(); 
+                  drawCircle(parseInt(radiusSlider.value)); 
+                  updateStatsForRadius(); updateMarkers(commoditySelect.value,true); });
                   drawCircle(parseInt(radiusSlider.value));
                   updateStatsForRadius();
                   updateMarkers(commoditySelect.value,true);
@@ -275,12 +336,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
       radiusSlider.addEventListener("input", function(){
           radiusValue.textContent=this.value;
-          if(userLocation){ drawCircle(parseInt(this.value)); updateStatsForRadius(); updateMarkers(commoditySelect.value,false); }
+          if(userLocation){ drawCircle(parseInt(this.value)); 
+            updateStatsForRadius(); 
+            updateMarkers(commoditySelect.value,false); }
       });
 
       // --- Fetch Data ---
       authFetch("/api/consumers_geojson/").then(data=>{
-          if(data){ allData=data; updateStatsForRadius(); updateMarkers(commoditySelect.value,true); }
+          if(data){ allData=data; 
+          updateStatsForRadius(); 
+          updateMarkers(commoditySelect.value,true); 
+        }
       }).catch(err=>console.error("Error loading GeoJSON:", err));
 
       commoditySelect.addEventListener("change", function(){
@@ -291,9 +357,18 @@ document.addEventListener("DOMContentLoaded", function() {
       });
 
       async function fetchAgrowonPrices(commodity){
+        const infoDiv = document.getElementById("agrowon-info");
+        const dataList = await authFetch(`/api/webdata_prices/?commodity=${commodity}`);
+
           try{
               const dataList = await authFetch(`/api/webdata_prices/?commodity=${commodity}`);
-              if(!dataList || dataList.length===0) return;
+              // If no data, show message
+              if(!dataList || dataList.length===0){
+                  document.getElementById("agrowon-info").innerText = "No data found for this commodity";
+                  if(agrowonChart) agrowonChart.destroy();
+                  return;
+              }
+                        
 
               const labels = dataList.map(d => d.apmc || 'NA');
               const minData = dataList.map(d => Number(d.minprice)||0);
@@ -311,12 +386,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
               const options = {responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{stacked:true,title:{display:true,text:'APMC'}},y:{stacked:true,beginAtZero:true,title:{display:true,text:'Price (₹)/Qunital'}}}};
 
-              if(agrowonChart){ agrowonChart.data=chartData; agrowonChart.options=options; agrowonChart.update(); }
-              else agrowonChart = new Chart(agrowonCanvas,{type:'bar',data:chartData,options:options});
+              // Destroy old chart and create new one
+              if(agrowonChart) 
+              agrowonChart.destroy();
+              agrowonChart = new Chart(agrowonCanvas, {
+                 type:'bar', data: chartData, options: options 
+                });
 
               const first = dataList[0];
               infoDiv.innerHTML=`<strong>Commodity:</strong> ${first.commodity}<br><strong>Variety:</strong> ${first.variety||'NA'}<br><strong>Date:</strong> ${first.date||'NA'}`;
-          } catch(err){ console.error(err); }
+            }catch(err){
+                  console.error(err);
+                  infoDiv.innerText = "No recent data found for this commodity";
+                  if(agrowonChart) agrowonChart.destroy();
+              }
       }
 
       fetchAgrowonPrices(commoditySelect.value);

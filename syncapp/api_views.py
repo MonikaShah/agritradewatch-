@@ -208,7 +208,7 @@ def agrowon_prices(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def webdata_prices(request):
     commodity_name = request.GET.get('commodity')
     if not commodity_name:
