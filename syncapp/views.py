@@ -16,11 +16,76 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db import connection
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
+
+def apmc(request):
+    """
+    Render APMC page (apmcdata.html) or return JSON data
+    for AJAX requests (commodity + date filter).
+    """
+    commodity = request.GET.get("commodity")
+    date_str = request.GET.get("date")
+
+    # Case 1: Initial page load → render template
+    if not commodity or not date_str:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT commodity FROM webdata ORDER BY commodity;")
+            commodities = [row[0] for row in cursor.fetchall()]
+        return render(request, "syncapp/apmcdata.html", {"commodities": commodities})
+
+    # Case 2: AJAX data request
+    try:
+        selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+
+    sources = ["agrowon", "agmarknet"]
+    result = {}
+
+    for source in sources:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT date, modal_price, min_price, max_price, market
+                FROM webdata
+                WHERE commodity = %s AND source = %s AND date = %s
+                ORDER BY market;
+            """, [commodity, source, selected_date])
+            rows = cursor.fetchall()
+
+        if not rows:
+            result[source] = {"status": "Data not available"}
+            continue
+
+        prices = []
+        for row in rows:
+            date, modal_price, min_price, max_price, market = row
+
+            # Convert Rs/quintal → Rs/kg for agmarknet only
+            if source == "agmarknet":
+                modal_price = round(modal_price / 100, 2) if modal_price else None
+                min_price = round(min_price / 100, 2) if min_price else None
+                max_price = round(max_price / 100, 2) if max_price else None
+
+            prices.append({
+                "date": date.strftime("%Y-%m-%d"),
+                "market": market,
+                "modal_price": modal_price,
+                "min_price": min_price,
+                "max_price": max_price,
+            })
+
+        result[source] = {"status": "ok", "data": prices}
+
+    return JsonResponse({
+        "commodity": commodity,
+        "date": selected_date.strftime("%Y-%m-%d"),
+        "sources": result
+    })
+
 
 def map_chart(request):
     commodities = Commodity.objects.all().order_by("type", "name")
