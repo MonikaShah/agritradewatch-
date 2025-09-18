@@ -24,6 +24,7 @@ from .serializers import (
     FarmerSerializer,
     ConsumerSerializer,
     WebDataSerializer,
+    
 )
 from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
@@ -345,13 +346,13 @@ def webdata_prices_public(request):
 
     today = timezone.localdate()
 
-    # Try today's data
+    # First, try today's data for exact commodity
     data_qs = WebData.objects.filter(
         commodity__iexact=commodity_name,
         date__date=today
     )
 
-    # If no data, try alias
+    # If no data today, try alias (optional)
     commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
     if not data_qs.exists() and commodity_obj and commodity_obj.alias_marathi:
         data_qs = WebData.objects.filter(
@@ -359,20 +360,9 @@ def webdata_prices_public(request):
             date__date=today
         )
 
-    # If still no data, get latest available
+    # If still no data, return 404 instead of fetching latest
     if not data_qs.exists():
-        latest_date = WebData.objects.filter(
-            Q(commodity__iexact=commodity_name) |
-            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
-        ).aggregate(Max("date"))["date__max"]
-
-        if not latest_date:
-            return Response({'error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
-
-        data_qs = WebData.objects.filter(date=latest_date).filter(
-            Q(commodity__iexact=commodity_name) |
-            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
-        )
+        return Response({'error': f'No data found for commodity: {commodity_name}'}, status=status.HTTP_404_NOT_FOUND)
 
     results = [
         {
@@ -390,3 +380,10 @@ def webdata_prices_public(request):
     ]
 
     return Response(results)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data)

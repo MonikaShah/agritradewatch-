@@ -118,6 +118,10 @@ class User1(AbstractUser):
 
     # def has_module_perms(self, app_label):
     #     return self.is_staff
+    
+    # Remove groups and permissions fields
+    groups = None
+    user_permissions = None
 
     class Meta:
         db_table = "syncapp_users1"
