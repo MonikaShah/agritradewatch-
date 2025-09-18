@@ -21,18 +21,10 @@ router.register(r'webdata', api_views.WebDataViewSet)
 
 
 urlpatterns = [
-    # path('map/', views.consumers_map_view, name='consumers-map'),
-    # path('map_merged/', views.consumers_map_merged_view, name='consumers-map_merged'),
-    # path('map_user_products/', views.map_user_products, name='map_user_products'),
-    # path('api/consumers_geojson/', api_views.consumers_geojson, name='consumers_geojson'),
-    # path('map_user_products_list/', views.map_user_products_list, name='map_user_products_list'),
     path('', views.landingpage, name='landingpage'),
     path('map_chart', views.map_chart, name='map_chart'),
-    # path('agrowon_prices/', api_views.agrowon_prices, name='agrowon_prices'),
-    # path('dashboard/',views.dashboard,name='dashboard.html'),
-    
-    # path('api/avg_consumer_price/', api_views.avg_consumer_price, name='avg_consumer_price'),
     path('aboutus/', views.aboutus, name='aboutus'),
+    path('apmc/', views.apmc, name='apmc'),
 
 
     # include DRF router URLs under /api/
@@ -44,10 +36,6 @@ urlpatterns = [
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     
-    # custom login & register for mobile app
-    # path('api/register/', RegisterView.as_view(), name='api-register'),
-    
-    # path('api/login/', api_login, name='api-login'),
     path("api/debug-headers/", api_views.debug_headers),
 
     # custom login & register for web portal

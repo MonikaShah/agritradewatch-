@@ -327,3 +327,66 @@ def whoami(request):
         "username": request.user.username,
         "auth": str(type(request.auth))  # shows if JWT or session
     })
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db.models import Q, Max
+from .models import WebData, Commodity
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def webdata_prices_public(request):
+    commodity_name = request.GET.get('commodity')
+    if not commodity_name:
+        return Response({'error': 'Commodity parameter required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    today = timezone.localdate()
+
+    # Try today's data
+    data_qs = WebData.objects.filter(
+        commodity__iexact=commodity_name,
+        date__date=today
+    )
+
+    # If no data, try alias
+    commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
+    if not data_qs.exists() and commodity_obj and commodity_obj.alias_marathi:
+        data_qs = WebData.objects.filter(
+            commodity__iexact=commodity_obj.alias_marathi,
+            date__date=today
+        )
+
+    # If still no data, get latest available
+    if not data_qs.exists():
+        latest_date = WebData.objects.filter(
+            Q(commodity__iexact=commodity_name) |
+            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
+        ).aggregate(Max("date"))["date__max"]
+
+        if not latest_date:
+            return Response({'error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
+
+        data_qs = WebData.objects.filter(date=latest_date).filter(
+            Q(commodity__iexact=commodity_name) |
+            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
+        )
+
+    results = [
+        {
+            'commodity': data.commodity,
+            'apmc': data.apmc,
+            'variety': data.variety,
+            'minprice': data.minprice,
+            'maxprice': data.maxprice,
+            'modalprice': data.modalprice,
+            'unit': data.unit,
+            'date': data.date.isoformat() if data.date else None,
+            'is_latest': (data.date.date() != today)
+        }
+        for data in data_qs
+    ]
+
+    return Response(results)

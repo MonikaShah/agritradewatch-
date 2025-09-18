@@ -192,7 +192,7 @@ class WebData(models.Model):
     date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        db_table = 'webdata'
+        db_table = "webdata"
         managed = False
         unique_together = ("source", "commodity", "variety", "apmc", "date")
 
