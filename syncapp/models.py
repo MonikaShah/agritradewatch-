@@ -120,8 +120,8 @@ class User1(AbstractUser):
     #     return self.is_staff
     
     # Remove groups and permissions fields
-    groups = None
-    user_permissions = None
+    # groups = None
+    # user_permissions = None
 
     class Meta:
         db_table = "syncapp_users1"
