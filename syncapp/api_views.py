@@ -328,15 +328,7 @@ def whoami(request):
         "username": request.user.username,
         "auth": str(type(request.auth))  # shows if JWT or session
     })
-
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from django.http import JsonResponse
-from django.utils import timezone
-from django.db.models import Q, Max
-from .models import WebData, Commodity
-
+# api for whole sale market prices
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def webdata_prices_public(request):
@@ -380,10 +372,95 @@ def webdata_prices_public(request):
     ]
 
     return Response(results)
-
+#@ api to view profile of logged in user
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile(request):
     user = request.user
     serializer = UserSerializer(user)
     return Response(serializer.data)
+
+
+#CRUD operations for consumer/farmer added crops
+def is_consumer(user):
+    return user.job == 'consumer'
+
+def is_farmer(user):
+    return user.job == 'farmer'
+
+# List crops
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_user_crops(request):
+    user = request.user
+    if is_consumer(user):
+        crops = Consumer1.objects.filter(userid=user.id)
+        serializer = ConsumerSerializer(crops, many=True)
+    elif is_farmer(user):
+        crops = Farmer1.objects.filter(id=user.id)
+        serializer = FarmerSerializer(crops, many=True)
+    else:
+        return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.data)
+
+# Add crop
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_user_crop(request):
+    user = request.user
+    if is_consumer(user):
+        serializer = ConsumerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(userid=user.id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    elif is_farmer(user):
+        serializer = FarmerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(id=user.id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Update crop
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_user_crop(request, crop_id):
+    user = request.user
+    try:
+        if is_consumer(user):
+            crop = Consumer1.objects.get(id=crop_id, userid=user.id)
+            serializer = ConsumerSerializer(crop, data=request.data, partial=True)
+        elif is_farmer(user):
+            crop = Farmer1.objects.get(id=crop_id)
+            serializer = FarmerSerializer(crop, data=request.data, partial=True)
+        else:
+            return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except (Consumer1.DoesNotExist, Farmer1.DoesNotExist):
+        return Response({"error": "Crop not found"}, status=status.HTTP_404_NOT_FOUND)
+
+# Delete crop
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user_crop(request, crop_id):
+    user = request.user
+    try:
+        if is_consumer(user):
+            crop = Consumer1.objects.get(id=crop_id, userid=user.id)
+        elif is_farmer(user):
+            crop = Farmer1.objects.get(id=crop_id)
+        else:
+            return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+
+        crop.delete()
+        return Response({"message": "Crop deleted successfully"}, status=status.HTTP_200_OK)
+
+    except (Consumer1.DoesNotExist, Farmer1.DoesNotExist):
+        return Response({"error": "Crop not found"}, status=status.HTTP_404_NOT_FOUND)

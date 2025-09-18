@@ -23,7 +23,7 @@ class Users1Admin(admin.ModelAdmin):
     list_filter = ('username', 'job', 'is_staff')                          # search bar
 
 class Consumers1Admin(admin.ModelAdmin):
-    list_display = ('date', 'user_name')
+    list_display = ('date', 'user_name', 'userid')
     list_filter = ['date']
 
     def get_queryset(self, request):
