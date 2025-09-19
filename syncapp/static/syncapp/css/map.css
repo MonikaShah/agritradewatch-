@@ -53,7 +53,7 @@ main {
   flex: 1;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Map container */
@@ -289,3 +289,89 @@ canvas {
 }
 
 #toggle-map-controls:hover { background: #45a049; }
+/* ====== About Us Page ====== */
+.about-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  line-height: 1.6;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.about-container h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #2d6a4f;
+}
+
+.about-container ul {
+  margin-left: 20px;
+  list-style: disc;
+}
+
+.about-container li {
+  margin-bottom: 8px;
+}
+
+/* ====== Mobile responsiveness for About Us ====== */
+@media (max-width: 768px) {
+  .about-container {
+    margin: 20px 15px;
+    padding: 15px;
+    font-size: 15px;
+  }
+  .about-container h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-container {
+    margin: 15px 10px;
+    padding: 12px;
+    font-size: 14px;
+  }
+  .about-container h2 {
+    font-size: 20px;
+  }
+  .about-container ul {
+    margin-left: 15px;
+  }
+}
+
+.card {
+  max-width: 900px;
+  margin: auto;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.card-body h1,
+.card-body h2,
+.card-body h3 {
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.card-body p {
+  margin-bottom: 1rem;
+  text-align: justify;
+}
+
+@media (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .card-body {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+

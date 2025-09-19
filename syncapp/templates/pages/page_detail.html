@@ -1,15 +1,12 @@
-{% extends "syncapp/base.html" %}
+{% extends 'syncapp/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="page-content">
-    <h1 class="page-title">{{ page.title }}</h1>
-    
-    {% if page.image %}
-        <img src="{{ page.image.url }}" alt="{{ page.title }}" class="page-image">
-    {% endif %}
-    
-    <div>
-        {{ page.content|safe }}
+<div class="container my-5">
+  <div class="card shadow-lg border-0 rounded-3">
+    <div class="card-body p-4 p-md-5">
+      {{ page.content|safe }}
     </div>
+  </div>
 </div>
 {% endblock %}
