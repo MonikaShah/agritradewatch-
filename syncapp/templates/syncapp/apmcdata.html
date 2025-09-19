@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function(){
     agmarkInfo.innerText = "Loading...";
 
     try {
-      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&source=agmarknet&date=${date}`);
+      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&source=agmark&date=${date}`);
       const dataList = await res.json();
 
       if(!dataList || dataList.length === 0){

@@ -179,3 +179,9 @@ STATIC_ROOT = BASE_DIR/ 'staticfiles'
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+
+LOGIN_URL = '/login/'          # redirect here if not logged in
+LOGIN_REDIRECT_URL = '/crops/' # where to go after successful login
+
+# Session expires when the browser is closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

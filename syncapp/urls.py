@@ -40,7 +40,12 @@ urlpatterns = [
 
     # custom login & register for web portal
     path('login/', views.web_login, name='login'),
+    path("logout/", views.web_logout, name="web_logout"),
     path('register/', views.web_register, name='register'),
+
+    path("crops/", views.crops_list, name="crops_list"),
+    path("crops/update/<str:crop_id>/", views.update_crop, name="update_crop"),
+    path("crops/delete/<str:crop_id>/", views.delete_crop, name="delete_crop"),
 ]
 
 if settings.DEBUG:

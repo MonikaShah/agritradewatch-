@@ -11,16 +11,19 @@ from rest_framework import serializers   # <-- this import is required
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User1
+       
         fields = '__all__'
 
 class FarmerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Farmer1
+        read_only_fields = ['id']
         fields = '__all__'
 
 class ConsumerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consumer1
+        read_only_fields = ['id']
         fields = '__all__'
 
 class WebDataSerializer(serializers.ModelSerializer):

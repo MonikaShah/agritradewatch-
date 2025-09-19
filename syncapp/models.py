@@ -1,5 +1,5 @@
 # Create your models here.
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
@@ -111,6 +111,12 @@ class User1(AbstractUser):
     USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
     REQUIRED_FIELDS = ['email', 'mobile']
 
+    
+    # Keep these so admin does not break
+    groups = models.ManyToManyField(Group, blank=True, related_name="custom_user_set")
+    user_permissions = models.ManyToManyField(Permission, blank=True, related_name="custom_user_set")
+
+
     def __str__(self):
         return self.username
     # def has_perm(self, perm, obj=None):
@@ -119,12 +125,10 @@ class User1(AbstractUser):
     # def has_module_perms(self, app_label):
     #     return self.is_staff
     
-    # Remove groups and permissions fields
-    groups = None
-    user_permissions = None
-
+    
     class Meta:
         db_table = "syncapp_users1"
+        managed = True
 
 # -------------------------------
 # Farmer model

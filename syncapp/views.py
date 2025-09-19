@@ -1,8 +1,15 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer1,Page,Commodity,User1 # or Farmer, UserData if they have geometry
-from django.shortcuts import render,get_object_or_404
-from rest_framework.decorators import api_view
+from .models import Consumer1,Page,Commodity,User1,Farmer1 # or Farmer, UserData if they have geometry
+from django.shortcuts import render,redirect, get_object_or_404
+from django.contrib import messages
+from .forms import ConsumerForm, FarmerForm
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.conf import settings
 # from .serializers import ConsumerGeoSerializer
 import requests,logging,json
 import xml.etree.ElementTree as ET
@@ -12,21 +19,26 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password, check_password
-from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
+
 logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
 
+@login_required
 def apmc(request):
     """
     Render APMC page (apmcdata.html) or return JSON data
     for AJAX requests (commodity + date filter).
     """
+
+     # Extra safety: double-check user is authenticated
+    if not request.user.is_authenticated:
+        return redirect(settings.LOGIN_URL)
+
     commodity = request.GET.get("commodity")
     date_str = request.GET.get("date")
 
@@ -143,22 +155,25 @@ def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug)
     return render(request, 'pages/page_detail.html', {'page': page})
 
+
 def web_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        try:
-            user = User1.objects.get(username=username)
-            if check_password(password, user.password):
-                request.session["user_id"] = user.id
-                messages.success(request, "Login successful!")
-                return redirect("/")  # change to dashboard
-            else:
-                messages.error(request, "Invalid password")
-        except User1.DoesNotExist:
-            messages.error(request, "User not found")
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)  # important
+            messages.success(request, f"Welcome {user.username}!")
+            return redirect("landingpage")
+        else:
+            messages.error(request, "Invalid credentials")
     return render(request, "syncapp/login.html")
 
+@login_required
+def web_logout(request):
+    logout(request)  # clears session
+    messages.info(request, "You have been logged out.")
+    return redirect("login")
 
 def web_register(request):
     if request.method == "POST":
@@ -173,3 +188,73 @@ def web_register(request):
             messages.success(request, "Registration successful, please login")
             return redirect("login")
     return render(request, "syncapp/register.html")
+
+
+@login_required
+def crops_list(request):
+    user = request.user
+    form = None
+    crops = None
+    print("job is ",user.job)
+    if user.job == "farmer":
+        if request.method == "POST":
+            form = FarmerForm(request.POST)
+            if form.is_valid():
+                farmer_entry = form.save(commit=False)
+                farmer_entry.id = user.id  # link to Firebase UID
+                farmer_entry.latitude = user.latitude
+                farmer_entry.longitude = user.longitude
+                farmer_entry.save()
+                return redirect("crops_list")
+        else:
+            form = FarmerForm()
+        crops = Farmer1.objects.filter(id=user.id)
+
+    elif user.job == "consumer":
+        if request.method == "POST":
+            form = ConsumerForm(request.POST)
+            if form.is_valid():
+                consumer_entry = form.save(commit=False)
+                consumer_entry.id = user.id
+                consumer_entry.userid = user.id
+                consumer_entry.latitude = user.latitude
+                consumer_entry.longitude = user.longitude
+                consumer_entry.save()
+                return redirect("crops_list")
+        else:
+            form = ConsumerForm()
+        crops = Consumer1.objects.filter(userid=user.id)
+
+    return render(request, "syncapp/crops_list.html", {"form": form, "crops": crops, "user": user})
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def update_crop(request, crop_id):
+    user = request.user
+    if user.job == "consumer":
+        crop = get_object_or_404(Consumer1, id=crop_id, userid=user.id)
+        form = ConsumerForm(request.POST or None, instance=crop)
+    else:
+        crop = get_object_or_404(Farmer1, id=crop_id)
+        form = FarmerForm(request.POST or None, instance=crop)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Crop updated successfully.")
+        return redirect("crops_list")
+
+    return render(request, "syncapp/crops.html", {"crops": [crop], "form": form})
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def delete_crop(request, crop_id):
+    user = request.user
+    if user.job == "consumer":
+        crop = get_object_or_404(Consumer1, id=crop_id, userid=user.id)
+    else:
+        crop = get_object_or_404(Farmer1, id=crop_id)
+
+    crop.delete()
+    messages.success(request, "Crop deleted successfully.")
+    return redirect("crops_list")
