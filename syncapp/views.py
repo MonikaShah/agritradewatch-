@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.conf import settings
+from uuid import uuid4
+import html
 # from .serializers import ConsumerGeoSerializer
 import requests,logging,json
 import xml.etree.ElementTree as ET
@@ -153,6 +155,8 @@ def page_detail(request, slug):
     Example slugs: 'about-us', 'disclaimer', 'footer', etc.
     """
     page = get_object_or_404(Page, slug=slug)
+    page.content = html.unescape(page.content)  # decode &lt;p&gt; → <p>
+
     return render(request, 'pages/page_detail.html', {'page': page})
 
 
@@ -174,6 +178,9 @@ def web_logout(request):
     logout(request)  # clears session
     messages.info(request, "You have been logged out.")
     return redirect("login")
+
+def profile(request):
+    return render(request, "syncapp/profile.html")
 
 def web_register(request):
     if request.method == "POST":
@@ -201,7 +208,7 @@ def crops_list(request):
             form = FarmerForm(request.POST)
             if form.is_valid():
                 farmer_entry = form.save(commit=False)
-                farmer_entry.id = user.id  # link to Firebase UID
+                farmer_entry.id = str(uuid4()) 
                 farmer_entry.latitude = user.latitude
                 farmer_entry.longitude = user.longitude
                 farmer_entry.save()
@@ -215,7 +222,7 @@ def crops_list(request):
             form = ConsumerForm(request.POST)
             if form.is_valid():
                 consumer_entry = form.save(commit=False)
-                consumer_entry.id = user.id
+                consumer_entry.id = str(uuid4())  # generate new UUID
                 consumer_entry.userid = user.id
                 consumer_entry.latitude = user.latitude
                 consumer_entry.longitude = user.longitude

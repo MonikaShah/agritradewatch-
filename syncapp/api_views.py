@@ -336,6 +336,15 @@ def webdata_prices_public(request):
     if not commodity_name:
         return Response({'error': 'Commodity parameter required'}, status=status.HTTP_400_BAD_REQUEST)
 
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return Response({'error': 'Invalid date format, use YYYY-MM-DD'}, status=400)
+    else:
+        query_date = timezone.localdate()
+
     today = timezone.localdate()
 
     # First, try today's data for exact commodity
@@ -349,7 +358,7 @@ def webdata_prices_public(request):
     if not data_qs.exists() and commodity_obj and commodity_obj.alias_marathi:
         data_qs = WebData.objects.filter(
             commodity__iexact=commodity_obj.alias_marathi,
-            date__date=today
+            date__date=query_date   
         )
 
     # If still no data, return 404 instead of fetching latest
@@ -406,23 +415,52 @@ def list_user_crops(request):
 # Add crop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+# def add_user_crop(request):
+#     user = request.user
+#     if is_consumer(user):
+#         serializer = ConsumerSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(userid=user.id)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     elif is_farmer(user):
+#         serializer = FarmerSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(id=user.id)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     else:
+#         return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+    
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 def add_user_crop(request):
     user = request.user
+
+    data = request.data.copy()  # make mutable copy
+
+    # Add user id automatically
+    data['userid'] = str(user.id)
+
+    # Set default date if not provided
+    if not data.get('date'):
+        data['date'] = timezone.now()
+    # Set latitude/longitude if not provided (fallback to 0.0)
+    if not data.get('latitude'):
+        data['latitude'] = 0.0
+    if not data.get('longitude'):
+        data['longitude'] = 0.0
+
     if is_consumer(user):
-        serializer = ConsumerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(userid=user.id)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = ConsumerSerializer(data=data)
     elif is_farmer(user):
-        serializer = FarmerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(id=user.id)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = FarmerSerializer(data=data)
     else:
         return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if serializer.is_valid():
+        serializer.save(id=str(uuid.uuid4()))
+        # serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # Update crop
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
