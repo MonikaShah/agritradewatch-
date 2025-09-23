@@ -191,6 +191,7 @@ class WebData(models.Model):
     id = models.AutoField(primary_key=True)
     source = models.CharField(max_length=100)
     commodity = models.CharField(max_length=255)  # store alias_marathi directly
+    commodity_local = models.CharField(max_length=100, blank=True, null=True)  # Hindi/Marathi
     variety = models.CharField(max_length=100, blank=True, null=True)
     apmc = models.CharField(max_length=100, blank=True, null=True)
     minprice = models.IntegerField(blank=True, null=True)
@@ -198,13 +199,15 @@ class WebData(models.Model):
     modalprice = models.IntegerField(blank=True, null=True)
     unit = models.CharField(max_length=20, blank=True, null=True)
     date = models.DateTimeField(blank=True, null=True)
-
+    district = models.CharField(max_length=50, blank=True, null=True)
+    grade = models.CharField(max_length=20, blank=True, null=True)
     class Meta:
         db_table = "webdata"
-        managed = False
-        unique_together = ("source", "commodity", "variety", "apmc", "date")
+        managed = True
+        # unique_together = ("source", "commodity", "variety", "apmc", "date")
 
-    
+    def __str__(self):
+        return f"{self.date} - {self.commodity} ({self.apmc})"
 
 class Page(models.Model):
     STATUS_CHOICES = (
