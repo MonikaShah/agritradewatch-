@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.conf import settings
 from uuid import uuid4
+from django.utils import timezone
 import html
 # from .serializers import ConsumerGeoSerializer
 import requests,logging,json
@@ -25,7 +26,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
-
+from .serializers import (
+    RegisterSerializer,
+    UserSerializer,
+    FarmerSerializer,
+    ConsumerSerializer,
+    WebDataSerializer,
+    
+)
 logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
@@ -198,70 +206,133 @@ def web_register(request):
 
 
 @login_required
+# def crops_list(request):
+#     user = request.user
+#     form = None
+#     crops = None
+#     print("job is ",user.job)
+#     if user.job == "farmer":
+#         if request.method == "POST":
+#             form = FarmerForm(request.POST)
+#             if form.is_valid():
+#                 farmer_entry = form.save(commit=False)
+#                 farmer_entry.id = str(uuid4()) 
+#                 farmer_entry.latitude = user.latitude
+#                 farmer_entry.longitude = user.longitude
+#                 farmer_entry.save()
+#                 return redirect("crops_list")
+#         else:
+#             form = FarmerForm()
+#         crops = Farmer1.objects.filter(id=user.id)
+
+#     elif user.job == "consumer":
+#         if request.method == "POST":
+#             form = ConsumerForm(request.POST)
+#             if form.is_valid():
+#                 consumer_entry = form.save(commit=False)
+#                 consumer_entry.id = str(uuid4())  # generate new UUID
+#                 consumer_entry.userid = user.id
+#                 consumer_entry.latitude = user.latitude
+#                 consumer_entry.longitude = user.longitude
+#                 consumer_entry.save()
+#                 return redirect("crops_list")
+#         else:
+#             form = ConsumerForm()
+#         crops = Consumer1.objects.filter(userid=user.id)
+
+#     return render(request, "syncapp/crops_list.html", {"form": form, "crops": crops, "user": user})
 def crops_list(request):
     user = request.user
+    edit_id = request.GET.get("edit")  # check if editing an existing crop
+    print("Edit ID from GET:", edit_id)
     form = None
     crops = None
-    print("job is ",user.job)
+    is_edit = False  # flag for template
+    print("job is", user.job)
+
     if user.job == "farmer":
-        if request.method == "POST":
-            form = FarmerForm(request.POST)
-            if form.is_valid():
-                farmer_entry = form.save(commit=False)
-                farmer_entry.id = str(uuid4()) 
-                farmer_entry.latitude = user.latitude
-                farmer_entry.longitude = user.longitude
-                farmer_entry.save()
-                return redirect("crops_list")
-        else:
-            form = FarmerForm()
         crops = Farmer1.objects.filter(id=user.id)
+        if edit_id:
+            crop_to_edit = get_object_or_404(Farmer1, id=edit_id)
+            form = FarmerForm(request.POST or None, instance=crop_to_edit)
+            is_edit = True
+        else:
+            form = FarmerForm(request.POST or None)
+
+        if request.method == "POST" and form.is_valid():
+            entry = form.save(commit=False)
+            if not edit_id:
+                entry.id = str(uuid4())  # generate UUID only for new crop
+            entry.latitude = user.latitude
+            entry.longitude = user.longitude
+            if not edit_id:
+                entry.date = timezone.now()  # auto-set datetime for new crop
+            entry.save()
+            return redirect("crops_list")
 
     elif user.job == "consumer":
-        if request.method == "POST":
-            form = ConsumerForm(request.POST)
-            if form.is_valid():
-                consumer_entry = form.save(commit=False)
-                consumer_entry.id = str(uuid4())  # generate new UUID
-                consumer_entry.userid = user.id
-                consumer_entry.latitude = user.latitude
-                consumer_entry.longitude = user.longitude
-                consumer_entry.save()
-                return redirect("crops_list")
-        else:
-            form = ConsumerForm()
         crops = Consumer1.objects.filter(userid=user.id)
+        if edit_id:
+            crop_to_edit = get_object_or_404(Consumer1, id=edit_id, userid=user.id)
+            form = ConsumerForm(request.POST or None, instance=crop_to_edit)
+            is_edit = True
+        else:
+            form = ConsumerForm(request.POST or None)
 
-    return render(request, "syncapp/crops_list.html", {"form": form, "crops": crops, "user": user})
+        if request.method == "POST" and form.is_valid():
+            entry = form.save(commit=False)
+            if not edit_id:
+                entry.id = str(uuid4())  # generate new UUID for new crop
+                entry.userid = user.id
+                entry.date = timezone.now()
+            entry.latitude = user.latitude
+            entry.longitude = user.longitude
+            entry.save()
+            return redirect("crops_list")
 
-@api_view(["GET", "POST"])
+    return render(
+        request,
+        "syncapp/crops_list.html",
+        {
+            "form": form,
+            "crops": crops,
+            "user": user,
+            "is_edit": is_edit,  # pass flag to template
+        },
+    )
+@api_view(['PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_crop(request, crop_id):
     user = request.user
+
     if user.job == "consumer":
         crop = get_object_or_404(Consumer1, id=crop_id, userid=user.id)
-        form = ConsumerForm(request.POST or None, instance=crop)
+        serializer = ConsumerSerializer(crop, data=request.data, partial=True)
+        
     else:
         crop = get_object_or_404(Farmer1, id=crop_id)
-        form = FarmerForm(request.POST or None, instance=crop)
+        serializer = FarmerSerializer(crop, data=request.data, partial=True)
 
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Crop updated successfully.")
-        return redirect("crops_list")
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=200)
 
-    return render(request, "syncapp/crops.html", {"crops": [crop], "form": form})
+    return Response(serializer.errors, status=400)
 
 
-@api_view(["GET", "POST"])
-@permission_classes([IsAuthenticated])
+@login_required
 def delete_crop(request, crop_id):
     user = request.user
-    if user.job == "consumer":
-        crop = get_object_or_404(Consumer1, id=crop_id, userid=user.id)
-    else:
-        crop = get_object_or_404(Farmer1, id=crop_id)
 
-    crop.delete()
-    messages.success(request, "Crop deleted successfully.")
+    try:
+        if user.job == "consumer":
+            crop = get_object_or_404(Consumer1, id=crop_id, userid=user.id)
+        else:  # farmer
+            crop = get_object_or_404(Farmer1, id=crop_id)
+
+        crop.delete()
+        messages.success(request, "Crop deleted successfully.")
+    except Exception as e:
+        messages.error(request, f"Error deleting crop: {str(e)}")
+
     return redirect("crops_list")
