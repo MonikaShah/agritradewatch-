@@ -7,16 +7,20 @@
 
     <!-- Left Sidebar -->
     <nav class="col-md-3 col-lg-2 mb-3 mb-md-0 d-md-block bg-light sidebar shadow-sm rounded p-3">
-      <h5 class="text-center mb-3">🌱 Crops Menu</h5>
+      <h5 class="text-center mb-3">
+        <img src="{% static 'logo.png' %}" 
+      alt="Logo" 
+      style="height:3em; max-height:50px; width:auto; margin-right:0.5em;">
+        Commodity History</h5>
       <ul class="nav flex-column nav-pills gap-2" id="cropsMenu">
         <li class="nav-item">
           <a class="nav-link {% if not is_edit and not show_map %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">
-            🌾 List Crops
+            🌾 Purchased Commodity
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if is_edit %}active{% endif %}" href="#formCrops" data-bs-toggle="tab">
-            {% if is_edit %}✏️ Update Crop{% else %}➕ Add Crop{% endif %}
+            {% if is_edit %}✏️ Update Crop{% else %}➕ Add Commodity{% endif %}
           </a>
         </li>
         <li class="nav-item">
@@ -35,7 +39,7 @@
         <!-- Crop List (default) -->
         <div class="tab-pane fade {% if not is_edit and not show_map %}show active{% endif %}" id="listCrops">
           <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white text-center">🌾 Your Crops</div>
+            <div class="card-header bg-primary text-white text-center">🌾 Purchased Commodities</div>
             <div class="card-body p-0">
               {% if crops %}
               <div class="table-responsive w-100">
@@ -183,7 +187,9 @@
             commodity: "{{ crop.commodity|escapejs }}",
             price: "{{ crop.buyingprice|default:''|escapejs }}",
             quantity: "{{ crop.quantitybought|default:''|escapejs }}",
-            unit: "{{ crop.unit|default:''|escapejs }}"
+            unit: "{{ crop.unit|default:''|escapejs }}",
+            date: "{{ crop.date }}"
+            
           }{% if not forloop.last %},{% endif %}
         {% endif %}
       {% endfor %}
@@ -195,7 +201,8 @@
         marker.bindPopup(
           "<b>" + crop.commodity + "</b><br/>" +
           "Price: " + crop.price + "<br/>" +
-          "Qty: " + (crop.quantity || '-') + " " + crop.unit
+          "Qty: " + (crop.quantity || '-') + " " + crop.unit + "<br/>" +
+          "Purchase date: " + (crop.date || '-') 
         );
         bounds.push([crop.lat, crop.lng]);
       });

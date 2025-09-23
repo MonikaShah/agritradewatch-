@@ -244,7 +244,6 @@ def web_register(request):
 def crops_list(request):
     user = request.user
     edit_id = request.GET.get("edit")  # check if editing an existing crop
-    print("Edit ID from GET:", edit_id)
     form = None
     crops = None
     is_edit = False  # flag for template
