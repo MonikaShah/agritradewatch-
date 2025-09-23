@@ -11,7 +11,11 @@ class ConsumerForm(forms.ModelForm):
     class Meta:
         model = Consumer1
         fields = ["commodity", "buyingprice", "quantitybought", "unit", "date"]
-        # exclude = ['id', 'userid']
+        widgets = {
+            'commodity': forms.TextInput(attrs={'class': 'form-control'}),
+            'quantitybought': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        }# exclude = ['id', 'userid']
 
 class FarmerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
@@ -23,4 +27,8 @@ class FarmerForm(forms.ModelForm):
     class Meta:
         model = Farmer1
         fields = ["commodity", "sellingprice", "quantitysold", "unit", "date", "image"]
-
+        widgets = {
+            'commodity': forms.TextInput(attrs={'class': 'form-control'}),
+            'quantitysold': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        }
