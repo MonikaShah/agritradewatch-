@@ -6,207 +6,288 @@
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 <style>
-  /* Horizontal line for inputs */
-  .form-inline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: flex-end;
-    margin-bottom: 20px;
-  }
+  .container-flex { display: flex; gap: 20px; flex-wrap: wrap; }
+  .left-panel { flex: 1 1 250px; min-width: 250px; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: #f9f9f9; }
+  .right-panel { flex: 3 1 600px; }
 
-  .form-inline > * {
-    flex: 1 1 200px;
-  }
+  .left-panel ul { list-style:none; padding:0; }
+  .left-panel li { padding: 10px; cursor:pointer; border-bottom:1px solid #ddd; }
+  .left-panel li.active { background:#007bff; color:#fff; }
 
-  /* Chart container */
-  .chart-container {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-  }
+  .chart-box { border:1px solid #ddd; border-radius:10px; padding:15px; background:#f9f9f9; margin-bottom:20px; display:none; }
+  .chart-box h4 { text-align:center; }
 
-  .chart-box {
-    flex: 1 1 45%;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    background: #f9f9f9;
-    min-width: 300px;
-  }
+  .form-group { margin-bottom:10px; }
+  .chart-box { border:1px solid #ddd; border-radius:10px; padding:15px; background:#f9f9f9; display:none; }
 
-  .chart-box h4 {
-    text-align: center;
-  }
-
-  #daySlider {
-    width: 100%;
-  }
-
-  @media (max-width: 768px) {
-    .chart-box {
-      flex: 1 1 100%;
-    }
-  }
+@media (max-width: 768px) {
+  .d-flex { flex-direction: column; }
+  .flex-shrink-1, .flex-grow-1 { max-width: 100%; min-width: 100%; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-3">Commodity Prices</h2>
+  <h2 class="mb-3">WholeSale Market Prices</h2>
+  <div id="dynamicAlert" class="alert alert-warning alert-dismissible fade show" style="display:none;"></div>
 
-  <!-- Horizontal Form -->
-  <div class="form-inline">
-    <div>
-      <label for="commoditySelect"><b>Select Commodity</b></label>
-      <select id="commoditySelect" class="form-control">
-        {% for item in commodities %}
+  <div class="d-flex flex-wrap">
+    <!-- LEFT PANEL (Filters) -->
+    <div class="p-3 bg-light rounded shadow-sm flex-shrink-1" style="min-width:250px; max-width:300px; flex:1;">
+      <div class="mb-3">
+        <label for="commoditySelect" class="form-label">Commodity</label>
+        <select id="commoditySelect" class="form-select w-100">
+          <option value="">All Commodities</option>
+          {% for item in commodities %}
           <option value="{{ item }}">{{ item }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label for="dateSelect"><b>Select Date</b></label>
-      <input type="date" id="dateSelect" class="form-control" value="{{ today|date:'Y-m-d' }}">
-    </div>
-    <div>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="apmcSelect" class="form-label">APMC</label>
+        <select id="apmcSelect" class="form-select w-100" disabled>
+          <option value="">Select APMC</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="dateSelect" class="form-label">Date</label>
+        <input type="date" id="dateSelect" class="form-control w-100" value="{{ today|date:'Y-m-d' }}">
+      </div>
       <button id="submitBtn" class="btn btn-primary w-100">Show Prices</button>
     </div>
-  </div>
 
-  <!-- Slider -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <label for="daySlider"><b>View Previous Days</b></label>
-      <input type="range" id="daySlider" min="0" max="7" step="1" value="0">
-      <span id="daySliderValue">Today</span>
-    </div>
-  </div>
+    <!-- RIGHT PANEL (Charts) -->
+    <div class="p-3 flex-grow-1" style="min-width:300px;">
+      <div class="chart-box" id="agmarkBox">
+        <h4>AgmarkNet Prices (₹/Kg)</h4>
+        <div id="agmark-info" class="text-muted text-center"></div>
+        <canvas id="agmarkChart" height="300"></canvas>
+      </div>
 
-  <!-- Charts -->
-  <div class="chart-container">
-    <div class="chart-box">
-      <h4>AgmarkNet Prices (₹/Kg)</h4>
-      <div id="agmark-info" class="text-muted text-center">Select a commodity and date</div>
-      <canvas id="agmarkChart" height="300"></canvas>
+      <div class="chart-box" id="agrowonBox">
+        <h4>Agrowon Prices (₹/Quintal)</h4>
+        <div id="agrowon-info" class="text-muted text-center"></div>
+        <canvas id="agrowonChart" height="300"></canvas>
+      </div>
+
+
+
+    <!-- Line chart -->
+    <div class="chart-box" id="agmarkLineBox">
+      <h4>AgmarkNet Prices (Last 7 Days ₹/Kg)</h4>
+      <canvas id="agmarkLineChart" height="300"></canvas>
     </div>
-    <div class="chart-box">
-      <h4>Agrowon Prices (₹/Kg)</h4>
-      <div id="agrowon-info" class="text-muted text-center">Select a commodity and date</div>
-      <canvas id="agrowonChart" height="300"></canvas>
-    </div>
-  </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-
+document.addEventListener("DOMContentLoaded", function() {
   const commoditySelect = document.getElementById("commoditySelect");
+  const apmcSelect = document.getElementById("apmcSelect");
   const dateSelect = document.getElementById("dateSelect");
   const submitBtn = document.getElementById("submitBtn");
 
   let agmarkChart = null;
   let agrowonChart = null;
 
-  submitBtn.addEventListener("click", fetchData);
-
-  async function fetchData(){
-    const commodity = commoditySelect.value;
-    const date = dateSelect.value;
-
-    fetchAgmarkPrices(commodity, date);
-    fetchAgrowonPrices(commodity, date);
+  function showAlert(msg, type="warning", dur=4000){
+    const alertDiv = document.getElementById("dynamicAlert");
+    alertDiv.innerText=msg;
+    alertDiv.className=`alert alert-${type} alert-dismissible fade show`;
+    alertDiv.style.display="block";
+    setTimeout(()=>{ alertDiv.classList.remove("show"); alertDiv.classList.add("hide"); setTimeout(()=>alertDiv.style.display="none",500); }, dur);
   }
 
-  // Function to update chart without flickering
-  function updateOrCreateChart(chartInstance, ctx, labels, datasets, yLabel) {
-    if(chartInstance){
-      chartInstance.data.labels = labels;
-      chartInstance.data.datasets = datasets;
-      chartInstance.options.scales.y.title.text = yLabel;
-      chartInstance.update();
-      return chartInstance;
-    } else {
-      return new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets },
+  function destroyChart(chart){ if(chart){ chart.destroy(); chart=null; } return chart; }
+
+  // Populate APMC based on selected commodity & date
+  async function populateApmc(){
+    const commodity = commoditySelect.value;
+    const date = dateSelect.value;
+    if(!commodity){ apmcSelect.innerHTML='<option value="">All APMCs</option>'; apmcSelect.disabled=false; return; }
+
+    try{
+      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&date=${date}`);
+      const dataList = await res.json();
+      const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
+      apmcSelect.innerHTML='<option value="">All APMCs</option>';
+      uniqueApmcs.forEach(a=>{
+        const opt = document.createElement("option");
+        opt.value=a; opt.textContent=a; apmcSelect.appendChild(opt);
+      });
+      apmcSelect.disabled = uniqueApmcs.length===0;
+    }catch(err){ console.error(err); apmcSelect.innerHTML='<option value="">All APMCs</option>'; apmcSelect.disabled=false; }
+  }
+
+  commoditySelect.addEventListener("change", populateApmc);
+  dateSelect.addEventListener("change", populateApmc);
+
+  async function fetchPrices(source, apmc=null, commodity=null, date=null){
+    const infoId = source=="agmark"?"agmark-info":"agrowon-info";
+    const boxId = source=="agmark"?"agmarkBox":"agrowonBox";
+    const ctx = document.getElementById(source+"Chart").getContext("2d");
+    if(source=="agmark") agmarkChart=destroyChart(agmarkChart); else agrowonChart=destroyChart(agrowonChart);
+
+    document.getElementById(infoId).innerText="Loading...";
+    document.getElementById(boxId).style.display="block";
+
+    try{
+      let url=`/api/webdata_prices_public/?source=${source}`;
+      if(commodity) url+=`&commodity=${encodeURIComponent(commodity)}`;
+      if(apmc) url+=`&apmc=${encodeURIComponent(apmc)}`;
+      if(date) url+=`&date=${date}`;
+      const res = await fetch(url);
+      const dataList = await res.json();
+
+      let labels=[], minData=[], modalData=[], maxData=[];
+      if(dataList.length===0){
+        labels = [apmc||"NA"];
+        minData=[0]; modalData=[0]; maxData=[0];
+      } else {
+        if(apmc){
+          const record = dataList.find(d=>d.apmc===apmc) || {};
+          labels=[apmc]; 
+          minData=[(record.minprice||0)/100]; // divide by 100 for per kg
+          modalData=[(record.modalprice||0)/100];
+          maxData=[(record.maxprice||0)/100];
+        } else {
+          labels = [...new Set(dataList.map(d=>d.apmc))];
+          minData = labels.map(l=>dataList.find(d=>d.apmc===l)?.minprice||0);
+          modalData = labels.map(l=>dataList.find(d=>d.apmc===l)?.modalprice||0);
+          maxData = labels.map(l=>dataList.find(d=>d.apmc===l)?.maxprice||0);
+        }
+      }
+
+      const colorMap = source==="agmark"
+        ? ["rgba(54,162,235,0.7)", "rgba(255,206,86,0.7)", "rgba(75,192,192,0.7)"]
+        : ["rgba(153,102,255,0.7)","rgba(255,159,64,0.7)","rgba(255,99,132,0.7)"];
+
+      const datasets=[
+        {label:"Min", data:minData, backgroundColor: colorMap[0]},
+        {label:"Modal", data:modalData, backgroundColor: colorMap[1]},
+        {label:"Max", data:maxData, backgroundColor: colorMap[2]}
+      ];
+
+      const chartOptions = {type:"bar", data:{labels,datasets}, options:{responsive:true, plugins:{legend:{position:"top"}}, scales:{y:{beginAtZero:true}}}};
+      if(source=="agmark") agmarkChart = new Chart(ctx, chartOptions);
+      else agrowonChart = new Chart(ctx, chartOptions);
+
+      document.getElementById(infoId).innerHTML=`<b>Commodity:</b> ${commodity||"All"}<br><b>APMC:</b> ${apmc||"All"}<br><b>Date:</b> ${date||"Latest"}`;
+    }catch(err){ 
+      console.error(err);
+      //  showAlert(`Error loading ${source} data`); 
+      document.getElementById(boxId).style.display="none"; }
+  }
+
+  submitBtn.addEventListener("click", ()=>{
+    const commodity = commoditySelect.value;
+    const apmc = apmcSelect.value;
+    const date = dateSelect.value;
+    fetchPrices("agmark",apmc,commodity,date);
+    // fetchPrices("agrowon",apmc,commodity,date);
+    // fetchLineChart("agmark",apmc,commodity);
+  });
+
+  let agmarkLineChart = null;
+  
+  
+  // Function to fetch last 7 days prices and draw line chart
+  async function fetchLineChart(source, apmc=null, commodity=null) {
+    const boxId = source == "agmark" ? "agmarkLineBox" : "agrowonLineBox";
+    const ctx = document.getElementById(source + "LineChart").getContext("2d");
+
+    if (source == "agmark") agmarkLineChart = destroyChart(agmarkLineChart);
+    else agrowonLineChart = destroyChart(agrowonLineChart);
+
+    document.getElementById(boxId).style.display = "block";
+
+    function formatDate(d) {
+      // Convert any date string to YYYY-MM-DD
+      const dt = new Date(d);
+      const month = (dt.getMonth() + 1).toString().padStart(2, "0");
+      const day = dt.getDate().toString().padStart(2, "0");
+      return `${dt.getFullYear()}-${month}-${day}`;
+    }
+
+    function formatLabel(d) {
+      // Format YYYY-MM-DD -> DD MMM
+      const dt = new Date(d);
+      return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+    }
+
+    try {
+      let url = `/api/webdata_prices_public/?source=${source}&lastdays=7`;
+      if (commodity) url += `&commodity=${encodeURIComponent(commodity)}`;
+      if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
+
+      const res = await fetch(url);
+      const dataList = await res.json();
+
+      if (!Array.isArray(dataList) || dataList.length === 0) {
+        document.getElementById(boxId).style.display = "none";
+        return;
+      }
+
+      // Make sure all 7 dates are shown even if some have no data
+      const today = new Date();
+      const labels = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        labels.push(d.toISOString().slice(0, 10)); // YYYY-MM-DD
+      }
+
+      // Map data for each date
+      const minData = [];
+      const modalData = [];
+      const maxData = [];
+
+      labels.forEach(date => {
+        const record = dataList.find(d => formatDate(d.date) === date);
+        minData.push(record ? record.minprice || 0 : 0);
+        modalData.push(record ? record.modalprice || 0 : 0);
+        maxData.push(record ? record.maxprice || 0 : 0);
+      });
+
+      const datasets = [
+        { label: "Min", data: minData, borderColor: "rgba(54,162,235,1)", backgroundColor: "rgba(54,162,235,0.2)", tension: 0.3 },
+        { label: "Modal", data: modalData, borderColor: "rgba(255,206,86,1)", backgroundColor: "rgba(255,206,86,0.2)", tension: 0.3 },
+        { label: "Max", data: maxData, borderColor: "rgba(75,192,192,1)", backgroundColor: "rgba(75,192,192,0.2)", tension: 0.3 }
+      ];
+
+      const chartOptions = {
+        type: "line",
+        data: { labels: labels.map(formatLabel), datasets }, // formatted labels
         options: {
           responsive: true,
           plugins: { legend: { position: "top" } },
-          scales: { y: { beginAtZero: true, title: { display: true, text: yLabel } } }
+          scales: { y: { beginAtZero: true } }
         }
-      });
-    }
-  }
+      };
 
-  async function fetchAgmarkPrices(commodity, date){
-    const agmarkInfo = document.getElementById("agmark-info");
-    const ctx = document.getElementById("agmarkChart").getContext("2d");
-    agmarkInfo.innerText = "Loading...";
+      if (source == "agmark") agmarkLineChart = new Chart(ctx, chartOptions);
+      else agrowonLineChart = new Chart(ctx, chartOptions);
 
-    try {
-      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&source=agmark&date=${date}`);
-      const dataList = await res.json();
-
-      if(!dataList || dataList.length === 0){
-        agmarkInfo.innerText = "No AgmarkNet data available";
-        return;
-      }
-
-      const labels = [...new Set(dataList.map(d=>d.apmc || "NA"))];
-      const minData = labels.map(label => dataList.find(d=>d.apmc===label)?.minprice/100 || 0);
-      const modalData = labels.map(label => dataList.find(d=>d.apmc===label)?.modalprice/100 || 0);
-      const maxData = labels.map(label => dataList.find(d=>d.apmc===label)?.maxprice/100 || 0);
-
-      const datasets = [
-        {label:"Min", data:minData, backgroundColor:"rgba(54,162,235,0.7)"},
-        {label:"Modal", data:modalData, backgroundColor:"rgba(255,206,86,0.7)"},
-        {label:"Max", data:maxData, backgroundColor:"rgba(75,192,192,0.7)"}
-      ];
-
-      agmarkChart = updateOrCreateChart(agmarkChart, ctx, labels, datasets, "₹/Kg");
-      agmarkInfo.innerHTML = `<b>Commodity:</b> ${commodity}<br><b>Date:</b> ${date}`;
-    } catch(err) {
-      agmarkInfo.innerText = "Error loading AgmarkNet data";
+    } catch (err) {
       console.error(err);
+      document.getElementById(boxId).style.display = "none";
     }
-  }
+}
 
-  async function fetchAgrowonPrices(commodity, date){
-    const agrowonInfo = document.getElementById("agrowon-info");
-    const ctx = document.getElementById("agrowonChart").getContext("2d");
-    agrowonInfo.innerText = "Loading...";
 
-    try {
-      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&source=agrowon&date=${date}`);
-      const dataList = await res.json();
 
-      if(!dataList || dataList.length === 0){
-        agrowonInfo.innerText = "No Agrowon data available";
-        return;
-      }
-
-      const labels = [...new Set(dataList.map(d=>d.apmc || "NA"))];
-      const minData = labels.map(label => dataList.find(d=>d.apmc===label)?.minprice || 0);
-      const modalData = labels.map(label => dataList.find(d=>d.apmc===label)?.modalprice || 0);
-      const maxData = labels.map(label => dataList.find(d=>d.apmc===label)?.maxprice || 0);
-
-      const datasets = [
-        {label:"Min", data:minData, backgroundColor:"rgba(153,102,255,0.7)"},
-        {label:"Modal", data:modalData, backgroundColor:"rgba(255,159,64,0.7)"},
-        {label:"Max", data:maxData, backgroundColor:"rgba(255,99,132,0.7)"}
-      ];
-
-      agrowonChart = updateOrCreateChart(agrowonChart, ctx, labels, datasets, "₹/Quintal");
-      agrowonInfo.innerHTML = `<b>Commodity:</b> ${commodity}<br><b>Date:</b> ${date}`;
-    } catch(err) {
-      agrowonInfo.innerText = "Error loading Agrowon data";
-      console.error(err);
-    }
-  }
-
+  // Initial load
+  populateApmc().then(()=>{ 
+    fetchPrices("agmark"); 
+    // fetchPrices("agrowon"); 
+  })
+    // fetchLineChart("agmark");
 });
+
+
+  
+
 </script>
 {% endblock %}

@@ -262,7 +262,8 @@ def webdata_prices(request):
             'is_latest': (data.date.date() != today)  # flag if not today's
         }
         for data in data_qs
-    ]
+    ]   
+    print("Sending JSON:", results)  # log in server console
 
     return JsonResponse(results, safe=False)
 
@@ -335,26 +336,26 @@ def whoami(request):
 def webdata_prices_public(request):
     commodity_name = request.GET.get('commodity')
     if not commodity_name:
-        return Response({'error': 'Commodity parameter required'}, status=status.HTTP_400_BAD_REQUEST)
+        # Always return empty list instead of an error object
+        return Response([])
 
     date_str = request.GET.get('date')
     if date_str:
         try:
             query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
-            return Response({'error': 'Invalid date format, use YYYY-MM-DD'}, status=400)
+            # Invalid date → return empty list
+            return Response([])
     else:
         query_date = timezone.localdate()
 
-    today = timezone.localdate()
-
-    # First, try today's data for exact commodity
+    # Filter data for the requested commodity and date
     data_qs = WebData.objects.filter(
         commodity__iexact=commodity_name,
-        date__date=today
+        date__date=query_date
     )
 
-    # If no data today, try alias (optional)
+    # If no data and there’s a commodity alias, try alias
     commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
     if not data_qs.exists() and commodity_obj and commodity_obj.alias_marathi:
         data_qs = WebData.objects.filter(
@@ -362,10 +363,7 @@ def webdata_prices_public(request):
             date__date=query_date   
         )
 
-    # If still no data, return 404 instead of fetching latest
-    if not data_qs.exists():
-        return Response({'error': f'No data found for commodity: {commodity_name}'}, status=status.HTTP_404_NOT_FOUND)
-
+    # Build results list
     results = [
         {
             'commodity': data.commodity,
@@ -376,12 +374,14 @@ def webdata_prices_public(request):
             'modalprice': data.modalprice,
             'unit': data.unit,
             'date': data.date.isoformat() if data.date else None,
-            'is_latest': (data.date.date() != today)
+            'is_latest': (data.date.date() != timezone.localdate()) if data.date else False
         }
         for data in data_qs
     ]
 
+    # Return empty list if no results
     return Response(results)
+
 #@ api to view profile of logged in user
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
