@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById(infoId).innerHTML=`<b>Commodity:</b> ${commodity||"All"}<br><b>APMC:</b> ${apmc||"All"}<br><b>Date:</b> ${date||"Latest"}`;
     }catch(err){ 
       console.error(err);
-      //  showAlert(`Error loading ${source} data`); 
+       showAlert(`Error loading ${source} data`); 
       document.getElementById(boxId).style.display="none"; }
   }
 
