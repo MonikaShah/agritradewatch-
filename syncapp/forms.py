@@ -5,14 +5,15 @@ class ConsumerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
         to_field_name="name",
-        empty_label="Select Commodity"
+        empty_label="Select Commodity",
+        widget=forms.Select(attrs={'class': 'form-control'})  # dropdown
     )
 
     class Meta:
         model = Consumer1
-        fields = ["commodity", "buyingprice", "quantitybought", "unit", "date"]
+        fields = ["commodity", "buyingprice", "quantitybought", "unit","image", "date"]
         widgets = {
-            'commodity': forms.TextInput(attrs={'class': 'form-control'}),
+            'buyingprice': forms.NumberInput(attrs={'class': 'form-control'}),
             'quantitybought': forms.NumberInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
         }# exclude = ['id', 'userid']

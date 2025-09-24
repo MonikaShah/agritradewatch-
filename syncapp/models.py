@@ -162,6 +162,7 @@ class Consumer1(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     userid=models.CharField(max_length=100)
+    image = models.ImageField(upload_to="consumer_images/", blank=True, null=True)  
 
     class Meta:
         db_table = 'syncapp_consumers1'

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer1,Page,Commodity,User1,Farmer1 # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from .forms import ConsumerForm, FarmerForm
@@ -40,26 +40,52 @@ def landingpage(request):
 
 @login_required
 def apmc(request):
-    """
-    Render APMC page (apmcdata.html) or return JSON data
-    for AJAX requests (commodity + date filter).
-    """
-
-     # Extra safety: double-check user is authenticated
     if not request.user.is_authenticated:
         return redirect(settings.LOGIN_URL)
 
     commodity = request.GET.get("commodity")
     date_str = request.GET.get("date")
+    today = timezone.localdate()
+
+    apmcs = WebData.objects.values_list('apmc', flat=True).distinct().order_by('apmc')
 
     # Case 1: Initial page load → render template
     if not commodity or not date_str:
         with connection.cursor() as cursor:
+            # fetch all commodities
             cursor.execute("SELECT DISTINCT commodity FROM webdata ORDER BY commodity;")
-            commodities = [row[0] for row in cursor.fetchall()]
-        return render(request, "syncapp/apmcdata.html", {"commodities": commodities})
+            all_commodities = [row[0] for row in cursor.fetchall()]
 
-    # Case 2: AJAX data request
+            # latest available date per commodity
+            cursor.execute("""
+                SELECT commodity, MAX(date)
+                FROM webdata
+                GROUP BY commodity;
+            """)
+            rows = cursor.fetchall()
+
+        latest_date_map = {comm: comm_date for comm, comm_date in rows}
+
+        # commodities that have data for today
+        available_today = [comm for comm, d in latest_date_map.items() if d == today]
+
+        # fallback logic
+        fallback_notice = None
+        if not available_today:
+            fallback_date = max(latest_date_map.values()) if latest_date_map else today
+            fallback_notice = f"No data available for today ({today}), showing latest available data for {fallback_date}."
+        else:
+            fallback_date = today
+
+        return render(request, "syncapp/apmcdata.html", {
+            "commodities": all_commodities,
+            "available_commodities": available_today,
+            "apmcs": apmcs,
+            "today": fallback_date,
+            "fallback_notice": fallback_notice,
+        })
+
+    # Case 2: AJAX request for specific commodity/date
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
@@ -83,15 +109,11 @@ def apmc(request):
             continue
 
         prices = []
-        for row in rows:
-            date, modal_price, min_price, max_price, market = row
-
-            # Convert Rs/quintal → Rs/kg for agmarknet only
+        for date, modal_price, min_price, max_price, market in rows:
             if source == "agmarknet":
                 modal_price = round(modal_price / 100, 2) if modal_price else None
                 min_price = round(min_price / 100, 2) if min_price else None
                 max_price = round(max_price / 100, 2) if max_price else None
-
             prices.append({
                 "date": date.strftime("%Y-%m-%d"),
                 "market": market,
@@ -253,10 +275,10 @@ def crops_list(request):
         crops = Farmer1.objects.filter(id=user.id)
         if edit_id:
             crop_to_edit = get_object_or_404(Farmer1, id=edit_id)
-            form = FarmerForm(request.POST or None, instance=crop_to_edit)
+            form = FarmerForm(request.POST or None,request.FILES or None, instance=crop_to_edit)
             is_edit = True
         else:
-            form = FarmerForm(request.POST or None)
+            form = FarmerForm(request.POST or None,request.FILES or None)
 
         if request.method == "POST" and form.is_valid():
             entry = form.save(commit=False)
@@ -273,10 +295,10 @@ def crops_list(request):
         crops = Consumer1.objects.filter(userid=user.id)
         if edit_id:
             crop_to_edit = get_object_or_404(Consumer1, id=edit_id, userid=user.id)
-            form = ConsumerForm(request.POST or None, instance=crop_to_edit)
+            form = ConsumerForm(request.POST or None, request.FILES or None,instance=crop_to_edit)
             is_edit = True
         else:
-            form = ConsumerForm(request.POST or None)
+            form = ConsumerForm(request.POST or None,request.FILES or None)
 
         if request.method == "POST" and form.is_valid():
             entry = form.save(commit=False)
@@ -284,10 +306,24 @@ def crops_list(request):
                 entry.id = str(uuid4())  # generate new UUID for new crop
                 entry.userid = user.id
                 entry.date = timezone.now()
-            entry.latitude = user.latitude
-            entry.longitude = user.longitude
+                entry.latitude = user.latitude
+                entry.longitude = user.longitude
             entry.save()
             return redirect("crops_list")
+    crops_json = []
+    if crops:
+        for crop in crops:
+            crops_json.append({
+                "lat": crop.latitude,
+                "lng": crop.longitude,
+                "commodity": str(crop.commodity),
+                "price": float(crop.buyingprice) if crop.buyingprice else None,
+                "quantity": crop.quantitybought,
+                "unit": crop.unit,
+                "date": crop.date.strftime("%Y-%m-%d %H:%M") if crop.date else None,
+                "image_url": crop.image.url if crop.image and hasattr(crop.image, "url") else None,
+
+            })
 
     return render(
         request,
@@ -297,6 +333,7 @@ def crops_list(request):
             "crops": crops,
             "user": user,
             "is_edit": is_edit,  # pass flag to template
+            "crops_json": json.dumps(crops_json),  # send JSON to template
         },
     )
 @api_view(['PATCH', 'PUT'])
