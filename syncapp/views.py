@@ -228,88 +228,56 @@ def web_register(request):
 
 
 @login_required
-# def crops_list(request):
-#     user = request.user
-#     form = None
-#     crops = None
-#     print("job is ",user.job)
-#     if user.job == "farmer":
-#         if request.method == "POST":
-#             form = FarmerForm(request.POST)
-#             if form.is_valid():
-#                 farmer_entry = form.save(commit=False)
-#                 farmer_entry.id = str(uuid4()) 
-#                 farmer_entry.latitude = user.latitude
-#                 farmer_entry.longitude = user.longitude
-#                 farmer_entry.save()
-#                 return redirect("crops_list")
-#         else:
-#             form = FarmerForm()
-#         crops = Farmer1.objects.filter(id=user.id)
-
-#     elif user.job == "consumer":
-#         if request.method == "POST":
-#             form = ConsumerForm(request.POST)
-#             if form.is_valid():
-#                 consumer_entry = form.save(commit=False)
-#                 consumer_entry.id = str(uuid4())  # generate new UUID
-#                 consumer_entry.userid = user.id
-#                 consumer_entry.latitude = user.latitude
-#                 consumer_entry.longitude = user.longitude
-#                 consumer_entry.save()
-#                 return redirect("crops_list")
-#         else:
-#             form = ConsumerForm()
-#         crops = Consumer1.objects.filter(userid=user.id)
-
-#     return render(request, "syncapp/crops_list.html", {"form": form, "crops": crops, "user": user})
 def crops_list(request):
     user = request.user
-    edit_id = request.GET.get("edit")  # check if editing an existing crop
+    edit_id = request.GET.get("edit")  # editing crop if present
     form = None
     crops = None
-    is_edit = False  # flag for template
-    print("job is", user.job)
+    is_edit = False  # template flag
 
+    # Farmer logic
     if user.job == "farmer":
         crops = Farmer1.objects.filter(id=user.id)
         if edit_id:
             crop_to_edit = get_object_or_404(Farmer1, id=edit_id)
-            form = FarmerForm(request.POST or None,request.FILES or None, instance=crop_to_edit)
+            form = FarmerForm(request.POST or None, request.FILES or None, instance=crop_to_edit)
             is_edit = True
         else:
-            form = FarmerForm(request.POST or None,request.FILES or None)
+            form = FarmerForm(request.POST or None, request.FILES or None)
 
         if request.method == "POST" and form.is_valid():
             entry = form.save(commit=False)
             if not edit_id:
-                entry.id = str(uuid4())  # generate UUID only for new crop
+                entry.id = str(uuid4())
             entry.latitude = user.latitude
             entry.longitude = user.longitude
             if not edit_id:
-                entry.date = timezone.now()  # auto-set datetime for new crop
+                entry.date = timezone.now()
             entry.save()
             return redirect("crops_list")
 
+    # Consumer logic
     elif user.job == "consumer":
         crops = Consumer1.objects.filter(userid=user.id)
         if edit_id:
             crop_to_edit = get_object_or_404(Consumer1, id=edit_id, userid=user.id)
-            form = ConsumerForm(request.POST or None, request.FILES or None,instance=crop_to_edit)
+            form = ConsumerForm(request.POST or None, request.FILES or None, instance=crop_to_edit)
             is_edit = True
         else:
-            form = ConsumerForm(request.POST or None,request.FILES or None)
+            form = ConsumerForm(request.POST or None, request.FILES or None)
 
         if request.method == "POST" and form.is_valid():
             entry = form.save(commit=False)
             if not edit_id:
-                entry.id = str(uuid4())  # generate new UUID for new crop
+                entry.id = str(uuid4())
                 entry.userid = user.id
                 entry.date = timezone.now()
                 entry.latitude = user.latitude
                 entry.longitude = user.longitude
             entry.save()
             return redirect("crops_list")
+
+    # Prepare JSON for map
     crops_json = []
     if crops:
         for crop in crops:
@@ -322,7 +290,6 @@ def crops_list(request):
                 "unit": crop.unit,
                 "date": crop.date.strftime("%Y-%m-%d %H:%M") if crop.date else None,
                 "image_url": crop.image.url if crop.image and hasattr(crop.image, "url") else None,
-
             })
 
     return render(
@@ -332,10 +299,11 @@ def crops_list(request):
             "form": form,
             "crops": crops,
             "user": user,
-            "is_edit": is_edit,  # pass flag to template
-            "crops_json": json.dumps(crops_json),  # send JSON to template
-        },
+            "is_edit": is_edit,
+            "crops_json": json.dumps(crops_json),
+        }
     )
+
 @api_view(['PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_crop(request, crop_id):

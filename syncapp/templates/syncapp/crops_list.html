@@ -5,39 +5,31 @@
 <div class="container-fluid my-4">
   <div class="row">
 
-    <!-- Left Sidebar -->
+    <!-- Sidebar Tabs -->
     <nav class="col-md-3 col-lg-2 mb-3 mb-md-0 d-md-block bg-light sidebar shadow-sm rounded p-3">
       <h5 class="text-center mb-3">
-        <img src="{% static 'logo.png' %}" 
-      alt="Logo" 
-      style="height:3em; max-height:50px; width:auto; margin-right:0.5em;">
-        Commodity History</h5>
+        <img src="{% static 'logo.png' %}" alt="Logo" style="height:3em; max-height:50px; width:auto; margin-right:0.5em;">
+        Commodity History
+      </h5>
       <ul class="nav flex-column nav-pills gap-2" id="cropsMenu">
         <li class="nav-item">
-          <a class="nav-link {% if not is_edit and not show_map %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">
-            🌾 Purchased Commodity
-          </a>
+          <a class="nav-link {% if not is_edit %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">🌾 Purchased Commodity</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if is_edit %}active{% endif %}" href="#formCrops" data-bs-toggle="tab">
-            {% if is_edit %}✏️ Update Crop{% else %}➕ Add Commodity{% endif %}
-          </a>
+          <a class="nav-link" href="#formCrops" data-bs-toggle="tab">➕ Add Crop</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if show_map %}active{% endif %}" href="#mapCrops" data-bs-toggle="tab">
-            🗺️ View on Map
-          </a>
+          <a class="nav-link" href="#mapCrops" data-bs-toggle="tab">🗺️ View on Map</a>
         </li>
       </ul>
     </nav>
 
     <!-- Right Content -->
     <main class="col-md-9 col-lg-10">
-      <div class="tab-content w-100 mx-auto" 
-           style="max-width: 1000px; border:1px solid #ddd; border-radius: 10px; padding:20px; background:#fff;">
-    
-        <!-- Crop List (default) -->
-        <div class="tab-pane fade {% if not is_edit and not show_map %}show active{% endif %}" id="listCrops">
+      <div class="tab-content w-100 mx-auto" style="max-width: 1000px; border:1px solid #ddd; border-radius:10px; padding:20px; background:#fff;">
+
+        <!-- Purchased Commodity -->
+        <div class="tab-pane fade {% if not is_edit %}show active{% endif %}" id="listCrops">
           <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white text-center">🌾 Purchased Commodities</div>
             <div class="card-body p-0">
@@ -46,16 +38,8 @@
                 <table class="table table-bordered table-striped table-hover text-center mx-auto">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Commodity</th>
-                      <th>Price</th>
-                      <th>Quantity</th>
-                      <th>Unit</th>
-                      <th>Image</th>
-                      <th>Date</th>
-                      <th>Latitude</th>
-                      <th>Longitude</th>
-                      <th>Actions</th>
+                      <th>#</th><th>Commodity</th><th>Price</th><th>Quantity</th><th>Unit</th>
+                      <th>Image</th><th>Date</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -68,22 +52,15 @@
                       <td>{{ crop.unit|default:"-" }}</td>
                       <td>
                         {% if crop.image %}
-                          <img src="{{ crop.image.url }}" alt="Image" width="100">
-                        {% else %}
-                          No Image
-                        {% endif %}
+                        <img src="{{ crop.image.url }}" alt="Image" style="width:80px; height:60px; object-fit:cover; border-radius:6px;">
+                        {% else %}No Image{% endif %}
                       </td>
-                      
-                      <td>{{ crop.date|date:"Y-m-d H:i" }}</td>
+                      <td>{{ crop.date|date:"d M Y, H:i" }}</td>
                       <td>{{ crop.latitude }}</td>
                       <td>{{ crop.longitude }}</td>
                       <td class="d-flex gap-1 justify-content-center flex-wrap">
-                        <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit">
-                          <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')">
-                          <i class="bi bi-trash"></i>
-                        </a>
+                        <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                        <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
                       </td>
                     </tr>
                     {% endfor %}
@@ -91,40 +68,37 @@
                 </table>
               </div>
               {% else %}
-                <p class="text-center p-3 text-muted">No crops added yet.</p>
+              <p class="text-center p-3 text-muted">No crops added yet.</p>
               {% endif %}
             </div>
           </div>
         </div>
 
-        <!-- Crop Form -->
+        <!-- Add / Update Crop Form -->
         <div class="tab-pane fade {% if is_edit %}show active{% endif %}" id="formCrops">
           <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-success text-white">
-              {% if is_edit %} ✏️ Update Crop {% else %} ➕ Add Crop {% endif %}
+            <div class="card-header bg-success text-white" id="formHeader">
+              {% if is_edit %}✏️ Update Crop{% else %}➕ Add Crop{% endif %}
             </div>
             <div class="card-body">
-              <form method="POST" enctype="multipart/form-data">
+              <form id="cropForm" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row g-3">
                   {% for field in form %}
-                    <div class="col-12 col-md-6">
-                      <div class="form-group">
-                        {{ field.label_tag }}
-                        {{ field }}
-                        {% if field.errors %}
-                          <div class="text-danger small">{{ field.errors|join:", " }}</div>
-                        {% endif %}
-                      </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      {{ field.label_tag }} {{ field }}
+                      {% if field.errors %}
+                      <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                      {% endif %}
                     </div>
+                  </div>
                   {% endfor %}
                 </div>
                 <div class="mt-3 d-flex gap-2 flex-wrap">
-                  <button type="submit" class="btn btn-success">
-                    {% if is_edit %}Update{% else %}Add{% endif %}
-                  </button>
+                  <button type="submit" class="btn btn-success" id="submitBtn">{% if is_edit %}Update{% else %}Add{% endif %}</button>
                   {% if is_edit %}
-                    <a href="{% url 'crops_list' %}" class="btn btn-secondary">Cancel</a>
+                  <a href="{% url 'crops_list' %}" class="btn btn-secondary">Cancel</a>
                   {% endif %}
                 </div>
               </form>
@@ -133,7 +107,7 @@
         </div>
 
         <!-- Map Section -->
-        <div class="tab-pane fade {% if show_map %}show active{% endif %}" id="mapCrops">
+        <div class="tab-pane fade" id="mapCrops">
           <div class="card shadow-sm">
             <div class="card-header bg-info text-white">🗺️ Crops Map</div>
             <div class="card-body">
@@ -141,95 +115,42 @@
             </div>
           </div>
         </div>
-    
+
       </div>
     </main>
-    
+
   </div>
 </div>
-<!-- <pre>
-  {{ crops_json|safe }}
-  </pre> -->
-  
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<!-- Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<!-- JS and Leaflet -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    var mapDiv = document.getElementById("map");
-    if (!mapDiv) return;
-  
-    // Initialize map
-    var map = L.map("map", { zoomControl: true });
-    
-    // OSM fallback layer
-    var osmLayer = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { attribution: '&copy; OpenStreetMap contributors', maxZoom: 14, minZoom: 2 }
-    );
-  
-    // Google Satellite tiles
-    var googleSat = L.tileLayer(
-      'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-      { attribution: '&copy; Google', subdomains: ['0','1','2','3'], maxZoom: 21, minZoom: 2, detectRetina: true }
-    );
-  
-    // Add both layers to control
-    var baseLayers = {
-      "OSM": osmLayer,
-      "Google Satellite": googleSat
-    };
-    L.control.layers(baseLayers).addTo(map);
-  
-    // Set default view and add OSM by default
-    map.setView([20.5937, 78.9629], 5);
-    osmLayer.addTo(map);
-  
-    // Add crop markers
-    // 
+document.addEventListener("DOMContentLoaded", function() {
+  // --- Map code (same as before) ---
+  var mapDiv = document.getElementById("map");
+  if(mapDiv){
+    var map = L.map("map",{zoomControl:true});
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:14,minZoom:2}).addTo(map);
+    var googleSat = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['0','1','2','3'], maxZoom:21}).addTo(map);
+    map.setView([20.5937,78.9629],5);
+
     var crops = {{ crops_json|safe }};
-    if (crops.length === 0) return;
-
-    var bounds = [];
-
-    crops.forEach(function(crop, index) {
-    // small offset to prevent exact overlap
-        var offset = 0.00005; 
-        var lat = crop.lat + index * offset;
-        var lng = crop.lng + index * offset;
-        var marker = L.marker([lat, lng]).addTo(map);
-        var imageHtml = crop.image_url 
-          ? '<br><img src="' + crop.image_url +  '" alt="Image" style="width:100px; height:80px; object-fit:cover; border-radius:5px;">'
-          : '';
-        marker.bindPopup(
-          "<b>" + crop.commodity + "</b><br/>" +
-          "Price: " + crop.price + "<br/>" +
-          "Qty: " + (crop.quantity || '-') + " " + crop.unit + "<br/>" +
-          "Purchase date: " + (crop.date || '-') +"<br>"+
-          imageHtml
-        );
-        bounds.push([lat, lng]);
-      });
-     
-    
-  
-    // Fix map display when tab is shown
-    var mapTab = document.querySelector('a[href="#mapCrops"]');
-    if (mapTab) {
-      mapTab.addEventListener('shown.bs.tab', function() {
-        map.invalidateSize(); // redraw map
-        // Optionally auto-switch to Google Satellite
-        if (!map.hasLayer(googleSat)) {
-          map.addLayer(googleSat);
-        }
+    if(crops.length){
+      var bounds=[];
+      crops.forEach(function(c,i){
+        var offset=0.00005;
+        var lat=c.lat+i*offset, lng=c.lng+i*offset;
+        var marker=L.marker([lat,lng]).addTo(map);
+        var img = c.image_url? '<br><img src="'+c.image_url+'" style="width:100px;height:80px;object-fit:cover;border-radius:5px;">' : '';
+        marker.bindPopup("<b>"+c.commodity+"</b><br>Price:"+c.price+"<br>Qty:"+(c.quantity||'-')+" "+c.unit+"<br>Date:"+(c.date||'-')+img);
+        bounds.push([lat,lng]);
       });
     }
-  });
-  </script>
-  
-  
+  }
+});
+</script>
+
 {% endblock %}
