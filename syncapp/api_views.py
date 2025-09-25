@@ -1,7 +1,7 @@
 import logging, json, requests, uuid
 from datetime import datetime
 from bs4 import BeautifulSoup
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
@@ -52,6 +52,7 @@ class ConsumerViewSet(viewsets.ModelViewSet):
     queryset = Consumer1.objects.all()
     serializer_class = ConsumerSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # 👈 required for images
 
     def get_queryset(self):
         # Example: only show consumers since 30 Aug 2025
