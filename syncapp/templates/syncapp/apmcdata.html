@@ -79,6 +79,7 @@
       <canvas id="agmarkLineChart" height="300"></canvas>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -187,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const date = dateSelect.value;
     fetchPrices("agmark",apmc,commodity,date);
     // fetchPrices("agrowon",apmc,commodity,date);
-    // fetchLineChart("agmark",apmc,commodity);
+    fetchLineChart("agmark",apmc,commodity);
   });
 
   let agmarkLineChart = null;
@@ -195,11 +196,13 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Function to fetch last 7 days prices and draw line chart
   async function fetchLineChart(source, apmc=null, commodity=null) {
-    const boxId = source == "agmark" ? "agmarkLineBox" : "agrowonLineBox";
+    const boxId = "agmarkLineBox"; 
     const ctx = document.getElementById(source + "LineChart").getContext("2d");
 
-    if (source == "agmark") agmarkLineChart = destroyChart(agmarkLineChart);
-    else agrowonLineChart = destroyChart(agrowonLineChart);
+    if (agmarkLineChart) { 
+      agmarkLineChart.destroy(); 
+      agmarkLineChart = null; 
+    }
 
     document.getElementById(boxId).style.display = "block";
 
@@ -216,6 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const dt = new Date(d);
       return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
     }
+    
 
     try {
       let url = `/api/webdata_prices_public/?source=${source}&lastdays=7`;
@@ -281,9 +285,10 @@ document.addEventListener("DOMContentLoaded", function() {
   // Initial load
   populateApmc().then(()=>{ 
     fetchPrices("agmark"); 
+    fetchLineChart("agmark");
     // fetchPrices("agrowon"); 
   })
-    // fetchLineChart("agmark");
+    
 });
 
 
