@@ -126,6 +126,20 @@ document.addEventListener("DOMContentLoaded", function() {
   commoditySelect.addEventListener("change", populateApmc);
   dateSelect.addEventListener("change", populateApmc);
 
+  commoditySelect.addEventListener("change", () => {
+      populateApmc().then(() => {
+          const commodity = commoditySelect.value;
+          const apmc = apmcSelect.value;
+          // fetchLineChart("agmark", apmc, commodity);
+      });
+  });
+
+  apmcSelect.addEventListener("change", () => {
+      const commodity = commoditySelect.value;
+      const apmc = apmcSelect.value;
+      // fetchLineChart("agmark", apmc, commodity);
+  });
+
   async function fetchPrices(source, apmc=null, commodity=null, date=null){
     const infoId = source=="agmark"?"agmark-info":"agrowon-info";
     const boxId = source=="agmark"?"agmarkBox":"agrowonBox";
@@ -151,9 +165,9 @@ document.addEventListener("DOMContentLoaded", function() {
         if(apmc){
           const record = dataList.find(d=>d.apmc===apmc) || {};
           labels=[apmc]; 
-          minData=[(record.minprice||0)/100]; // divide by 100 for per kg
-          modalData=[(record.modalprice||0)/100];
-          maxData=[(record.maxprice||0)/100];
+          minData=[(record.minprice||0)]; // divide by 100 for per kg
+          modalData=[(record.modalprice||0)];
+          maxData=[(record.maxprice||0)];
         } else {
           labels = [...new Set(dataList.map(d=>d.apmc))];
           minData = labels.map(l=>dataList.find(d=>d.apmc===l)?.minprice||0);
@@ -189,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const date = dateSelect.value;
     fetchPrices("agmark",apmc,commodity,date);
     // fetchPrices("agrowon",apmc,commodity,date);
-    fetchLineChart("agmark",apmc,commodity);
+    // fetchLineChart("agmark",apmc,commodity);
   });
 
   let agmarkLineChart = null;
@@ -207,20 +221,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById(boxId).style.display = "block";
 
-    function formatDate(d) {
-      // Convert any date string to YYYY-MM-DD
-      const dt = new Date(d);
-      const month = (dt.getMonth() + 1).toString().padStart(2, "0");
-      const day = dt.getDate().toString().padStart(2, "0");
-      return `${dt.getFullYear()}-${month}-${day}`;
-    }
-
     function formatLabel(d) {
-      // Format YYYY-MM-DD -> DD MMM
       const dt = new Date(d);
       return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
     }
-    
 
     try {
       let url = `/api/webdata_prices_public/?source=${source}&lastdays=7`;
@@ -235,25 +239,35 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
       }
 
-      // Make sure all 7 dates are shown even if some have no data
+      // Create last 7 dates in YYYY-MM-DD
       const today = new Date();
       const labels = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
-        labels.push(d.toISOString().slice(0, 10)); // YYYY-MM-DD
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const dd = String(d.getDate()).padStart(2,"0");
+        labels.push(`${yyyy}-${mm}-${dd}`);
       }
 
-      // Map data for each date
       const minData = [];
       const modalData = [];
       const maxData = [];
 
-      labels.forEach(date => {
-        const record = dataList.find(d => formatDate(d.date) === date);
-        minData.push(record ? record.minprice || 0 : 0);
-        modalData.push(record ? record.modalprice || 0 : 0);
-        maxData.push(record ? record.maxprice || 0 : 0);
+      labels.forEach(dateStr => {
+        // find record with exact local date match
+        const record = dataList.find(d => {
+          const recDate = new Date(d.date);
+          const y = recDate.getFullYear();
+          const m = String(recDate.getMonth()+1).padStart(2,"0");
+          const day = String(recDate.getDate()).padStart(2,"0");
+          return `${y}-${m}-${day}` === dateStr;
+        });
+
+        minData.push(record ? record.minprice : 0);
+        modalData.push(record ? record.modalprice : 0);
+        maxData.push(record ? record.maxprice : 0);
       });
 
       const datasets = [
@@ -262,18 +276,15 @@ document.addEventListener("DOMContentLoaded", function() {
         { label: "Max", data: maxData, borderColor: "rgba(75,192,192,1)", backgroundColor: "rgba(75,192,192,0.2)", tension: 0.3 }
       ];
 
-      const chartOptions = {
+      agmarkLineChart = new Chart(ctx, {
         type: "line",
-        data: { labels: labels.map(formatLabel), datasets }, // formatted labels
+        data: { labels: labels.map(formatLabel), datasets },
         options: {
           responsive: true,
           plugins: { legend: { position: "top" } },
           scales: { y: { beginAtZero: true } }
         }
-      };
-
-      if (source == "agmark") agmarkLineChart = new Chart(ctx, chartOptions);
-      else agrowonLineChart = new Chart(ctx, chartOptions);
+      });
 
     } catch (err) {
       console.error(err);
@@ -282,11 +293,10 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 
-
   // Initial load
   populateApmc().then(()=>{ 
     fetchPrices("agmark"); 
-    fetchLineChart("agmark");
+    // fetchLineChart("agmark");
     // fetchPrices("agrowon"); 
   })
     
