@@ -52,7 +52,8 @@
       </div>
       <div class="mb-3">
         <label for="dateSelect" class="form-label">Date</label>
-        <input type="date" id="dateSelect" class="form-control w-100" value="{{ today|date:'Y-m-d' }}">
+        <input type="date" id="dateSelect" class="form-control w-100" value="{{ today|date:'Y-m-d' }}" min="2025-08-11"
+        max="{{ today|date:'Y-m-d' }}">
       </div>
       <button id="submitBtn" class="btn btn-primary w-100">Show Prices</button>
     </div>
