@@ -332,39 +332,66 @@ def whoami(request):
         "auth": str(type(request.auth))  # shows if JWT or session
     })
 # api for whole sale market prices
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django.utils import timezone
+from datetime import datetime
+from .models import WebData, Commodity
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def webdata_prices_public(request):
+    source = request.GET.get('source', 'agmark')
     commodity_name = request.GET.get('commodity')
     if not commodity_name:
-        # Always return empty list instead of an error object
         return Response([])
 
+    apmc_name = request.GET.get('apmc')
     date_str = request.GET.get('date')
-    if date_str:
-        try:
-            query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        except ValueError:
-            # Invalid date → return empty list
-            return Response([])
-    else:
-        query_date = timezone.localdate()
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
 
-    # Filter data for the requested commodity and date
-    data_qs = WebData.objects.filter(
-        commodity__iexact=commodity_name,
-        date__date=query_date
-    )
+    # Determine date filtering
+    try:
+        if start_date_str and end_date_str:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            data_qs = WebData.objects.filter(
+                commodity__iexact=commodity_name,
+                date__date__range=(start_date, end_date)
+            )
+        else:
+            if date_str:
+                query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            else:
+                query_date = timezone.localdate()
+            data_qs = WebData.objects.filter(
+                commodity__iexact=commodity_name,
+                date__date=query_date
+            )
+    except ValueError:
+        return Response([])
 
-    # If no data and there’s a commodity alias, try alias
+    # Try alias if no data
     commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
     if not data_qs.exists() and commodity_obj and commodity_obj.alias_marathi:
-        data_qs = WebData.objects.filter(
-            commodity__iexact=commodity_obj.alias_marathi,
-            date__date=query_date   
-        )
+        if start_date_str and end_date_str:
+            data_qs = WebData.objects.filter(
+                commodity__iexact=commodity_obj.alias_marathi,
+                date__date__range=(start_date, end_date)
+            )
+        else:
+            data_qs = WebData.objects.filter(
+                commodity__iexact=commodity_obj.alias_marathi,
+                date__date=query_date
+            )
 
-    # Build results list
+    # Filter by APMC if provided
+    if apmc_name:
+        data_qs = data_qs.filter(apmc__iexact=apmc_name)
+
+    # Build results
     results = [
         {
             'commodity': data.commodity,
@@ -377,10 +404,9 @@ def webdata_prices_public(request):
             'date': data.date.isoformat() if data.date else None,
             'is_latest': (data.date.date() != timezone.localdate()) if data.date else False
         }
-        for data in data_qs
+        for data in data_qs.order_by('date')  # order by date for line chart
     ]
 
-    # Return empty list if no results
     return Response(results)
 
 #@ api to view profile of logged in user
