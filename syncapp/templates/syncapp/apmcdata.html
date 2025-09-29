@@ -80,7 +80,7 @@
     <!-- RIGHT PANEL (Charts) -->
     <div class="p-3 flex-grow-1" style="min-width:300px;">
       <div class="chart-box" id="agmarkBox">
-        <h4>AgmarkNet Prices (₹/Kg)</h4>
+        <h4>AgmarkNet Prices (₹/Qunital)</h4>
         <div id="agmark-info" class="text-muted text-center"></div>
         <canvas id="agmarkChart" height="300"></canvas>
       </div>
@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById(boxId).style.display="block";
 
     try{
-      let url=`/api/webdata_prices_public/?source=${source}`;
+      let url=  window.location.origin +`/api/webdata_prices_public/?source=${source}`;
       if(commodity) url+=`&commodity=${encodeURIComponent(commodity)}`;
       if(apmc) url+=`&apmc=${encodeURIComponent(apmc)}`;
       if(date) url+=`&date=${date}`;
