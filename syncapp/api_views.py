@@ -153,7 +153,7 @@ def consumers_geojson(request):
                     "buyingprice": c.buyingprice,
                     "quantitybought": c.quantitybought,
                     "unit": c.unit,
-                    "image":c.image,
+                    "image":c.image.url if c.image else None,
                 },
             })
 
