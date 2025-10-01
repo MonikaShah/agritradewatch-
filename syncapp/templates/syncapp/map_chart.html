@@ -23,6 +23,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.0.1/dist/chartjs-chart-box-and-violin-plot.umd.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -71,6 +72,9 @@
         <option value="700" label="700m"></option>
       </datalist>
     </div>
+    <hr>
+    <button id="toggleDistrictBtn">🗺️ Show/Hide Districts</button>
+    <button id="toggleApmcBtn">🛒 Show All APMC</button>
   </div>
   <button id="toggle-map-controls">⚙️ Hide/Show</button>
 </div>
@@ -117,6 +121,20 @@ document.addEventListener("DOMContentLoaded", function() {
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
 
+  const apmcCsvUrl = "{% static 'APMC_names.csv' %}";
+  let apmcMarkers = L.layerGroup();  // Separate layer for APMC
+
+  const toggleApmcBtn = document.getElementById("toggleApmcBtn");
+  let apmcVisible = false;
+
+  const apmcIcon = L.icon({
+    iconUrl: "{% static 'apmcM.png' %}",
+    iconSize: [30, 30], // width, height
+    iconAnchor: [15, 30], // point of the icon which will correspond to marker's location
+    popupAnchor: [0, -30] // point from which the popup opens relative to the iconAnchor
+  });
+
+  
   // --------------------------
   // Token helpers
   // --------------------------
@@ -214,8 +232,45 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 }
   async function fetchAgmarkPrices(commodity){  
-      return fetchAgrowonPrices(commodity); // just call webdata_prices
+    const infoDiv = document.getElementById("agmark-info");
+    const agmarkCanvas = document.getElementById("agmarkChart");
 
+    try {
+        const res = await authFetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}`);
+        if(!Array.isArray(res) || res.length === 0){
+            infoDiv.innerText = "No data found for this commodity";
+            if(agmarkChart) agmarkChart.destroy();
+            return;
+        }
+
+        const labels = res.map(d => d.date);
+        const prices = res.map(d => d.price);
+
+        const chartData = {
+            labels,
+            datasets: [{
+                label: 'Agmark Price',
+                data: prices,
+                backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
+
+        if(agmarkChart) agmarkChart.destroy();
+        const ctx = agmarkCanvas.getContext("2d");
+        agmarkChart = new Chart(ctx, { type: 'line', data: chartData, options });
+
+        const first = res[0];
+        infoDiv.innerHTML = `<strong>Commodity:</strong> ${first.commodity || commodity}<br><strong>Date:</strong> ${first.date || 'NA'}`;
+
+    } catch(err){
+        console.error(err);
+        infoDiv.innerText = "Error fetching Agmark prices";
+        if(agmarkChart) agmarkChart.destroy();
+    }
 }
 
 
@@ -309,6 +364,7 @@ document.addEventListener("DOMContentLoaded", function() {
           }
           if(filtered.length === 0) return {avg:null, weighted:null, modal:null};
           const prices = filtered.map(f=>f.properties.buyingprice).filter(v=>v!==null);
+          const unit = filtered.map(f => f.properties.unit).find(u => u !== null && u !== undefined) || '';
           const quantities = filtered.map(f=>f.properties.quantitybought).map(q=>q||1);
           const avg = prices.reduce((a,b)=>a+b,0)/prices.length;
           const weighted = prices.reduce((sum,p,i)=>sum+p*quantities[i],0)/quantities.reduce((a,b)=>a+b,0);
@@ -319,9 +375,9 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       function showGlobalStats(stats){
-          document.getElementById("avg-price").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
+          document.getElementById("avg-price").innerText = stats.avg!==null ?` ₹${stats.avg.toFixed(2)} ${stats.unit || ''}`: "No data";
           document.getElementById("weighted-avg").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
-          document.getElementById("modal-price").innerText = stats.modal!==null ? stats.modal : "No data";
+          document.getElementById("modal-price").innerText = stats.modal!==null ? `₹${stats.modal}` : "No data";
       }
 
       function showRadiusStats(stats){
@@ -377,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function() {
               navigator.geolocation.getCurrentPosition(pos=>{
                   userLocation = L.latLng(pos.coords.latitude,pos.coords.longitude);
                   if(userMarker) map.removeLayer(userMarker);
-                  userMarker = L.marker(userLocation,{draggable:true,title:"My Location"}).addTo(map);
+                  userMarker = L.marker(userLocation,{draggable:true,title:"APMC"}).addTo(map);
                   userMarker.on("dragend",e=>{ 
                       userLocation=e.target.getLatLng(); 
                       drawCircle(parseInt(radiusSlider.value)); 
@@ -414,12 +470,80 @@ document.addEventListener("DOMContentLoaded", function() {
           updateStatsForRadius();
           updateMarkers(this.value,true);
           fetchAgrowonPrices(this.value);
+          fetchAgmarkPrices(this.value);
          
       });
+      let districtLayer = null;
 
+      
+      toggleApmcBtn.addEventListener("click", async () => {
+      if(!apmcVisible){
+          // Load CSV
+          const response = await fetch(apmcCsvUrl);
+          const text = await response.text();
+          const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+
+          parsed.data.forEach(row => {
+              const lat = parseFloat(row.Latitude);
+              const lng = parseFloat(row.Longitude);
+              if(!isNaN(lat) && !isNaN(lng)){
+                // const marker = L.marker([lat, lng], { icon: apmcIcon })
+                //    .bindPopup(`<strong>${row.Apmc}</strong><br>${row.District}`);
+                //   apmcMarkers.addLayer(marker);
+
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 10,            // size of the circle
+                    color: 'blue',        // border color
+                    weight: 2,             // border width
+                    fillColor: 'red',    // fill color
+                    fillOpacity: 0.3       // transparency
+                }).bindPopup(`<strong>Mandi Name: ${row.Apmc}</strong><br>District: ${row.District}`);
+                apmcMarkers.addLayer(marker);
+              }
+          });
+
+          apmcMarkers.addTo(map);
+          apmcVisible = true;
+          toggleApmcBtn.innerText = "📍 Hide APMC";
+      } else {
+          map.removeLayer(apmcMarkers);
+          apmcVisible = false;
+          toggleApmcBtn.innerText = "📍 Show All APMC";
+      }
+  });
+
+      const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
+        let districtVisible = true;
+
+        toggleDistrictBtn.addEventListener("click", () => {
+          if(!districtLayer || !districtLayer.addTo) return; // safety check
+
+          if(districtVisible){
+              map.removeLayer(districtLayer);
+              districtVisible = false;
+              toggleDistrictBtn.innerText = "🗺️ Show Districts";
+          } else {
+              districtLayer.addTo(map);
+              districtVisible = true;
+              toggleDistrictBtn.innerText = "🗺️ Hide Districts";
+          }
+        });
+      
+        try {
+              const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
+              const districtData = await districtResponse.json();
+              
+              districtLayer = L.geoJSON(districtData, {
+                  style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
+              }).addTo(map); // initially visible
+          } catch(err){
+              console.error("Error loading district GeoJSON:", err);
+          } 
+        
+        // InitMap ends here
       // --- Initial chart fetch ---
       fetchAgrowonPrices(commoditySelect.value);
-      // fetchAgmarkPrices(commoditySelect.value);
+      fetchAgmarkPrices(commoditySelect.value);
 
       document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
   }
