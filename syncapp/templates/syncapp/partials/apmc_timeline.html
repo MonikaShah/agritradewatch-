@@ -1,0 +1,33 @@
+<!-- templates/syncapp/partials/apmc_timeline.html -->
+<h4>Market Prices Timeline</h4>
+<canvas id="apmcTimelineChart" height="200"></canvas>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Commodity</th>
+            <th>Variety</th>
+            <th>Arrival (Tonn)</th>
+            <th>Min Price</th>
+            <th>Max Price</th>
+            <th>Modal Price</th>
+            <th>Grade</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for price in prices %}
+        <tr>
+            <td>{{ price.report_date }}</td>
+            <td>{{ price.crop_group }}</td>
+            <td>{{ price.variety }}</td>
+            <td>{{ price.arrival_tonn }}</td>
+            <td>{{ price.min_price_quintal }}</td>
+            <td>{{ price.max_price_quintal }}</td>
+            <td>{{ price.modal_price_quintal }}</td>
+            <td>{{ price.grade }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

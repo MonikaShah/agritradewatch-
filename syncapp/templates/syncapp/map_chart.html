@@ -4,6 +4,8 @@
 {% block title %}Consumers Map{% endblock %}
 
 {% block extra_head %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -111,7 +113,23 @@
     <div id="agrowon-info">Click on a marker</div>
     <canvas id="agrowonChart"></canvas>
   </div>
+  <div class="modal fade" id="apmcTimelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">APMC Market Timeline</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Timeline content will load here -->
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -478,40 +496,39 @@ document.addEventListener("DOMContentLoaded", function() {
 
       
       toggleApmcBtn.addEventListener("click", async () => {
-      if(!apmcVisible){
-          // Load CSV
-          const response = await fetch(apmcCsvUrl);
-          const text = await response.text();
-          const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        if(!apmcVisible){
+            try {
+                const response = await fetch("/api/apmc/");  // fetch from DB
+                const data = await response.json();
 
-          parsed.data.forEach(row => {
-              const lat = parseFloat(row.Latitude);
-              const lng = parseFloat(row.Longitude);
-              if(!isNaN(lat) && !isNaN(lng)){
-                // const marker = L.marker([lat, lng], { icon: apmcIcon })
-                //    .bindPopup(`<strong>${row.Apmc}</strong><br>${row.District}`);
-                //   apmcMarkers.addLayer(marker);
+                data.forEach(row => {
+                    const lat = parseFloat(row.latitude);
+                    const lng = parseFloat(row.longitude);
+                    if(!isNaN(lat) && !isNaN(lng)){
+                        const marker = L.circleMarker([lat, lng], {
+                            radius: 10,
+                            color: 'blue',
+                            weight: 2,
+                            fillColor: 'red',
+                            fillOpacity: 0.3
+                        }).bindPopup(`<strong>Mandi Name: ${row.apmc_name}</strong><br>District: ${row.district}<br><a href="#" class="apmc-link" data-apmc="${row.apmc_name}">View Timeline</a>`);
+                        apmcMarkers.addLayer(marker);
+                    }
+                });
 
-                const marker = L.circleMarker([lat, lng], {
-                    radius: 10,            // size of the circle
-                    color: 'blue',        // border color
-                    weight: 2,             // border width
-                    fillColor: 'red',    // fill color
-                    fillOpacity: 0.3       // transparency
-                }).bindPopup(`<strong>Mandi Name: ${row.Apmc}</strong><br>District: ${row.District}`);
-                apmcMarkers.addLayer(marker);
-              }
-          });
+                apmcMarkers.addTo(map);
+                apmcVisible = true;
+                toggleApmcBtn.innerText = "📍 Hide APMC";
 
-          apmcMarkers.addTo(map);
-          apmcVisible = true;
-          toggleApmcBtn.innerText = "📍 Hide APMC";
-      } else {
-          map.removeLayer(apmcMarkers);
-          apmcVisible = false;
-          toggleApmcBtn.innerText = "📍 Show All APMC";
-      }
-  });
+            } catch(err){
+                console.error("Error fetching APMC from DB:", err);
+            }
+        } else {
+            map.removeLayer(apmcMarkers);
+            apmcVisible = false;
+            toggleApmcBtn.innerText = "📍 Show All APMC";
+        }
+    });
 
       const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
         let districtVisible = true;
@@ -545,9 +562,89 @@ document.addEventListener("DOMContentLoaded", function() {
       // --- Initial chart fetch ---
       fetchAgrowonPrices(commoditySelect.value);
       fetchAgmarkPrices(commoditySelect.value);
-
+      
       document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
+
+      function showTimeline(apmcName) {
+        const url = `/apmc/${encodeURIComponent(apmcName)}/timeline-ajax/`;
+
+        fetch(url)
+            .then(res => res.text())
+            .then(data => {
+                const modalBody = document.querySelector('#apmcTimelineModal .modal-body');
+                modalBody.innerHTML = data;
+
+                // Show modal
+                const modalEl = document.getElementById('apmcTimelineModal');
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                // Parse table rows
+                const pricesRows = modalBody.querySelectorAll('tbody tr');
+                const labels = [];
+                const modalPrices = [];
+
+                pricesRows.forEach(row => {
+                    const date = row.cells[0].innerText;
+                    const price = row.cells[6].innerText.replace(/,/g,'');
+                    if(price){
+                        labels.push(date);
+                        modalPrices.push(parseFloat(price));
+                    }
+                });
+
+                // Render chart after modal shown
+                setTimeout(() => {
+                    const ctx = modalBody.querySelector('#apmcTimelineChart').getContext('2d');
+
+                    // Destroy previous chart only if it's a valid Chart instance
+                    if(window.apmcTimelineChart instanceof Chart){
+                        window.apmcTimelineChart.destroy();
+                    }
+
+                    window.apmcTimelineChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Modal Price (₹/Quintal)',
+                                data: modalPrices,
+                                fill: false,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'top' }, title: { display: true, text: 'Modal Price Trend' } },
+                            scales: {
+                                x: { title: { display: true, text: 'Date' } },
+                                y: { title: { display: true, text: 'Price (₹)' } }
+                            }
+                        }
+                    });
+                }, 200);
+
+            })
+            .catch(err => console.error(err));
+    }
+
+      // Attach event listener
+      document.addEventListener('click', function(e){
+        const target = e.target.closest('.apmc-link');
+        if(target){
+            e.preventDefault();
+            const apmcName = target.dataset.apmc;
+            showTimeline(apmcName);
+        }
+    });
+
+      
+      
   }
+
 
 });
 </script>

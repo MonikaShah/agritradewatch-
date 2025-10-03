@@ -47,6 +47,9 @@ urlpatterns = [
     path("crops/", views.crops_list, name="crops_list"),
     path("crops/update/<str:crop_id>/", views.update_crop, name="update_crop"),
     path("crops/delete/<str:crop_id>/", views.delete_crop, name="delete_crop"),
+
+    path('apmc/<str:apmc_name>/timeline-ajax/', api_views.apmc_timeline_ajax, name='apmc_timeline_ajax'),
+
 ]
 
 if settings.DEBUG:

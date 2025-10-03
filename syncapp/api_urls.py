@@ -18,10 +18,14 @@ urlpatterns = [
     path('profile/', api_views.profile, name='profile'),  # logged-in user
     path("whoami/", api_views.whoami, name="whoami"),
     
+   
     # Crops CRUD using API tokens
     path('crops/', api_views.list_user_crops, name='api_list_crops'),
     path('crops/add/', api_views.add_user_crop, name='api_add_crop'),
     path('crops/<str:crop_id>/update/', api_views.update_user_crop, name='api_update_crop'),
     path('crops/<str:crop_id>/delete/', api_views.delete_user_crop, name='api_delete_crop'),
 
+   
+    path('apmc/', api_views.apmc_list, name='apmc_list'),
+    
 ]

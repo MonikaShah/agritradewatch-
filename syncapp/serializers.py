@@ -13,7 +13,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User1
        
         fields = '__all__'
+        read_only_fields = ["id"]   # prevent client from sending UUID
 
+        
 class FarmerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Farmer1

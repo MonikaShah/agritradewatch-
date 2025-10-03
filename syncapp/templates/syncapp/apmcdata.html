@@ -24,7 +24,11 @@
   .d-flex { flex-direction: column; }
   .flex-shrink-1, .flex-grow-1 { max-width: 100%; min-width: 100%; }
 }
+
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -73,12 +77,20 @@
           <input type="date" id="lineEndDate" class="form-control w-100" value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
         </div>
       </div>
+      <hr>
+      <!-- <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="mapToggle">
+        <label class="form-check-label" for="mapToggle">Show APMC Map</label>
+      </div> -->
 
       
     </div>
 
     <!-- RIGHT PANEL (Charts) -->
     <div class="p-3 flex-grow-1" style="min-width:300px;">
+     <div id="mainContent" class="d-flex flex-wrap">
+      <!-- Chart Panel -->
+    <div id="chartsPanel" class="flex-grow-1 d-flex flex-column"> 
       <div class="chart-box" id="agmarkBox">
         <h4>AgmarkNet Prices (₹/Qunital)</h4>
         <div id="agmark-info" class="text-muted text-center"></div>
@@ -98,7 +110,15 @@
       <h4>AgmarkNet Prices (For selected date range and apmc)</h4>
       <canvas id="agmarkLineChart" height="300"></canvas>
     </div>
-</div>
+   </div>
+
+     <!-- Map Panel (hidden by default) -->
+     <div id="mapPanel" class="flex-shrink-1 chart-box" style="display:none; min-width:400px; height:400px;">
+      <h4>APMC Locations Map</h4>
+      <div id="apmcMap" style="width:100%; height:350px;"></div>
+    </div>
+   </div>
+  </div>
 
 {% endblock %}
 
@@ -112,6 +132,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let agmarkChart = null;
   let agrowonChart = null;
+
+  let apmcMap = L.map("apmcMap").setView([20.0, 77.0], 6); // center on Maharashtra
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(apmcMap);
+
+
   lineChartToggle.addEventListener("change", () => {
     if(lineChartToggle.checked){
         lineChartControls.style.display = "block";
@@ -326,11 +353,23 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // fetchPrices("agrowon"); 
   })
-    
+  const mapToggle = document.getElementById("mapToggle");
+  const mapPanel = document.getElementById("mapPanel");
+  const chartsPanel = document.getElementById("chartsPanel");
+
+  // mapToggle.addEventListener("change", () => {
+  //   if(mapToggle.checked){
+  //     mapPanel.style.display = "block";
+  //     chartsPanel.style.flex = "2 1 400px";   // charts shrink a bit
+  //     mapPanel.style.flex = "3 1 500px";      // map expands to center
+  //     if(apmcMap) apmcMap.invalidateSize();   // redraw Leaflet map
+  //   } else {
+  //     mapPanel.style.display = "none";
+  //     chartsPanel.style.flex = "1 1 100%";    // charts take full width
+  //   }
+  // });  
+
+
 });
-
-
-  
-
 </script>
 {% endblock %}

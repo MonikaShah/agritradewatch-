@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from uuid import uuid4
 from django.utils import timezone
-import html
+import html, uuid
 # from .serializers import ConsumerGeoSerializer
 import requests,logging,json
 import xml.etree.ElementTree as ET
@@ -221,7 +221,7 @@ def web_register(request):
         if User1.objects.filter(username=username).exists():
             messages.error(request, "Username already taken")
         else:
-            User1.objects.create(username=username, email=email, password=password)
+            User1.objects.create(id=uuid.uuid4(),username=username, email=email, password=password)
             messages.success(request, "Registration successful, please login")
             return redirect("login")
     return render(request, "syncapp/register.html")

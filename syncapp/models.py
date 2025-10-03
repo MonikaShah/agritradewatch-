@@ -234,3 +234,44 @@ class Page(models.Model):
     def __str__(self):
         return self.title
   
+
+class APMC_Master(models.Model):
+    apmc_name = models.CharField(max_length=150, primary_key=True)
+    district = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    class Meta:
+        db_table = "apmc_master"
+        verbose_name = "APMC Master"
+        verbose_name_plural = "APMC Masters"
+
+    def __str__(self):
+        return self.apmc_name
+
+
+class APMC_Market_Prices(models.Model):
+    market_name = models.ForeignKey(APMC_Master, on_delete=models.CASCADE, to_field='apmc_name',db_column='market_name', related_name='market_prices')
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    variety = models.CharField(max_length=150, null=True, blank=True)
+    crop_group = models.CharField(max_length=100, null=True, blank=True)
+    arrival_tonn = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    min_price_quintal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    max_price_quintal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    modal_price_quintal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    report_date = models.DateField()
+    grade = models.CharField(max_length=50, null=True, blank=True)
+    commodity = models.CharField(max_length=100)
+    class Meta:
+        db_table ="apmc_market_prices"
+        verbose_name = "APMC Market Price"
+        verbose_name_plural = "APMC Market Prices"
+        indexes = [
+            models.Index(fields=['report_date']),
+            models.Index(fields=['district']),
+        ]
+
+    def __str__(self):
+        return f"{self.market_name} - {self.report_date}"

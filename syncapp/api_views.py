@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt  # ← import here
-
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status, generics, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,7 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -531,3 +531,13 @@ def delete_user_crop(request, crop_id):
 
     except (Consumer1.DoesNotExist, Farmer1.DoesNotExist):
         return Response({"error": "Crop not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+def apmc_list(request):
+    apmcs = APMC_Master.objects.all().values('apmc_name', 'district', 'state','latitude', 'longitude')
+    return JsonResponse(list(apmcs), safe=False)
+
+def apmc_timeline_ajax(request, apmc_name):
+    apmc = get_object_or_404(APMC_Master, apmc_name=apmc_name)
+    prices = apmc.market_prices.all().order_by('report_date')
+    return render(request, 'syncapp/partials/apmc_timeline.html', {'prices': prices})
