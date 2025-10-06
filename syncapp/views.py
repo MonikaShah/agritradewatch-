@@ -132,7 +132,7 @@ def apmc(request):
 
 @login_required
 def map_chart(request):
-    # print("User:", request.user, "| Authenticated:", request.user.is_authenticated)
+    print("User:", request.user, "| Authenticated:", request.user.is_authenticated)
 
     commodities = Commodity.objects.all().order_by("type", "name")
     grouped_commodities = {}

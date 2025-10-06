@@ -221,59 +221,69 @@ def agrowon_prices(request):
 @permission_classes([IsAuthenticated])
 def webdata_prices(request):
     commodity_name = request.GET.get('commodity')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
     if not commodity_name:
         return JsonResponse({'error': 'Commodity parameter required'}, status=400)
 
-    today = timezone.localdate()
+    # 1️⃣ Initialize queryset
+    qs = WebData.objects.filter(commodity__iexact=commodity_name)
 
-    # 1️⃣ Try today's data
-    data_qs = WebData.objects.filter(
-        commodity__iexact=commodity_name,
-        date__date=today
-    )
+    # Handle date range
+    if start_date:
+        qs = qs.filter(date__date__gte=start_date)
+    if end_date:
+        qs = qs.filter(date__date__lte=end_date)
 
-    # 2️⃣ If not found, try alias from Commodity table
-    if not data_qs.exists():
+    # If no data in range, try alias
+    if not qs.exists():
         commodity_obj = Commodity.objects.filter(name__iexact=commodity_name).first()
-        if commodity_obj and commodity_obj.alias_marathi:
-            data_qs = WebData.objects.filter(
-                commodity__iexact=commodity_obj.alias_marathi,
-                date__date=today
-            )
+        alias_name = getattr(commodity_obj, "alias_marathi", None)
+        if alias_name:
+            qs = WebData.objects.filter(commodity__iexact=alias_name)
+            if start_date:
+                qs = qs.filter(date__date__gte=start_date)
+            if end_date:
+                qs = qs.filter(date__date__lte=end_date)
 
-    # 3️⃣ If still not found, fetch latest available date
-    if not data_qs.exists():
-        latest_date = WebData.objects.filter(
-            Q(commodity__iexact=commodity_name) |
-            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
-        ).aggregate(Max("date"))["date__max"]
+    if not qs.exists():
+        return JsonResponse({'error': 'No data found in the selected range'}, status=404)
 
-        if not latest_date:
-            return JsonResponse({'error': 'No data found'}, status=404)
-
-        data_qs = WebData.objects.filter(date=latest_date).filter(
-            Q(commodity__iexact=commodity_name) |
-            Q(commodity__iexact=getattr(commodity_obj, "alias_marathi", None))
-        )
 
     # 4️⃣ Serialize results
     results = [
         {
             'commodity': data.commodity,
-            'apmc': data.apmc,
+            'apmc_name': data.apmc if data.apmc else None,  # ✅ send name
             'variety': data.variety,
             'minprice': data.minprice,
             'maxprice': data.maxprice,
             'modalprice': data.modalprice,
             'unit': data.unit,
             'date': data.date.isoformat() if data.date else None,
-            'is_latest': (data.date.date() != today)  # flag if not today's
+            # 'is_latest': (data.date.date() != today)  # flag if not today's
         }
-        for data in data_qs
-    ]   
+        for data in qs.order_by('date')
+    ]
+    
     print("Sending JSON:", results)  # log in server console
 
     return JsonResponse(results, safe=False)
+
+def consumer_timeline(request, commodity):
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    qs = Consumer1.objects.filter(commodity__iexact=commodity)
+    if start_date: qs = qs.filter(date__gte=start_date)
+    if end_date: qs = qs.filter(date__lte=end_date)
+    qs = qs.order_by("date")
+
+    data = [{"date": entry.date.strftime("%Y-%m-%d"),
+             "price": entry.buyingprice} for entry in qs]
+
+    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def api_register(request):
@@ -339,12 +349,6 @@ def whoami(request):
         "auth": str(type(request.auth))  # shows if JWT or session
     })
 # api for whole sale market prices
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from django.utils import timezone
-from datetime import datetime
-from .models import WebData, Commodity
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

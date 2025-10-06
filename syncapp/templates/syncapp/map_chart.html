@@ -99,37 +99,18 @@
         Modal Price: <span id="modal-price-radius">--</span>
       </div>
     </div>
-    <canvas id="chartCanvas"></canvas>
+    <hr>
+    <h3>Agmarknet Price Trend : <span id="agmarknet"></span></h3>
+  <!-- New: Date range selection -->
+  <div id="date-range-container" style="margin-bottom: 10px;">
+    <label>Start Date: <input type="date" id="startDate"></label>
+    <label>End Date: <input type="date" id="endDate"></label>
+    <button id="filterByDateBtn" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
   </div>
 
-  <div class="box" id="agmark-box">
-    <h3>Agmarknet Price</h3>
-    <div id="agmark-info">Click on a commodity</div>
-    <canvas id="agmarkChart"></canvas>
-  </div>
-
-  <div class="box" id="agrowon-box">
-    <h3>Agrowon Price</h3>
-    <div id="agrowon-info">Click on a marker</div>
-    <canvas id="agrowonChart"></canvas>
-  </div>
-  <div class="modal fade" id="apmcTimelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">APMC Market Timeline</h5>
-          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <!-- Timeline content will load here -->
-        </div>
-      </div>
-    </div>
-  </div>
+  <canvas id="chartCanvas"></canvas>
 </div>
-
+    
 {% endblock %}
 
 {% block extra_js %}
@@ -216,82 +197,7 @@ document.addEventListener("DOMContentLoaded", function() {
   let agrowonChart = null;
   let agmarkChart = null;
 
-  async function fetchAgrowonPrices(commodity){
-    const infoDiv = document.getElementById("agrowon-info");
-    const agrowonCanvas = document.getElementById("agrowonChart");
-
-    try{
-        const dataList = await authFetch(`/api/webdata_prices/?commodity=${commodity}`);
-        if(!Array.isArray(dataList) || dataList.length===0){
-            infoDiv.innerText = "No data found for this commodity";
-            if(agrowonChart) agrowonChart.destroy();
-            return;
-        }
-
-        const labels = dataList.map(d=>d.date);
-        const prices = dataList.map(d=>d.price);
-
-        const chartData = {
-            labels,
-            datasets:[{label:'Price',data:prices,backgroundColor:'rgba(75,192,192,0.7)',borderColor:'rgba(75,192,192,1)',borderWidth:1}]
-        };
-
-        const options = { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}} };
-
-        if(agrowonChart) agrowonChart.destroy();
-        const ctx = agrowonCanvas.getContext("2d");
-        agrowonChart = new Chart(ctx,{ type:'line', data:chartData, options });
-
-        const first = dataList[0];
-        infoDiv.innerHTML = `<strong>Commodity:</strong> ${first.commodity || commodity}<br><strong>Date:</strong> ${first.date || 'NA'}`;
-    } catch(err){
-        console.error(err);
-        infoDiv.innerText = "Error fetching Agrowon prices";
-        if(agrowonChart) agrowonChart.destroy();
-    }
-}
-  async function fetchAgmarkPrices(commodity){  
-    const infoDiv = document.getElementById("agmark-info");
-    const agmarkCanvas = document.getElementById("agmarkChart");
-
-    try {
-        const res = await authFetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}`);
-        if(!Array.isArray(res) || res.length === 0){
-            infoDiv.innerText = "No data found for this commodity";
-            if(agmarkChart) agmarkChart.destroy();
-            return;
-        }
-
-        const labels = res.map(d => d.date);
-        const prices = res.map(d => d.price);
-
-        const chartData = {
-            labels,
-            datasets: [{
-                label: 'Agmark Price',
-                data: prices,
-                backgroundColor: 'rgba(255, 159, 64, 0.7)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1
-            }]
-        };
-
-        const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
-
-        if(agmarkChart) agmarkChart.destroy();
-        const ctx = agmarkCanvas.getContext("2d");
-        agmarkChart = new Chart(ctx, { type: 'line', data: chartData, options });
-
-        const first = res[0];
-        infoDiv.innerHTML = `<strong>Commodity:</strong> ${first.commodity || commodity}<br><strong>Date:</strong> ${first.date || 'NA'}`;
-
-    } catch(err){
-        console.error(err);
-        infoDiv.innerText = "Error fetching Agmark prices";
-        if(agmarkChart) agmarkChart.destroy();
-    }
-}
-
+  
 
   // --------------------------
   // Login form
@@ -516,8 +422,7 @@ document.addEventListener("DOMContentLoaded", function() {
           selectedCommoditySpan.innerText=this.value;
           updateStatsForRadius();
           updateMarkers(this.value,true);
-          fetchAgrowonPrices(this.value);
-          fetchAgmarkPrices(this.value);
+          
          
       });
       let districtLayer = null;
@@ -588,9 +493,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // InitMap ends here
       // --- Initial chart fetch ---
-      fetchAgrowonPrices(commoditySelect.value);
-      fetchAgmarkPrices(commoditySelect.value);
-      
+     
       document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
 
       function showTimeline(apmcName) {
@@ -669,9 +572,85 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-      
-      
-  }
+   // Fetch Agmark Price and draw line chart
+    let agmarkChart = null;
+    let chartData = [];  // Store API response globally for tooltips
+
+    document.getElementById("filterByDateBtn").addEventListener("click", async () => {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const commodity = document.getElementById("commoditySelect").value;
+
+        if (!commodity) return alert("Select a commodity first.");
+
+        try {
+            const url = `/api/webdata_prices/?commodity=${encodeURIComponent(commodity)}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
+            const data = await authFetch(url);
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            chartData = data;  // <-- Save globally for tooltip access
+
+            // Extract labels and price arrays
+            const labels = data.map(d =>{ 
+                if(!d.date) return '';
+                const dt = new Date(d.date);
+                return dt.toLocaleDateString('en-GB');  // outputs DD/MM/YYYY
+            });
+            const minPrices = data.map(d => parseFloat(d.minprice));
+            const maxPrices = data.map(d => parseFloat(d.maxprice));
+            const modalPrices = data.map(d => parseFloat(d.modalprice));
+
+            const ctx = document.getElementById("chartCanvas").getContext("2d");
+
+            // Destroy previous chart
+            if (agmarkChart instanceof Chart) agmarkChart.destroy();
+
+            agmarkChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Min Price', data: minPrices, borderColor: 'green', backgroundColor: 'rgba(0,128,0,0.1)', tension: 0.1 },
+                        { label: 'Max Price', data: maxPrices, borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.1)', tension: 0.1 },
+                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', backgroundColor: 'rgba(0,0,255,0.1)', tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: `${commodity} Price Trend per Qunital` },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const price = context.raw;
+                                    const datasetLabel = context.dataset.label;
+                                    const index = context.dataIndex;
+                                    const apmcName = chartData[index].apmc_name || "Unknown APMC";
+                                    return `${datasetLabel}: ₹${price} (${apmcName})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'Price (₹)' } }
+                    }
+                }
+            });
+
+        } catch(err){
+            console.error("Error fetching webdata prices:", err);
+            alert("Failed to load prices. Check console.");
+        }
+    });
+
+  }//InitMap close
 
 
 });
