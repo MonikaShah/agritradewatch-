@@ -135,10 +135,16 @@ def profile(request):
 def consumers_geojson(request):
     cutoff_date = timezone.make_aware(datetime(2024, 1, 1))
     consumers = Consumer1.objects.filter(date__gte=cutoff_date)
+    
+    # Optional: preload all user IDs to avoid repeated queries
+    user_map = {u.id: u.username for u in User1.objects.all()}
+
 
     features = []
     for c in consumers:
         if c.latitude and c.longitude:
+            username = user_map.get(c.userid, "unknown")  # lookup username from User1
+
             features.append({
                 "type": "Feature",
                 "geometry": {
@@ -148,6 +154,7 @@ def consumers_geojson(request):
                 "properties": {
                     "id": c.id,
                     "name": c.commodity,
+                    "username": username,
                     "commodity": c.commodity,
                     "date": c.date.isoformat() if c.date else None,
                     "buyingprice": c.buyingprice,

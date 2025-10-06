@@ -23,8 +23,8 @@ class Users1Admin(admin.ModelAdmin):
     list_filter = ('username', 'job', 'is_staff')                          # search bar
 
 class Consumers1Admin(admin.ModelAdmin):
-    list_display = ('date', 'user_name', 'userid')
-    list_filter = ['date']
+    list_display = ('date', 'commodity','user_name', 'userid')
+    list_filter = ['date','commodity']
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -38,7 +38,7 @@ class Consumers1Admin(admin.ModelAdmin):
         except User1.DoesNotExist:
             return '-'
 
-    user_name.short_description = 'Name'
+    user_name.short_description = 'Username'
 class WebdataAdmin(admin.ModelAdmin):
     list_display = ('commodity', 'source', 'date', 'apmc')
     list_filter = ['date']

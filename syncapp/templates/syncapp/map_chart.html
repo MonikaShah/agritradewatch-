@@ -434,7 +434,35 @@ document.addEventListener("DOMContentLoaded", function() {
               },
               onEachFeature:(f,layer)=>{
                   const p=f.properties;
-                  layer.bindPopup(`<strong>${p.commodity || "Unknown"}</strong><br>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price: ${p.buyingprice||'NA'}<br>Quantity: ${p.quantitybought||'-'} ${p.unit||''}<br>`);
+                  // layer.bindPopup(`<strong>Consumer Name:</strong>${p.username || "Unknown"}<br><strong>Commodity Purchaed:</strong>${p.commodity || "Unknown"}<br>Purchase Date: </strong>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price:</strong> ${p.buyingprice||'NA'}<br>Quantity Bought:</strong> ${p.quantitybought||'-'} ${p.unit||''}<br>`);
+                  // Build table HTML
+                  const table = `
+                      <table style="border-collapse: collapse; width: 100%;">
+                          
+                          <tr>
+                              <td style="border: 1px solid #999; padding: 4px;">Consumer Name</td>
+                              <td style="border: 1px solid #999; padding: 4px;">${p.username || "Unknown"}</td>
+                          </tr>
+                          <tr>
+                              <td style="border: 1px solid #999; padding: 4px;">Commodity Purchased</td>
+                              <td style="border: 1px solid #999; padding: 4px;">${p.commodity || "Unknown"}</td>
+                          </tr>
+                          <tr>
+                              <td style="border: 1px solid #999; padding: 4px;">Purchase Date</td>
+                              <td style="border: 1px solid #999; padding: 4px;">${p.date ? new Date(p.date).toLocaleDateString('en-GB') : "-"}</td>
+                          </tr>
+                          <tr>
+                              <td style="border: 1px solid #999; padding: 4px;">Buying Price</td>
+                              <td style="border: 1px solid #999; padding: 4px;">${p.buyingprice || 'NA'}</td>
+                          </tr>
+                          <tr>
+                              <td style="border: 1px solid #999; padding: 4px;">Quantity Bought</td>
+                              <td style="border: 1px solid #999; padding: 4px;">${p.quantitybought || '-'} ${p.unit || ''}</td>
+                          </tr>
+                      </table>
+                  `;
+
+                  layer.bindPopup(table);
               }
           });
           markers.addLayer(geojsonLayer); map.addLayer(markers);
