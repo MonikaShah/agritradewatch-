@@ -210,7 +210,7 @@ def web_login(request):
 def web_logout(request):
     logout(request)  # clears session
     messages.info(request, "You have been logged out.")
-    return redirect("login")
+    return redirect("landingpage")
 
 def profile(request):
     return render(request, "syncapp/profile.html")

@@ -93,9 +93,93 @@
       font-size: 0.85rem;
       color: #555;
     }
+    
+    .login-link {
+      background: #198754;
+      color: white !important;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .login-link:hover {
+      background: #145c32;
+      transform: scale(1.05);
+    }
+    /* Top navigation (right corner) */
+  .top-nav {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* Welcome text style */
+  .welcome-text {
+    font-weight: 600;
+    color: #155724;
+    background: #e9f7ef;
+    padding: 6px 14px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
+  }
+
+  /* Logout button */
+  .logout-link {
+    background: #dc3545;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: background 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .logout-link:hover {
+    background: #bb2d3b;
+    transform: scale(1.05);
+  }
+
+  /* Optional: Mobile adjustments */
+  @media (max-width: 576px) {
+    .top-nav {
+      top: 10px;
+      right: 10px;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .welcome-text {
+      font-size: 0.9rem;
+      padding: 5px 12px;
+    }
+
+    .logout-link {
+      padding: 6px 12px;
+      font-size: 0.9rem;
+    }
+}
   </style>
 </head>
 <body>
+
+  <div class="top-nav">
+    {% if user.is_authenticated %}
+      <span class="welcome-text">Welcome, {{ user.username }}!</span>
+      <a href="{% url 'web_logout' %}" class="logout-link">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="login-link">Login / Register</a>
+    {% endif %}
+  </div>
 
   <div class="content container">
     <!-- Logo + Title -->
