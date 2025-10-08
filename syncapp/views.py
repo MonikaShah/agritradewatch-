@@ -17,7 +17,7 @@ import html, uuid
 import requests,logging,json
 import xml.etree.ElementTree as ET
 import pandas as pd
-from datetime import datetime
+from datetime import datetime,timedelta
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
@@ -38,7 +38,6 @@ logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
 
-@login_required
 def apmc(request):
     if not request.user.is_authenticated:
         return redirect(settings.LOGIN_URL)
@@ -130,6 +129,89 @@ def apmc(request):
         "sources": result
     })
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import datetime, timedelta
+from django.db import connection
+
+def ahmedapmc(request):
+    apmc_name = request.GET.get("apmc_name")  # optional
+    variety = request.GET.get("variety", "Red")
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    today = timezone.localdate()
+
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else today - timedelta(days=30)
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else today
+    except ValueError:
+        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+
+    # --- Fetch all APMC locations ---
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT apmc_name, latitude, longitude
+            FROM apmc_master
+            WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+            ORDER BY apmc_name;
+        """)
+        locations = [{"apmc_name": row[0], "lat": row[1], "lon": row[2]} for row in cursor.fetchall()]
+
+    # --- Fetch prices only if a specific APMC is selected ---
+    prices = []
+    if apmc_name:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT report_date, variety, modal_price_quintal, min_price_quintal, max_price_quintal
+                FROM apmc_market_prices
+                WHERE market_name = %s
+                  AND variety = %s
+                  AND report_date BETWEEN %s AND %s
+                ORDER BY report_date ASC;
+            """, [apmc_name, variety, start_date, end_date])
+            rows = cursor.fetchall()
+
+        for r in rows:
+            prices.append({
+                "date": r[0].strftime("%Y-%m-%d"),
+                "commodity": r[1],
+                "modal_price": float(r[2]) if r[2] is not None else 0,
+                "min_price": float(r[3]) if r[3] is not None else 0,
+                "max_price": float(r[4]) if r[4] is not None else 0,
+            })
+
+    return JsonResponse({
+        "status": "ok",
+        "locations": locations,
+        "prices": prices,
+    })
+
+
+def aphmedapmc_market_view(request):
+    today = timezone.localdate()
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT DISTINCT commodity FROM apmc_market_prices ORDER BY commodity;")
+        commodities = [row[0] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT market_name FROM apmc_market_prices ORDER BY market_name;")
+        apmcs = [row[0] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT report_date FROM apmc_market_prices ORDER BY report_date;")
+        date_rows = [row[0] for row in cursor.fetchall()]
+
+    # Convert to ISO format for HTML date input
+    dates = [d.strftime('%Y-%m-%d') for d in date_rows if d is not None]
+
+    return render(request, 'syncapp/ahmedapmc.html', {
+        'commodities': commodities,
+        'apmcs': apmcs,
+        'dates': dates,
+        'today': today,
+    })
+
+
 @login_required
 def map_chart(request):
     print("User:", request.user, "| Authenticated:", request.user.is_authenticated)
@@ -199,8 +281,9 @@ def web_login(request):
         password = request.POST.get("password")
         user = authenticate(username=username, password=password)
         if user:
-            login(request, user)  # important
+            login(request, user)  # important, sets session
             messages.success(request, f"Welcome {user.username}!")
+            
             return redirect("landingpage")
         else:
             messages.error(request, "Invalid credentials")

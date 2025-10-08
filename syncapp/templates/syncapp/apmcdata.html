@@ -1,125 +1,155 @@
 {% extends 'syncapp/base.html' %}
 {% load static %}
 
-{% block title %}WholeSale Market Prices{% endblock %}
+{% block title %}Wholesale Market Prices{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-<style>
-  .container-flex { display: flex; gap: 20px; flex-wrap: wrap; }
-  .left-panel { flex: 1 1 250px; min-width: 250px; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: #f9f9f9; }
-  .right-panel { flex: 3 1 600px; }
-
-  .left-panel ul { list-style:none; padding:0; }
-  .left-panel li { padding: 10px; cursor:pointer; border-bottom:1px solid #ddd; }
-  .left-panel li.active { background:#007bff; color:#fff; }
-
-  .chart-box { border:1px solid #ddd; border-radius:10px; padding:15px; background:#f9f9f9; margin-bottom:20px; display:none; }
-  .chart-box h4 { text-align:center; }
-
-  .form-group { margin-bottom:10px; }
-  .chart-box { border:1px solid #ddd; border-radius:10px; padding:15px; background:#f9f9f9; display:none; }
-
-@media (max-width: 768px) {
-  .d-flex { flex-direction: column; }
-  .flex-shrink-1, .flex-grow-1 { max-width: 100%; min-width: 100%; }
-}
-
-</style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<style>
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .filter-bar .form-group {
+    flex: 1 1 180px;
+    min-width: 160px;
+  }
+
+  /* MAIN PANEL LAYOUT */
+  .main-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .map-panel, .chart-panel {
+    flex: 1 1 48%;
+    min-width: 300px;
+    height: 520px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #map {
+    flex: 1;
+    width: 100%;
+    border-radius: 15px;
+  }
+  .chart-panel h5 {
+    background: linear-gradient(90deg, #007bff, #00b4d8);
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    border-radius: 15px 15px 0 0;
+    font-size: 1rem;
+  }
+  .chart-panel canvas {
+    flex: 1;
+    padding: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      flex-direction: column;
+    }
+    .map-panel, .chart-panel {
+      width: 100%;
+      height: 400px;
+    }
+  }
+
+  .map-panel {
+    position: relative;
+  }
+
+  #mapOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.5); /* lighter overlay */
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #222;
+    backdrop-filter: blur(3px); /* subtle glass effect */
+    z-index: 500;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    pointer-events: none; /* allows map panning/zooming */
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-3">WholeSale Market Prices</h2>
+  <h2 class="mb-3 text-primary">Wholesale Market Prices</h2>
   <div id="dynamicAlert" class="alert alert-warning alert-dismissible fade show" style="display:none;"></div>
 
-  <div class="d-flex flex-wrap">
-    <!-- LEFT PANEL (Filters) -->
-    <div class="p-3 bg-light rounded shadow-sm flex-shrink-1" style="min-width:250px; max-width:300px; flex:1;">
-      <div class="mb-3">
-        <label for="commoditySelect" class="form-label">Commodity</label>
-        <select id="commoditySelect" class="form-select w-100">
-          <option value="">All Commodities</option>
-          {% for item in commodities %}
-          <option value="{{ item }}">{{ item }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="apmcSelect" class="form-label">APMC</label>
-        <select id="apmcSelect" class="form-select w-100" disabled>
-          <option value="">Select APMC</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="dateSelect" class="form-label">Date</label>
-        <input type="date" id="dateSelect" class="form-control w-100" value="{{ today|date:'Y-m-d' }}" min="2025-08-11"
-        max="{{ today|date:'Y-m-d' }}">
-      </div>
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="form-group">
+      <label for="commoditySelect" class="form-label">Commodity</label>
+      <select id="commoditySelect" class="form-select w-100">
+        <option value="">All Commodities</option>
+        {% for item in commodities %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="lineStartDate" class="form-label">Start Date</label>
+      <input type="date" id="lineStartDate" class="form-control w-100"
+             value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="lineEndDate" class="form-label">End Date</label>
+      <input type="date" id="lineEndDate" class="form-control w-100"
+             value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="apmcSelect" class="form-label">APMC</label>
+      <select id="apmcSelect" class="form-select w-100" disabled>
+        <option value="">Select APMC</option>
+      </select>
+    </div>
+
+    <div class="form-group">
       <button id="submitBtn" class="btn btn-primary w-100">Show Prices</button>
-      <br>
-      <hr>
-      <div class="form-check form-switch mb-3">
-        <input class="form-check-input" type="checkbox" id="lineChartToggle">
-        <label class="form-check-label" for="lineChartToggle">Show Line Chart</label>
-      </div>
-      
-      <div id="lineChartControls" style="display:none;">
-        <div class="mb-3">
-          <label for="lineStartDate" class="form-label">Start Date</label>
-          <input type="date" id="lineStartDate" class="form-control w-100" value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
-        </div>
-        <div class="mb-3">
-          <label for="lineEndDate" class="form-label">End Date</label>
-          <input type="date" id="lineEndDate" class="form-control w-100" value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
-        </div>
-      </div>
-      <hr>
-      <!-- <div class="form-check form-switch mb-3">
-        <input class="form-check-input" type="checkbox" id="mapToggle">
-        <label class="form-check-label" for="mapToggle">Show APMC Map</label>
-      </div> -->
-
-      
     </div>
-
-    <!-- RIGHT PANEL (Charts) -->
-    <div class="p-3 flex-grow-1" style="min-width:300px;">
-     <div id="mainContent" class="d-flex flex-wrap">
-      <!-- Chart Panel -->
-    <div id="chartsPanel" class="flex-grow-1 d-flex flex-column"> 
-      <div class="chart-box" id="agmarkBox">
-        <h4>AgmarkNet Prices (₹/Qunital)</h4>
-        <div id="agmark-info" class="text-muted text-center"></div>
-        <canvas id="agmarkChart" height="300"></canvas>
-      </div>
-
-      <div class="chart-box" id="agrowonBox">
-        <h4>Agrowon Prices (₹/Quintal)</h4>
-        <div id="agrowon-info" class="text-muted text-center"></div>
-        <canvas id="agrowonChart" height="300"></canvas>
-      </div>
-
-
-
-    <!-- Line chart -->
-    <div class="chart-box" id="agmarkLineBox">
-      <h4>AgmarkNet Prices (For selected date range and apmc)</h4>
-      <canvas id="agmarkLineChart" height="300"></canvas>
-    </div>
-   </div>
-
-     <!-- Map Panel (hidden by default) -->
-     <div id="mapPanel" class="flex-shrink-1 chart-box" style="display:none; min-width:400px; height:400px;">
-      <h4>APMC Locations Map</h4>
-      <div id="apmcMap" style="width:100%; height:350px;"></div>
-    </div>
-   </div>
   </div>
 
+  <!-- MAIN CONTENT -->
+  <div class="main-content mt-3">
+    <div class="map-panel">
+      <div id="map"></div>
+      <div id="mapOverlay">🗺️ Coming Soon</div>
+  </div>
+
+    <div class="chart-panel">
+      <h5>AgmarkNet Prices Trend</h5>
+      <canvas id="agmarkLineChart"></canvas>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -127,249 +157,153 @@
 document.addEventListener("DOMContentLoaded", function() {
   const commoditySelect = document.getElementById("commoditySelect");
   const apmcSelect = document.getElementById("apmcSelect");
-  const dateSelect = document.getElementById("dateSelect");
+  const lineStartDate = document.getElementById("lineStartDate");
+  const lineEndDate = document.getElementById("lineEndDate");
   const submitBtn = document.getElementById("submitBtn");
-
-  let agmarkChart = null;
-  let agrowonChart = null;
-
-  let apmcMap = L.map("apmcMap").setView([20.0, 77.0], 6); // center on Maharashtra
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors"
-  }).addTo(apmcMap);
-
-
-  lineChartToggle.addEventListener("change", () => {
-    if(lineChartToggle.checked){
-        lineChartControls.style.display = "block";
-        fetchLineChart(); // draw line chart on toggle ON
-    } else {
-        lineChartControls.style.display = "none";
-        if(agmarkLineChart){
-            agmarkLineChart.destroy();
-            agmarkLineChart = null;
-        }
-        document.getElementById("agmarkLineBox").style.display = "none";
-    }
-  });
-
-// Re-draw line chart when slider dates change
-  [lineStartDate, lineEndDate].forEach(el => {
-    el.addEventListener("change", () => {
-        if(lineChartToggle.checked){
-            fetchLineChart();
-        }
-    });
-  });
-
-  function showAlert(msg, type="warning", dur=4000){
-    const alertDiv = document.getElementById("dynamicAlert");
-    alertDiv.innerText=msg;
-    alertDiv.className=`alert alert-${type} alert-dismissible fade show`;
-    alertDiv.style.display="block";
-    setTimeout(()=>{ alertDiv.classList.remove("show"); alertDiv.classList.add("hide"); setTimeout(()=>alertDiv.style.display="none",500); }, dur);
-  }
-
-  function destroyChart(chart){ if(chart){ chart.destroy(); chart=null; } return chart; }
-
-  // Populate APMC based on selected commodity & date
-  async function populateApmc(){
-    const commodity = commoditySelect.value;
-    const date = dateSelect.value;
-    if(!commodity){ apmcSelect.innerHTML='<option value="">All APMCs</option>'; apmcSelect.disabled=false; return; }
-
-    try{
-      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&date=${date}`);
-      const dataList = await res.json();
-      const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
-      apmcSelect.innerHTML='<option value="">All APMCs</option>';
-      uniqueApmcs.forEach(a=>{
-        const opt = document.createElement("option");
-        opt.value=a; opt.textContent=a; apmcSelect.appendChild(opt);
-      });
-      apmcSelect.disabled = uniqueApmcs.length===0;
-    }catch(err){ console.error(err); apmcSelect.innerHTML='<option value="">All APMCs</option>'; apmcSelect.disabled=false; }
-  }
-
-  commoditySelect.addEventListener("change", populateApmc);
-  dateSelect.addEventListener("change", populateApmc);
-
-  commoditySelect.addEventListener("change", () => {
-      populateApmc().then(() => {
-          const commodity = commoditySelect.value;
-          const apmc = apmcSelect.value;
-          // fetchLineChart("agmark", apmc, commodity);
-      });
-  });
-
-  apmcSelect.addEventListener("change", () => {
-      const commodity = commoditySelect.value;
-      const apmc = apmcSelect.value;
-      // fetchLineChart("agmark", apmc, commodity);
-  });
-
-  async function fetchPrices(source, apmc=null, commodity=null, date=null){
-    const infoId = source=="agmark"?"agmark-info":"agrowon-info";
-    const boxId = source=="agmark"?"agmarkBox":"agrowonBox";
-    const ctx = document.getElementById(source+"Chart").getContext("2d");
-    if(source=="agmark") agmarkChart=destroyChart(agmarkChart); else agrowonChart=destroyChart(agrowonChart);
-
-    document.getElementById(infoId).innerText="Loading...";
-    document.getElementById(boxId).style.display="block";
-
-    try{
-      let url=  window.location.origin +`/api/webdata_prices_public/?source=${source}`;
-      if(commodity) url+=`&commodity=${encodeURIComponent(commodity)}`;
-      if(apmc) url+=`&apmc=${encodeURIComponent(apmc)}`;
-      if(date) url+=`&date=${date}`;
-      const res = await fetch(url);
-      const dataList = await res.json();
-
-      let labels=[], minData=[], modalData=[], maxData=[];
-      if(dataList.length===0){
-        labels = [apmc||"NA"];
-        minData=[0]; modalData=[0]; maxData=[0];
-      } else {
-        if(apmc){
-          const record = dataList.find(d=>d.apmc===apmc) || {};
-          labels=[apmc]; 
-          minData=[(record.minprice||0)]; // divide by 100 for per kg
-          modalData=[(record.modalprice||0)];
-          maxData=[(record.maxprice||0)];
-        } else {
-          labels = [...new Set(dataList.map(d=>d.apmc))];
-          minData = labels.map(l=>dataList.find(d=>d.apmc===l)?.minprice||0);
-          modalData = labels.map(l=>dataList.find(d=>d.apmc===l)?.modalprice||0);
-          maxData = labels.map(l=>dataList.find(d=>d.apmc===l)?.maxprice||0);
-        }
-      }
-
-      const colorMap = source==="agmark"
-        ? ["rgba(54,162,235,0.7)", "rgba(255,206,86,0.7)", "rgba(75,192,192,0.7)"]
-        : ["rgba(153,102,255,0.7)","rgba(255,159,64,0.7)","rgba(255,99,132,0.7)"];
-
-      const datasets=[
-        {label:"Min", data:minData, backgroundColor: colorMap[0]},
-        {label:"Modal", data:modalData, backgroundColor: colorMap[1]},
-        {label:"Max", data:maxData, backgroundColor: colorMap[2]}
-      ];
-
-      const chartOptions = {type:"bar", data:{labels,datasets}, options:{responsive:true, plugins:{legend:{position:"top"}}, scales:{y:{beginAtZero:true}}}};
-      if(source=="agmark") agmarkChart = new Chart(ctx, chartOptions);
-      else agrowonChart = new Chart(ctx, chartOptions);
-
-      document.getElementById(infoId).innerHTML=`<b>Commodity:</b> ${commodity||"All"}<br><b>APMC:</b> ${apmc||"All"}<br><b>Date:</b> ${date||"Latest"}`;
-    }catch(err){ 
-      console.error(err);
-       showAlert(`Error loading ${source} data`); 
-      document.getElementById(boxId).style.display="none"; }
-  }
-
-  submitBtn.addEventListener("click", ()=>{
-    const commodity = commoditySelect.value;
-    const apmc = apmcSelect.value;
-    const date = dateSelect.value;
-    fetchPrices("agmark",apmc,commodity,date);
-    // fetchPrices("agrowon",apmc,commodity,date);
-    // fetchLineChart("agmark",apmc,commodity);
-  });
+  const dynamicAlert = document.getElementById("dynamicAlert");
 
   let agmarkLineChart = null;
-  
-  async function fetchLineChart() {
-    const canvas = document.getElementById("agmarkLineChart");
-    if (!canvas) return; // stop if canvas not found
-    const ctx = canvas.getContext("2d");
+  let map, markerLayer;
 
-    if (agmarkLineChart) {
-        agmarkLineChart.destroy();
-        agmarkLineChart = null;
+  // --- Initialize Leaflet map ---
+  function initMap() {
+    map = L.map('map').setView([19.5, 79.6], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+    markerLayer = L.layerGroup().addTo(map);
+  }
+  initMap();
+
+  // --- Alert Helper ---
+  function showAlert(msg, type="warning", dur=4000){
+    dynamicAlert.innerText = msg;
+    dynamicAlert.className = `alert alert-${type} alert-dismissible fade show`;
+    dynamicAlert.style.display = "block";
+    setTimeout(()=>{
+      dynamicAlert.classList.remove("show");
+      dynamicAlert.classList.add("hide");
+      setTimeout(()=>dynamicAlert.style.display="none",500);
+    }, dur);
+  }
+
+  // --- Populate APMCs ---
+  async function populateApmc(){
+    const commodity = commoditySelect.value;
+    const startDate = lineStartDate.value;
+    const endDate = lineEndDate.value;
+
+    if(!commodity || !startDate || !endDate){ 
+      apmcSelect.innerHTML = '<option value="">Select APMC</option>'; 
+      apmcSelect.disabled = true; 
+      return; 
     }
 
-    const boxId = "agmarkLineBox";
-    document.getElementById(boxId).style.display = "block";
+    try{
+      const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&start_date=${startDate}&end_date=${endDate}`);
+      const dataList = await res.json();
+
+      const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
+      apmcSelect.innerHTML = '<option value="">All APMCs</option>';
+      uniqueApmcs.forEach(a=>{
+        const opt = document.createElement("option");
+        opt.value = a;
+        opt.textContent = a;
+        apmcSelect.appendChild(opt);
+      });
+      apmcSelect.disabled = uniqueApmcs.length === 0;
+
+      // --- Add markers ---
+      markerLayer.clearLayers();
+      dataList.forEach(d=>{
+        if (d.lat && d.lon) {
+          L.circleMarker([d.lat, d.lon], {
+            radius: 8,
+            color: '#007bff',
+            fillColor: '#00b4d8',
+            fillOpacity: 0.5,
+            weight: 2
+          }).addTo(markerLayer)
+            .bindPopup(`<b>${d.apmc}</b><br>${d.commodity}<br>₹${d.modalprice}`);
+        }
+      });
+
+    }catch(err){
+      console.error(err);
+      apmcSelect.disabled = true;
+    }
+  }
+
+  // --- Fetch Chart ---
+  async function fetchLineChart() {
+    const ctx = document.getElementById("agmarkLineChart").getContext("2d");
+    if (agmarkLineChart) agmarkLineChart.destroy();
 
     const commodity = commoditySelect.value;
     const apmc = apmcSelect.value;
     const startDate = lineStartDate.value;
     const endDate = lineEndDate.value;
 
-    if (!commodity) return; // optional: require commodity for line chart
+    if (!commodity || !startDate || !endDate) {
+      showAlert("Please select commodity and date range first");
+      return;
+    }
 
     try {
-        let url = `/api/webdata_prices_public/?source=agmark`;
-        if (commodity) url += `&commodity=${encodeURIComponent(commodity)}`;
-        if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
-        if (startDate && endDate) url += `&start_date=${startDate}&end_date=${endDate}`;
+      let url = `/api/webdata_prices_public/?source=agmark&commodity=${encodeURIComponent(commodity)}`;
+      if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
+      url += `&start_date=${startDate}&end_date=${endDate}`;
 
-        const res = await fetch(url);
-        const dataList = await res.json();
-        if (!Array.isArray(dataList) || dataList.length === 0) {
-            document.getElementById(boxId).style.display = "none";
-            return;
+      const res = await fetch(url);
+      const dataList = await res.json();
+      if (!Array.isArray(dataList) || dataList.length === 0) {
+        showAlert("No data available for selected criteria", "info");
+        return;
+      }
+
+      const grouped = {};
+      dataList.forEach(d => {
+        const dateStr = d.date.split("T")[0];
+        if (!grouped[dateStr]) grouped[dateStr] = { min: [], modal: [], max: [] };
+        grouped[dateStr].min.push(d.minprice || 0);
+        grouped[dateStr].modal.push(d.modalprice || 0);
+        grouped[dateStr].max.push(d.maxprice || 0);
+      });
+
+      const labels = Object.keys(grouped).sort();
+      const minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
+      const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
+      const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
+
+      agmarkLineChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            { label: "Min", data: minData, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.2)", tension:0.3 },
+            { label: "Modal", data: modalData, borderColor: "#ffc107", backgroundColor: "rgba(255,193,7,0.2)", tension:0.3 },
+            { label: "Max", data: maxData, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.2)", tension:0.3 }
+          ]
+        },
+        options: {
+          responsive:true,
+          plugins:{ legend:{ position:"top" } },
+          scales:{ y:{ beginAtZero:true } }
         }
+      });
 
-        const grouped = {};
-        dataList.forEach(d => {
-            const dateStr = d.date.split("T")[0];
-            if (!grouped[dateStr]) grouped[dateStr] = { min: [], modal: [], max: [] };
-            grouped[dateStr].min.push(d.minprice || 0);
-            grouped[dateStr].modal.push(d.modalprice || 0);
-            grouped[dateStr].max.push(d.maxprice || 0);
-        });
-
-        const labels = Object.keys(grouped).sort();
-        const minData = labels.map(dt => grouped[dt].min.reduce((a, b) => a + b, 0) / grouped[dt].min.length);
-        const modalData = labels.map(dt => grouped[dt].modal.reduce((a, b) => a + b, 0) / grouped[dt].modal.length);
-        const maxData = labels.map(dt => grouped[dt].max.reduce((a, b) => a + b, 0) / grouped[dt].max.length);
-
-        agmarkLineChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels,
-                datasets: [
-                    { label: "Min", data: minData, borderColor: "rgba(54,162,235,1)", backgroundColor: "rgba(54,162,235,0.2)", tension: 0.3 },
-                    { label: "Modal", data: modalData, borderColor: "rgba(255,206,86,1)", backgroundColor: "rgba(255,206,86,0.2)", tension: 0.3 },
-                    { label: "Max", data: maxData, borderColor: "rgba(75,192,192,1)", backgroundColor: "rgba(75,192,192,0.2)", tension: 0.3 }
-                ]
-            },
-            options: { responsive: true, plugins: { legend: { position: "top" } }, scales: { y: { beginAtZero: true } } }
-        });
-
-    } catch (err) {
-        console.error(err);
-        document.getElementById(boxId).style.display = "none";
+    } catch(err) { 
+      console.error(err); 
+      showAlert("Error loading line chart"); 
     }
-}
+  }
 
-  // Function to fetch last 7 days prices and draw line chart
-  
-
-
-
-  // Initial load
-  populateApmc().then(()=>{ 
-    fetchPrices("agmark"); 
-    
-    // fetchPrices("agrowon"); 
-  })
-  const mapToggle = document.getElementById("mapToggle");
-  const mapPanel = document.getElementById("mapPanel");
-  const chartsPanel = document.getElementById("chartsPanel");
-
-  // mapToggle.addEventListener("change", () => {
-  //   if(mapToggle.checked){
-  //     mapPanel.style.display = "block";
-  //     chartsPanel.style.flex = "2 1 400px";   // charts shrink a bit
-  //     mapPanel.style.flex = "3 1 500px";      // map expands to center
-  //     if(apmcMap) apmcMap.invalidateSize();   // redraw Leaflet map
-  //   } else {
-  //     mapPanel.style.display = "none";
-  //     chartsPanel.style.flex = "1 1 100%";    // charts take full width
-  //   }
-  // });  
-
-
+  // --- Event Listeners ---
+  commoditySelect.addEventListener("change", populateApmc);
+  lineStartDate.addEventListener("change", populateApmc);
+  lineEndDate.addEventListener("change", populateApmc);
+  submitBtn.addEventListener("click", fetchLineChart);
 });
 </script>
 {% endblock %}

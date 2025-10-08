@@ -66,9 +66,26 @@
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'map_chart' %}">Dashboard</a>
                         </li>
-                        <li class="nav-item d-none d-lg-block">
-                            <a class="nav-link px-3" href="{% url 'apmc' %}">Wholesale Price</a>
-                        </li>
+                        
+                            <!-- Wholesale Market Price Dropdown -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle px-3 fw-semibold" href="#" id="wholesaleDropdown"
+       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      Wholesale Market Price 
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="wholesaleDropdown">
+      <li>
+        <a class="dropdown-item" id="webOption" href="{% url 'apmc' %}">
+          🌐 ALL APMC Data
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" id="crowdOption" href="{% url 'aphmedapmc_market_view' %}">
+          👥 Ahmednagar APMC Data 
+        </a>
+      </li>
+    </ul>
+  </li>
                         <li class="nav-item d-none d-lg-block">
                             <a class="nav-link px-3" href="{% url 'page_detail' slug='resource' %}">App Vault</a>
                         </li>
@@ -114,6 +131,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const path = window.location.pathname;
+        
+          // Highlight the active choice in the dropdown
+          if (path.includes("crowd")) {
+            document.getElementById("crowdOption").classList.add("active");
+          } else {
+            document.getElementById("webOption").classList.add("active");
+          }
+        });
+        </script>
+        
+    {% endblock %}
 </body>
 </html>
