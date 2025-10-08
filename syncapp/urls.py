@@ -25,7 +25,8 @@ urlpatterns = [
     path('map_chart', views.map_chart, name='map_chart'),
     path('aboutus/', views.aboutus, name='aboutus'),
     path('apmc/', views.apmc, name='apmc'),
-
+    path('ahmedapmc/',views.ahmedapmc,name='ahmedapmc'),
+    path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
 
     # include DRF router URLs under /api/
     path('api/', include(router.urls)),
