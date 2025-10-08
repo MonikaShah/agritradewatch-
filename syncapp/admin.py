@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Commodity,Consumer1,Farmer1,User1,WebData,Page  # replace with your actual models
+from .models import Commodity,Consumer1,Farmer1,User1,WebData,Page,APMC_Market_Prices,APMC_Master  # replace with your actual models
 from django.utils.html import format_html
 from django.db.models import F  # Make sure to import F
 
@@ -52,6 +52,7 @@ admin.site.register(User1,Users1Admin)
 admin.site.register(WebData,WebdataAdmin)
 admin.site.register(Page,PageAdmin)
 admin.site.register(Commodity)
+admin.site.register(APMC_Master)
 
 
 # Register your models here.
