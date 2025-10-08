@@ -72,10 +72,15 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const map = L.map('map').setView([19.7515, 75.7139], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; OpenStreetMap contributors'
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     maxZoom: 18,
+    //     attribution: '&copy; OpenStreetMap contributors'
+    // }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and others'
     }).addTo(map);
+
 
     let apmcMarkers = [];
     let priceChart = null;
