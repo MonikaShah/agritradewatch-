@@ -39,9 +39,7 @@ def landingpage(request):
     return render(request, "syncapp/landingpage.html")
 
 def apmc(request):
-    if not request.user.is_authenticated:
-        return redirect(settings.LOGIN_URL)
-
+    
     commodity = request.GET.get("commodity")
     date_str = request.GET.get("date")
     today = timezone.localdate()
@@ -128,12 +126,6 @@ def apmc(request):
         "date": selected_date.strftime("%Y-%m-%d"),
         "sources": result
     })
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.utils import timezone
-from datetime import datetime, timedelta
-from django.db import connection
 
 def ahmedapmc(request):
     apmc_name = request.GET.get("apmc_name")  # optional
