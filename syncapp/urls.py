@@ -2,6 +2,7 @@ from django.urls import path,include
 from . import views
 from rest_framework import routers
 from . import api_views
+from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 # from .api_views import RegisterView, CustomAuthToken
@@ -34,6 +35,9 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
+    #For web browsers
+        path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     

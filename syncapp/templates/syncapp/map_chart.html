@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   
   // --------------------------
-  // Token helpers
+  // Token helpers 
   // --------------------------
   async function refreshToken(){
       const refresh = sessionStorage.getItem("refresh_token");
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
   
 
   // --------------------------
-  // Login form
+  // Login form 
   // --------------------------
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -215,8 +215,14 @@ document.addEventListener("DOMContentLoaded", function() {
       });
       const data = await res.json();
       if(data.access){
-          sessionStorage.setItem("api_token", data.access);
-          sessionStorage.setItem("refresh_token", data.refresh);
+        if(!sessionStorage.getItem("api_token") && localStorage.getItem("api_token")){
+            sessionStorage.setItem("api_token", localStorage.getItem("api_token"));
+            sessionStorage.setItem("refresh_token", localStorage.getItem("refresh_token"));
+            sessionStorage.setItem("username", localStorage.getItem("username"));
+        } 
+          localStorage.setItem("username", username);
+          localStorage.setItem("api_token", data.access);
+          localStorage.setItem("refresh_token", data.refresh);
           loginModal.style.display = "none";
           initMap();
       } else {
@@ -229,22 +235,45 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // --------------------------
-  // Auto-login check
+  // Auto-login check 
   // --------------------------
-  (async function autoLoginCheck(){
-      const token = sessionStorage.getItem("api_token");
-      if(token){
-          const ok = await refreshToken();
-          if(ok){
-              loginModal.style.display = "none";
-              initMap();
-          } else {
-              loginModal.style.display = "block"; // token expired
-          }
-      } else {
-          loginModal.style.display = "block"; // no token
-      }
-  })();
+  (async function autoLoginCheck() {
+    const token = sessionStorage.getItem("api_token");
+    const refresh = sessionStorage.getItem("refresh_token");
+    const username = sessionStorage.getItem("username");
+
+    if(token) {
+        // Try to use the token
+        try {
+            // Test a simple API endpoint to see if token is valid
+            const res = await fetch("/api/consumers_geojson/", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if(res.ok){
+                loginModal.style.display = "none";
+                initMap();
+                return;
+            } 
+        } catch(err){
+            console.warn("Token check failed:", err);
+        }
+    }
+
+    // Token invalid or missing, try refresh
+    if(refresh){
+        const ok = await refreshToken();
+        if(ok){
+            loginModal.style.display = "none";
+            initMap();
+            return;
+        }
+    }
+
+    // No valid token or refresh -> show login modal
+    loginModal.style.display = "block";
+})();
+
+
 
   // --------------------------
   // Map initialization
@@ -411,7 +440,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       // --- Fetch initial data ---
       try {
-          allData = await authFetch("/api/consumers_geojson/");
+          allData = await fetch("/api/consumers_geojson/");
           updateStatsForRadius(); 
           updateMarkers(commoditySelect.value,true);
       } catch(err){
@@ -585,7 +614,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         try {
             const url = `/api/webdata_prices/?commodity=${encodeURIComponent(commodity)}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
-            const data = await authFetch(url);
+            const data = await fetch(url);
 
             if (data.error) {
                 alert(data.error);
@@ -651,6 +680,37 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
   }//InitMap close
+
+  // --------------------------
+// Web login via Django session
+// --------------------------
+loginForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    // Send POST request to Django session login endpoint
+    const res = await fetch("/accounts/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    });
+
+    if (res.ok) {
+      // Login successful → reload page to update {{ user }}
+      window.location.reload();
+    } else {
+      // Login failed
+      document.getElementById("loginMessage").innerText = "Invalid credentials!";
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    document.getElementById("loginMessage").innerText = "Login failed! Check console.";
+  }
+});
+
 
 
 });
