@@ -76,6 +76,7 @@ MIDDLEWARE = [
 # }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -97,6 +98,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
             ],
         },
     },
@@ -185,3 +187,13 @@ LOGIN_REDIRECT_URL = '/crops/' # where to go after successful login
 
 # Session expires when the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# If your site uses www.example.com
+SESSION_COOKIE_DOMAIN = ".mandigo.in"
+CSRF_COOKIE_DOMAIN = ".mandigo.in"
+
+# Make sure cookies are sent over HTTPS if using HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Add your domain to trusted origins
+CSRF_TRUSTED_ORIGINS = ["https://mandigo.in"]
