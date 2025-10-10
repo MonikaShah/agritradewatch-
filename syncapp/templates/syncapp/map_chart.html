@@ -114,23 +114,7 @@
 {% endblock %}
 
 {% block extra_js %}
-
 <script>
-// Get CSRF token from cookie
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
 document.addEventListener("DOMContentLoaded", function() {
 
   const loginModal = document.getElementById("loginModal");
@@ -220,33 +204,35 @@ document.addEventListener("DOMContentLoaded", function() {
   // --------------------------
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    const csrfToken = getCookie('csrftoken');
 
     try {
-        const res = await fetch("/accounts/login/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-CSRFToken": csrfToken
-            },
-            credentials: "same-origin", // important: send cookies
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-        });
-
-        if (res.ok) {
-            // Login succeeded → refresh page to show {{ user.username }}
-            window.location.reload();
-        } else {
-            document.getElementById("loginMessage").innerText = "Invalid credentials!";
-        }
-    } catch (err) {
+      const res = await fetch("/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if(data.access){
+        if(!sessionStorage.getItem("api_token") && localStorage.getItem("api_token")){
+            sessionStorage.setItem("api_token", localStorage.getItem("api_token"));
+            sessionStorage.setItem("refresh_token", localStorage.getItem("refresh_token"));
+            sessionStorage.setItem("username", localStorage.getItem("username"));
+        } 
+          localStorage.setItem("username", username);
+          localStorage.setItem("api_token", data.access);
+          localStorage.setItem("refresh_token", data.refresh);
+          loginModal.style.display = "none";
+          initMap();
+      } else {
+          loginMessage.innerText = data.detail || "Login failed!";
+      }
+    } catch(err){
         console.error("Login error:", err);
-        document.getElementById("loginMessage").innerText = "Login failed! Check console.";
+        loginMessage.innerText = "Login failed! Check console.";
     }
-});
+  });
 
   // --------------------------
   // Auto-login check 
@@ -698,32 +684,32 @@ document.addEventListener("DOMContentLoaded", function() {
   // --------------------------
 // Web login via Django session
 // --------------------------
-loginForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
+// loginForm.addEventListener("submit", async function (e) {
+//   e.preventDefault();
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+//   const username = document.getElementById("username").value;
+//   const password = document.getElementById("password").value;
 
-  try {
-    // Send POST request to Django session login endpoint
-    const res = await fetch("/accounts/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-    });
+//   try {
+//     // Send POST request to Django session login endpoint
+//     const res = await fetch("/accounts/login/", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+//     });
 
-    if (res.ok) {
-      // Login successful → reload page to update {{ user }}
-      window.location.reload();
-    } else {
-      // Login failed
-      document.getElementById("loginMessage").innerText = "Invalid credentials!";
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    document.getElementById("loginMessage").innerText = "Login failed! Check console.";
-  }
-});
+//     if (res.ok) {
+//       // Login successful → reload page to update {{ user }}
+//       window.location.reload();
+//     } else {
+//       // Login failed
+//       document.getElementById("loginMessage").innerText = "Invalid credentials!";
+//     }
+//   } catch (err) {
+//     console.error("Login error:", err);
+//     document.getElementById("loginMessage").innerText = "Login failed! Check console.";
+//   }
+// });
 
 
 
