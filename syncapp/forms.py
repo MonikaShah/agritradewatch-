@@ -23,18 +23,18 @@ class ConsumerForm(forms.ModelForm):
 
     class Meta:
         model = Consumer1
-        fields = ["commodity", "buyingprice", "quantitybought", "unit", "image", "date"]
+        fields = ["commodity", "buyingprice", "quantitybought", "unit", "image"]
         widgets = {
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
             'buyingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter buying price'}),
             'quantitybought': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
             'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Unit (e.g., Kg, litre)'}),
-            'date': forms.TextInput(attrs={
-                'class': 'form-control datetimepicker',
-                'placeholder': 'Select date & time',
-                'autocomplete': 'off'
-            }),
+            # 'date': forms.TextInput(attrs={
+            #     'class': 'form-control datetimepicker',
+            #     'placeholder': 'Select date & time',
+            #     'autocomplete': 'off'
+            # }),
         }
 
 
@@ -58,14 +58,14 @@ class FarmerForm(forms.ModelForm):
 
     class Meta:
         model = Farmer1
-        fields = ["commodity", "sellingprice", "quantitysold", "unit", "date", "image"]
+        fields = ["commodity", "sellingprice", "quantitysold", "unit",  "image"]
         widgets = {
             'sellingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter selling price'}),
             'quantitysold': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
-            'date': forms.TextInput(attrs={
-                'class': 'form-control datetimepicker',
-                'placeholder': 'Select date & time',
-                'autocomplete': 'off'
-            }),
+            # 'date': forms.TextInput(attrs={
+            #     'class': 'form-control datetimepicker',
+            #     'placeholder': 'Select date & time',
+            #     'autocomplete': 'off'
+            # }),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
