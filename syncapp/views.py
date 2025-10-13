@@ -295,11 +295,27 @@ def web_register(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = make_password(request.POST.get("password"))
+        name = request.POST.get("name")           # new
+        mobile = request.POST.get("mobile_number")       # new
+        job = request.POST.get("job")     
+        latitude = request.POST.get("latitude")   # new
+        longitude = request.POST.get("longitude") # new
+
 
         if User1.objects.filter(username=username).exists():
             messages.error(request, "Username already taken")
         else:
-            User1.objects.create(id=uuid.uuid4(),username=username, email=email, password=password)
+            User1.objects.create(
+                id=str(uuid.uuid4()),
+                username=username,
+                email=email,
+                password=password,
+                name=name,
+                mobile=mobile,
+                job=job,
+                latitude=latitude,
+                longitude=longitude
+            )
             messages.success(request, "Registration successful, please login")
             return redirect("login")
     return render(request, "syncapp/register.html")
@@ -308,16 +324,15 @@ def web_register(request):
 @login_required
 def crops_list(request):
     user = request.user
-    edit_id = request.GET.get("edit")  # editing crop if present
+    edit_id = request.GET.get("edit")
+    is_edit = False
+    crops = Farmer1.objects.none()  # default empty queryset
     form = None
-    crops = None
-    is_edit = False  # template flag
-
-    # Farmer logic
+    # ---------------- Farmer ----------------
     if user.job == "farmer":
-        crops = Farmer1.objects.filter(id=user.id)
+        crops = Farmer1.objects.filter(userid=user.id)
         if edit_id:
-            crop_to_edit = get_object_or_404(Farmer1, id=edit_id)
+            crop_to_edit = get_object_or_404(Farmer1, id=edit_id, userid=user.id)
             form = FarmerForm(request.POST or None, request.FILES or None, instance=crop_to_edit)
             is_edit = True
         else:
@@ -327,14 +342,14 @@ def crops_list(request):
             entry = form.save(commit=False)
             if not edit_id:
                 entry.id = str(uuid4())
+                entry.userid = user.id
+                entry.date = timezone.now()
             entry.latitude = user.latitude
             entry.longitude = user.longitude
-            if not edit_id:
-                entry.date = timezone.now()
             entry.save()
             return redirect("crops_list")
 
-    # Consumer logic
+    # ---------------- Consumer ----------------
     elif user.job == "consumer":
         crops = Consumer1.objects.filter(userid=user.id)
         if edit_id:
@@ -355,7 +370,7 @@ def crops_list(request):
             entry.save()
             return redirect("crops_list")
 
-    # Prepare JSON for map
+    # ---------------- Prepare JSON for map ----------------
     crops_json = []
     if crops:
         for crop in crops:
@@ -363,12 +378,14 @@ def crops_list(request):
                 "lat": crop.latitude,
                 "lng": crop.longitude,
                 "commodity": str(crop.commodity),
-                "price": float(crop.buyingprice) if crop.buyingprice else None,
-                "quantity": crop.quantitybought,
+                "price": float(getattr(crop, "buyingprice", getattr(crop, "sellingprice", 0))) if getattr(crop, "buyingprice", getattr(crop, "sellingprice", None)) else None,
+                "quantity": getattr(crop, "quantitybought", getattr(crop, "quantitysold", None)),
                 "unit": crop.unit,
                 "date": crop.date.strftime("%Y-%m-%d %H:%M") if crop.date else None,
                 "image_url": crop.image.url if crop.image and hasattr(crop.image, "url") else None,
             })
+
+    has_crops = bool(crops.exists()) if crops else False
 
     return render(
         request,
@@ -378,9 +395,11 @@ def crops_list(request):
             "crops": crops,
             "user": user,
             "is_edit": is_edit,
+            "has_crops": has_crops,
             "crops_json": json.dumps(crops_json),
         }
     )
+
 
 @api_view(['PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
