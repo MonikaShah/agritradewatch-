@@ -440,12 +440,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
       // --- Fetch initial data ---
       try {
-          allData = await fetch("/api/consumers_geojson/");
-          updateStatsForRadius(); 
-          updateMarkers(commoditySelect.value,true);
-      } catch(err){
-          console.error("Error loading GeoJSON:", err);
-      }
+            const res = await fetch("/api/consumers_geojson/");
+            if (!res.ok) throw new Error("Failed to fetch GeoJSON");
+            allData = await res.json();  // <-- FIXED
+            updateStatsForRadius(); 
+            updateMarkers(commoditySelect.value, true);
+        } catch(err){
+            console.error("Error loading GeoJSON:", err);
+        }
 
       commoditySelect.addEventListener("change", function(){
           selectedCommoditySpan.innerText=this.value;
