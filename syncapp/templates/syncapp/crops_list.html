@@ -45,7 +45,9 @@
                   <thead>
                     <tr>
                       <th>#</th><th>Commodity</th><th>Price</th><th>Quantity</th><th>Unit</th>
-                      <th>Image</th><th>Date</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
+                      <th>Image</th><th>Date</th>
+                      <!-- <th>Latitude</th><th>Longitude</th> -->
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -67,8 +69,8 @@
                         {% else %}No Image{% endif %}
                       </td>
                       <td>{{ crop.date|date:"d M Y, H:i" }}</td>
-                      <td>{{ crop.latitude }}</td>
-                      <td>{{ crop.longitude }}</td>
+                      <!-- <td>{{ crop.latitude }}</td>
+                      <td>{{ crop.longitude }}</td> -->
                       <td>
                         <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
                         <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
