@@ -24,18 +24,42 @@ class ConsumerForm(forms.ModelForm):
                 'autocomplete': 'off'
             }),
         }
+
+
 class FarmerForm(forms.ModelForm):
+    UNIT_CHOICES = [
+        ('2.5 Kg', '2.5 Kg'),
+        ('Kg', 'Kg'),
+        ('Bundle', 'Bundle'),
+        ('Piece', 'Piece'),
+        ('Dozen', 'Dozen'),
+    ]
+
+    # Define commodity as before
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
-        to_field_name="name",   # store commodity name in farmer.commodity
-        empty_label="Select Commodity"
+        to_field_name="name",
+        empty_label="Select Commodity",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    # Define unit as a ChoiceField (not in widgets)
+    unit = forms.ChoiceField(
+        choices=UNIT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
     )
 
     class Meta:
         model = Farmer1
         fields = ["commodity", "sellingprice", "quantitysold", "unit", "date", "image"]
         widgets = {
-            'commodity': forms.TextInput(attrs={'class': 'form-control'}),
-            'quantitysold': forms.NumberInput(attrs={'class': 'form-control'}),
-            'date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'sellingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter selling price'}),
+            'quantitysold': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+            'date': forms.TextInput(attrs={
+                'class': 'form-control datetimepicker',
+                'placeholder': 'Select date & time',
+                'autocomplete': 'off'
+            }),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
