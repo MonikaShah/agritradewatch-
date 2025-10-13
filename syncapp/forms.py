@@ -1,12 +1,24 @@
 from django import forms
 from .models import Consumer1, Farmer1, Commodity
 
+UNIT_CHOICES = [
+        ('2.5 Kg', '2.5 Kg'),
+        ('Kg', 'Kg'),
+        ('Bundle', 'Bundle'),
+        ('Piece', 'Piece'),
+        ('Dozen', 'Dozen'),
+    ]
 class ConsumerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
         to_field_name="name",
         empty_label="Select Commodity",
         widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    unit = forms.ChoiceField(
+        choices=UNIT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
     )
 
     class Meta:
@@ -27,13 +39,7 @@ class ConsumerForm(forms.ModelForm):
 
 
 class FarmerForm(forms.ModelForm):
-    UNIT_CHOICES = [
-        ('2.5 Kg', '2.5 Kg'),
-        ('Kg', 'Kg'),
-        ('Bundle', 'Bundle'),
-        ('Piece', 'Piece'),
-        ('Dozen', 'Dozen'),
-    ]
+    
 
     # Define commodity as before
     commodity = forms.ModelChoiceField(
