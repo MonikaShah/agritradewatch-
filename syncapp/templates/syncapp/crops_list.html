@@ -13,7 +13,13 @@
       </h5>
       <ul class="nav flex-column nav-pills gap-2" id="cropsMenu">
         <li class="nav-item">
-          <a class="nav-link {% if has_crops and not is_edit %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">🌾 Purchased Commodity</a>
+          <a class="nav-link {% if has_crops and not is_edit %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">
+            {% if user.is_authenticated and user.job == 'farmer' %}
+            🛒 Sold Commodities
+          {% else %}
+            🌾 Purchased Commodities
+          {% endif %}
+        </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if not has_crops or is_edit %}active{% endif %}" href="#formCrops" data-bs-toggle="tab">➕ Add Crop</a>
@@ -46,7 +52,7 @@
                     <tr>
                       <th>#</th><th>Commodity</th><th>Price</th><th>Quantity</th><th>Unit</th>
                       <th>Image</th>
-                      <th>Date</th>
+                      <th>Date, Time</th>
                       <!-- <th>Latitude</th><th>Longitude</th> -->
                       <th>Actions</th>
                     </tr>
