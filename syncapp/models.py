@@ -141,9 +141,10 @@ class Farmer1(models.Model):
     quantitysold = models.FloatField(blank=True, null=True)
     unit = models.CharField(max_length=20, blank=True, null=True)
     date = models.DateTimeField(blank=True, null=True)
-    image = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to="farmer_images/", blank=True, null=True)  
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    userid=models.CharField(max_length=100)
 
     class Meta:
         db_table = 'syncapp_farmers1'

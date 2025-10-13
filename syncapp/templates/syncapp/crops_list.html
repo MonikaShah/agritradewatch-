@@ -30,7 +30,14 @@
 
         <!-- Purchased Commodity -->
           <div class="tab-pane fade {% if has_crops and not is_edit %}show active{% endif %}" id="listCrops">          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white text-center">🌾 Purchased Commodities</div>
+            <div class="card-header bg-primary text-white text-center">
+              
+              {% if user.is_authenticated and user.job == 'farmer' %}
+              🛒 Sold Commodities
+            {% else %}
+              🌾 Purchased Commodities
+            {% endif %}
+            </div>
             <div class="card-body p-0">
               {% if crops %}
               <div class="table-responsive w-100">
