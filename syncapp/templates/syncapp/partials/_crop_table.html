@@ -1,0 +1,94 @@
+{% if crops %}
+<div class="table-responsive w-100">
+  <table class="table table-bordered table-hover align-middle mb-0">
+    <thead class="table-primary text-center">
+      <tr>
+        <th>#</th>  
+        <th>
+          Date
+          <a href="?sort=date_asc">⬆️</a>
+          <a href="?sort=date_desc">⬇️</a>
+        </th>
+        <th>Image</th>
+        <th class="position-relative">
+          Commodity
+          <a href="#" id="commodityFilterToggle" class="text-dark ms-1">
+            <i class="bi bi-funnel"></i>
+          </a>
+
+          <!-- Dropdown with checkboxes -->
+          <div id="commodityFilterDropdown"
+               class="dropdown-menu p-2 shadow-sm"
+               style="max-height:250px; overflow-y:auto; position:absolute; top:100%; left:0; display:none; z-index:1000;">
+            <form id="filterForm">
+              <div class="form-check border-bottom mb-1 pb-1">
+                <!-- Select All -->
+              <input class="form-check-input" type="checkbox" id="selectAllCommodities"
+              {% if selected_commodities|length == commodities|length %}checked{% endif %}>
+              <label class="form-check-label fw-bold" for="selectAllCommodities">Select All</label>
+              {% for c in commodities %}
+              <div class="form-check">
+              <input class="form-check-input commodity-filter"
+                type="checkbox"
+                name="commodity"
+                value="{{ c }}"
+                id="commodity_{{ forloop.counter }}"
+                {% if c in selected_commodities %}checked{% endif %}>
+              <label class="form-check-label" for="commodity_{{ forloop.counter }}">{{ c }}</label>
+              </div>
+              {% endfor %}
+
+            </form>
+          </div>
+        </th>
+        <th>
+          Selling Price
+          <a href="?sort=price_asc" data-sort="price_asc">⬆️</a>
+          <a href="?sort=price_desc" data-sort="price_desc">⬇️</a>
+        </th>
+        <th>
+          Quantity Sold
+          <a href="?sort=qty_asc" data-sort="qty_asc">⬆️</a>
+          <a href="?sort=qty_desc" data-sort="qty_desc">⬇️</a>
+        </th>
+        <th>Unit</th>
+        <th>Actions</th>
+        <!-- Date column sortable -->
+        
+      </tr>
+    </thead>
+    <tbody>
+      {% for crop in crops %}
+      <tr>
+        <td class="text-center">{{ forloop.counter }}</td>  <!-- Serial number -->
+        <td>{{ crop.date|date:"d M Y" }}</td>
+        <td class="text-center">
+          {% if crop.image %}
+            <img src="{{ crop.image.url }}" alt="{{ crop.commodity }}" class="img-thumbnail" style="width: 80px; height: 80px;">
+          {% else %}
+            <span class="text-muted">No image</span>
+          {% endif %}
+        </td>
+        <td>{{ crop.commodity }}</td>
+        {% if user.job == "farmer" %}
+          <td>₹{{ crop.sellingprice }}</td>
+          <td>{{ crop.quantitysold }}</td>
+        {% else %}
+          <td>₹{{ crop.buyingprice }}</td>
+          <td>{{ crop.quantitybought }}</td>
+        {% endif %}
+        <td>{{ crop.unit }}</td>
+        <td>
+          <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
+          <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center m-2">
+  No crops found for the selected filters.
+</div>
+{% endif %}

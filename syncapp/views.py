@@ -25,6 +25,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
+from django.template.loader import render_to_string
+
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 from .serializers import (
     RegisterSerializer,
@@ -320,72 +322,108 @@ def web_register(request):
             return redirect("login")
     return render(request, "syncapp/register.html")
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from uuid import uuid4
+from django.utils import timezone
+from .models import Farmer1, Consumer1, Commodity
+from .forms import FarmerForm, ConsumerForm
+import json
 
 @login_required
 def crops_list(request):
     user = request.user
+    sort = request.GET.get("sort", "")
+    selected_commodities = request.GET.getlist("commodity[]") or request.GET.getlist("commodity")
     edit_id = request.GET.get("edit")
     is_edit = False
-    crops = Farmer1.objects.none()  # default empty queryset
-    form = None
-    # ---------------- Farmer ----------------
+
+    # ---------- Determine User Role ----------
     if user.job == "farmer":
         crops = Farmer1.objects.filter(userid=user.id)
-        if edit_id:
-            crop_to_edit = get_object_or_404(Farmer1, id=edit_id, userid=user.id)
-            form = FarmerForm(request.POST or None, request.FILES or None, instance=crop_to_edit)
-            is_edit = True
-        else:
-            form = FarmerForm(request.POST or None, request.FILES or None)
+        form_class = FarmerForm
+        qty_field = "quantitysold"
+        price_field = "sellingprice"
+    else:
+        crops = Consumer1.objects.filter(userid=user.id)
+        form_class = ConsumerForm
+        qty_field = "quantitybought"
+        price_field = "buyingprice"
 
-        if request.method == "POST" and form.is_valid():
-            entry = form.save(commit=False)
-            if not edit_id:
-                entry.id = str(uuid4())
-                entry.userid = user.id
-                entry.date = timezone.now()
+    # ---------- Distinct commodities from user's crops ----------
+    commodities = list(crops.values_list("commodity", flat=True).distinct().order_by("commodity"))
+
+    # If no specific commodity selected, select all
+    if not selected_commodities:
+        selected_commodities = commodities.copy()
+
+    # ---------- Commodity Filter ----------
+    if selected_commodities and "All" not in selected_commodities:
+        crops = crops.filter(commodity__in=selected_commodities)
+
+    # ---------- Sorting ----------
+    sort_map = {
+        "date_asc": "date",
+        "date_desc": "-date",
+        "qty_asc": qty_field,
+        "qty_desc": f"-{qty_field}",
+        "price_asc": price_field,
+        "price_desc": f"-{price_field}",
+    }
+    if sort in sort_map:
+        crops = crops.order_by(sort_map[sort])
+
+    # ---------- Add/Edit Form ----------
+    if edit_id:
+        crop_to_edit = get_object_or_404(crops.model, id=edit_id, userid=user.id)
+        form = form_class(request.POST or None, request.FILES or None, instance=crop_to_edit)
+        is_edit = True
+    else:
+        form = form_class(request.POST or None, request.FILES or None)
+
+    if request.method == "POST" and form.is_valid():
+        entry = form.save(commit=False)
+        if not edit_id:
+            entry.id = str(uuid4())
+            entry.userid = user.id
+            entry.date = timezone.now()
             entry.latitude = user.latitude
             entry.longitude = user.longitude
-            entry.save()
-            return redirect("crops_list")
+        entry.save()
+        return redirect("crops_list")
 
-    # ---------------- Consumer ----------------
-    elif user.job == "consumer":
-        crops = Consumer1.objects.filter(userid=user.id)
-        if edit_id:
-            crop_to_edit = get_object_or_404(Consumer1, id=edit_id, userid=user.id)
-            form = ConsumerForm(request.POST or None, request.FILES or None, instance=crop_to_edit)
-            is_edit = True
-        else:
-            form = ConsumerForm(request.POST or None, request.FILES or None)
+    # ---------- Prepare JSON for map ----------
+    crops_json = [
+        {
+            "lat": c.latitude,
+            "lng": c.longitude,
+            "commodity": c.commodity,
+            "price": getattr(c, price_field, None),
+            "quantity": getattr(c, qty_field, None),
+            "unit": c.unit,
+            "date": c.date.strftime("%Y-%m-%d %H:%M") if c.date else "",
+            "image_url": c.image.url if c.image else ""
+        }
+        for c in crops
+    ]
 
-        if request.method == "POST" and form.is_valid():
-            entry = form.save(commit=False)
-            if not edit_id:
-                entry.id = str(uuid4())
-                entry.userid = user.id
-                entry.date = timezone.now()
-                entry.latitude = user.latitude
-                entry.longitude = user.longitude
-            entry.save()
-            return redirect("crops_list")
+    # ---------- AJAX Partial Response ----------
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        html = render_to_string(
+            "syncapp/partials/_crop_table.html",
+            {
+                "crops": crops,
+                "selected_commodities": selected_commodities,
+                "user": user,
+                "sort": sort,
+                "commodities": commodities,
+            },
+        )
+        return JsonResponse({"html": html})
 
-    # ---------------- Prepare JSON for map ----------------
-    crops_json = []
-    if crops:
-        for crop in crops:
-            crops_json.append({
-                "lat": crop.latitude,
-                "lng": crop.longitude,
-                "commodity": str(crop.commodity),
-                "price": float(getattr(crop, "buyingprice", getattr(crop, "sellingprice", 0))) if getattr(crop, "buyingprice", getattr(crop, "sellingprice", None)) else None,
-                "quantity": getattr(crop, "quantitybought", getattr(crop, "quantitysold", None)),
-                "unit": crop.unit,
-                "date": crop.date.strftime("%Y-%m-%d %H:%M") if crop.date else None,
-                "image_url": crop.image.url if crop.image and hasattr(crop.image, "url") else None,
-            })
-
-    has_crops = bool(crops.exists()) if crops else False
+    has_crops = crops.exists()
 
     return render(
         request,
@@ -396,8 +434,11 @@ def crops_list(request):
             "user": user,
             "is_edit": is_edit,
             "has_crops": has_crops,
+            "commodities": commodities,
+            "selected_commodities": selected_commodities,
+            "sort": sort,
             "crops_json": json.dumps(crops_json),
-        }
+        },
     )
 
 

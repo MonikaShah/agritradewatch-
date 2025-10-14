@@ -15,15 +15,15 @@
         <li class="nav-item">
           <a class="nav-link {% if has_crops and not is_edit %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">
             {% if user.is_authenticated and user.job == 'farmer' %}
-            🛒 Sold Commodities
-          {% else %}
-            🌾 Purchased Commodities
-          {% endif %}
-        </a>
+              🛒 Sold Commodities
+            {% else %}
+              🌾 Purchased Commodities
+            {% endif %}
+          </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if not has_crops or is_edit %}active{% endif %}" href="#formCrops" data-bs-toggle="tab">➕ Add Crop</a>
-                  </li>
+        </li>
         <li class="nav-item">
           <a class="nav-link" href="#mapCrops" data-bs-toggle="tab">🗺️ View on Map</a>
         </li>
@@ -35,67 +35,28 @@
       <div class="tab-content w-100 mx-auto" style="max-width: 1000px; border:1px solid #ddd; border-radius:10px; padding:20px; background:#fff;">
 
         <!-- Purchased Commodity -->
-          <div class="tab-pane fade {% if has_crops and not is_edit %}show active{% endif %}" id="listCrops">          <div class="card shadow-sm mb-4">
+        <div class="tab-pane fade {% if has_crops and not is_edit %}show active{% endif %}" id="listCrops">
+          <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white text-center">
-              
               {% if user.is_authenticated and user.job == 'farmer' %}
-              🛒 Sold Commodities
-            {% else %}
-              🌾 Purchased Commodities
-            {% endif %}
-            </div>
-            <div class="card-body p-0">
-              {% if crops %}
-              <div class="table-responsive w-100">
-                <table class="table table-bordered table-striped table-hover text-center mx-auto">
-                  <thead>
-                    <tr>
-                      <th>#</th><th>Commodity</th><th>Price</th><th>Quantity</th><th>Unit</th>
-                      <th>Image</th>
-                      <th>Date, Time</th>
-                      <!-- <th>Latitude</th><th>Longitude</th> -->
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for crop in crops %}
-                    <tr class="{% cycle 'table-light' 'table-secondary' %}">
-                      <td>{{ forloop.counter }}</td>
-                      <td>{{ crop.commodity }}</td>
-                      <td>{% if crop.buyingprice %}{{ crop.buyingprice }}
-                        {% elif crop.sellingprice %}{{ crop.sellingprice }}
-                        {% else %}-{% endif %}</td>
-                      <td>{% if  crop.quantitybought %}{{ crop.quantitybought }}
-                        {% elif crop.quantitysold %}{{ crop.quantitysold }}
-                        {% else %}-{% endif %}</td>
-                      </td>
-                      <td>{{ crop.unit|default:"-" }}</td>
-                      <td>
-                        {% if crop.image %}
-                        <img src="{{ crop.image.url }}" alt="Image" style="width:80px; height:60px; object-fit:cover; border-radius:6px;">
-                        {% else %}No Image{% endif %}
-                      </td>
-                      <td>{{ crop.date|date:"d M Y, H:i" }}</td>
-                      <!-- <td>{{ crop.latitude }}</td>
-                      <td>{{ crop.longitude }}</td> -->
-                      <td>
-                        <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
-                        <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
+                🛒 Sold Commodities
               {% else %}
-              <p class="text-center p-3 text-muted">No crops added yet.</p>
+                🌾 Purchased Commodities
               {% endif %}
             </div>
+
+          
+
+            <!-- Table Section -->
+            <div id="cropTableContainer">
+              {% include "syncapp/partials/_crop_table.html" %}
+            </div>
+
           </div>
         </div>
 
         <!-- Add / Update Crop Form -->
-        <div class="tab-pane fade {% if not has_crops or is_edit  %}show active{% endif %}" id="formCrops">
+        <div class="tab-pane fade {% if not has_crops or is_edit %}show active{% endif %}" id="formCrops">
           <div class="card mb-4 shadow-sm">
             <div class="card-header bg-success text-white" id="formHeader">
               {% if is_edit %}✏️ Update Crop{% else %}➕ Add Crop{% endif %}
@@ -105,20 +66,20 @@
                 {% csrf_token %}
                 <div class="row g-3">
                   {% for field in form %}
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      {{ field.label_tag }} {{ field }}
-                      {% if field.errors %}
-                      <div class="text-danger small">{{ field.errors|join:", " }}</div>
-                      {% endif %}
+                    <div class="col-12 col-md-6">
+                      <div class="form-group">
+                        {{ field.label_tag }} {{ field }}
+                        {% if field.errors %}
+                          <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                        {% endif %}
+                      </div>
                     </div>
-                  </div>
                   {% endfor %}
                 </div>
                 <div class="mt-3 d-flex gap-2 flex-wrap">
                   <button type="submit" class="btn btn-success" id="submitBtn">{% if is_edit %}Update{% else %}Add{% endif %}</button>
                   {% if is_edit %}
-                  <a href="{% url 'crops_list' %}" class="btn btn-secondary">Cancel</a>
+                    <a href="{% url 'crops_list' %}" class="btn btn-secondary">Cancel</a>
                   {% endif %}
                 </div>
               </form>
@@ -130,77 +91,166 @@
         <div class="tab-pane fade" id="mapCrops">
           <div class="card shadow-sm">
             <div class="card-header bg-info text-white">🗺️ Crops Map</div>
-            <div class="card-body">
-              <div id="map" style="height:500px; width:100%; border-radius:8px;"></div>
+            <div class="card-body p-0">
+              <div id="map" class="w-100 h-100"></div>
             </div>
           </div>
-        </div>
+        
+      </div>
 
       </div>
     </main>
-
   </div>
 </div>
+<!-- CSS for responsiveness -->
+<style>
+  #mapCrops .card {
+    height: 70vh; /* 70% of viewport height on mobile */
+  }
+  @media (min-width: 768px) {
+    #mapCrops .card {
+      height: 500px; /* tablets */
+    }
+  }
+  @media (min-width: 1200px) {
+    #mapCrops .card {
+      height: 600px; /* desktop */
+    }
+  }
+  #map {
+    width: 100%;
+    height: 100%;
+  }
+</style>
 
+<!-- JS -->
 <!-- JS and Leaflet -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
-
-<!-- Bootstrap 5 JS Bundle (includes Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {
+  
+    const cropsData = {{ crops_json|safe }};
+  
+    // Initialize map
+    const map = L.map("map").setView([20.0, 78.0], 5);
 
-// ---------------- Handle Tabs ----------------
-// Determine if Add Crop tab should be shown
-var showFormTab = {% if not has_crops or is_edit %}true{% else %}false{% endif %};
+    // Add satellite tiles
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", 
+      {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 19
+      }
+    ).addTo(map);
 
-// Get all tab links
-var tabLinks = document.querySelectorAll('#cropsMenu .nav-link');
+    // Set initial map view to India bounds
+      const indiaBounds = [[6.7, 68.0], [35.5, 97.5]];
+      map.fitBounds(indiaBounds);
 
-if(showFormTab){
-    // Show Add Crop tab
-    var formTabEl = document.querySelector('#cropsMenu a[href="#formCrops"]');
-    if(formTabEl){
-        var tab = new bootstrap.Tab(formTabEl);
-        tab.show();
+    // Group crops by lat/lng
+    const locations = {};
+    cropsData.forEach(crop => {
+      if (crop.lat && crop.lng) {
+        const key = `${crop.lat},${crop.lng}`;
+        if (!locations[key]) locations[key] = [];
+        locations[key].push(crop);
+      }
+    });
+
+    const markers = [];
+    Object.keys(locations).forEach(key => {
+      const [lat, lng] = key.split(",").map(Number);
+      const cropsAtLoc = locations[key];
+
+      // Build popup HTML with scrollable container
+      let popupHTML = `<div style="max-height:200px; overflow-y:auto;">`;
+      popupHTML += "<strong>Commodities at this location:</strong><br><ul>";
+      cropsAtLoc.forEach(c => {
+        popupHTML += `<li>
+          <strong>${c.commodity}</strong> - ${c.date}<br>
+          Price: ₹${c.price}, Quantity: ${c.quantity} ${c.unit}<br>
+          ${c.image_url ? '<img src="' + c.image_url + '" style="width:100px;height:auto;"><br>' : ''}
+        </li>`;
+      });
+      popupHTML += "</ul></div>";
+
+      const marker = L.marker([lat, lng])
+        .bindPopup(popupHTML)
+        .addTo(map);
+
+      markers.push(marker);
+    });
+
+
+    // Fit map to markers
+    if (markers.length === 1) {
+      map.setView(markers[0].getLatLng(), 15);
+    } else if (markers.length > 1) {
+      const group = L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.2));
+    } else {
+      map.setView([20.0, 78.0], 5); // fallback
     }
-} else {
-    // Show Purchased Commodity tab if user already has crops
-    var listTabEl = document.querySelector('#cropsMenu a[href="#listCrops"]');
-    if(listTabEl){
-        var tab = new bootstrap.Tab(listTabEl);
-        tab.show();
-    }
-}
 
-// ---------------- Initialize Map ----------------
-var mapDiv = document.getElementById("map");
-if(mapDiv){
-    var map = L.map("map",{zoomControl:true});
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:14,minZoom:2}).addTo(map);
-    // Optional Google satellite overlay
-    L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['0','1','2','3'], maxZoom:21}).addTo(map);
-    map.setView([20.5937,78.9629],5);
+    // Leaflet map resize fix when tab shown
+    const mapTab = document.querySelector('a[href="#mapCrops"]');
+    mapTab.addEventListener("shown.bs.tab", function () {
+      map.invalidateSize();
+    });
 
-    var crops = {{ crops_json|safe }};
-    if(crops.length){
-        var bounds=[];
-        crops.forEach(function(c,i){
-            var offset=0.00005;
-            var lat=c.lat+i*offset, lng=c.lng+i*offset;
-            var marker=L.marker([lat,lng]).addTo(map);
-            var img = c.image_url? '<br><img src="'+c.image_url+'" style="width:100px;height:80px;object-fit:cover;border-radius:5px;">' : '';
-            marker.bindPopup("<b>"+c.commodity+"</b><br>Price:"+c.price+"<br>Qty:"+(c.quantity||'-')+" "+c.unit+"<br>Date:"+(c.date||'-')+img);
-            bounds.push([lat,lng]);
-        });
-        map.fitBounds(bounds);
-    }
-}
-
-});
-
-</script>
+    // Toggle dropdown & close on outside click
+    document.addEventListener("click", function(e) {
+      const filterToggle = e.target.closest("#commodityFilterToggle");
+      const filterDropdown = document.querySelector("#commodityFilterDropdown");
+  
+      if (filterToggle) {
+        e.preventDefault();
+        filterDropdown.style.display =
+          filterDropdown.style.display === "block" ? "none" : "block";
+        return;
+      }
+  
+      if (filterDropdown && !filterDropdown.contains(e.target)) {
+        filterDropdown.style.display = "none";
+      }
+    });
+  
+    // Delegate checkbox changes for AJAX updates
+    document.body.addEventListener("change", function(e) {
+      if (e.target.matches(".commodity-filter, #selectAllCommodities")) {
+        const form = document.getElementById("filterForm");
+        const params = new URLSearchParams();
+  
+        // Handle select all checkbox
+        if (e.target.id === "selectAllCommodities") {
+          const allChecked = e.target.checked;
+          document.querySelectorAll(".commodity-filter").forEach(cb => cb.checked = allChecked);
+        } else {
+          // Update select all state
+          const allChecked = Array.from(document.querySelectorAll(".commodity-filter")).every(cb => cb.checked);
+          document.getElementById("selectAllCommodities").checked = allChecked;
+        }
+  
+        // Add selected commodities to URL params
+        form.querySelectorAll(".commodity-filter:checked").forEach(cb => params.append("commodity[]", cb.value));
+  
+        // AJAX fetch
+        fetch("?" + params.toString(), {
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("cropTableContainer").innerHTML = data.html;
+        })
+        .catch(err => console.error(err));
+      }
+    });
+  
+  });
+  </script>
+  
 {% endblock %}
