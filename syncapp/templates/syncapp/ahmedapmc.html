@@ -21,35 +21,68 @@
   #chartContainer { flex-grow: 1; padding: 10px; height: 400px; position: relative; }
   #priceChart { height: 100% !important; width: 100%; }
   #noDataMessage { display:none; text-align:center; padding:20px; color:#555; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); }
+  .form-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  flex: 1 1 180px; /* allows wrapping while keeping good spacing */
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+select, input[type="date"] {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #aaa;
+  width: 100%;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="form-section">
-    <label><strong>APMC:</strong></label>
-    <select id="apmcSelect">
-      <option value="">-- Ahmednagar APMCs --</option>
-      {% for a in apmcs %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
-    </select>
+    <div class="form-group">
+      <label><strong>APMC:</strong></label>
+      <select id="apmcSelect">
+        <option value="">-- Ahmednagar APMCs --</option>
+        {% for a in apmcs %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+      </select>
+    </div>
 
-    <label><strong>Commodity:</strong></label>
-    <select id="commoditySelect"> 
-      
-      <option value="Other">Onion (Other)</option>
-      <option value="Red">Onion (Red)</option> 
-    </select>
-
-    <label><strong>Start Date:</strong></label>
-    <select id="startDate">
-      <option value="">Select start date</option>
-      {% for d in dates %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-    </select>
-
-    <label><strong>End Date:</strong></label>
-    <select id="endDate" disabled>
-      <option value="">Select end date</option>
-    </select>
+    <div class="form-group">
+      <label><strong>Commodity:</strong></label>
+      <select id="commoditySelect"> 
+        <option value="Other">Onion (Other)</option>
+        <option value="Red">Onion (Red)</option> 
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label><strong>Start Date:</strong></label>
+      <select id="startDate">
+        <option value="">Select start date</option>
+        {% for d in dates %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label><strong>End Date:</strong></label>
+      <select id="endDate" disabled>
+        <option value="">Select end date</option>
+      </select>
+    </div>
   </div>
 
   <div class="main-container">
