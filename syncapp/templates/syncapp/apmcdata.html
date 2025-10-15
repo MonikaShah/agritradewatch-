@@ -148,11 +148,13 @@
         <input type="range" id="chartSlider" min="0" max="100" value="0" style="width:150px;">
         <div id="chartContainer">
           <canvas id="agmarkLineChart"></canvas>
+          
+          <div style="text-align:right; font-size:0.8rem; color:#555; padding:5px 10px;">
+            Data Source: <a href="https://data.gov.in/" target="_blank">data.gov.in</a>
+          </div>
         </div>
       </div>
-      <canvas id="agmarkLineChart"></canvas>
-    </div>
-  </div>
+      
 </div>
 {% endblock %}
 
@@ -306,10 +308,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     pan: { enabled: true, mode: "x" },
                     zoom: { wheel: { enabled: true }, mode: "x" },
                     pinch: { enabled: true, mode: "x"  },
-                }
+                },
+                tooltip: {
+                  callbacks: {
+                      label: function(context) {
+                          return `₹ ${context.raw} per quintal`; // add ₹/quintal in tooltip
+                      }
+                  }
+              }
             },
             scales: {
-                y: { beginAtZero: true }
+              y: {
+                  title: { display: true, text: "Price (₹ per Quintal)" }, // y-axis label
+                  beginAtZero: true
+              },
+              x: {
+                  title: { display: true, text: "Date" }
+              }
             }
             }
         });
