@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
 <style>
   /* FILTER BAR */
@@ -32,18 +33,9 @@
     flex-wrap: wrap;
     gap: 15px;
   }
-  .map-panel, .chart-panel {
-    flex: 1 1 48%;
-    min-width: 300px;
-    height: 520px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
+  .map-panel { flex:3; height:520px; background:#fff; border:1px solid #e0e0e0; border-radius:15px; box-shadow:0 2px 6px rgba(0,0,0,0.08); display:flex; flex-direction:column; }
+.chart-panel { flex:7; height:520px; background:#fff; border:1px solid #e0e0e0; border-radius:15px; box-shadow:0 2px 6px rgba(0,0,0,0.08); display:flex; flex-direction:column; }
+  
   #map {
     flex: 1;
     width: 100%;
@@ -145,7 +137,19 @@
   </div>
 
     <div class="chart-panel">
-      <h5>AgmarkNet Prices Trend</h5>
+      <h5>AgmarkNet Prices Trend </h5>
+      <div class="chart-panel">
+        <div class="chart-header">
+          <button id="zoomInBtn" class="btn btn-sm btn-primary">Zoom In</button>
+          <button id="zoomOutBtn" class="btn btn-sm btn-primary">Zoom Out</button>
+          <button id="resetZoomBtn" class="btn btn-sm btn-secondary">Reset</button>
+          
+        </div>
+        <input type="range" id="chartSlider" min="0" max="100" value="0" style="width:150px;">
+        <div id="chartContainer">
+          <canvas id="agmarkLineChart"></canvas>
+        </div>
+      </div>
       <canvas id="agmarkLineChart"></canvas>
     </div>
   </div>
@@ -164,6 +168,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let agmarkLineChart = null;
   let map, markerLayer;
+ 
+  Chart.register(ChartZoom);  // make sure this is done once
 
   // --- Initialize Leaflet map ---
   function initMap() {
@@ -284,20 +290,29 @@ document.addEventListener("DOMContentLoaded", function() {
       agmarkLineChart = new Chart(ctx, {
         type: "line",
         data: {
-          labels,
-          datasets: [
-            { label: "Min", data: minData, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.2)", tension:0.3 },
-            { label: "Modal", data: modalData, borderColor: "#ffc107", backgroundColor: "rgba(255,193,7,0.2)", tension:0.3 },
-            { label: "Max", data: maxData, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.2)", tension:0.3 }
-          ]
+            labels,
+            datasets: [
+                { label: "Min", data: minData, borderColor: "#007bff", tension:0.3 },
+                { label: "Modal", data: modalData, borderColor: "#ffc107", tension:0.3 },
+                { label: "Max", data: maxData, borderColor: "#28a745", tension:0.3 }
+            ]
         },
         options: {
-          responsive:true,
-          plugins:{ legend:{ position:"top" } },
-          scales:{ y:{ beginAtZero:true } }
-        }
-      });
-
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "top" },
+                zoom: {
+                    pan: { enabled: true, mode: "x" },
+                    zoom: { wheel: { enabled: true }, mode: "x" },
+                    pinch: { enabled: true, mode: "x"  },
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+            }
+        });
     } catch(err) { 
       console.error(err); 
       showAlert("Error loading line chart"); 
@@ -309,6 +324,30 @@ document.addEventListener("DOMContentLoaded", function() {
   lineStartDate.addEventListener("change", populateApmc);
   lineEndDate.addEventListener("change", populateApmc);
   submitBtn.addEventListener("click", fetchLineChart);
+
+  // --- Zoom Buttons ---
+document.getElementById("zoomInBtn").addEventListener("click", () => {
+    if (agmarkLineChart) agmarkLineChart.zoom(1.1);
+});
+document.getElementById("zoomOutBtn").addEventListener("click", () => {
+    if (agmarkLineChart) agmarkLineChart.zoom(0.9);
+});
+document.getElementById("resetZoomBtn").addEventListener("click", () => {
+    if (agmarkLineChart) agmarkLineChart.resetZoom();
+});
+
+// --- Slider Control ---
+const slider = document.getElementById("chartSlider");
+slider.addEventListener("input", function() {
+    if (!agmarkLineChart) return;
+    const scale = this.value / 100;  // value between 0-1
+    const xScale = agmarkLineChart.scales.x;
+    const totalLabels = xScale.max - xScale.min;
+    const newMax = xScale.min + totalLabels * scale;
+    xScale.options.min = xScale.min;
+    xScale.options.max = newMax;
+    agmarkLineChart.update("none");
+});
 });
 </script>
 {% endblock %}
