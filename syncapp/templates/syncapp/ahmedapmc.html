@@ -10,12 +10,31 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
 <style>
   .form-section { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px 0; }
   select, input[type="date"] { padding: 6px 10px; border-radius: 8px; border: 1px solid #aaa; }
   .main-container { display: flex; gap: 20px; margin-top: 20px; }
-  .left-panel, .right-panel { flex: 1; height: 75vh; background: #fff; border: 1px solid #ddd; border-radius: 16px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+  .left-panel { 
+    width: 30%;   /* <-- map width */
+    background: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 16px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.right-panel { 
+    width: 70%;   /* <-- chart width */
+    background: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 16px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    display: flex; 
+    flex-direction: column; 
+}
   #map { flex-grow: 1; border-radius: 16px; }
   .card-header { background: linear-gradient(135deg, #6c63ff, #00d4ff); color: white; text-align: center; padding: 10px; font-weight: bold; }
   #chartContainer { flex-grow: 1; padding: 10px; height: 400px; position: relative; }
@@ -93,6 +112,15 @@ select, input[type="date"] {
 
     <div class="right-panel">
       <div class="card-header">Price Trends</div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; padding:5px 10px;">
+        <button id="zoomInBtn" class="btn btn-sm btn-primary">Zoom In</button>
+        <button id="zoomOutBtn" class="btn btn-sm btn-primary">Zoom Out</button>
+        <button id="resetZoomBtn" class="btn btn-sm btn-secondary">Reset Zoom</button>
+      </div>
+      <div style="padding: 5px 10px; display: flex; align-items: center; gap: 10px;">
+        <label for="zoomSlider" style="margin:0;">Zoom:</label>
+        <input type="range" id="zoomSlider" min="0" max="100" value="0" style="flex:1;">
+      </div>
       <div id="chartContainer">
         <canvas id="priceChart"></canvas>
         <div id="noDataMessage">No price data for selected filters</div>
@@ -200,30 +228,106 @@ document.addEventListener("DOMContentLoaded", function() {
             if (priceChart) priceChart.destroy();
 
             priceChart = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: "Min Price", data: minPrices, borderColor: "green", fill: false },
-                        { label: "Modal Price", data: modalPrices, borderColor: "blue", fill: false },
-                        { label: "Max Price", data: maxPrices, borderColor: "red", fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: true } },
-                    scales: {
-                        x: { title: { display: true, text: "Date" } },
-                        y: { title: { display: true, text: "Price (₹/quintal)" } }
-                    }
-                }
-            });
+              type: "line",
+              data: {
+                  labels: labels,
+                  datasets: [
+                      { label: "Min Price", data: minPrices, borderColor: "green", fill: false },
+                      { label: "Modal Price", data: modalPrices, borderColor: "blue", fill: false },
+                      { label: "Max Price", data: maxPrices, borderColor: "red", fill: false }
+                  ]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      legend: { display: true },
+                      zoom: {
+                          pan: {
+                              enabled: true,
+                              mode: 'x',        // pan only horizontally
+                              modifierKey: 'ctrl'  // optional: pan only with ctrl key
+                          },
+                          zoom: {
+                              wheel: {
+                                  enabled: true, // enable zooming with mouse wheel
+                              },
+                              pinch: {
+                                  enabled: true // enable pinch zoom on touch devices
+                              },
+                              mode: 'x',       // zoom only along x-axis
+                          }
+                      }
+                  },
+                  scales: {
+                      x: { title: { display: true, text: "Date" } },
+                      y: { title: { display: true, text: "Price (₹/quintal)" } }
+                  }
+              }
+          });
+
         })
         .catch(err => console.error("Error fetching data:", err));
     }
 
     // Event listeners
+
+        document.getElementById("zoomInBtn").addEventListener("click", () => {
+        if (priceChart) {
+            const xScale = priceChart.scales.x;
+            const min = xScale.min;
+            const max = xScale.max;
+            const range = max - min;
+            const zoomFactor = 0.8; // 20% zoom in
+            xScale.options.min = min + range*(1-zoomFactor)/2;
+            xScale.options.max = max - range*(1-zoomFactor)/2;
+            priceChart.update();
+        }
+    });
+
+    document.getElementById("zoomOutBtn").addEventListener("click", () => {
+        if (priceChart) {
+            const xScale = priceChart.scales.x;
+            const min = xScale.min;
+            const max = xScale.max;
+            const range = max - min;
+            const zoomFactor = 1.2; // 20% zoom out
+            xScale.options.min = min - range*(zoomFactor-1)/2;
+            xScale.options.max = max + range*(zoomFactor-1)/2;
+            priceChart.update();
+        }
+    });
+
+    document.getElementById("resetZoomBtn").addEventListener("click", () => {
+        if (priceChart) {
+            const xScale = priceChart.scales.x;
+            xScale.options.min = undefined;
+            xScale.options.max = undefined;
+            priceChart.update();
+        }
+    });
+
+    const zoomSlider = document.getElementById("zoomSlider");
+
+      zoomSlider.addEventListener("input", () => {
+          if (!priceChart) return;
+
+          const xScale = priceChart.scales.x;
+          const labels = priceChart.data.labels;
+          const total = labels.length;
+
+          const zoomPercent = zoomSlider.value / 100; // 0 = no zoom, 1 = full zoom
+          const windowSize = Math.max(2, Math.floor(total * (1 - zoomPercent))); // at least 2 points visible
+
+          const startIndex = Math.floor((total - windowSize) / 2);
+          const endIndex = startIndex + windowSize - 1;
+
+          xScale.options.min = labels[startIndex];
+          xScale.options.max = labels[endIndex];
+          priceChart.update();
+      });
+
+
     ["apmcSelect","commoditySelect","startDate","endDate"].forEach(id =>
         document.getElementById(id).addEventListener("change", fetchAPMCData)
     );
