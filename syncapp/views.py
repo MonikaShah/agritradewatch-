@@ -26,7 +26,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from django.template.loader import render_to_string
-
+from django.contrib.auth.views import PasswordResetView
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 from .serializers import (
     RegisterSerializer,
@@ -322,15 +322,6 @@ def web_register(request):
             return redirect("login")
     return render(request, "syncapp/register.html")
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
-from uuid import uuid4
-from django.utils import timezone
-from .models import Farmer1, Consumer1, Commodity
-from .forms import FarmerForm, ConsumerForm
-import json
 
 @login_required
 def crops_list(request):
@@ -478,3 +469,13 @@ def delete_crop(request, crop_id):
         messages.error(request, f"Error deleting crop: {str(e)}")
 
     return redirect("crops_list")
+
+
+class MyPasswordResetView(PasswordResetView):
+    template_name = 'registration/password_reset_form.html'
+    email_template_name = 'registration/password_reset_email.html'
+    subject_template_name = 'registration/password_reset_subject.txt'
+
+    def get_users(self, email):
+        """Return all active users matching the email."""
+        return User1.objects.filter(email__iexact=email, is_active=True)

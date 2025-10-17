@@ -35,7 +35,8 @@ SECRET_KEY = 'django-insecure-2acdn_!1^g!f^3w4mwn04y^w7i0vk19*_ox5ewc+^y^2vgvkz+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2')]
+ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2'),'localhost',
+    '127.0.0.1']
 
 
 # Application definition
@@ -187,13 +188,11 @@ LOGIN_REDIRECT_URL = '/crops/' # where to go after successful login
 
 # Session expires when the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-# If your site uses www.example.com
-SESSION_COOKIE_DOMAIN = ".mandigo.in"
-CSRF_COOKIE_DOMAIN = ".mandigo.in"
 
-# Make sure cookies are sent over HTTPS if using HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-# Add your domain to trusted origins
-CSRF_TRUSTED_ORIGINS = ["https://mandigo.in"]
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_PASS')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
