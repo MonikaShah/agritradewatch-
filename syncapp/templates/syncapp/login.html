@@ -6,17 +6,24 @@
 <style>
     /* Hide header and nav */
     header, nav {
-        display: none !important;
+        display: block !important;
     }
 
     body {
         background: linear-gradient(135deg, #6c63ff, #00d4ff);
         min-height: 100vh;
         display: flex;
+        flex-direction: column;   /* vertical stacking */
         align-items: center;
         justify-content: center;
         padding: 1rem;
     }
+    main {
+    flex: 1; /* pushes footer to bottom */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
     .login-card {
         border-radius: 12px;
@@ -95,7 +102,10 @@
             New user? 
             <a href="{% url 'register' %}">Register here</a>
         </p>
+        <p>
+            <a href="{% url 'password_reset' %}">Forgot your password?</a>
+        </p>
     </div>
 </div>
-<br><br>
+
 {% endblock %}
