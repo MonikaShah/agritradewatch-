@@ -107,7 +107,7 @@ class User1(AbstractUser):
 
     # Make username non-nullable
     username = models.CharField(max_length=150, unique=True, null=False, blank=False)
-
+    email = models.EmailField(unique=True, blank=False, null=False)
     USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
     REQUIRED_FIELDS = ['email', 'mobile']
 
