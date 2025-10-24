@@ -4,11 +4,12 @@ from django.contrib.gis.geos import GEOSGeometry
 from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import ConsumerForm, FarmerForm
+from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
 from django.conf import settings
 from uuid import uuid4
 from django.utils import timezone
@@ -36,6 +37,8 @@ from .serializers import (
     WebDataSerializer,
     
 )
+
+
 logger = logging.getLogger(__name__)
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
@@ -475,6 +478,7 @@ class MyPasswordResetView(PasswordResetView):
     template_name = 'registration/password_reset_form.html'
     email_template_name = 'registration/password_reset_email.html'
     subject_template_name = 'registration/password_reset_subject.txt'
+    form_class = MyCustomPasswordResetForm   # 👈 Add this line'
 
     def get_users(self, email):
         """Return all active users matching the email."""

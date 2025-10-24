@@ -30,19 +30,15 @@ urlpatterns = [
     path('ahmedapmc/',views.ahmedapmc,name='ahmedapmc'),
     path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
 
-    # include DRF router URLs under /api/
-    path('api/', include(router.urls)),
-    # 🔑 JWT login/refresh endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
+   
     #For web browsers
-        path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
 
     # For PAges like about us etc
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     
-    path("api/debug-headers/", api_views.debug_headers),
+
+    
 
     # custom login & register for web portal
     path('login/', views.web_login, name='login'),
@@ -50,7 +46,7 @@ urlpatterns = [
     path("profile/",views.profile,name='profile'),
     path('register/', views.web_register, name='register'),
     
-     path('password_reset/', MyPasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/', MyPasswordResetView.as_view(), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='registration/password_reset_done.html'
     ), name='password_reset_done'),
@@ -60,6 +56,7 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='registration/password_reset_complete.html',
     ), name='password_reset_complete'),
+    
     path("crops/", views.crops_list, name="crops_list"),
     path("crops/update/<str:crop_id>/", views.update_crop, name="update_crop"),
     path("crops/delete/<str:crop_id>/", views.delete_crop, name="delete_crop"),
@@ -68,6 +65,14 @@ urlpatterns = [
     path('ahmedapmc/',views.ahmedapmc,name='ahmedapmc'),
     path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
     # path('dash/',views.dash,name='dash'),
+
+     # include DRF router URLs under /api/
+    path('api/', include('syncapp.api_urls', namespace='api')),
+    path('api/', include(router.urls)),
+    # 🔑 JWT login/refresh endpoints
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("api/debug-headers/", api_views.debug_headers),
 
 ]
 

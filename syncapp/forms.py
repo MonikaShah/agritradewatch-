@@ -1,5 +1,6 @@
 from django import forms
-from .models import Consumer1, Farmer1, Commodity
+from .models import Consumer1, Farmer1, Commodity, User1
+from django.contrib.auth.forms import PasswordResetForm
 
 UNIT_CHOICES = [
         ('2.5 Kg', '2.5 Kg'),
@@ -69,3 +70,15 @@ class FarmerForm(forms.ModelForm):
             # }),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+class MyCustomPasswordResetForm(PasswordResetForm):
+    def get_users(self, email):
+        """Override to use your own user model."""
+        active_users = User1.objects.filter(email__iexact=email, is_active=True)
+        return active_users
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if not User1.objects.filter(email__iexact=email, is_active=True).exists():
+            raise forms.ValidationError("No active user found with this email address.")
+        return email

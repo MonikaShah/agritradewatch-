@@ -16,6 +16,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.utils.decorators import method_decorator
+from django.db.models import Max, Q
 
 from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices
 from .serializers import (
@@ -26,8 +28,12 @@ from .serializers import (
     WebDataSerializer,
     
 )
-from django.utils.decorators import method_decorator
-from django.db.models import Max, Q
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -217,6 +223,11 @@ def agrowon_prices(request):
             {"status": "error", "message": "Scraping failed"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+    
+# ---------------------------------------------------------------------
+# Agmarknet - WEbdata 
+# ---------------------------------------------------------------------
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def webdata_prices(request):
@@ -552,3 +563,67 @@ def apmc_timeline_ajax(request, apmc_name):
     apmc = get_object_or_404(APMC_Master, apmc_name=apmc_name)
     prices = apmc.market_prices.all().order_by('report_date')
     return render(request, 'syncapp/partials/apmc_timeline.html', {'prices': prices})
+
+
+# -------------------------------
+# 1️⃣  Request password reset email
+# -------------------------------
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    users = User.objects.filter(email__iexact=email, is_active=True)
+    if not users.exists():
+        return Response({"error": "User with this email does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+    for user in users:
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_url = f"{settings.FRONTEND_URL}/reset/{uid}/{token}/"  # or your app deep link
+
+        subject = render_to_string('registration/password_reset_subject.txt').strip()
+        message = render_to_string('registration/password_reset_email_api.html', {
+            'user': user,
+            'reset_url': reset_url,
+        })
+
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+    return Response({"message": "Password reset email sent successfully"}, status=status.HTTP_200_OK)
+
+
+# -------------------------------
+# 2️⃣  Confirm new password
+# -------------------------------
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uidb64 = request.data.get('uidb64')
+    token = request.data.get('token')
+    new_password = request.data.get('new_password')
+
+    if not uidb64 or not token or not new_password:
+        return Response(
+            {"error": "uidb64, token, and new_password are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({"error": "Invalid user identifier"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not default_token_generator.check_token(user, token):
+        return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.save()
+
+    return Response({"message": "Password has been reset successfully"}, status=status.HTTP_200_OK)
+
+def test_api(request):
+    return JsonResponse({"ok": True})

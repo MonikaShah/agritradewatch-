@@ -3,6 +3,8 @@ from django.urls import path
 from syncapp import api_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+app_name = 'api'  # <-- add this
 urlpatterns = [
     path('login/', api_views.api_login, name='api-login'),  # <-- keep this for web
     path('consumers_geojson/', api_views.consumers_geojson, name='consumers_geojson'),
@@ -18,7 +20,9 @@ urlpatterns = [
     path('profile/', api_views.profile, name='profile'),  # logged-in user
     path("whoami/", api_views.whoami, name="whoami"),
     
-   
+    #Password reset
+    path('password_reset/', api_views.password_reset_request, name='password_reset'),
+    path('password_reset/confirm/', api_views.password_reset_confirm, name='password_reset_confirm'),
     # Crops CRUD using API tokens
     path('crops/', api_views.list_user_crops, name='api_list_crops'),
     path('crops/add/', api_views.add_user_crop, name='api_add_crop'),
@@ -27,5 +31,7 @@ urlpatterns = [
 
    
     path('apmc/', api_views.apmc_list, name='apmc_list'),
+    path('test/', api_views.test_api),
+    
     
 ]
