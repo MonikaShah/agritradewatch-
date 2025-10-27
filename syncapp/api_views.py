@@ -182,6 +182,15 @@ def consumers_geojson(request):
     }
     return JsonResponse(geojson)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def commodity_count(request):
+    commodity = request.GET.get("commodity", "").strip()
+    if not commodity:
+        return JsonResponse({"error": "Missing commodity parameter"}, status=400)
+
+    count = Consumer1.objects.filter(commodity__iexact=commodity).count()
+    return JsonResponse({"commodity": commodity, "count": count})
 
 # ---------------------------------------------------------------------
 # Agrowon Prices Scraper

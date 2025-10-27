@@ -8,6 +8,7 @@ app_name = 'api'  # <-- add this
 urlpatterns = [
     path('login/', api_views.api_login, name='api-login'),  # <-- keep this for web
     path('consumers_geojson/', api_views.consumers_geojson, name='consumers_geojson'),
+    path('commodity_count/', api_views.commodity_count, name='commodity_count'),
     path('agrowon_prices/', api_views.agrowon_prices, name='agrowon_prices'),
     path('webdata_prices/', api_views.webdata_prices, name='webdata_prices'),
     path('webdata_prices_public/', api_views.webdata_prices_public, name='webdata_prices_public'),

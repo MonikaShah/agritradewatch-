@@ -58,6 +58,9 @@
       {% endfor %}
     </select>
         
+    <!-- Show total commodity count -->
+    <p id="commodityCount" style="margin-top: 5px; font-weight: bold; color: #333;"></p>
+    
     <hr>
     <div id="left-panel">
       <button id="locateBtn">📍 My Location</button>
@@ -358,8 +361,9 @@ document.addEventListener("DOMContentLoaded", function() {
           const indiaBounds = L.latLngBounds([6.5,68.0],[35.5,97.5]);
           const filteredFeatures = allData.features.filter(f=>{
               const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
-              return indiaBounds.contains(latlng) && f.properties.commodity?.toLowerCase() === commodity.toLowerCase();
-          });
+              const dbName = f.properties.commodity?.trim().toLowerCase();
+              const selected = commodity.trim().toLowerCase();
+              return indiaBounds.contains(latlng) && dbName === selected;          });
 
           const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
           geojsonLayer = L.geoJSON(filteredGeoJSON, {
@@ -457,6 +461,31 @@ document.addEventListener("DOMContentLoaded", function() {
           
          
       });
+
+            // --- Show total commodity count (case-insensitive) ---
+        function updateCommodityCount() {
+            if (!allData || !Array.isArray(allData.features)) return;
+            const selectedCommodity = commoditySelect.value.trim().toLowerCase();
+
+            const count = allData.features.filter(f =>
+                f.properties?.commodity?.trim().toLowerCase() === selectedCommodity
+            ).length;
+
+            document.getElementById("commodityCount").innerText = 
+                count > 0
+                ? `Total Records: ${count}`
+                : "No records found";
+        }
+
+        // Call initially and on change
+        updateCommodityCount();
+        commoditySelect.addEventListener("change", function(){
+            selectedCommoditySpan.innerText=this.value;
+            updateStatsForRadius();
+            updateMarkers(this.value,true);
+            updateCommodityCount();   // <-- added here
+        });
+
       let districtLayer = null;
 
       
@@ -713,6 +742,30 @@ document.addEventListener("DOMContentLoaded", function() {
 //     document.getElementById("loginMessage").innerText = "Login failed! Check console.";
 //   }
 // });
+// --- Commodity count display ---
+const commoditySelect = document.getElementById("commoditySelect");
+const commodityCount = document.getElementById("commodityCount");
+
+commoditySelect.addEventListener("change", () => {
+  const commodity = commoditySelect.value;
+  if (!commodity) return;
+
+  fetch(`/commodity_count/?commodity=${commodity}`, {
+    headers: { "Authorization": `Bearer ${authToken}` } // if using JWT or session
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.count !== undefined) {
+      commodityCount.textContent = `${data.commodity}: ${data.count} records found`;
+    } else {
+      commodityCount.textContent = "Error fetching count.";
+    }
+  })
+  .catch(err => {
+    commodityCount.textContent = "Error connecting to server.";
+    console.error(err);
+  });
+});
 
 
 
