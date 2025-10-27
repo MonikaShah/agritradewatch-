@@ -287,7 +287,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
       const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
-      googleSat.addTo(map);
+      //googleSat.addTo(map);
+      osm.addTo(map);
       const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
       L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
