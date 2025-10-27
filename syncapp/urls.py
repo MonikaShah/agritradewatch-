@@ -19,7 +19,7 @@ router.register(r'users', api_views.UserViewSet)
 router.register(r'farmers', api_views.FarmerViewSet)
 router.register(r'consumers', api_views.ConsumerViewSet)
 router.register(r'webdata', api_views.WebDataViewSet)
-
+router.register(r'commodities', api_views.CommodityViewSet)
 
 
 urlpatterns = [

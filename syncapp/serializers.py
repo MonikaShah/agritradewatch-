@@ -1,5 +1,5 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import User1, Farmer1, Consumer1, WebData
+from .models import User1, Farmer1, Consumer1, WebData,Commodity
 from rest_framework import serializers   # <-- this import is required
 
 # class ConsumerGeoSerializer(GeoFeatureModelSerializer):
@@ -33,6 +33,14 @@ class WebDataSerializer(serializers.ModelSerializer):
         model = WebData
         fields = '__all__'
 
+class CommoditySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Commodity
+       
+        fields = '__all__'
+        
+
+        
 # 🔹 Serializer for user registration (using Django's default User model)
 class RegisterSerializer(serializers.ModelSerializer):
     job = serializers.ChoiceField(choices=[('consumer', 'Consumer'), ('farmer', 'Farmer')], required=True)
