@@ -192,27 +192,19 @@
     <!-- Cards Section -->
     <div class="row g-4 justify-content-center w-100">
       
-      <div class="col-12 col-sm-6 col-md-4">
-        <div class="card card-custom">
-          <div class="card-body">
-            <span class="emoji">🗺</span>
-            <h5 class="card-title">Digital Thela</h5>
-            <a href="/map" class="btn btn-success w-100 disabled">Coming Soon</a>
-          </div>
-        </div>
-      </div>
+      
 
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
             <span class="emoji">👩‍💻</span>
-            <h5 class="card-title">Consumer Dashboard</h5>
+            <h5 class="card-title">Price Watch Dashboard</h5>
             <a href="{% url 'map_chart' %}" class="btn btn-primary w-100">Open</a>
           </div>
         </div>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-4">
+      <!-- <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
             <span class="emoji">👨‍🌾</span>
@@ -220,7 +212,7 @@
             <a href="/farmer-dashboard" class="btn btn-warning w-100 disabled">Coming Soon</a>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
@@ -235,13 +227,22 @@
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
+            <span class="emoji">🗺</span>
+            <h5 class="card-title">Digital Thela</h5>
+            <a href="/map" class="btn btn-success w-100 disabled">Coming Soon</a>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="col-12 col-sm-6 col-md-4">
+        <div class="card card-custom">
+          <div class="card-body">
             <span class="emoji">🛒</span>
             <h5 class="card-title">Retailer Dashboard</h5>
             <a href="/retailer-dashboard" class="btn btn-danger w-100 disabled">Coming Soon</a>
           </div>
         </div>
-      </div>
-
+      </div> -->
+      {% if user.is_authenticated and user.is_superuser %}
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
@@ -253,7 +254,7 @@
       </div>
     </div>
   </div>
-
+  {% endif %}
   <!-- Footer -->
   <footer>
     &copy; 2025 Agritrade Watch | Built for smarter agriculture & markets
