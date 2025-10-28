@@ -85,6 +85,25 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     pointer-events: none; /* allows map panning/zooming */
   }
+  .chartContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+.chart-footer {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  text-align: right;
+  color: #555;
+}
+.chartContainer canvas {
+  flex-grow: 1; /* Make chart occupy all available space */
+}
+#agmarkLineChart{
+  width: 100% !important;
+  height: 100% !important;
+}
 </style>
 {% endblock %}
 
@@ -108,7 +127,7 @@
     <div class="form-group">
       <label for="lineStartDate" class="form-label">Start Date</label>
       <input type="date" id="lineStartDate" class="form-control w-100"
-             value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
+             value="{{ today|date:'Y-m-d' }}" min="2014-01-01" max="{{ today|date:'Y-m-d' }}">
     </div>
 
     <div class="form-group">
@@ -133,27 +152,29 @@
   <div class="main-content mt-3">
     <div class="map-panel">
       <div id="map"></div>
-      <div id="mapOverlay">🗺️ Coming Soon</div>
+      <!-- <div id="mapOverlay">🗺️ Coming Soon</div> -->
   </div>
 
-    <div class="chart-panel">
-      <h5>AgmarkNet Prices Trend </h5>
-      <div class="chart-panel">
-        <div class="chart-header">
-          <button id="zoomInBtn" class="btn btn-sm btn-primary">Zoom In</button>
-          <button id="zoomOutBtn" class="btn btn-sm btn-primary">Zoom Out</button>
-          <button id="resetZoomBtn" class="btn btn-sm btn-secondary">Reset</button>
-          
+  <div class="chart-panel">
+    <h5>AgmarkNet Prices Trend</h5>
+  
+    <div id="chartContainer" class="chartContainer" style="flex: 1; width: 100%; position: relative; min-height: 400px;">
+      <div id="loading-spinner" class="text-center my-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
-        <input type="range" id="chartSlider" min="0" max="100" value="0" style="width:150px;">
-        <div id="chartContainer">
-          <canvas id="agmarkLineChart"></canvas>
-          
-          <div style="text-align:right; font-size:0.8rem; color:#555; padding:5px 10px;">
-            Data Source: <a href="https://data.gov.in/" target="_blank">data.gov.in</a>
-          </div>
-        </div>
+        <p class="mt-2">Processing data, please wait...</p>
       </div>
+  
+      <canvas id="agmarkLineChart" style="width: 100% !important; height: 100% !important;"></canvas>
+    </div>
+  
+    <div class="chart-footer">
+      <p class="chart-tip">💡 Tip: Scroll to zoom, drag (or Ctrl + drag) to pan.</p>
+      <p class="chart-source">Data Source: <a href="https://data.gov.in" target="_blank">data.gov.in</a></p>
+    </div>
+  </div>
+  
       
 </div>
 {% endblock %}
@@ -174,17 +195,37 @@ document.addEventListener("DOMContentLoaded", function() {
   Chart.register(ChartZoom);  // make sure this is done once
 
   // --- Initialize Leaflet map ---
-  function initMap() {
-    map = L.map('map').setView([19.5, 79.6], 7);
+  async function initMap() {
+    // map = L.map('map').setView([20.5937, 78.9629], 5); // Center India;
+    map = L.map('map').setView([19.7515, 75.7139], 7); // Maharashtra center and zoom
+
+
     // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     //   maxZoom: 18,
     //   attribution: '© OpenStreetMap'
     // }).addTo(map);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 18,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and others'
-    }).addTo(map);
-
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    });
+    const googleSat= L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
+    });
+    const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: ''
+    });
+    osm.addTo(map);
+    const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
+    const baseMaps = { "OpenStreetMap": osm, "Google Satellite": satelliteWithBoundaries };
+      L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+    const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
+    const districtData = await districtResponse.json();
+    
+    districtLayer = L.geoJSON(districtData, {
+        style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
+    }).addTo(map); 
+    
     markerLayer = L.layerGroup().addTo(map);
   }
   initMap();
@@ -247,92 +288,157 @@ document.addEventListener("DOMContentLoaded", function() {
       apmcSelect.disabled = true;
     }
   }
+  async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
+  const params = new URLSearchParams({
+    apmc_name: selectedApmc || "",
+    variety: commodity || "",
+    start_date: startDate || "",
+    end_date: endDate || ""
+  });
+
+  try {
+    const res = await fetch(`/ahmedapmc/?${params.toString()}`);
+    const data = await res.json();
+
+    // Clear previous markers from markerLayer (if you want a fresh layer)
+    markerLayer.clearLayers();
+
+    // Add new markers for Ahmednagar
+    data.locations.forEach(loc => {
+      const isSelected = selectedApmc && loc.apmc_name === selectedApmc;
+      const marker = L.circleMarker([loc.lat, loc.lon], {
+        radius: 8,
+        color: isSelected ? "red" : "blue",
+        fillColor: isSelected ? "#ff3333" : "#3399ff",
+        fillOpacity: 0.6,
+        weight: 2
+      }).bindPopup(`<b>${loc.apmc_name}</b>`);
+
+      marker.addTo(markerLayer);
+    });
+
+    if (data.locations.length > 0) {
+      map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
+      document.getElementById("mapOverlay").style.display = "none";
+    } else {
+      document.getElementById("mapOverlay").style.display = "block";
+    }
+
+  } catch (error) {
+    console.error("Error loading Ahmednagar APMCs:", error);
+  }
+}
+
 
   // --- Fetch Chart ---
   async function fetchLineChart() {
-    const ctx = document.getElementById("agmarkLineChart").getContext("2d");
-    if (agmarkLineChart) agmarkLineChart.destroy();
+  const ctx = document.getElementById("agmarkLineChart").getContext("2d");
+  const spinner = document.getElementById("loading-spinner");
+  const chartContainer = document.getElementById("chartContainer");
 
-    const commodity = commoditySelect.value;
-    const apmc = apmcSelect.value;
-    const startDate = lineStartDate.value;
-    const endDate = lineEndDate.value;
+  if (agmarkLineChart) agmarkLineChart.destroy();
 
-    if (!commodity || !startDate || !endDate) {
-      showAlert("Please select commodity and date range first");
+  const commodity = commoditySelect.value;
+  const apmc = apmcSelect.value;
+  const startDate = lineStartDate.value;
+  const endDate = lineEndDate.value;
+
+  if (!commodity || !startDate || !endDate) {
+    showAlert("Please select commodity and date range first");
+    return;
+  }
+
+  try {
+    // 🔹 Show spinner
+    spinner.style.display = "block";
+    chartContainer.style.opacity = "0.4";
+
+    let url = `/api/webdata_prices_public/?source=agmark&commodity=${encodeURIComponent(commodity)}`;
+    if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
+    url += `&start_date=${startDate}&end_date=${endDate}`;
+
+    const res = await fetch(url);
+    const dataList = await res.json();
+
+    if (!Array.isArray(dataList) || dataList.length === 0) {
+      showAlert("No data available for selected criteria", "info");
       return;
     }
 
-    try {
-      let url = `/api/webdata_prices_public/?source=agmark&commodity=${encodeURIComponent(commodity)}`;
-      if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
-      url += `&start_date=${startDate}&end_date=${endDate}`;
+    const grouped = {};
+    dataList.forEach(d => {
+      const dateStr = d.date.split("T")[0];
+      if (!grouped[dateStr]) grouped[dateStr] = { min: [], modal: [], max: [] };
+      grouped[dateStr].min.push(d.minprice || 0);
+      grouped[dateStr].modal.push(d.modalprice || 0);
+      grouped[dateStr].max.push(d.maxprice || 0);
+    });
 
-      const res = await fetch(url);
-      const dataList = await res.json();
-      if (!Array.isArray(dataList) || dataList.length === 0) {
-        showAlert("No data available for selected criteria", "info");
-        return;
-      }
+    const labels = Object.keys(grouped).sort();
+    const minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
+    const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
+    const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
 
-      const grouped = {};
-      dataList.forEach(d => {
-        const dateStr = d.date.split("T")[0];
-        if (!grouped[dateStr]) grouped[dateStr] = { min: [], modal: [], max: [] };
-        grouped[dateStr].min.push(d.minprice || 0);
-        grouped[dateStr].modal.push(d.modalprice || 0);
-        grouped[dateStr].max.push(d.maxprice || 0);
-      });
-
-      const labels = Object.keys(grouped).sort();
-      const minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
-      const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
-      const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
-
-      agmarkLineChart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels,
-            datasets: [
-                { label: "Min", data: minData, borderColor: "#007bff", tension:0.3 },
-                { label: "Modal", data: modalData, borderColor: "#ffc107", tension:0.3 },
-                { label: "Max", data: maxData, borderColor: "#28a745", tension:0.3 }
-            ]
+    agmarkLineChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "Min", data: minData, borderColor: "#007bff", tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+          { label: "Modal", data: modalData, borderColor: "#ffc107", tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+          { label: "Max", data: maxData, borderColor: "#28a745", tension: 0.3 ,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: { top: 10, bottom: 0, left: 0, right: 0 }  // ✅ minimal padding
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: "top" },
-                zoom: {
-                    pan: { enabled: true, mode: "x" },
-                    zoom: { wheel: { enabled: true }, mode: "x" },
-                    pinch: { enabled: true, mode: "x"  },
-                },
-                tooltip: {
-                  callbacks: {
-                      label: function(context) {
-                          return `₹ ${context.raw} per quintal`; // add ₹/quintal in tooltip
-                      }
-                  }
-              }
+        plugins: {
+          legend: { position: "top" },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: "x",
+              modifierKey: "ctrl"   // optional: require Ctrl for panning
             },
-            scales: {
-              y: {
-                  title: { display: true, text: "Price (₹ per Quintal)" }, // y-axis label
-                  beginAtZero: true
-              },
-              x: {
-                  title: { display: true, text: "Date" }
+            zoom: {
+              wheel: { enabled: true },  // ✅ enables scroll wheel zoom
+              pinch: { enabled: true },  // ✅ touch pinch zoom
+              drag: { enabled: false },
+              mode: "x"
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `₹ ${context.raw.toFixed(0)} per quintal`;
               }
             }
-            }
-        });
-    } catch(err) { 
-      console.error(err); 
-      showAlert("Error loading line chart"); 
-    }
+          }
+        },
+        scales: {
+          y: {
+            title: { display: true, text: "Price (₹ per Quintal)" },
+            beginAtZero: true
+          },
+          x: { title: { display: true, text: "Date" } }
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    showAlert("Error loading line chart");
+  } finally {
+    // 🔹 Hide spinner regardless of success or error
+    spinner.style.display = "none";
+    chartContainer.style.opacity = "1";
   }
+  loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
+}
+
 
   // --- Event Listeners ---
   commoditySelect.addEventListener("change", populateApmc);
@@ -341,28 +447,28 @@ document.addEventListener("DOMContentLoaded", function() {
   submitBtn.addEventListener("click", fetchLineChart);
 
   // --- Zoom Buttons ---
-document.getElementById("zoomInBtn").addEventListener("click", () => {
-    if (agmarkLineChart) agmarkLineChart.zoom(1.1);
-});
-document.getElementById("zoomOutBtn").addEventListener("click", () => {
-    if (agmarkLineChart) agmarkLineChart.zoom(0.9);
-});
-document.getElementById("resetZoomBtn").addEventListener("click", () => {
-    if (agmarkLineChart) agmarkLineChart.resetZoom();
-});
+// document.getElementById("zoomInBtn").addEventListener("click", () => {
+//     if (agmarkLineChart) agmarkLineChart.zoom(1.1);
+// });
+// document.getElementById("zoomOutBtn").addEventListener("click", () => {
+//     if (agmarkLineChart) agmarkLineChart.zoom(0.9);
+// });
+// document.getElementById("resetZoomBtn").addEventListener("click", () => {
+//     if (agmarkLineChart) agmarkLineChart.resetZoom();
+// });
 
 // --- Slider Control ---
-const slider = document.getElementById("chartSlider");
-slider.addEventListener("input", function() {
-    if (!agmarkLineChart) return;
-    const scale = this.value / 100;  // value between 0-1
-    const xScale = agmarkLineChart.scales.x;
-    const totalLabels = xScale.max - xScale.min;
-    const newMax = xScale.min + totalLabels * scale;
-    xScale.options.min = xScale.min;
-    xScale.options.max = newMax;
-    agmarkLineChart.update("none");
-});
+// const slider = document.getElementById("chartSlider");
+// slider.addEventListener("input", function() {
+//     if (!agmarkLineChart) return;
+//     const scale = this.value / 100;  // value between 0-1
+//     const xScale = agmarkLineChart.scales.x;
+//     const totalLabels = xScale.max - xScale.min;
+//     const newMax = xScale.min + totalLabels * scale;
+//     xScale.options.min = xScale.min;
+//     xScale.options.max = newMax;
+//     agmarkLineChart.update("none");
+// });
 });
 </script>
 {% endblock %}
