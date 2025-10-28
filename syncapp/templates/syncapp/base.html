@@ -38,6 +38,19 @@
             background-color: #ffffff33;
             color: white;
         }
+        .footer-custom {
+            background-color: #f8f9fa;
+            color: #212529;
+            font-size: 0.9rem;
+            padding: 8px 0; /* Reduced padding */
+          }
+
+          @media (max-width: 576px) {
+            .footer-custom {
+              padding: 4px 0;
+              font-size: 0.8rem;
+            }
+           }
     </style>
 
     {% block extra_head %}{% endblock %}
@@ -62,15 +75,19 @@
 
                     <!-- Left nav links -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">About Us</a>
-                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'map_chart' %}">Dashboard</a>
                         </li>
+                        <li class="nav-item">
+                          <a class="nav-link px-3"  href="{% url 'apmc' %}">Wholesale Market Price </a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">About Us</a>
+                      </li>
                         
                         <!-- Wholesale Market Price Dropdown (left-aligned) -->
-                        <li class="nav-item dropdown">
+                        <!-- <li class="nav-item dropdown">
                           <a class="nav-link dropdown-toggle px-3 fw-semibold" href="#" id="wholesaleDropdown"
                              role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Wholesale Market Price 
@@ -87,7 +104,7 @@
                               </a>
                             </li>
                           </ul>
-                        </li>
+                        </li> -->
                         
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'page_detail' slug='resource' %}">App Vault</a>
@@ -127,7 +144,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-3 border-top" style="background-color: #f8f9fa; color: #212529;">
+    <footer class="text-center border-top footer-custom" style="background-color: #f8f9fa; color: #212529;">
       &copy; 2025 Agri Dashboard | Powered by Leaflet & Chart.js
   </footer>
   
