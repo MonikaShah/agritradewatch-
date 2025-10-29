@@ -424,8 +424,8 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
   if (!selectedApmc) {
   Swal.fire({
     icon: "info",
-    title: "No APMC Selected",
-    text: "Please choose an APMC marker or select from dropdown.",
+    title: "Data not available",
+    html: "Data not available for selected date range for chosen APMC.<br> Showing average prices for all apmcs within date range. ",
     confirmButtonColor: "#3085d6"
   });
   return;
