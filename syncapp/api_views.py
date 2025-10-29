@@ -257,9 +257,9 @@ def webdata_prices(request):
 
     # Handle date range
     if start_date:
-        qs = qs.filter(date__date__gte=start_date)
+        qs = qs.filter(date__gte=start_date)
     if end_date:
-        qs = qs.filter(date__date__lte=end_date)
+        qs = qs.filter(date__lte=end_date)
 
     # If no data in range, try alias
     if not qs.exists():
@@ -268,9 +268,9 @@ def webdata_prices(request):
         if alias_name:
             qs = WebData.objects.filter(commodity__iexact=alias_name)
             if start_date:
-                qs = qs.filter(date__date__gte=start_date)
+                qs = qs.filter(date__gte=start_date)
             if end_date:
-                qs = qs.filter(date__date__lte=end_date)
+                qs = qs.filter(date__lte=end_date)
 
     if not qs.exists():
         return JsonResponse({'error': 'No data found in the selected range'}, status=404)
@@ -395,7 +395,7 @@ def webdata_prices_public(request):
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
             data_qs = WebData.objects.filter(
                 commodity__iexact=commodity_name,
-                date__date__range=(start_date, end_date)
+                date__range=(start_date, end_date)
             )
         else:
             if date_str:
@@ -404,7 +404,7 @@ def webdata_prices_public(request):
                 query_date = timezone.localdate()
             data_qs = WebData.objects.filter(
                 commodity__iexact=commodity_name,
-                date__date=query_date
+                date=query_date
             )
     except ValueError:
         return Response([])
@@ -415,12 +415,12 @@ def webdata_prices_public(request):
         if start_date_str and end_date_str:
             data_qs = WebData.objects.filter(
                 commodity__iexact=commodity_obj.alias_marathi,
-                date__date__range=(start_date, end_date)
+                date__range=(start_date, end_date)
             )
         else:
             data_qs = WebData.objects.filter(
                 commodity__iexact=commodity_obj.alias_marathi,
-                date__date=query_date
+                date=query_date
             )
 
     # Filter by APMC if provided
@@ -438,7 +438,7 @@ def webdata_prices_public(request):
             'modalprice': data.modalprice,
             'unit': data.unit,
             'date': data.date.isoformat() if data.date else None,
-            'is_latest': (data.date.date() != timezone.localdate()) if data.date else False
+            'is_latest': (data.date != timezone.localdate()) if data.date else False
         }
         for data in data_qs.order_by('date')  # order by date for line chart
     ]

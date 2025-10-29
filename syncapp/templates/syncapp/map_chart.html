@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.0.1/dist/chartjs-chart-box-and-violin-plot.umd.min.js"></script>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 {% endblock %}
@@ -64,25 +64,26 @@
     <hr>
     <div id="left-panel">
       <button id="locateBtn">📍 My Location</button>
-      <label>Radius: <span id="radiusValue">100</span> m</label>
-      <input type="range" id="radiusSlider" min="50" max="700" step="50" value="100" list="tickmarks">
-      <datalist id="tickmarks">
-        <option value="50" label="50m"></option>
-        <option value="100" label="100m"></option>
-        <option value="200" label="200m"></option>
-        <option value="300" label="300m"></option>
-        <option value="400" label="400m"></option>
-        <option value="500" label="500m"></option>
-        <option value="600" label="600m"></option>
-        <option value="700" label="700m"></option>
-      </datalist>
+      <label>Radius: <span id="radiusValue">100</span></label>
+      <input type="range" id="radiusSlider" min="1" max="8" value="2" step="1" list="tickmarks">
+        <datalist id="tickmarks">
+        <option value="1" label="50 m"></option>
+        <option value="2" label="100 m"></option>
+        <option value="3" label="500 m"></option>
+        <option value="4" label="1 km"></option>
+        <option value="5" label="5 km"></option>
+        <option value="6" label="20 km"></option>
+        <option value="7" label="100 km"></option>
+        <option value="8" label="500 km"></option>
+        </datalist>
+
     </div>
     <hr>
     <button id="toggleDistrictBtn">🗺️ Hide Districts</button>
-    <hr>
-    <button id="toggleApmcBtn">🛒 Show All APMC</button>
+    <!-- <hr> -->
+    <!-- <button id="toggleApmcBtn">🛒 Show All APMC</button> -->
   </div>
-  <button id="toggle-map-controls">⚙️ Hide/Show</button>
+  <!-- <button id="toggle-map-controls">⚙️ Hide/Show</button> -->
 </div>
 
 <div id="right-panel">
@@ -127,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const apmcCsvUrl = "{% static 'APMC_names.csv' %}";
   let apmcMarkers = L.layerGroup();  // Separate layer for APMC
 
-  const toggleApmcBtn = document.getElementById("toggleApmcBtn");
+//   const toggleApmcBtn = document.getElementById("toggleApmcBtn");
   let apmcVisible = false;
 
   const apmcIcon = L.icon({
@@ -305,6 +306,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
       const radiusSlider = document.getElementById("radiusSlider");
       const radiusValue = document.getElementById("radiusValue");
+      const scale = {
+                    1: 50,
+                    2: 100,
+                    3: 500,
+                    4: 1000,
+                    5: 5000,
+                    6: 20000,
+                    7: 100000,
+                    8: 500000
+        };
 
       function drawCircle(radius){
           if(!userLocation) return;
@@ -349,7 +360,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const commodity = commoditySelect.value.toLowerCase();
         const filtered = allData.features.filter(f => f.properties?.commodity?.toLowerCase() === commodity);
         showGlobalStats(computeStats(filtered));
-        if(userLocation) showRadiusStats(computeStats(filtered, userLocation, parseInt(radiusSlider.value)));
+        if(userLocation) showRadiusStats(computeStats(filtered, userLocation, scale[radiusSlider.value]));
         else showRadiusStats({avg:null, weighted:null, modal:null});
       }
 
@@ -369,7 +380,7 @@ document.addEventListener("DOMContentLoaded", function() {
           geojsonLayer = L.geoJSON(filteredGeoJSON, {
               pointToLayer:(f,latlng)=>{
                   let color="red";
-                  if(userLocation && userLocation.distanceTo(latlng)<=parseInt(radiusSlider.value)) color="green";
+                  if(userLocation && userLocation.distanceTo(latlng)<=scale[radiusSlider.value]) color="green";
                   return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
               },
               onEachFeature:(f,layer)=>{
@@ -423,11 +434,11 @@ document.addEventListener("DOMContentLoaded", function() {
                   userMarker = L.marker(userLocation,{draggable:true,title:"APMC"}).addTo(map);
                   userMarker.on("dragend",e=>{ 
                       userLocation=e.target.getLatLng(); 
-                      drawCircle(parseInt(radiusSlider.value)); 
+                      drawCircle(scale[radiusSlider.value]); 
                       updateStatsForRadius(); 
                       updateMarkers(commoditySelect.value,true); 
                   });
-                  drawCircle(parseInt(radiusSlider.value));
+                  drawCircle(scale[radiusSlider.value]);
                   updateStatsForRadius();
                   updateMarkers(commoditySelect.value,true);
               });
@@ -435,9 +446,14 @@ document.addEventListener("DOMContentLoaded", function() {
       });
 
       radiusSlider.addEventListener("input", function(){
-          radiusValue.textContent=this.value;
+        const meters = scale[radiusSlider.value];
+        radiusValue.textContent =
+        meters >= 1000 ? `${(meters / 1000).toLocaleString()} km` : `${meters} m`;
+
+
+        //   radiusValue.textContent=this.value;
           if(userLocation){ 
-              drawCircle(parseInt(this.value)); 
+              drawCircle(meters); 
               updateStatsForRadius(); 
               updateMarkers(commoditySelect.value,false); 
           }
@@ -489,40 +505,40 @@ document.addEventListener("DOMContentLoaded", function() {
       let districtLayer = null;
 
       
-      toggleApmcBtn.addEventListener("click", async () => {
-        if(!apmcVisible){
-            try {
-                const response = await fetch("/api/apmc/");  // fetch from DB
-                const data = await response.json();
+    //   toggleApmcBtn.addEventListener("click", async () => {
+    //     if(!apmcVisible){
+    //         try {
+    //             const response = await fetch("/api/apmc/");  // fetch from DB
+    //             const data = await response.json();
 
-                data.forEach(row => {
-                    const lat = parseFloat(row.latitude);
-                    const lng = parseFloat(row.longitude);
-                    if(!isNaN(lat) && !isNaN(lng)){
-                        const marker = L.circleMarker([lat, lng], {
-                            radius: 10,
-                            color: 'blue',
-                            weight: 2,
-                            fillColor: 'red',
-                            fillOpacity: 0.3
-                        }).bindPopup(`<strong>Mandi Name: ${row.apmc_name}</strong><br>District: ${row.district}<br><a href="#" class="apmc-link" data-apmc="${row.apmc_name}">View Timeline</a>`);
-                        apmcMarkers.addLayer(marker);
-                    }
-                });
+    //             data.forEach(row => {
+    //                 const lat = parseFloat(row.latitude);
+    //                 const lng = parseFloat(row.longitude);
+    //                 if(!isNaN(lat) && !isNaN(lng)){
+    //                     const marker = L.circleMarker([lat, lng], {
+    //                         radius: 10,
+    //                         color: 'blue',
+    //                         weight: 2,
+    //                         fillColor: 'red',
+    //                         fillOpacity: 0.3
+    //                     }).bindPopup(`<strong>Mandi Name: ${row.apmc_name}</strong><br>District: ${row.district}<br><a href="#" class="apmc-link" data-apmc="${row.apmc_name}">View Timeline</a>`);
+    //                     apmcMarkers.addLayer(marker);
+    //                 }
+    //             });
 
-                apmcMarkers.addTo(map);
-                apmcVisible = true;
-                toggleApmcBtn.innerText = "📍 Hide APMC";
+    //             apmcMarkers.addTo(map);
+    //             apmcVisible = true;
+    //             toggleApmcBtn.innerText = "📍 Hide APMC";
 
-            } catch(err){
-                console.error("Error fetching APMC from DB:", err);
-            }
-        } else {
-            map.removeLayer(apmcMarkers);
-            apmcVisible = false;
-            toggleApmcBtn.innerText = "📍 Show All APMC";
-        }
-    });
+    //         } catch(err){
+    //             console.error("Error fetching APMC from DB:", err);
+    //         }
+    //     } else {
+    //         map.removeLayer(apmcMarkers);
+    //         apmcVisible = false;
+//                toggleApmcBtn.innerText = "📍 Show All APMC";
+    //     }
+    // });
 
       const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
         let districtVisible = true;
@@ -555,7 +571,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // InitMap ends here
       // --- Initial chart fetch ---
      
-      document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
+    //   document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
 
       function showTimeline(apmcName) {
         const url = `/apmc/${encodeURIComponent(apmcName)}/timeline-ajax/`;
@@ -646,7 +662,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
         try {
             const url = `/api/webdata_prices/?commodity=${encodeURIComponent(commodity)}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
-            const data = await fetch(url);
+            // const data = await fetch(url);
+            const res = await fetch(url);
+            const data = await res.json();
 
             if (data.error) {
                 alert(data.error);
@@ -743,6 +761,8 @@ document.addEventListener("DOMContentLoaded", function() {
 //   }
 // });
 // --- Commodity count display ---
+const token = sessionStorage.getItem("api_token");
+
 const commoditySelect = document.getElementById("commoditySelect");
 const commodityCount = document.getElementById("commodityCount");
 
@@ -751,7 +771,7 @@ commoditySelect.addEventListener("change", () => {
   if (!commodity) return;
 
   fetch(`/commodity_count/?commodity=${commodity}`, {
-    headers: { "Authorization": `Bearer ${authToken}` } // if using JWT or session
+    headers: { "Authorization": `Bearer ${token}` } // if using JWT or session
   })
   .then(response => response.json())
   .then(data => {
