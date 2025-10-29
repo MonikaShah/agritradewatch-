@@ -85,7 +85,8 @@ main {
 /* Map container */
 #map-container {
   position: relative;
-  flex: 2;
+  /* flex: 2; */
+  flex:0 0 65%;
   min-height: 400px;
 }
 
@@ -145,7 +146,8 @@ main {
 
 /* Right panel (charts & info) */
 #right-panel {
-  flex: 1;
+  /* flex: 1; */
+  flex:0 0 35%;
   background: #f9f9f9;
   border-left: 2px solid #ccc;
   display: flex;
@@ -174,9 +176,13 @@ main {
 canvas {
   width: 100% !important;
   height: auto !important; /* let height adjust automatically */
-  max-height: 300px;       /* prevent it from being too tall on large screens */
+  max-height: 300px;     /*  prevent it from being too tall on large screens */
 }
-
+.chartContainer canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+}
 /* ====== Page content styling ====== */
 .page-content {
   max-width: 900px;

@@ -4,6 +4,7 @@
 {% block title %}Wholesale Market Prices{% endblock %}
 
 {% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -59,7 +60,7 @@
     .main-content {
       flex-direction: column;
     }
-    .map-panel, .chart-panel {
+    .map-panel {
       width: 100%;
       height: 400px;
     }
@@ -84,26 +85,104 @@
     z-index: 500;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     pointer-events: none; /* allows map panning/zooming */
-  }
-  .chartContainer {
+  }.map-chart-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+.map-chart-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.map-panel {
+  flex: 0 0 30%;
+  height: 700px; /* 🔹 increase total map+chart panel height */
+  border-radius: 15px;
+  overflow: hidden;
+}
+.map-chart-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+/* Map panel */
+.map-panel {
+  flex: 0 0 30%;
+  height: 75vh; /* consistent height relative to screen */
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+/* Chart panel */
+.chart-panel {
+  flex: 0 0 70%;
+  height: 75vh;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  height: 100%;
+}
+
+/* Title */
+.chart-title {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px;
+  background: linear-gradient(90deg, #007bff, #00b4d8);
+  color: white;
+  margin: 0;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  text-align: center;
+}
+
+/* Chart Container */
+.chartContainer {
+  flex: 1;
+  position: relative;
   width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 10px;
+  min-height: 400px;
 }
-.chart-footer {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  text-align: right;
-  color: #555;
-}
+
 .chartContainer canvas {
-  flex-grow: 1; /* Make chart occupy all available space */
-}
-#agmarkLineChart{
   width: 100% !important;
   height: 100% !important;
+  border: 2px solid #007bff; /* clear border visible */
+  border-radius: 12px;
+  box-sizing: border-box;
+  display: block;
 }
+
+/* Footer */
+.chart-footer {
+  padding: 8px 12px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .map-chart-row {
+    flex-direction: column;
+  }
+
+  .map-panel, .chart-panel {
+    width: 100%;
+    height: 50vh; /* adjusts well on mobile */
+  }
+}
+
 </style>
 {% endblock %}
 
@@ -149,16 +228,15 @@
   </div>
 
   <!-- MAIN CONTENT -->
-  <div class="main-content mt-3">
-    <div class="map-panel">
+  <div class="map-chart-row d-flex">
+    <div class="map-panel" id="mapContainer">
       <div id="map"></div>
-      <!-- <div id="mapOverlay">🗺️ Coming Soon</div> -->
+       <div id="mapOverlay" style="display:none;"></div>
   </div>
 
   <div class="chart-panel">
-    <h5>AgmarkNet Prices Trend</h5>
-  
-    <div id="chartContainer" class="chartContainer" style="flex: 1; width: 100%; position: relative; min-height: 400px;">
+    <h5 class="chart-title">AgmarkNet Prices Trend</h5>  
+    <div id="chartContainer" class="chartContainer" style="height: 100%; min-height: 500px;">
       <div id="loading-spinner" class="text-center my-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -166,7 +244,7 @@
         <p class="mt-2">Processing data, please wait...</p>
       </div>
   
-      <canvas id="agmarkLineChart" style="width: 100% !important; height: 100% !important;"></canvas>
+      <canvas id="agmarkLineChart" ></canvas>
     </div>
   
     <div class="chart-footer">
@@ -288,7 +366,71 @@ document.addEventListener("DOMContentLoaded", function() {
       apmcSelect.disabled = true;
     }
   }
-  async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
+//   async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
+//   const params = new URLSearchParams({
+//     apmc_name: selectedApmc || "",
+//     variety: commodity || "",
+//     start_date: startDate || "",
+//     end_date: endDate || ""
+//   });
+
+//   try {
+//     const res = await fetch(`/ahmedapmc/?${params.toString()}`);
+//     const data = await res.json();
+
+//     // Clear previous markers from markerLayer (if you want a fresh layer)
+//     markerLayer.clearLayers();
+
+//     // Add new markers for Ahmednagar
+//     data.locations.forEach(loc => {
+//       const isSelected = selectedApmc && loc.apmc_name === selectedApmc;
+//       const marker = L.circleMarker([loc.lat, loc.lon], {
+//         radius: 8,
+//         color: isSelected ? "red" : "blue",
+//         fillColor: isSelected ? "#ff3333" : "#3399ff",
+//         fillOpacity: 0.6,
+//         weight: 2
+//       }).bindPopup(`<b>${loc.apmc_name}</b>`);
+
+//       // 🔹 Add click event for this marker
+//       marker.on("click", () => {
+//         // 1. Update dropdown
+//         const apmcSelect = document.getElementById("apmcSelect");
+//         apmcSelect.value = loc.apmc_name;
+
+//         // 2. Close popup
+//         marker.closePopup();
+
+//         // 3. Trigger chart reload for this APMC
+//         fetchLineChart();
+//       });
+
+//       marker.addTo(markerLayer);
+//     });
+
+//     if (data.locations.length > 0) {
+//       map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
+//       document.getElementById("mapOverlay").style.display = "none";
+//     } else {
+//       document.getElementById("mapOverlay").style.display = "block";
+//     }
+
+//   } catch (error) {
+//     console.error("Error loading Ahmednagar APMCs:", error);
+//   }
+// }
+async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
+
+  if (!selectedApmc) {
+  Swal.fire({
+    icon: "info",
+    title: "No APMC Selected",
+    text: "Please choose an APMC marker or select from dropdown.",
+    confirmButtonColor: "#3085d6"
+  });
+  return;
+}
+
   const params = new URLSearchParams({
     apmc_name: selectedApmc || "",
     variety: commodity || "",
@@ -297,13 +439,53 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   try {
-    const res = await fetch(`/ahmedapmc/?${params.toString()}`);
-    const data = await res.json();
+    let res = await fetch(`/ahmedapmc/?${params.toString()}`);
+    let data = await res.json();
 
-    // Clear previous markers from markerLayer (if you want a fresh layer)
+    // If no data for selected period, try a nearby date range (±15 days)
+    if (!data.locations || data.locations.length === 0) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const prevStart = new Date(start);
+      const nextEnd = new Date(end);
+      prevStart.setDate(start.getDate() - 15);
+      nextEnd.setDate(end.getDate() + 15);
+
+      const nearbyParams = new URLSearchParams({
+        apmc_name: selectedApmc || "",
+        variety: commodity || "",
+        start_date: prevStart.toISOString().split("T")[0],
+        end_date: nextEnd.toISOString().split("T")[0]
+      });
+
+      const altRes = await fetch(`/ahmedapmc/?${nearbyParams.toString()}`);
+      const altData = await altRes.json();
+
+      if (altData.locations && altData.locations.length > 0) {
+        Swal.fire({
+          icon: "info",
+          title: "No Data for Selected Dates",
+          text: "Showing nearby available period instead (±15 days).",
+          confirmButtonColor: "#3085d6"
+        });
+        data = altData;
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Available",
+          text: "No records found for the selected APMC and nearby dates. Try another date range or APMC.",
+          confirmButtonColor: "#d33"
+        });
+        document.getElementById("mapOverlay").style.display = "block";
+        map.setView([19.7515, 75.7139], 7);
+        return;
+      }
+    }
+
+    // Clear previous markers
     markerLayer.clearLayers();
 
-    // Add new markers for Ahmednagar
+    // Add markers for APMC locations
     data.locations.forEach(loc => {
       const isSelected = selectedApmc && loc.apmc_name === selectedApmc;
       const marker = L.circleMarker([loc.lat, loc.lon], {
@@ -314,18 +496,30 @@ document.addEventListener("DOMContentLoaded", function() {
         weight: 2
       }).bindPopup(`<b>${loc.apmc_name}</b>`);
 
+      // On click: select and reload chart
+      marker.on("click", () => {
+        const apmcSelect = document.getElementById("apmcSelect");
+        apmcSelect.value = loc.apmc_name;
+        marker.closePopup();
+        fetchLineChart();
+      });
+
       marker.addTo(markerLayer);
     });
 
+    // Zoom to APMC markers
     if (data.locations.length > 0) {
       map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
       document.getElementById("mapOverlay").style.display = "none";
-    } else {
-      document.getElementById("mapOverlay").style.display = "block";
     }
 
   } catch (error) {
     console.error("Error loading Ahmednagar APMCs:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error Fetching Data",
+      text: "Something went wrong while fetching APMC data.",
+    });
   }
 }
 
@@ -361,9 +555,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const dataList = await res.json();
 
     if (!Array.isArray(dataList) || dataList.length === 0) {
-      showAlert("No data available for selected criteria", "info");
-      return;
-    }
+      Swal.fire({
+        icon: "warning",
+        title: "No Data Found",
+        text: "No records available for the selected APMC and date range. Checking nearby (±15 days)...",
+        confirmButtonColor: "#d33"
+      });
+
+      // ✅ Still attempt to load APMC markers with fallback logic
+      await loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
+    return;
+  }
+
 
     const grouped = {};
     dataList.forEach(d => {
