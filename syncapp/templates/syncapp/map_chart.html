@@ -26,6 +26,65 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+
+<style>
+  .resizable-chart {
+    width: 100% !important;
+    max-height: 300px;
+    transition: max-height 0.3s ease;
+  }
+
+  .resizable-chart.expanded {
+    max-height: 600px;
+  }
+  .toggle-chart-btn {
+  font-size: 0.8rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 2px 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.toggle-chart-btn:hover {
+  background-color: #e2e6ea;
+}
+.chart-container {
+  width: 100%;
+  height: 300px;              /* default compact height */
+  transition: height 0.28s ease;
+  position: relative;
+}
+
+/* make the canvas fill the container */
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;    /* Chart.js respects canvas height property */
+  display: block;
+}
+
+/* expanded state */
+.chart-container.expanded {
+  height: 600px;              /* expanded height */
+}
+#dateRangeSlider {
+  margin-top: 10px;
+}
+.noUi-handle {
+  background-color: #007bff;
+  border: 2px solid #0056b3;
+  box-shadow: none;
+}
+.noUi-connect {
+  background: #80bdff;
+}
+
+</style>
 {% endblock %}
 
 {% block content %}
@@ -41,6 +100,7 @@
     <div id="loginMessage" style="margin-top:10px; color:red;"></div>
   </div>
 </div>
+
 
 <div id="map-container">
  <div id="map"></div>
@@ -83,7 +143,7 @@
     <!-- <hr> -->
     <!-- <button id="toggleApmcBtn">🛒 Show All APMC</button> -->
   </div>
-  <!-- <button id="toggle-map-controls">⚙️ Hide/Show</button> -->
+  <button id="toggle-map-controls">⚙️ Hide/Show</button>
 </div>
 
 <div id="right-panel">
@@ -95,26 +155,73 @@
         Average Price: <span id="avg-price">--</span><br>
         Weighted Average: <span id="weighted-avg">--</span><br>
         Modal Price: <span id="modal-price">--</span>
-      </div>
+      </div> 
       <div id="radius-stats" style="margin-top: 4px;">
         <strong>Within Selected Radius:</strong><br>
         Average Price: <span id="avg-price-radius">--</span><br>
         Weighted Average: <span id="weighted-avg-radius">--</span><br>
         Modal Price: <span id="modal-price-radius">--</span>
       </div>
-    </div>
+    </div> <!--# stats-container div close -->
     <hr>
-    <h3>Agmarknet Price Trend : <span id="agmarknet"></span></h3>
-  <!-- New: Date range selection -->
-  <div id="date-range-container" style="margin-bottom: 10px;">
-    <label>Start Date: <input type="date" id="startDate"></label>
-    <label>End Date: <input type="date" id="endDate"></label>
-    <button id="filterByDateBtn" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-  </div>
-
-  <canvas id="chartCanvas"></canvas>
-</div>
+    <div style="text-align: right; margin-bottom: 10px;">
+      <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open All Charts</button>
+    </div>
     
+    <hr>
+    <h3>Consumers Buying Price Trend : <span id="consumerapan"></span>
+      <button class="toggle-chart-btn" data-target="consumersChart">Hide Chart</button>
+      <!-- <button class="resize-chart-btn" data-target="consumersChart">Expand</button> -->
+    </h3>
+      <!-- New: Date range selection -->
+      <div id="date-range-container1" style="margin-bottom: 10px;">
+        <label>Start Date: <input type="date" id="startDate1"></label>
+        <label>End Date: <input type="date" id="endDate1"></label>
+        <button id="filterByDateBtn1" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
+      </div>
+      <!-- <div class="chart-container" id="consumersChartContainer">
+        <canvas id="consumersChart"></canvas>
+      </div> -->
+      <canvas id="consumersChart" class="resizable-chart"></canvas>
+
+      <hr>
+      <h3>Farmers Selling Price Trend : <span id="farmerspan"></span>
+        <button class="toggle-chart-btn" data-target="farmerChart">Hide Chart</button>
+        <!-- <button class="resize-chart-btn" data-target="farmerChart">Expand</button> -->
+      </h3>
+      <!-- New: Date range selection -->
+      <div id="date-range-container2" style="margin-bottom: 10px;">
+        <label>Start Date: <input type="date" id="startDate2"></label>
+        <label>End Date: <input type="date" id="endDate2"></label>
+        <button id="filterByDateBtn2" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
+      </div>
+      <canvas id="farmerChart" class="resizable-chart"></canvas>
+      <!-- <div class="chart-container" id="farmerChartContainer">
+        <canvas id="farmerChart"></canvas>
+      </div> -->
+
+    <hr>
+    <h3>Agmarknet Price Trend : <span id="agmarknet"></span>
+      <button class="toggle-chart-btn" data-target="chartCanvas">Hide Chart</button>
+      <!-- <button class="resize-chart-btn" data-target="chartCanvas">Expand</button> -->
+    </h3>
+    <!-- New: Date range selection -->
+    <div id="date-range-container" style="margin-bottom: 10px;">
+      <label>Start Date: <input type="date" id="startDate"></label>
+      <label>End Date: <input type="date" id="endDate"></label>
+      <button id="filterByDateBtn" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
+    </div>
+    
+     <div class="chart-x-slider-container">
+      <canvas id="chartCanvas"></canvas>
+      <div id="dateRangeSlider" class="mt-3" style="width: 80%; margin: auto;"></div>
+      <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
+    </div>
+
+
+
+  </div><!--# graph-box div close -->
+</div><!--# <right>-panel div close -->
 {% endblock %}
 
 {% block extra_js %}
@@ -198,12 +305,10 @@ document.addEventListener("DOMContentLoaded", function() {
   // --------------------------
   // Agrowon & Agmark fetch functions
   // --------------------------
-  let agrowonChart = null;
-  let agmarkChart = null;
+    let agmarkChart = null;
+    let agmarkData = [];
 
-  
-
-  // --------------------------
+// --------------------------
   // Login form 
   // --------------------------
   loginForm.addEventListener("submit", async function (e) {
@@ -275,7 +380,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // No valid token or refresh -> show login modal
     loginModal.style.display = "block";
-})();
+  })();
 
 
 
@@ -290,10 +395,19 @@ document.addEventListener("DOMContentLoaded", function() {
       const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
-      const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
+    //   const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: '&copy; Google' });
+      const googleSat= L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
+      });
+      const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: ''
+      });
       //googleSat.addTo(map);
       osm.addTo(map);
+      const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
       const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
+    //   const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
       L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -504,46 +618,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
       let districtLayer = null;
 
-      
-    //   toggleApmcBtn.addEventListener("click", async () => {
-    //     if(!apmcVisible){
-    //         try {
-    //             const response = await fetch("/api/apmc/");  // fetch from DB
-    //             const data = await response.json();
-
-    //             data.forEach(row => {
-    //                 const lat = parseFloat(row.latitude);
-    //                 const lng = parseFloat(row.longitude);
-    //                 if(!isNaN(lat) && !isNaN(lng)){
-    //                     const marker = L.circleMarker([lat, lng], {
-    //                         radius: 10,
-    //                         color: 'blue',
-    //                         weight: 2,
-    //                         fillColor: 'red',
-    //                         fillOpacity: 0.3
-    //                     }).bindPopup(`<strong>Mandi Name: ${row.apmc_name}</strong><br>District: ${row.district}<br><a href="#" class="apmc-link" data-apmc="${row.apmc_name}">View Timeline</a>`);
-    //                     apmcMarkers.addLayer(marker);
-    //                 }
-    //             });
-
-    //             apmcMarkers.addTo(map);
-    //             apmcVisible = true;
-    //             toggleApmcBtn.innerText = "📍 Hide APMC";
-
-    //         } catch(err){
-    //             console.error("Error fetching APMC from DB:", err);
-    //         }
-    //     } else {
-    //         map.removeLayer(apmcMarkers);
-    //         apmcVisible = false;
-//                toggleApmcBtn.innerText = "📍 Show All APMC";
-    //     }
-    // });
-
       const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
-        let districtVisible = true;
+      let districtVisible = true;
 
-        toggleDistrictBtn.addEventListener("click", () => {
+       toggleDistrictBtn.addEventListener("click", () => {
           if(!districtLayer || !districtLayer.addTo) return; // safety check
 
           if(districtVisible){
@@ -568,10 +646,10 @@ document.addEventListener("DOMContentLoaded", function() {
               console.error("Error loading district GeoJSON:", err);
           } 
         
-        // InitMap ends here
+       
       // --- Initial chart fetch ---
      
-    //   document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
+      document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
 
       function showTimeline(apmcName) {
         const url = `/apmc/${encodeURIComponent(apmcName)}/timeline-ajax/`;
@@ -652,6 +730,8 @@ document.addEventListener("DOMContentLoaded", function() {
    // Fetch Agmark Price and draw line chart
     let agmarkChart = null;
     let chartData = [];  // Store API response globally for tooltips
+    let dateRangeSlider = document.getElementById('dateRangeSlider');
+    let dateRangeLabel = document.getElementById('dateRangeLabel');
 
     document.getElementById("filterByDateBtn").addEventListener("click", async () => {
         const startDate = document.getElementById("startDate").value;
@@ -693,9 +773,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Min Price', data: minPrices, borderColor: 'green', backgroundColor: 'rgba(0,128,0,0.1)', tension: 0.1 },
-                        { label: 'Max Price', data: maxPrices, borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.1)', tension: 0.1 },
-                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', backgroundColor: 'rgba(0,0,255,0.1)', tension: 0.1 }
+                        { label: 'Min Price', data: minPrices, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5 },
+                        { label: 'Max Price', data: maxPrices, borderColor: 'red', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5}
                     ]
                 },
                 options: {
@@ -722,55 +802,31 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
             });
-
+            
+                   
+        
         } catch(err){
             console.error("Error fetching webdata prices:", err);
             alert("Failed to load prices. Check console.");
         }
     });
 
-  }//InitMap close
-
-  // --------------------------
-// Web login via Django session
-// --------------------------
-// loginForm.addEventListener("submit", async function (e) {
-//   e.preventDefault();
-
-//   const username = document.getElementById("username").value;
-//   const password = document.getElementById("password").value;
-
-//   try {
-//     // Send POST request to Django session login endpoint
-//     const res = await fetch("/accounts/login/", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//       body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-//     });
-
-//     if (res.ok) {
-//       // Login successful → reload page to update {{ user }}
-//       window.location.reload();
-//     } else {
-//       // Login failed
-//       document.getElementById("loginMessage").innerText = "Invalid credentials!";
-//     }
-//   } catch (err) {
-//     console.error("Login error:", err);
-//     document.getElementById("loginMessage").innerText = "Login failed! Check console.";
-//   }
-// });
+ }//InitMap close
 // --- Commodity count display ---
 const token = sessionStorage.getItem("api_token");
 
 const commoditySelect = document.getElementById("commoditySelect");
 const commodityCount = document.getElementById("commodityCount");
+const initialCommodity = commoditySelect?.value?.trim();
 
 commoditySelect.addEventListener("change", () => {
+// commoditySelect.addEventListener("change", async function () {
   const commodity = commoditySelect.value;
+//   await updateAgmarkControls(commodity);
+
   if (!commodity) return;
 
-  fetch(`/commodity_count/?commodity=${commodity}`, {
+  fetch(`/api/commodity_count/?commodity=${commodity}`, {
     headers: { "Authorization": `Bearer ${token}` } // if using JWT or session
   })
   .then(response => response.json())
@@ -786,6 +842,394 @@ commoditySelect.addEventListener("change", () => {
     console.error(err);
   });
 });
+// --- Consumers1 Price Trend Chart ---
+let consumersChart = null;
+
+async function fetchConsumersPrices() {
+  const commodity1 = document.getElementById("commoditySelect").value;
+  const startDate1 = document.getElementById("startDate1").value;
+  const endDate1 = document.getElementById("endDate1").value;
+
+  if (!commodity1) return;
+
+  try {
+    const url = `/api/consumers1_prices/${encodeURIComponent(commodity1)}/?` +
+      `${startDate1 ? `start_date=${startDate1}&` : ""}` +
+      `${endDate1 ? `end_date=${endDate1}` : ""}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error("Fetch error:", res.statusText);
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Unexpected API response:", data);
+      Swal.fire({
+        icon: "warning",
+        title: "No consumer data",
+        text: "The consumer price API did not return valid data.",
+      });
+      return;
+    }
+
+    // ✅ Sort safely by date
+    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
+    const prices = sortedData.map(d => parseFloat(d.price));
+
+    const ctx = document.getElementById("consumersChart").getContext("2d");
+
+    if (consumersChart instanceof Chart) {
+      consumersChart.destroy();
+    }
+
+    consumersChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Consumer Reported Price (₹)",
+            data: prices,
+            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderWidth: 2,
+            tension: 0.3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: `Consumer Prices for ${commodity1}`,
+          },
+          legend: { position: "top" },
+        },
+        scales: {
+          x: { title: { display: true, text: "Date" } },
+          y: { title: { display: true, text: "Price (₹)" } },
+        },
+      },
+    });
+    // ✅ Register for resize logic
+    window.chartInstances = window.chartInstances || {};
+    window.chartInstances["consumersChart"] = consumersChart;
+
+  } catch (err) {
+    console.error("Error fetching consumer prices:", err);
+  }
+}
+
+// Attach to Filter button and commodity change
+document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
+document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
+
+// Initial load (optional)
+fetchConsumersPrices();
+
+
+// --- Farmer1 Price Trend Chart ---
+let farmerChart = null;
+
+async function fetchFarmersPrices() {
+  const commodity2 = document.getElementById("commoditySelect").value;
+  const startDate2 = document.getElementById("startDate2").value;
+  const endDate2 = document.getElementById("endDate2").value;
+
+  if (!commodity2) return;
+
+  try {
+    const url = `/api/farmers_prices/${encodeURIComponent(commodity2)}/?` +
+      `${startDate2 ? `start_date=${startDate2}&` : ""}` +
+      `${endDate2 ? `end_date=${endDate2}` : ""}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error("Fetch error:", res.statusText);
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Unexpected API response:", data);
+      Swal.fire({
+        icon: "warning",
+        title: "No Famer data",
+        text: "The Farmer fetch price API did not return valid data.",
+      });
+      return;
+    }
+
+    // ✅ Sort safely by date
+    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
+    const prices = sortedData.map(d => parseFloat(d.price));
+
+    const ctx = document.getElementById("farmerChart").getContext("2d");
+
+    if (farmerChart instanceof Chart) {
+      farmerChart.destroy();
+    }
+
+    farmerChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Famer's Reported Selling Price (₹)",
+            data: prices,
+            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderWidth: 2,
+            tension: 0.3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+          title: {
+            display: true,
+            text: `Farmer's Selling Price for ${commodity2}`,
+          },
+          legend: { position: "top" },
+        },
+        scales: {
+          x: { title: { display: true, text: "Date" } },
+          y: { title: { display: true, text: "Price (₹)" } },
+        },
+      },
+    });
+
+  } catch (err) {
+    console.error("Error fetching Farmer selling prices:", err);
+  }
+}
+
+// Attach to Filter button and commodity change
+document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
+document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
+
+// Initial load (optional)
+fetchFarmersPrices();
+ 
+
+// Toggle Show/Hide for all trend charts
+document.querySelectorAll('.toggle-chart-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const targetCanvas = document.getElementById(targetId);
+
+    if (targetCanvas.style.display === 'none') {
+      targetCanvas.style.display = 'block';
+      btn.textContent = 'Hide';
+    } else {
+      targetCanvas.style.display = 'none';
+      btn.textContent = 'Show';
+    }
+  });
+});
+//   // --- Resize Chart Logic ---
+// // Resize Chart Button Logic
+// document.querySelectorAll(".resize-chart-btn").forEach(btn => {
+//   btn.addEventListener("click", () => {
+//     const targetCanvasId = btn.dataset.target; // e.g. consumersChart
+//     const container = document.getElementById(targetCanvasId + "Container");
+//     if (!container) return;
+
+//     const chartInstance = window.chartInstances?.[targetCanvasId];
+//     const expanded = container.classList.toggle("expanded");
+//     btn.textContent = expanded ? "Shrink" : "Expand";
+
+//     setTimeout(() => {
+//       chartInstance?.resize();
+//     }, 100);
+//   });
+// // });
+// const startInput = document.getElementById("startDate");
+// const endInput = document.getElementById("endDate");
+// const dateSlider = document.getElementById("dateSlider");
+// const sliderStartLabel = document.getElementById("sliderStartLabel");
+// const sliderEndLabel = document.getElementById("sliderEndLabel");
+// const sliderValue = document.getElementById("sliderValue");
+
+// // Convert date ↔ timestamp
+// function dateToTime(d) {
+//   return new Date(d).getTime();
+// }
+// function timeToDate(t) {
+//   return new Date(t).toISOString().split("T")[0];
+// }
+
+// // Set slider range when start/end change
+// function updateDateSliderRange() {
+//   if (!startInput.value || !endInput.value) return;
+
+//   const start = dateToTime(startInput.value);
+//   const end = dateToTime(endInput.value);
+//   const totalDays = Math.max(0, Math.floor((end - start) / (1000 * 60 * 60 * 24)));
+
+//   dateSlider.min = 0;
+//   dateSlider.max = totalDays;
+//   dateSlider.value = 0;
+
+//   sliderStartLabel.textContent = startInput.value;
+//   sliderEndLabel.textContent = endInput.value;
+//   sliderValue.textContent = startInput.value;
+// }
+
+// // When slider moves
+// dateSlider.addEventListener("input", function () {
+//   if (!startInput.value || !endInput.value) return;
+
+//   const start = dateToTime(startInput.value);
+//   const offset = parseInt(this.value);
+//   const currentDate = timeToDate(start + offset * 24 * 60 * 60 * 1000);
+
+//   sliderValue.textContent = currentDate;
+
+//   // OPTIONAL: Update Agmark chart live for this date
+//   // fetchAgmarkData(commoditySelect.value, startInput.value, currentDate);
+// });
+
+// // When date inputs change
+// [startInput, endInput].forEach(inp => inp.addEventListener("change", updateDateSliderRange));
+
+// // Initialize once
+// updateDateSliderRange();
+// --- Initialize Two-Way Date Range Slider ---
+// =============================
+// Two-way date range slider (Agmarknet)
+// =============================
+// const dateRangeSlider = document.getElementById('dateRangeSlider');
+// const dateRangeLabel = document.getElementById('dateRangeLabel');
+
+// // Define the min and max date for your dataset (adjust as needed)
+// const allDates = agmarkData.map(d => new Date(d.date));
+// const minDate = new Date(Math.min(...allDates));
+// const maxDate = new Date(Math.max(...allDates));
+
+// // const minDate = new Date("2023-01-01");
+// // const maxDate = new Date("2025-12-31");
+
+// // Initialize noUiSlider
+// noUiSlider.create(dateRangeSlider, {
+//   start: [minDate.getTime(), maxDate.getTime()],
+//   connect: true,
+//   range: {
+//     min: minDate.getTime(),
+//     max: maxDate.getTime()
+//   },
+//   step: 24 * 60 * 60 * 1000, // 1 day
+//   tooltips: false,
+// });
+
+// // Function to format dates
+// function formatDate(ts) {
+//   const d = new Date(ts);
+//   return d.toISOString().split('T')[0];
+// }
+
+// // Display initial range
+// dateRangeLabel.textContent = `${formatDate(minDate)} — ${formatDate(maxDate)}`;
+
+// // Update display on slide
+// dateRangeSlider.noUiSlider.on('update', function (values) {
+//   const start = formatDate(+values[0]);
+//   const end = formatDate(+values[1]);
+//   dateRangeLabel.textContent = `${start} — ${end}`;
+// });
+
+// // Optional: Trigger your filter when sliding stops
+// dateRangeSlider.noUiSlider.on('change', function (values) {
+//   const start = formatDate(+values[0]);
+//   const end = formatDate(+values[1]);
+  
+//   console.log("Selected range:", start, "to", end);
+//   // 🔹 You can call your Agmarknet chart update function here:
+//   // fetchAgmarkChart(start, end);
+// });
+
+
+let chartPopup = null;
+
+document.getElementById("openAllChartsBtn").addEventListener("click", openAllChartsInPopup);
+
+function openAllChartsInPopup() {
+  const chartIds = ["consumersChart", "farmerChart", "chartCanvas"]; // all your chart <canvas> IDs
+  const chartImages = chartIds.map(id => {
+    const canvas = document.getElementById(id);
+    return canvas ? canvas.toDataURL("image/png") : null;
+  }).filter(Boolean);
+
+  // Reuse popup if it’s already open
+  if (!chartPopup || chartPopup.closed) {
+    chartPopup = window.open("", "chartsPopup", "width=1100,height=900");
+  } else {
+    chartPopup.focus();
+  }
+
+  // Write content
+  chartPopup.document.open();
+  chartPopup.document.write(`
+    <html>
+      <head>
+        <title>All Charts</title>
+        <style>
+          body {
+            margin: 0;
+            background: #f9fafb;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+          }
+          img {
+            max-width: 95%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          }
+          button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+        </style>
+      </head>
+      <body>
+        <button onclick="window.close()">Close</button>
+        ${chartImages.map((src, i) => `<img src="${src}" alt="Chart ${i + 1}">`).join("")}
+      </body>
+    </html>
+  `);
+  chartPopup.document.close();
+}
+const labels = agmarkChart.data.labels; // e.g. ['2024-01-01', '2024-01-02', ...]
+
 
 
 
