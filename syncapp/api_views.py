@@ -273,7 +273,7 @@ def webdata_prices(request):
                 qs = qs.filter(date__lte=end_date)
 
     if not qs.exists():
-        return JsonResponse({'error': 'No data found in the selected range'}, status=404)
+        return JsonResponse({'error': 'No data found for selected commodity / date range'}, status=404)
 
 
     # 4️⃣ Serialize results
@@ -307,6 +307,20 @@ def consumer_timeline(request, commodity):
 
     data = [{"date": entry.date.strftime("%Y-%m-%d"),
              "price": entry.buyingprice} for entry in qs]
+
+    return JsonResponse(data, safe=False)
+
+def farmer_timeline(request, commodity):
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    qs = Farmer1.objects.filter(commodity__iexact=commodity)
+    if start_date: qs = qs.filter(date__gte=start_date)
+    if end_date: qs = qs.filter(date__lte=end_date)
+    qs = qs.order_by("date")
+
+    data = [{"date": entry.date.strftime("%Y-%m-%d"),
+             "price": entry.sellingprice} for entry in qs]
 
     return JsonResponse(data, safe=False)
 

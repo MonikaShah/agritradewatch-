@@ -13,7 +13,8 @@ urlpatterns = [
     path('webdata_prices/', api_views.webdata_prices, name='webdata_prices'),
     path('webdata_prices_public/', api_views.webdata_prices_public, name='webdata_prices_public'),
     path('register/', api_views.api_register, name='api_register'),
-
+    path("consumers1_prices/<str:commodity>/", api_views.consumer_timeline, name="consumer_timeline"),
+    path("farmers_prices/<str:commodity>/", api_views.farmer_timeline, name="farmer_timeline"),
     # Mobile JWT APIs
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
