@@ -86,7 +86,7 @@ main {
 #map-container {
   position: relative;
   /* flex: 2; */
-  flex:0 0 65%;
+  flex:0 0 50%;
   min-height: 400px;
 }
 
@@ -147,7 +147,7 @@ main {
 /* Right panel (charts & info) */
 #right-panel {
   /* flex: 1; */
-  flex:0 0 35%;
+  flex:0 0 50%;
   background: #f9f9f9;
   border-left: 2px solid #ccc;
   display: flex;
@@ -404,6 +404,11 @@ canvas {
   .card-body {
     font-size: 0.95rem;
     line-height: 1.5;
+  }
+
+  .spinner-border {
+    width: 2rem;
+    height: 2rem;
   }
 }
 
