@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from django.conf import settings
 from pathlib import Path
 from decouple import config
 import os
@@ -19,7 +19,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),'USER_ID_FIELD': 'id',        # ← use your CharField PK
     'USER_ID_CLAIM': 'user_id',   # ← the claim name in the JWT payload
 }
-
+from django.utils.translation import gettext_lazy as _
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -196,5 +197,24 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_PASS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-FRONTEND_URL= 'https://mandigo.in'  #FRONTEND_URL = 'http://127.0.0.1:8000'
+# 
+# FRONTEND_URL = 'http://127.0.0.1:8000'
+FRONTEND_URL= 'https://mandigo.in'
 
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+LANGUAGE_CODE = 'en'  # Default language
+
+LANGUAGES = [
+    ('en', _('English')),
+    ('hi', _('Hindi')),
+    ('mr', _('Marathi')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale')
+    ]
+print(settings.LOCALE_PATHS)

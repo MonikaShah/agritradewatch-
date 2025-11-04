@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.views.i18n import JavaScriptCatalog
 
 
 router = routers.DefaultRouter()
@@ -23,6 +24,8 @@ router.register(r'commodities', api_views.CommodityViewSet)
 
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     path('', views.landingpage, name='landingpage'),
     path('map_chart', views.map_chart, name='map_chart'),
     path('aboutus/', views.aboutus, name='aboutus'),

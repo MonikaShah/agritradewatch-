@@ -38,6 +38,7 @@ from .serializers import (
     
 )
 
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 def landingpage(request):
@@ -279,11 +280,11 @@ def web_login(request):
         user = authenticate(username=username, password=password)
         if user:
             login(request, user)  # important, sets session
-            messages.success(request, f"Welcome {user.username}!")
-            
+            messages.success(request, _("Welcome %(username)s!") % {"username": user.username})            
             return redirect("landingpage")
         else:
-            messages.error(request, "Invalid credentials")
+            messages.error(request, _("Invalid credentials"))
+            return render(request, "syncapp/login.html")
     return render(request, "syncapp/login.html")
 
 @login_required

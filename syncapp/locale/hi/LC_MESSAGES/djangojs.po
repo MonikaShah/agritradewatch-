@@ -1,0 +1,481 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-04 14:31+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: syncapp/static/syncapp/js/price_chart.js:1
+msgid "Min"
+msgstr "न्यूनतम कीमत"
+
+#: syncapp/static/syncapp/js/price_chart.js:2
+msgid "Modal"
+msgstr "मॉडल कीमत"
+
+#: syncapp/static/syncapp/js/price_chart.js:3
+msgid "Max"
+msgstr "अधिकतम कीमत"
+
+#: syncapp/static/syncapp/js/price_chart.js:4
+msgid "per quintal"
+msgstr "प्रति क्विंटल"
+
+#: syncapp/static/syncapp/js/price_chart.js:5
+msgid "Price (₹ per Quintal)"
+msgstr "मूल्य (₹ प्रति क्विंटल)"
+
+#: syncapp/static/syncapp/js/price_chart.js:6
+msgid "Date"
+msgstr "तारीख"
+
+#: syncapp/static/syncapp/js/price_chart.js:7
+msgid "Error loading line chart"
+msgstr "लाइन चार्ट लोड करने में त्रुटि"
+
+# Marathi translations for APMC names
+msgid "Kurdwadi"
+msgstr "कुर्डवाडी"
+
+msgid "Kopargaon"
+msgstr "कोपरगाव"
+
+msgid "Chandrapur"
+msgstr "चंद्रपूर"
+
+msgid "Pandharpur"
+msgstr "पंढरपूर"
+
+msgid "Mangal Wedha"
+msgstr "मंगळवेढा"
+
+msgid "Dindori(Vani)"
+msgstr "दिंडोरी (वाणी)"
+
+msgid "Newasa(Ghodegaon)"
+msgstr "नेवासा (घोडेगाव)"
+
+msgid "Chandrapur(Ganjwad)"
+msgstr "चंद्रपूर (गांजवड)"
+
+msgid "Malkapur"
+msgstr "मळकापूर"
+
+msgid "Dindori"
+msgstr "दिंडोरी"
+
+msgid "Shrirampur"
+msgstr "श्रीरामपूर"
+
+msgid "Vita"
+msgstr "विटा"
+
+msgid "Shirur"
+msgstr "शिरूर"
+
+msgid "Bhivandi"
+msgstr "भिवंडी"
+
+msgid "Islampur"
+msgstr "इस्लामपूर"
+
+msgid "Indapur"
+msgstr "इंदापूर"
+
+msgid "Junnar(Narayangaon)"
+msgstr "जुन्नर (नारायणगाव)"
+
+msgid "Rahata"
+msgstr "राहाता"
+
+msgid "Satana"
+msgstr "सटाणा"
+
+msgid "Nasik"
+msgstr "नाशिक"
+
+msgid "Sinner"
+msgstr "सिन्नर"
+
+msgid "Shirpur"
+msgstr "शिरपूर"
+
+msgid "Shree Rameshwar Krushi Market"
+msgstr "श्री रामेश्वर कृषी मार्केट"
+
+msgid "Chikali"
+msgstr "चिकली"
+
+msgid "Kannad"
+msgstr "कन्नड"
+
+msgid "Lasalgaon(Niphad)"
+msgstr "लासलगाव (निफाड)"
+
+msgid "Murbad"
+msgstr "मुरबाड"
+
+msgid "Vadgaonpeth"
+msgstr "वडगांवपेठ"
+
+msgid "Kolhapur(Malkapur)"
+msgstr "कोल्हापूर (मळकापूर)"
+
+msgid "Rahuri"
+msgstr "राहुरी"
+
+msgid "Hingna"
+msgstr "हिंगणा"
+
+msgid "Dharashiv"
+msgstr "धाराशिव"
+
+msgid "Manmad"
+msgstr "मनमाड"
+
+msgid "Parshiwani"
+msgstr "पारशिवनी"
+
+msgid "Sangamner"
+msgstr "संगमनेर"
+
+msgid "Pimpalgaon"
+msgstr "पिंपळगाव"
+
+msgid "Amrawati(Frui & Veg. Market)"
+msgstr "अमरावती (फळ व भाजी मार्केट)"
+
+msgid "Ratnagiri (Nachane)"
+msgstr "रत्नागिरी (नाचणे)"
+
+msgid "Kolhapur"
+msgstr "कोल्हापूर"
+
+msgid "Satara"
+msgstr "सातारा"
+
+msgid "Mumbai"
+msgstr "मुंबई"
+
+msgid "Malegaon"
+msgstr "मालेगाव"
+
+msgid "Mulshi"
+msgstr "मुळशी"
+
+msgid "Palghar"
+msgstr "पालघर"
+
+msgid "Umrane"
+msgstr "उमरणे"
+
+msgid "Yawal"
+msgstr "यावल"
+
+msgid "Jaysingpur"
+msgstr "जयसिंगपूर"
+
+msgid "Paranda"
+msgstr "परांडा"
+
+msgid "Khed(Chakan)"
+msgstr "खेड (छाकण)"
+
+msgid "Chandvad"
+msgstr "चांदवड"
+
+msgid "Tuljapur"
+msgstr "तुळजापूर"
+
+msgid "Koregaon"
+msgstr "कोरेगाव"
+
+msgid "Parner"
+msgstr "पारनेर"
+
+msgid "Ramtek"
+msgstr "रामटेक"
+
+msgid "Ahmednagar"
+msgstr "अहमदनगर"
+
+msgid "Janata Agri Market (DLS Agro Infrastructure Pvt Lt"
+msgstr "जनता अ‍ॅग्री मार्केट (डीएलएस अ‍ॅग्रो इन्फ्रास्ट्रक्चर प्रा. लि.)"
+
+msgid "Shevgaon"
+msgstr "शेवगाव"
+
+msgid "Rahuri(Vambori)"
+msgstr "राहुरी (वांबोरी)"
+
+msgid "Karjat"
+msgstr "कर्जत"
+
+msgid "Malharshree Farmers Producer Co Ltd"
+msgstr "मल्हारश्री फार्मर्स प्रोड्यूसर कंपनी लि."
+
+msgid "Akole"
+msgstr "अकोले"
+
+msgid "Pimpalgaon Baswant(Saykheda)"
+msgstr "पिंपळगाव बसवंत (सायकडा)"
+
+msgid "Pune(Moshi)"
+msgstr "पुणे (मोशी)"
+
+msgid "Junnar(Alephata)"
+msgstr "जुन्नर (आळेफाटा)"
+
+msgid "Junnar"
+msgstr "जुन्नर"
+
+msgid "Chattrapati Sambhajinagar"
+msgstr "छत्रपती संभाजीनगर"
+
+msgid "Ausa"
+msgstr "औसा"
+
+msgid "Panvel"
+msgstr "पनवेल"
+
+msgid "Nampur"
+msgstr "नांपुर"
+
+msgid "Lasalgaon"
+msgstr "लासलगाव"
+
+msgid "Pune"
+msgstr "पुणे"
+
+msgid "Paithan"
+msgstr "पैठण"
+
+msgid "Dhule"
+msgstr "धुळे"
+
+msgid "Laxmi Sopan Agriculture Produce Marketing Co Ltd"
+msgstr "लक्ष्मी सोपान अ‍ॅग्रिकल्चर प्रोड्यूस मार्केटिंग कंपनी लि."
+
+msgid "Kamthi"
+msgstr "कामठी"
+
+msgid "Phaltan"
+msgstr "फलटण"
+
+msgid "Gangapur"
+msgstr "गंगापूर"
+
+msgid "Mankamneshwar Farmar Producer CoLtd Sanchalit Mank"
+msgstr "मंकामनेश्वर फार्मर प्रोड्यूसर कंपनी लि. संचलित मंक"
+
+msgid "Chalisgaon"
+msgstr "चाळीसगाव"
+
+msgid "Patan"
+msgstr "पाटण"
+
+msgid "Vaduj"
+msgstr "वडूज"
+
+msgid "Jalgaon"
+msgstr "जळगाव"
+
+msgid "Baramati"
+msgstr "बारामती"
+
+msgid "Lonand"
+msgstr "लोणंद"
+
+msgid "Dound"
+msgstr "दौंड"
+
+msgid "Akola"
+msgstr "अकोला"
+
+msgid "Palus"
+msgstr "पलूस"
+
+msgid "Ghoti"
+msgstr "घोटी"
+
+msgid "Navapur"
+msgstr "नवापूर"
+
+msgid "Morshi"
+msgstr "मोर्शी"
+
+msgid "Nandura"
+msgstr "नंदुरा"
+
+msgid "Shree Sairaj Krushi Market"
+msgstr "श्री साईराज कृषी मार्केट"
+
+msgid "Washi (Dharashiv)"
+msgstr "वाशी (धाराशिव)"
+
+msgid "Yeola"
+msgstr "येवला"
+
+msgid "Ulhasnagar"
+msgstr "उल्हासनगर"
+
+msgid "Jalana"
+msgstr "जालना"
+
+msgid "Pune(Pimpri)"
+msgstr "पुणे (पिंपरी)"
+
+msgid "Akluj"
+msgstr "आक्लुज"
+
+msgid "Solapur"
+msgstr "सोलापूर"
+
+msgid "Kalmeshwar"
+msgstr "कलमेश्वर"
+
+msgid "Vai"
+msgstr "वाई"
+
+msgid "Pathardi"
+msgstr "पाथर्डी"
+
+msgid "Premium Krushi Utpanna Bazar"
+msgstr "प्रीमियम कृषी उत्पन्न बाजार"
+
+msgid "Pen"
+msgstr "पेण"
+
+msgid "Amalner"
+msgstr "अमळनेर"
+
+msgid "Lasalgaon(Vinchur)"
+msgstr "लासलगाव (विंचूर)"
+
+msgid "Nandgaon"
+msgstr "नांदगाव"
+
+msgid "Vashi New Mumbai"
+msgstr "वाशी नवी मुंबई"
+
+msgid "Kalvan"
+msgstr "कलवन"
+
+msgid "Junnar(Otur)"
+msgstr "जुन्नर (ओतूर)"
+
+msgid "Karmala"
+msgstr "कर्माळा"
+
+msgid "Jawali"
+msgstr "जावली"
+
+msgid "Karad"
+msgstr "कराड"
+
+msgid "Sangli(Phale, Bhajipura Market)"
+msgstr "सांगली (फळे, भाजीपुरा मार्केट)"
+
+msgid "Manchar"
+msgstr "मंचर"
+
+msgid "Om Chaitanya Multistate Agro Purpose CoOp Society"
+msgstr "ओम चैतन्य मल्टीस्टेट अ‍ॅग्रो पर्पज को-ऑप सोसायटी"
+
+msgid "Kada"
+msgstr "कडा"
+
+msgid "Fulmbri"
+msgstr "फुलंब्री"
+
+msgid "Kurdwadi(Modnimb)"
+msgstr "कुर्डवाडी (मोदणींब)"
+
+msgid "Shrigonda"
+msgstr "श्रीगोंदा"
+
+msgid "Shrigonda(Gogargaon)"
+msgstr "श्रीगोंदा (गोगरगाव)"
+
+msgid "Shivsiddha Govind Producer Company Limited Sanchal"
+msgstr "शिवसिद्ध गोविंद प्रोड्यूसर कंपनी लि. संचालित"
+
+msgid "Devala"
+msgstr "देवळा"
+
+msgid "Nagpur"
+msgstr "नागपूर"
+
+msgid "Kalyan"
+msgstr "कल्याण"
+
+msgid "Pune(Manjri)"
+msgstr "पुणे (मांजरी)"
+
+msgid "Rahuri(Songaon)"
+msgstr "राहुरी (सोंगाव)"
+
+msgid "Lasur Station"
+msgstr "लसूऱ स्टेशन"
+
+msgid "Karjat(Raigad)"
+msgstr "कर्जत (रायगड)"
+
+msgid "Barshi"
+msgstr "बार्शी"
+
+msgid "Amarawati"
+msgstr "अमरावती"
+
+msgid "Sakri"
+msgstr "साक्री"
+
+msgid "Jamkhed"
+msgstr "जामखेड"
+
+msgid "Pune(Khadiki)"
+msgstr "पुणे (खडकी)"
+
+msgid "Bhusaval"
+msgstr "भुसावळ"
+
+msgid "Vasai"
+msgstr "वसई"
+
+msgid "Vaijpur"
+msgstr "वैजपूर"
+
+msgid "All APMCs"
+msgstr "सभी एपीएमसी"
+
+msgid "Data not available for selected Filter."
+msgstr "चयनित फ़िल्टर के लिए डेटा उपलब्ध नहीं है"
+
+msgid "Showing average prices for all apmcs within selected date range."
+msgstr "चयनित तिथि के लिए सभी एपीएमसी की औसत कीमतें दिखा रहा है।"
+
+
+msgid "Please select commodity and date range first"
+msgstr "कृपया पहले वस्तु और दिनांक सीमा का चयन करें"
+
+msgid "Tomato"
+msgstr "टमाटर"
+
+msgid "Onion"
+msgstr "प्याज"
+
+msgid "Potato"
+msgstr "आलू"

@@ -1,5 +1,6 @@
 {% extends 'syncapp/base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Wholesale Market Prices{% endblock %}
 
@@ -9,7 +10,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-
+<script src="{% url 'javascript-catalog' %}"></script>
+<script src="{% static 'js/price_chart.js' %}"></script>
 <style>
   /* FILTER BAR */
   .filter-bar {
@@ -188,15 +190,15 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-3 text-primary">Wholesale Market Prices</h2>
+  <h2 class="mb-3 text-primary">{% trans "Wholesale Market Prices" %}</h2>
   <div id="dynamicAlert" class="alert alert-warning alert-dismissible fade show" style="display:none;"></div>
 
   <!-- FILTER BAR -->
   <div class="filter-bar">
     <div class="form-group">
-      <label for="commoditySelect" class="form-label">Commodity</label>
+      <label for="commoditySelect" class="form-label">{% trans "Commodity" %}</label>
       <select id="commoditySelect" class="form-select w-100">
-        <option value="">All Commodities</option>
+        <option value="">{% trans "All Commodities" %}</option>
         {% for item in commodities %}
         <option value="{{ item }}">{{ item }}</option>
         {% endfor %}
@@ -204,26 +206,26 @@
     </div>
 
     <div class="form-group">
-      <label for="lineStartDate" class="form-label">Start Date</label>
+      <label for="lineStartDate" class="form-label">{% trans "Start Date" %}</label>
       <input type="date" id="lineStartDate" class="form-control w-100"
              value="{{ today|date:'Y-m-d' }}" min="2014-01-01" max="{{ today|date:'Y-m-d' }}">
     </div>
 
     <div class="form-group">
-      <label for="lineEndDate" class="form-label">End Date</label>
+      <label for="lineEndDate" class="form-label">{% trans "End Date" %}</label>
       <input type="date" id="lineEndDate" class="form-control w-100"
              value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
     </div>
 
     <div class="form-group">
-      <label for="apmcSelect" class="form-label">APMC</label>
+      <label for="apmcSelect" class="form-label">{% trans "APMC" %}</label>
       <select id="apmcSelect" class="form-select w-100" disabled>
-        <option value="">Select APMC</option>
+        <option value="">{% trans "Select APMC" %}</option>
       </select>
     </div>
 
     <div class="form-group">
-      <button id="submitBtn" class="btn btn-primary w-100">Show Prices</button>
+      <button id="submitBtn" class="btn btn-primary w-100">{% trans "Show Prices" %}</button>
     </div>
   </div>
 
@@ -235,21 +237,21 @@
   </div>
 
   <div class="chart-panel">
-    <h5 class="chart-title">AgmarkNet Prices Trend</h5>  
+    <h5 class="chart-title">{% trans "AgmarkNet Prices Trend" %}</h5>  
     <div id="chartContainer" class="chartContainer" style="height: 100%; min-height: 500px;">
       <div id="loading-spinner" class="text-center my-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{% trans "Loading..." %}</span>
         </div>
-        <p class="mt-2">Processing data, please wait...</p>
+        <p class="mt-2">{% trans "Processing data, please wait..." %}</p>
       </div>
   
       <canvas id="agmarkLineChart" ></canvas>
     </div>
   
     <div class="chart-footer">
-      <p class="chart-tip">💡 Tip: Scroll to zoom, drag (or Ctrl + drag) to pan.</p>
-      <p class="chart-source">Data Source: <a href="https://data.gov.in" target="_blank">data.gov.in</a></p>
+      <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
+      <p class="chart-source">{% trans "Data Source" %}: <a href="https://data.gov.in" target="_blank">{% trans "data.gov.in" %}</a></p>
     </div>
   </div>
   
@@ -261,6 +263,14 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const commoditySelect = document.getElementById("commoditySelect");
+      const options = commoditySelect.options;
+
+    for (let i = 0; i < options.length; i++) {
+      const opt = options[i];
+      if (opt.value) {
+        opt.textContent = gettext(opt.value);
+      }
+    }
   const apmcSelect = document.getElementById("apmcSelect");
   const lineStartDate = document.getElementById("lineStartDate");
   const lineEndDate = document.getElementById("lineEndDate");
@@ -337,11 +347,11 @@ document.addEventListener("DOMContentLoaded", function() {
       const dataList = await res.json();
 
       const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
-      apmcSelect.innerHTML = '<option value="">All APMCs</option>';
+      apmcSelect.innerHTML = `<option value="">${gettext("All APMCs")}</option>`;
       uniqueApmcs.forEach(a=>{
         const opt = document.createElement("option");
         opt.value = a;
-        opt.textContent = a;
+        opt.textContent = gettext(a);  // 🔹 translate dynamically
         apmcSelect.appendChild(opt);
       });
       apmcSelect.disabled = uniqueApmcs.length === 0;
@@ -360,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function() {
             .bindPopup(`<b>${d.apmc}</b><br>${d.commodity}<br>₹${d.modalprice}`);
         }
       });
-
+      await loadAhmednagarAPMCs("Ahmednagar", commodity, startDate, endDate);
     }catch(err){
       console.error(err);
       apmcSelect.disabled = true;
@@ -424,8 +434,8 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
   if (!selectedApmc) {
   Swal.fire({
     icon: "info",
-    title: "Data not available",
-    html: "Data not available for selected date range for chosen APMC.<br> Showing average prices for all apmcs within date range. ",
+    title:  gettext("Data not available for selected Filter."),
+    html:  gettext("Showing average prices for all apmcs within selected date range."),
     confirmButtonColor: "#3085d6"
   });
   return;
@@ -538,7 +548,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
   const endDate = lineEndDate.value;
 
   if (!commodity || !startDate || !endDate) {
-    showAlert("Please select commodity and date range first");
+    showAlert(gettext("Please select commodity and date range first"));
     return;
   }
 
@@ -582,14 +592,17 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
     const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
 
+    const minLabel = gettext("Min");
+    const modalLabel = gettext("Modal");
+    const maxLabel = gettext("Max");
     agmarkLineChart = new Chart(ctx, {
       type: "line",
       data: {
         labels,
         datasets: [
-          { label: "Min", data: minData, borderColor: "#007bff", tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
-          { label: "Modal", data: modalData, borderColor: "#ffc107", tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
-          { label: "Max", data: maxData, borderColor: "#28a745", tension: 0.3 ,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+          { label: minLabel, data: minData, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+          { label: modalLabel, data: modalData, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
+          { label: maxLabel, data: maxData, borderColor: "red", tension: 0.3 ,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
         ]
       },
       options: {
@@ -616,24 +629,28 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `₹ ${context.raw.toFixed(0)} per quintal`;
+                const perQuintal = gettext("per quintal");
+                return `₹ ${context.raw.toFixed(0)} ${perQuintal}`
+                // return `₹ ${context.raw.toFixed(0)} per quintal`;
               }
             }
           }
         },
         scales: {
           y: {
-            title: { display: true, text: "Price (₹ per Quintal)" },
+            title: { display: true, 
+              text: gettext("Price (₹ per Quintal)"),
             beginAtZero: true
           },
-          x: { title: { display: true, text: "Date" } }
+          x: { title: { display: true, text: gettext("Date") } }
         }
       }
+     }
     });
 
   } catch (err) {
     console.error(err);
-    showAlert("Error loading line chart");
+    showAlert(gettext("Error loading line chart"));
   } finally {
     // 🔹 Hide spinner regardless of success or error
     spinner.style.display = "none";
@@ -672,6 +689,21 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 //     xScale.options.max = newMax;
 //     agmarkLineChart.update("none");
 // });
+window.addEventListener("load", async function() {
+    const defaultApmc = "Ahmednagar";   // 🔹 Default APMC
+    const defaultCommodity = commoditySelect.value || "Tomato";  // pick a sensible default
+    const startDate = lineStartDate.value;
+    const endDate = lineEndDate.value;
+
+    const displayApmc = gettext(defaultApmc);
+    // Set dropdowns
+    apmcSelect.innerHTML = `<option value="${defaultApmc}" selected>${displayApmc}</option>`;
+    apmcSelect.disabled = false;
+
+    // Fetch and render data
+    await fetchLineChart();   // draw chart
+    await loadAhmednagarAPMCs(defaultApmc, defaultCommodity, startDate, endDate); // load map markers
+});
 });
 </script>
 {% endblock %}

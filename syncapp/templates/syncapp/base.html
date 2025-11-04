@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,7 +63,7 @@
             <div class="container-fluid">
                 <!-- Logo / Title -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'landingpage' %}">
-                    🌾 <span class="ms-2">MandiGo</span>
+                    🌾 <span class="ms-2">{% trans "MandiGo" %}</span>
                 </a>
 
                 <!-- Hamburger for mobile -->
@@ -77,13 +78,13 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         
                         <li class="nav-item">
-                            <a class="nav-link px-3" href="{% url 'map_chart' %}">Dashboard</a>
+                            <a class="nav-link px-3" href="{% url 'map_chart' %}">{% trans "Dashboard" %}</a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link px-3"  href="{% url 'apmc' %}">Wholesale Market Price </a>
+                          <a class="nav-link px-3"  href="{% url 'apmc' %}">{% trans "Wholesale Market Data" %} </a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">About Us</a>
+                          <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">{% trans "About Us" %}</a>
                       </li>
                         
                         <!-- Wholesale Market Price Dropdown (left-aligned) -->
@@ -107,7 +108,7 @@
                         </li> -->
                         
                         <li class="nav-item">
-                            <a class="nav-link px-3" href="{% url 'page_detail' slug='resource' %}">App Vault</a>
+                            <a class="nav-link px-3" href="{% url 'page_detail' slug='resource' %}">{% trans "App Vault" %}</a>
                         </li>
                     </ul>
 
@@ -119,18 +120,30 @@
                             👤 {{ user.username|title }}
                           </a>
                           <ul class="dropdown-menu shadow-sm" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">{% trans "Profile" %}</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'web_logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'web_logout' %}">{% trans "Logout" %}</a></li>
                           </ul>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                          <a class="btn btn-outline-light btn-sm rounded-pill" href="{% url 'login' %}">Login</a>
+                          <a class="btn btn-outline-light btn-sm rounded-pill" href="{% url 'login' %}">{% trans "Login" %}</a>
                         </li>
                         {% endif %}
                     </ul>
-
+                    <form action="{% url 'set_language' %}" method="post">
+                      {% csrf_token %}
+                      <select name="language">
+                          {% get_current_language as LANGUAGE_CODE %}
+                          {% get_available_languages as LANGUAGES %}
+                          {% for lang in LANGUAGES %}
+                              <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                  {{ lang.1 }}
+                              </option>
+                          {% endfor %}
+                      </select>
+                      <input type="submit" value="{% trans 'Change' %}">
+                  </form>
                 </div>
             </div>
         </nav>
@@ -145,7 +158,7 @@
 
     <!-- Footer -->
     <footer class="text-center border-top footer-custom" style="background-color: #f8f9fa; color: #212529;">
-      &copy; 2025 Agri Dashboard | Powered by Leaflet & Chart.js
+      &copy; {% trans "2025 Agritrade Watch | Built for smarter agriculture & markets" %}
   </footer>
   
     <!-- JS Libraries -->

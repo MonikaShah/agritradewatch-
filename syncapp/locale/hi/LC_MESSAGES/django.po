@@ -1,0 +1,159 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-04 14:00+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: syncapp/templates/syncapp/apmcdata.html:193
+msgid "Wholesale Market Prices"
+msgstr "थोक बाज़ार कीमत"
+
+#: syncapp/templates/syncapp/apmcdata.html:199
+msgid "Commodity"
+msgstr "वस्तुएं"
+
+#: syncapp/templates/syncapp/apmcdata.html:201
+msgid "All Commodities"
+msgstr "सभी वस्तुएं"
+
+#: syncapp/templates/syncapp/apmcdata.html:209
+msgid "Start Date"
+msgstr "आरंभ तिथि"
+
+#: syncapp/templates/syncapp/apmcdata.html:215
+msgid "End Date"
+msgstr "अंतिम तिथि"
+
+#: syncapp/templates/syncapp/apmcdata.html:221
+msgid "APMC"
+msgstr "एपीएमसी"
+
+#: syncapp/templates/syncapp/apmcdata.html:223
+msgid "Select APMC"
+msgstr "एपीएमसी का चयन करें"
+
+#: syncapp/templates/syncapp/apmcdata.html:228
+msgid "Show Prices"
+msgstr "कीमतें दिखाएँ"
+
+#: syncapp/templates/syncapp/apmcdata.html:240
+msgid "AgmarkNet Prices Trend"
+msgstr "एगमार्कनेट कीमतों का रुझान"
+
+#: syncapp/templates/syncapp/apmcdata.html:244
+msgid "Loading..."
+msgstr "लोड हो रहा है..."
+
+#: syncapp/templates/syncapp/apmcdata.html:246
+msgid "Processing data, please wait..."
+msgstr "डेटा संसाधित किया जा रहा है, कृपया प्रतीक्षा करें..."
+
+#: syncapp/templates/syncapp/apmcdata.html:253
+msgid "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan."
+msgstr "टिप: ज़ूम करने के लिए स्क्रॉल करें, पैन करने के लिए खींचें (या Ctrl + खींचें)."
+
+#: syncapp/templates/syncapp/apmcdata.html:254
+msgid "Data Source"
+msgstr "डेटा स्रोत"
+
+#: syncapp/templates/syncapp/apmcdata.html:254
+msgid "data.gov.in"
+msgstr ""
+
+#: syncapp/templates/syncapp/base.html:66
+#: syncapp/templates/syncapp/landingpage.html:204
+msgid "MandiGo"
+msgstr "मंडीगो"
+
+#: syncapp/templates/syncapp/base.html:81
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+#: syncapp/templates/syncapp/base.html:84
+#: syncapp/templates/syncapp/landingpage.html:236
+msgid "Wholesale Market Data"
+msgstr "थोक बाज़ार डेटा"
+
+#: syncapp/templates/syncapp/base.html:87
+msgid "About Us"
+msgstr "हमारे बारे में"
+
+#: syncapp/templates/syncapp/base.html:111
+msgid "App Vault"
+msgstr "ऐप वॉल्ट"
+
+#: syncapp/templates/syncapp/base.html:123
+msgid "Profile"
+msgstr "प्रोफ़ाइल"
+
+#: syncapp/templates/syncapp/base.html:125
+#: syncapp/templates/syncapp/landingpage.html:179
+msgid "Logout"
+msgstr "लॉग आउट"
+
+#: syncapp/templates/syncapp/base.html:130
+msgid "Login"
+msgstr "लॉग इन करें"
+
+#: syncapp/templates/syncapp/base.html:145
+#: syncapp/templates/syncapp/landingpage.html:195
+msgid "Change"
+msgstr "परिवर्तन"
+
+#: syncapp/templates/syncapp/base.html:161
+#: syncapp/templates/syncapp/landingpage.html:275
+msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
+msgstr "2025 एग्रीट्रेड वॉच | बेहतर कृषि और बाज़ारों के लिए निर्मित"
+
+#: syncapp/templates/syncapp/landingpage.html:178
+msgid "Welcome,"
+msgstr "स्वागत है"
+
+#: syncapp/templates/syncapp/landingpage.html:181
+msgid "Login / Register"
+msgstr "लॉगइन/रजिस्टर करें"
+
+#: syncapp/templates/syncapp/landingpage.html:205
+msgid "Empowering Farmers, Consumers, and Markets with Data"
+msgstr "डेटा के साथ किसानों, उपभोक्ताओं और बाजारों को सशक्त बनाना"
+
+#: syncapp/templates/syncapp/landingpage.html:216
+msgid "Price Watch Dashboard"
+msgstr "मूल्य निरीक्षण डैशबोर्ड"
+
+#: syncapp/templates/syncapp/landingpage.html:217
+#: syncapp/templates/syncapp/landingpage.html:237
+msgid "Open"
+msgstr "क्लिक करें"
+
+#: syncapp/templates/syncapp/landingpage.html:265
+msgid "My Commodities"
+msgstr "मेरी वस्तुएं"
+
+#: syncapp/views.py:283
+#, python-format
+msgid "Welcome %(username)s!"
+msgstr "स्वागत है %(username)s!"
+
+#: syncapp/views.py:286
+msgid "Invalid credentials"
+msgstr "अवैध क्रेडेन्शियल"
+
+
+
+#~ msgid "Wholesale Market Price"
+#~ msgstr "थोक बाज़ार कीमत"
