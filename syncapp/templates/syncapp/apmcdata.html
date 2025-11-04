@@ -12,6 +12,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="{% url 'javascript-catalog' %}"></script>
 <script src="{% static 'js/price_chart.js' %}"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
 <style>
   /* FILTER BAR */
   .filter-bar {
@@ -185,6 +189,27 @@
   }
 }
 
+.chart-slider {
+  width: 100%;
+}
+.noUi-target {
+  background: #e9ecef;
+  border-radius: 5px;
+  height: 8px;
+}
+.noUi-handle {
+  background: #007bff;
+  border: none;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  width: 16px;
+  height: 16px;
+  top: -4px;
+}
+.noUi-connect {
+  background: #007bff;
+}
+
+
 </style>
 {% endblock %}
 
@@ -247,9 +272,22 @@
       </div>
   
       <canvas id="agmarkLineChart" ></canvas>
+      
     </div>
   
     <div class="chart-footer">
+      <div class="chart-slider mt-3 px-3">
+        <label for="dateRangeSlider" class="form-label fw-bold">{% trans "Adjust Date Range" %}</label>
+        <div id="dateRangeSlider"></div>
+        
+        <div class="d-flex justify-content-between mt-2 text-muted small">
+          <span id="sliderStartLabel">Start Date</span>
+          <span id="sliderEndLabel">End Date</span>
+        </div>
+      </div>
+      <br>
+      <br>
+
       <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
       <p class="chart-source">{% trans "Data Source" %}: <a href="https://data.gov.in" target="_blank">{% trans "data.gov.in" %}</a></p>
     </div>
@@ -376,59 +414,7 @@ document.addEventListener("DOMContentLoaded", function() {
       apmcSelect.disabled = true;
     }
   }
-//   async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
-//   const params = new URLSearchParams({
-//     apmc_name: selectedApmc || "",
-//     variety: commodity || "",
-//     start_date: startDate || "",
-//     end_date: endDate || ""
-//   });
 
-//   try {
-//     const res = await fetch(`/ahmedapmc/?${params.toString()}`);
-//     const data = await res.json();
-
-//     // Clear previous markers from markerLayer (if you want a fresh layer)
-//     markerLayer.clearLayers();
-
-//     // Add new markers for Ahmednagar
-//     data.locations.forEach(loc => {
-//       const isSelected = selectedApmc && loc.apmc_name === selectedApmc;
-//       const marker = L.circleMarker([loc.lat, loc.lon], {
-//         radius: 8,
-//         color: isSelected ? "red" : "blue",
-//         fillColor: isSelected ? "#ff3333" : "#3399ff",
-//         fillOpacity: 0.6,
-//         weight: 2
-//       }).bindPopup(`<b>${loc.apmc_name}</b>`);
-
-//       // 🔹 Add click event for this marker
-//       marker.on("click", () => {
-//         // 1. Update dropdown
-//         const apmcSelect = document.getElementById("apmcSelect");
-//         apmcSelect.value = loc.apmc_name;
-
-//         // 2. Close popup
-//         marker.closePopup();
-
-//         // 3. Trigger chart reload for this APMC
-//         fetchLineChart();
-//       });
-
-//       marker.addTo(markerLayer);
-//     });
-
-//     if (data.locations.length > 0) {
-//       map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
-//       document.getElementById("mapOverlay").style.display = "none";
-//     } else {
-//       document.getElementById("mapOverlay").style.display = "block";
-//     }
-
-//   } catch (error) {
-//     console.error("Error loading Ahmednagar APMCs:", error);
-//   }
-// }
 async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) {
 
   if (!selectedApmc) {
@@ -647,6 +633,47 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
       }
      }
     });
+
+        // ✅ Initialize Dual-handle Date Slider (noUiSlider)
+    const slider = document.getElementById('dateRangeSlider');
+    const sliderStartLabel = document.getElementById('sliderStartLabel');
+    const sliderEndLabel = document.getElementById('sliderEndLabel');
+
+    // Destroy old slider if it exists (prevents duplicate sliders)
+    if (slider.noUiSlider) {
+        slider.noUiSlider.destroy();
+    }
+
+    if (labels.length > 0) {
+        // Create new slider instance
+        noUiSlider.create(slider, {
+            start: [0, labels.length - 1],   // handles at start and end
+            connect: true,
+            range: { min: 0, max: labels.length - 1 },
+            step: 1,
+        });
+
+        // Initialize date labels below slider
+        sliderStartLabel.textContent = labels[0];
+        sliderEndLabel.textContent = labels[labels.length - 1];
+
+        // Update chart dynamically as slider is moved
+        slider.noUiSlider.on('update', function (values) {
+            const startIndex = Math.floor(values[0]);
+            const endIndex = Math.floor(values[1]);
+            const visibleLabels = labels.slice(startIndex, endIndex + 1);
+
+            // Adjust visible X-axis range
+            agmarkLineChart.options.scales.x.min = visibleLabels[0];
+            agmarkLineChart.options.scales.x.max = visibleLabels[visibleLabels.length - 1];
+            agmarkLineChart.update('none');
+
+            // Update slider date labels
+            sliderStartLabel.textContent = visibleLabels[0];
+            sliderEndLabel.textContent = visibleLabels[visibleLabels.length - 1];
+        });
+    }
+
 
   } catch (err) {
     console.error(err);
