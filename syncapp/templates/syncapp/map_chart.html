@@ -32,6 +32,10 @@
 
 
 <style>
+  main {
+  display: block !important; /* disable flex for main */
+}
+  
   .resizable-chart {
     width: 100% !important;
     max-height: 300px;
@@ -83,7 +87,34 @@
 .noUi-connect {
   background: #80bdff;
 }
+#split-container {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
 
+#map-container {
+  flex: 0 0 55%;
+  min-width: 25%;
+  transition: flex-basis 0.1s ease;
+}
+
+#divider {
+  width: 6px;
+  background: #ccc;
+  cursor: col-resize;
+  flex-shrink: 0;
+}
+
+#right-panel {
+  flex: 0 0 45%;
+  overflow-y: auto;
+  background: #f9f9f9;
+}
+#map-container { outline: 1px dashed rgba(0,0,0,0.08); }
+#right-panel { outline: 1px dashed rgba(0,0,0,0.08); }
+#divider { outline: 1px solid rgba(0,0,0,0.06); }
 </style>
 {% endblock %}
 
@@ -101,7 +132,7 @@
   </div>
 </div>
 
-
+<div id="split-container">
 <div id="map-container">
  <div id="map"></div>
   <div id="map-controls">
@@ -145,7 +176,7 @@
   </div>
   <button id="toggle-map-controls">⚙️ Hide/Show</button>
 </div>
-
+  <div id="divider"></div>
 <div id="right-panel">
   <div class="box" id="graph-box">
     <h3>Consumer Reported Buying Price : <span id="selected-commodity"></span></h3>
@@ -214,20 +245,64 @@
     
      <div class="chart-x-slider-container">
       <canvas id="chartCanvas"></canvas>
-      <div id="dateRangeSlider" class="mt-3" style="width: 80%; margin: auto;"></div>
-      <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
+       <!-- Dual slider -->
+  <div id="dateRangeSlider" style="margin: 20px auto; width: 90%;"></div>
+  <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
     </div>
 
 
 
   </div><!--# graph-box div close -->
 </div><!--# <right>-panel div close -->
+</div> <!--split container close-->
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+// RESIZE the map and left panel
+const divider = document.getElementById("divider");
+  const left = document.getElementById("map-container");
+  const right = document.getElementById("right-panel");
+  const container = document.getElementById("split-container");
+  const map = document.getElementById("map");
 
+  let isResizing = false;
+  let startX = 0;
+  let startLeftFlex = 0;
+
+  divider.addEventListener("mousedown", (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    // calculate initial left flex percentage
+    startLeftFlex = (left.offsetWidth / container.offsetWidth) * 100;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const newLeftPercent = ((left.offsetWidth + dx) / container.offsetWidth) * 100;
+
+    // clamp to reasonable limits (min 25%, max 75%)
+    const clamped = Math.min(75, Math.max(25, newLeftPercent));
+    left.style.flex = `0 0 ${clamped}%`;
+    right.style.flex = `0 0 ${100 - clamped}%`;
+
+    // refresh leaflet map dynamically if available
+    if (window.myLeafletMap) {
+      window.myLeafletMap.invalidateSize();
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    isResizing = false;
+    document.body.style.cursor = "default";
+    document.body.style.userSelect = "auto";
+  });
+
+  // REsize over
   const loginModal = document.getElementById("loginModal");
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
@@ -334,6 +409,7 @@ document.addEventListener("DOMContentLoaded", function() {
           localStorage.setItem("refresh_token", data.refresh);
           loginModal.style.display = "none";
           initMap();
+          window._leaflet_map = map;
       } else {
           loginMessage.innerText = data.detail || "Login failed!";
       }
@@ -922,6 +998,8 @@ async function fetchConsumersPrices() {
     // ✅ Register for resize logic
     window.chartInstances = window.chartInstances || {};
     window.chartInstances["consumersChart"] = consumersChart;
+    window.chartInstances["agmarkChart"] = agmarkChart;
+    window.chartInstances["farmerChart"] = farmerChart;
 
   } catch (err) {
     console.error("Error fetching consumer prices:", err);
@@ -1043,126 +1121,6 @@ document.querySelectorAll('.toggle-chart-btn').forEach(btn => {
     }
   });
 });
-//   // --- Resize Chart Logic ---
-// // Resize Chart Button Logic
-// document.querySelectorAll(".resize-chart-btn").forEach(btn => {
-//   btn.addEventListener("click", () => {
-//     const targetCanvasId = btn.dataset.target; // e.g. consumersChart
-//     const container = document.getElementById(targetCanvasId + "Container");
-//     if (!container) return;
-
-//     const chartInstance = window.chartInstances?.[targetCanvasId];
-//     const expanded = container.classList.toggle("expanded");
-//     btn.textContent = expanded ? "Shrink" : "Expand";
-
-//     setTimeout(() => {
-//       chartInstance?.resize();
-//     }, 100);
-//   });
-// // });
-// const startInput = document.getElementById("startDate");
-// const endInput = document.getElementById("endDate");
-// const dateSlider = document.getElementById("dateSlider");
-// const sliderStartLabel = document.getElementById("sliderStartLabel");
-// const sliderEndLabel = document.getElementById("sliderEndLabel");
-// const sliderValue = document.getElementById("sliderValue");
-
-// // Convert date ↔ timestamp
-// function dateToTime(d) {
-//   return new Date(d).getTime();
-// }
-// function timeToDate(t) {
-//   return new Date(t).toISOString().split("T")[0];
-// }
-
-// // Set slider range when start/end change
-// function updateDateSliderRange() {
-//   if (!startInput.value || !endInput.value) return;
-
-//   const start = dateToTime(startInput.value);
-//   const end = dateToTime(endInput.value);
-//   const totalDays = Math.max(0, Math.floor((end - start) / (1000 * 60 * 60 * 24)));
-
-//   dateSlider.min = 0;
-//   dateSlider.max = totalDays;
-//   dateSlider.value = 0;
-
-//   sliderStartLabel.textContent = startInput.value;
-//   sliderEndLabel.textContent = endInput.value;
-//   sliderValue.textContent = startInput.value;
-// }
-
-// // When slider moves
-// dateSlider.addEventListener("input", function () {
-//   if (!startInput.value || !endInput.value) return;
-
-//   const start = dateToTime(startInput.value);
-//   const offset = parseInt(this.value);
-//   const currentDate = timeToDate(start + offset * 24 * 60 * 60 * 1000);
-
-//   sliderValue.textContent = currentDate;
-
-//   // OPTIONAL: Update Agmark chart live for this date
-//   // fetchAgmarkData(commoditySelect.value, startInput.value, currentDate);
-// });
-
-// // When date inputs change
-// [startInput, endInput].forEach(inp => inp.addEventListener("change", updateDateSliderRange));
-
-// // Initialize once
-// updateDateSliderRange();
-// --- Initialize Two-Way Date Range Slider ---
-// =============================
-// Two-way date range slider (Agmarknet)
-// =============================
-// const dateRangeSlider = document.getElementById('dateRangeSlider');
-// const dateRangeLabel = document.getElementById('dateRangeLabel');
-
-// // Define the min and max date for your dataset (adjust as needed)
-// const allDates = agmarkData.map(d => new Date(d.date));
-// const minDate = new Date(Math.min(...allDates));
-// const maxDate = new Date(Math.max(...allDates));
-
-// // const minDate = new Date("2023-01-01");
-// // const maxDate = new Date("2025-12-31");
-
-// // Initialize noUiSlider
-// noUiSlider.create(dateRangeSlider, {
-//   start: [minDate.getTime(), maxDate.getTime()],
-//   connect: true,
-//   range: {
-//     min: minDate.getTime(),
-//     max: maxDate.getTime()
-//   },
-//   step: 24 * 60 * 60 * 1000, // 1 day
-//   tooltips: false,
-// });
-
-// // Function to format dates
-// function formatDate(ts) {
-//   const d = new Date(ts);
-//   return d.toISOString().split('T')[0];
-// }
-
-// // Display initial range
-// dateRangeLabel.textContent = `${formatDate(minDate)} — ${formatDate(maxDate)}`;
-
-// // Update display on slide
-// dateRangeSlider.noUiSlider.on('update', function (values) {
-//   const start = formatDate(+values[0]);
-//   const end = formatDate(+values[1]);
-//   dateRangeLabel.textContent = `${start} — ${end}`;
-// });
-
-// // Optional: Trigger your filter when sliding stops
-// dateRangeSlider.noUiSlider.on('change', function (values) {
-//   const start = formatDate(+values[0]);
-//   const end = formatDate(+values[1]);
-  
-//   console.log("Selected range:", start, "to", end);
-//   // 🔹 You can call your Agmarknet chart update function here:
-//   // fetchAgmarkChart(start, end);
-// });
 
 
 let chartPopup = null;
@@ -1231,8 +1189,7 @@ function openAllChartsInPopup() {
 const labels = agmarkChart.data.labels; // e.g. ['2024-01-01', '2024-01-02', ...]
 
 
-
-
+//DOM close
 });
 </script>
 {% endblock %}
