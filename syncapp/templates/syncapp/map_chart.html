@@ -30,7 +30,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
 
-
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
 <style>
   main {
   display: block !important; /* disable flex for main */
@@ -152,9 +155,12 @@
     <!-- Show total commodity count -->
     <p id="commodityCount" style="margin-top: 5px; font-weight: bold; color: #333;"></p>
     
+
     <hr>
     <div id="left-panel">
-      <button id="locateBtn">📍 My Location</button>
+      <button id="locateBtn" title="My Location">
+        <i class="fas fa-crosshairs"></i>
+        </button>
       <label>Radius: <span id="radiusValue">100</span></label>
       <input type="range" id="radiusSlider" min="1" max="8" value="2" step="1" list="tickmarks">
         <datalist id="tickmarks">
