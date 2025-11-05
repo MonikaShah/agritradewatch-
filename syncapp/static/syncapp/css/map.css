@@ -203,6 +203,28 @@ main {
   border-bottom: 1px solid #aaa;
   padding-bottom: 4px;
 }
+/* Force Google-style smaller My Location button */
+#left-panel #locateBtn {
+  width: auto !important;
+  padding: 6px 10px;
+  background: white;
+  color: #4285f4;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#left-panel #locateBtn:hover {
+  background: #f0f0f0;
+}
+
 
 /* Charts */
 canvas {
