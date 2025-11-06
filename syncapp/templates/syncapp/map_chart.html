@@ -34,6 +34,8 @@
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
   main {
   display: block !important; /* disable flex for main */
@@ -154,9 +156,17 @@
         
     <!-- Show total commodity count -->
     <p id="commodityCount" style="margin-top: 5px; font-weight: bold; color: #333;"></p>
-    
-
     <hr>
+      <div id="date-range-container" style="margin-bottom: 10px;">
+      <label>Start Date:</label>
+      <input type="date" id="startDate" class="form-control" style="margin-bottom: 5px; font-size: 12px;">
+
+      <label>End Date:</label>
+      <input type="date" id="endDate" class="form-control" style="margin-bottom: 5px; font-size: 12px;">
+
+      <button id="filterByDateBtn" class="btn btn-primary btn-sm" style="width: 100%;">Filter</button>
+    </div>
+  <hr>
     <div id="left-panel">
       <button id="locateBtn" title="My Location">
         <i class="fas fa-crosshairs"></i>
@@ -173,7 +183,11 @@
         <option value="7" label="100 km"></option>
         <option value="8" label="500 km"></option>
         </datalist>
-
+        <div id="radius-stats" style="margin-top: 4px;">
+        <strong>Within Selected Radius:</strong><br>
+        Average Price: <span id="avg-price-radius">--</span><br>
+        Modal Price: <span id="modal-price-radius">--</span>
+      </div>
     </div>
     <hr>
     <button id="toggleDistrictBtn">🗺️ Hide Districts</button>
@@ -185,22 +199,24 @@
   <div id="divider"></div>
 <div id="right-panel">
   <div class="box" id="graph-box">
-    <h3>Consumer Reported Buying Price : <span id="selected-commodity"></span></h3>
+    <h3>Charts for : 
+      <span id="selected-commodity"></span>
+    </h3>
     <div id="stats-container" style="display: flex; gap: 20px;">
-      <div id="global-stats" style="margin-top: 4px;">
+      <div id="global-stats" style="margin-top: 4px;display:none;">
         <strong>All Consumers:</strong><br>
         Average Price: <span id="avg-price">--</span><br>
         Weighted Average: <span id="weighted-avg">--</span><br>
         Modal Price: <span id="modal-price">--</span>
       </div> 
-      <div id="radius-stats" style="margin-top: 4px;">
+      <div id="radius-stats1" style="margin-top: 4px;display:none;">
         <strong>Within Selected Radius:</strong><br>
         Average Price: <span id="avg-price-radius">--</span><br>
         Weighted Average: <span id="weighted-avg-radius">--</span><br>
         Modal Price: <span id="modal-price-radius">--</span>
       </div>
     </div> <!--# stats-container div close -->
-    <hr>
+    <!-- <hr> -->
     <div style="text-align: right; margin-bottom: 10px;">
       <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open All Charts</button>
     </div>
@@ -211,14 +227,12 @@
       <!-- <button class="resize-chart-btn" data-target="consumersChart">Expand</button> -->
     </h3>
       <!-- New: Date range selection -->
-      <div id="date-range-container1" style="margin-bottom: 10px;">
+      <!-- <div id="date-range-container1" style="margin-bottom: 10px;">
         <label>Start Date: <input type="date" id="startDate1"></label>
         <label>End Date: <input type="date" id="endDate1"></label>
         <button id="filterByDateBtn1" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-      </div>
-      <!-- <div class="chart-container" id="consumersChartContainer">
-        <canvas id="consumersChart"></canvas>
       </div> -->
+      
       <canvas id="consumersChart" class="resizable-chart"></canvas>
 
       <hr>
@@ -227,11 +241,11 @@
         <!-- <button class="resize-chart-btn" data-target="farmerChart">Expand</button> -->
       </h3>
       <!-- New: Date range selection -->
-      <div id="date-range-container2" style="margin-bottom: 10px;">
+      <!-- <div id="date-range-container2" style="margin-bottom: 10px;">
         <label>Start Date: <input type="date" id="startDate2"></label>
         <label>End Date: <input type="date" id="endDate2"></label>
         <button id="filterByDateBtn2" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-      </div>
+      </div> -->
       <canvas id="farmerChart" class="resizable-chart"></canvas>
       <!-- <div class="chart-container" id="farmerChartContainer">
         <canvas id="farmerChart"></canvas>
@@ -243,11 +257,11 @@
       <!-- <button class="resize-chart-btn" data-target="chartCanvas">Expand</button> -->
     </h3>
     <!-- New: Date range selection -->
-    <div id="date-range-container" style="margin-bottom: 10px;">
+    <!-- <div id="date-range-container" style="margin-bottom: 10px;">
       <label>Start Date: <input type="date" id="startDate"></label>
       <label>End Date: <input type="date" id="endDate"></label>
       <button id="filterByDateBtn" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-    </div>
+    </div> -->
     
      <div class="chart-x-slider-container">
       <canvas id="chartCanvas"></canvas>
@@ -309,6 +323,33 @@ const divider = document.getElementById("divider");
   });
 
   // REsize over
+
+  const endDateInput = document.getElementById("endDate");
+  const startDateInput = document.getElementById("startDate");
+
+  // helper: convert date to yyyy-mm-dd
+  function toISO(d) {
+    return d.toISOString().split("T")[0];
+  }
+
+  // helper: convert date to dd-mm-yyyy (for display or debug)
+  function toDDMMYYYY(d) {
+    return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
+  }
+
+  const today = new Date();
+  const priorDate = new Date();
+  priorDate.setDate(today.getDate() - 95);
+
+  // ✅ assign ISO values to date inputs
+  endDateInput.value = toISO(today);
+  startDateInput.value = toISO(priorDate);
+
+  console.log("Start date (DD-MM-YYYY):", toDDMMYYYY(priorDate));
+  console.log("End date (DD-MM-YYYY):", toDDMMYYYY(today));
+  // 🔹 Optional: automatically trigger data filter on load
+  document.getElementById("filterByDateBtn").click();
+
   const loginModal = document.getElementById("loginModal");
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
@@ -566,11 +607,38 @@ const divider = document.getElementById("divider");
           if(!allData || !Array.isArray(allData.features)) return;
 
           const indiaBounds = L.latLngBounds([6.5,68.0],[35.5,97.5]);
-          const filteredFeatures = allData.features.filter(f=>{
-              const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
-              const dbName = f.properties.commodity?.trim().toLowerCase();
-              const selected = commodity.trim().toLowerCase();
-              return indiaBounds.contains(latlng) && dbName === selected;          });
+
+//           const filteredFeatures = allData.features.filter(f=>{
+//               const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+//               const dbName = f.properties.commodity?.trim().toLowerCase();
+//               const selected = commodity.trim().toLowerCase();
+//               return indiaBounds.contains(latlng) && dbName === selected;          });
+
+// // Filter Map based on date range added
+            const startDateInput = document.getElementById("startDate").value;
+            const endDateInput = document.getElementById("endDate").value;
+            const startDate = startDateInput ? new Date(startDateInput) : null;
+            const endDate = endDateInput ? new Date(endDateInput) : null;
+
+            const filteredFeatures = allData.features.filter(f => {
+                const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+                const dbName = f.properties.commodity?.trim().toLowerCase();
+                const selected = commodity.trim().toLowerCase();
+
+                // Skip if location not in India bounds or commodity mismatch
+                if (!indiaBounds.contains(latlng) || dbName !== selected) return false;
+
+                // Filter by date range if available
+                if (f.properties.date) {
+                    const recordDate = new Date(f.properties.date);
+                    if (startDate && recordDate < startDate) return false;
+                    if (endDate && recordDate > endDate) return false;
+                }
+
+                return true;
+            });
+
+         
 
           const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
           geojsonLayer = L.geoJSON(filteredGeoJSON, {
@@ -891,6 +959,9 @@ const divider = document.getElementById("divider");
             console.error("Error fetching webdata prices:", err);
             alert("Failed to load prices. Check console.");
         }
+        // Refresh map markers to reflect selected date range
+    updateMarkers(commoditySelect.value, true);
+
     });
 
  }//InitMap close
@@ -929,15 +1000,15 @@ let consumersChart = null;
 
 async function fetchConsumersPrices() {
   const commodity1 = document.getElementById("commoditySelect").value;
-  const startDate1 = document.getElementById("startDate1").value;
-  const endDate1 = document.getElementById("endDate1").value;
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
 
   if (!commodity1) return;
 
   try {
     const url = `/api/consumers1_prices/${encodeURIComponent(commodity1)}/?` +
-      `${startDate1 ? `start_date=${startDate1}&` : ""}` +
-      `${endDate1 ? `end_date=${endDate1}` : ""}`;
+      `${startDate ? `start_date=${startDate}&` : ""}` +
+      `${endDate ? `end_date=${endDate}` : ""}`;
 
     const res = await fetch(url);
 
@@ -1013,7 +1084,9 @@ async function fetchConsumersPrices() {
 }
 
 // Attach to Filter button and commodity change
-document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
+// document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
+// document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
+document.getElementById("filterByDateBtn").addEventListener("click", fetchConsumersPrices);
 document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
 
 // Initial load (optional)
@@ -1025,15 +1098,15 @@ let farmerChart = null;
 
 async function fetchFarmersPrices() {
   const commodity2 = document.getElementById("commoditySelect").value;
-  const startDate2 = document.getElementById("startDate2").value;
-  const endDate2 = document.getElementById("endDate2").value;
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
 
   if (!commodity2) return;
 
   try {
     const url = `/api/farmers_prices/${encodeURIComponent(commodity2)}/?` +
-      `${startDate2 ? `start_date=${startDate2}&` : ""}` +
-      `${endDate2 ? `end_date=${endDate2}` : ""}`;
+      `${startDate ? `start_date=${startDate}&` : ""}` +
+      `${endDate ? `end_date=${endDate}` : ""}`;
 
     const res = await fetch(url);
 
@@ -1105,9 +1178,10 @@ async function fetchFarmersPrices() {
 }
 
 // Attach to Filter button and commodity change
-document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
+// document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
+// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
+document.getElementById("filterByDateBtn").addEventListener("click", fetchFarmersPrices);
 document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
-
 // Initial load (optional)
 fetchFarmersPrices();
  
@@ -1192,8 +1266,14 @@ function openAllChartsInPopup() {
   `);
   chartPopup.document.close();
 }
-const labels = agmarkChart.data.labels; // e.g. ['2024-01-01', '2024-01-02', ...]
-
+// const labels = agmarkChart.data.labels; // e.g. ['2024-01-01', '2024-01-02', ...]
+if (window.agmarkChart && agmarkChart.data) {
+  const labels = agmarkChart.data.labels;
+  // rest of your code using agmarkChart
+} else {
+  console.warn("agmarkChart not ready yet.");
+  return;
+}
 
 //DOM close
 });
