@@ -146,9 +146,14 @@
       {% for type, items in grouped_commodities.items %}
         <optgroup label="{{ type }}">
           {% for item in items %}
-            <option value="{{ item.name }}" {% if item.disabled %}disabled{% endif %}>
+            <!-- <option value="{{ item.name }}" {% if item.disabled %}disabled{% endif %}>
               {{ item.name }}
-            </option>
+            </option> -->
+             <option value="{{ item.name }}"
+                  {% if item.name == "Onion" %}selected{% endif %} 
+                  {% if item.disabled %}disabled{% endif %}>
+            {{ item.name }}
+          </option>
           {% endfor %}
         </optgroup>
       {% endfor %}
@@ -960,9 +965,9 @@ const divider = document.getElementById("divider");
             alert("Failed to load prices. Check console.");
         }
         // Refresh map markers to reflect selected date range
-    updateMarkers(commoditySelect.value, true);
-
+        updateMarkers(commoditySelect.value, true);
     });
+     document.getElementById("filterByDateBtn").click();
 
  }//InitMap close
 // --- Commodity count display ---
