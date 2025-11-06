@@ -1,6 +1,6 @@
 {% extends 'syncapp/base.html' %}
 {% load static %}
-
+{% load i18n %}
 {% block title %}Consumers Map{% endblock %}
 
 {% block extra_head %}
@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="{% static 'syncapp/css/map.css' %}">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
@@ -239,19 +239,19 @@
       </div> -->
       
       <canvas id="consumersChart" class="resizable-chart"></canvas>
+      <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
 
       <hr>
-      <h3>Farmers Selling Price Trend : <span id="farmerspan"></span>
+      <!-- <h3>Farmers Selling Price Trend : <span id="farmerspan"></span>
         <button class="toggle-chart-btn" data-target="farmerChart">Hide Chart</button>
-        <!-- <button class="resize-chart-btn" data-target="farmerChart">Expand</button> -->
-      </h3>
+      </h3> -->
       <!-- New: Date range selection -->
       <!-- <div id="date-range-container2" style="margin-bottom: 10px;">
         <label>Start Date: <input type="date" id="startDate2"></label>
         <label>End Date: <input type="date" id="endDate2"></label>
         <button id="filterByDateBtn2" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
       </div> -->
-      <canvas id="farmerChart" class="resizable-chart"></canvas>
+      <!-- <canvas id="farmerChart" class="resizable-chart"></canvas> -->
       <!-- <div class="chart-container" id="farmerChartContainer">
         <canvas id="farmerChart"></canvas>
       </div> -->
@@ -270,6 +270,7 @@
     
      <div class="chart-x-slider-container">
       <canvas id="chartCanvas"></canvas>
+      <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
        <!-- Dual slider -->
   <div id="dateRangeSlider" style="margin: 20px auto; width: 90%;"></div>
   <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
@@ -354,6 +355,7 @@ const divider = document.getElementById("divider");
   console.log("End date (DD-MM-YYYY):", toDDMMYYYY(today));
   // 🔹 Optional: automatically trigger data filter on load
   document.getElementById("filterByDateBtn").click();
+    Chart.register(ChartZoom);
 
   const loginModal = document.getElementById("loginModal");
   const loginForm = document.getElementById("loginForm");
@@ -748,19 +750,60 @@ const divider = document.getElementById("divider");
       });
 
             // --- Show total commodity count (case-insensitive) ---
-        function updateCommodityCount() {
-            if (!allData || !Array.isArray(allData.features)) return;
-            const selectedCommodity = commoditySelect.value.trim().toLowerCase();
+        // function updateCommodityCount() {
+        //     if (!allData || !Array.isArray(allData.features)) return;
+        //     const selectedCommodity = commoditySelect.value.trim().toLowerCase();
 
-            const count = allData.features.filter(f =>
-                f.properties?.commodity?.trim().toLowerCase() === selectedCommodity
-            ).length;
+        //     const count = allData.features.filter(f =>
+        //         f.properties?.commodity?.trim().toLowerCase() === selectedCommodity
+        //     ).length;
 
-            document.getElementById("commodityCount").innerText = 
-                count > 0
-                ? `Total Records: ${count}`
-                : "No records found";
+        //     document.getElementById("commodityCount").innerText = 
+        //         count > 0
+        //         ? `Consumer's Records: ${count}`
+        //         : "No records found";
+        // }
+        async function updateCommodityCount() {
+          if (!allData || !Array.isArray(allData.features)) return;
+
+          const selectedCommodity = commoditySelect.value.trim().toLowerCase();
+          const startDate = document.getElementById("startDate").value;
+          const endDate = document.getElementById("endDate").value;
+
+          // --- Consumer count from map data ---
+          const consumerCount = allData.features.filter(f => {
+            const c = f.properties?.commodity?.trim().toLowerCase();
+            const d = f.properties?.date;
+            return (
+              c === selectedCommodity &&
+              (!startDate || d >= startDate) &&
+              (!endDate || d <= endDate)
+            );
+          }).length;
+
+          // --- Farmer count from API (fetch dynamically) ---
+          let farmerCount = 0;
+          try {
+            const res = await fetch(`/api/farmers_prices/${encodeURIComponent(selectedCommodity)}/?start_date=${startDate}&end_date=${endDate}`);
+            if (res.ok) {
+              const farmerData = await res.json();
+              farmerCount = farmerData.length || 0;
+            } else {
+              console.error("Farmer API error:", res.status);
+            }
+          } catch (err) {
+            console.error("Error fetching farmer data:", err);
+          }
+
+          // --- Display combined info ---
+          const totalText =
+            consumerCount > 0 || farmerCount > 0
+              ? `Consumer: ${consumerCount} records | Farmer: ${farmerCount} records`
+              : "No records found";
+
+          document.getElementById("commodityCount").innerText = totalText;
         }
+
 
         // Call initially and on change
         updateCommodityCount();
@@ -949,7 +992,24 @@ const divider = document.getElementById("divider");
                                     return `${datasetLabel}: ₹${price} (${apmcName})`;
                                 }
                             }
-                        }
+                        },
+                        zoom: {
+                          zoom: {
+                            wheel: {
+                              enabled: true,     // ✅ zoom with mouse wheel
+                              // modifierKey: "ctrl" // optional: require Ctrl+scroll
+                            },
+                            pinch: {
+                              enabled: true      // ✅ zoom with pinch gesture
+                            },
+                            mode: "x",          // zoom both axes
+                          },
+                          pan: {
+                            enabled: true,       // ✅ allow dragging
+                            mode: "x",
+                          }
+                        },
+                      
                     },
                     scales: {
                         x: { title: { display: true, text: 'Date' } },
@@ -966,6 +1026,7 @@ const divider = document.getElementById("divider");
         }
         // Refresh map markers to reflect selected date range
         updateMarkers(commoditySelect.value, true);
+        await updateCommodityCount();
     });
      document.getElementById("filterByDateBtn").click();
 
@@ -1001,50 +1062,245 @@ commoditySelect.addEventListener("change", () => {
   });
 });
 // --- Consumers1 Price Trend Chart ---
+// let consumersChart = null;
+
+// async function fetchConsumersPrices() {
+//   const commodity1 = document.getElementById("commoditySelect").value;
+//   const startDate = document.getElementById("startDate").value;
+//   const endDate = document.getElementById("endDate").value;
+
+//   if (!commodity1) return;
+
+//   try {
+//     const url = `/api/consumers1_prices/${encodeURIComponent(commodity1)}/?` +
+//       `${startDate ? `start_date=${startDate}&` : ""}` +
+//       `${endDate ? `end_date=${endDate}` : ""}`;
+
+//     const res = await fetch(url);
+
+//     if (!res.ok) {
+//       console.error("Fetch error:", res.statusText);
+//       return;
+//     }
+
+//     const data = await res.json();
+
+//     if (!Array.isArray(data)) {
+//       console.error("Unexpected API response:", data);
+//       Swal.fire({
+//         icon: "warning",
+//         title: "No consumer data",
+//         text: "The consumer price API did not return valid data.",
+//       });
+//       return;
+//     }
+
+//     // ✅ Sort safely by date
+//     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+//     const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
+//     const prices = sortedData.map(d => parseFloat(d.price));
+
+//     const ctx = document.getElementById("consumersChart").getContext("2d");
+
+//     if (consumersChart instanceof Chart) {
+//       consumersChart.destroy();
+//     }
+
+//     consumersChart = new Chart(ctx, {
+//       type: "line",
+//       data: {
+//         labels,
+//         datasets: [
+//           {
+//             label: "Consumer Reported Price (₹)",
+//             data: prices,
+//             borderColor: "rgba(255, 99, 132, 1)",
+//             backgroundColor: "rgba(255, 99, 132, 0.2)",
+//             borderWidth: 2,
+//             tension: 0.3,
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         plugins: {
+//           title: {
+//             display: true,
+//             text: `Consumer Prices for ${commodity1}`,
+//           },
+//           legend: { position: "top" },
+//         },
+//         scales: {
+//           x: { title: { display: true, text: "Date" } },
+//           y: { title: { display: true, text: "Price (₹)" } },
+//         },
+//       },
+//     });
+//     // ✅ Register for resize logic
+//     window.chartInstances = window.chartInstances || {};
+//     window.chartInstances["consumersChart"] = consumersChart;
+//     window.chartInstances["agmarkChart"] = agmarkChart;
+//     window.chartInstances["farmerChart"] = farmerChart;
+
+//   } catch (err) {
+//     console.error("Error fetching consumer prices:", err);
+//   }
+// }
+
+// // Attach to Filter button and commodity change
+// // document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
+// // document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
+// document.getElementById("filterByDateBtn").addEventListener("click", fetchConsumersPrices);
+// document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
+
+// // Initial load (optional)
+// fetchConsumersPrices();
+
+
+// // --- Farmer1 Price Trend Chart ---
+// let farmerChart = null;
+
+// async function fetchFarmersPrices() {
+//   const commodity2 = document.getElementById("commoditySelect").value;
+//   const startDate = document.getElementById("startDate").value;
+//   const endDate = document.getElementById("endDate").value;
+
+//   if (!commodity2) return;
+
+//   try {
+//     const url = `/api/farmers_prices/${encodeURIComponent(commodity2)}/?` +
+//       `${startDate ? `start_date=${startDate}&` : ""}` +
+//       `${endDate ? `end_date=${endDate}` : ""}`;
+
+//     const res = await fetch(url);
+
+//     if (!res.ok) {
+//       console.error("Fetch error:", res.statusText);
+//       return;
+//     }
+
+//     const data = await res.json();
+
+//     if (!Array.isArray(data)) {
+//       console.error("Unexpected API response:", data);
+//       Swal.fire({
+//         icon: "warning",
+//         title: "No Famer data",
+//         text: "The Farmer fetch price API did not return valid data.",
+//       });
+//       return;
+//     }
+
+//     // ✅ Sort safely by date
+//     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+//     const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
+//     const prices = sortedData.map(d => parseFloat(d.price));
+
+//     const ctx = document.getElementById("farmerChart").getContext("2d");
+
+//     if (farmerChart instanceof Chart) {
+//       farmerChart.destroy();
+//     }
+
+//     farmerChart = new Chart(ctx, {
+//       type: "line",
+//       data: {
+//         labels,
+//         datasets: [
+//           {
+//             label: "Famer's Reported Selling Price (₹)",
+//             data: prices,
+//             borderColor: "rgba(255, 99, 132, 1)",
+//             backgroundColor: "rgba(255, 99, 132, 0.2)",
+//             borderWidth: 2,
+//             tension: 0.3,
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+
+//         plugins: {
+//           title: {
+//             display: true,
+//             text: `Farmer's Selling Price for ${commodity2}`,
+//           },
+//           legend: { position: "top" },
+//         },
+//         scales: {
+//           x: { title: { display: true, text: "Date" } },
+//           y: { title: { display: true, text: "Price (₹)" } },
+//         },
+//       },
+//     });
+
+//   } catch (err) {
+//     console.error("Error fetching Farmer selling prices:", err);
+//   }
+// }
+
+// Attach to Filter button and commodity change
+// document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
+// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
+// document.getElementById("filterByDateBtn").addEventListener("click", fetchFarmersPrices);
+// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
+// Initial load (optional)
+// fetchFarmersPrices();
+//  unified charts
 let consumersChart = null;
 
-async function fetchConsumersPrices() {
-  const commodity1 = document.getElementById("commoditySelect").value;
+async function fetchConsumersAndFarmersPrices() {
+  const commodity = document.getElementById("commoditySelect").value;
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
 
-  if (!commodity1) return;
+  if (!commodity) return;
 
   try {
-    const url = `/api/consumers1_prices/${encodeURIComponent(commodity1)}/?` +
-      `${startDate ? `start_date=${startDate}&` : ""}` +
-      `${endDate ? `end_date=${endDate}` : ""}`;
+    // Fetch both datasets in parallel
+    const [consumerRes, farmerRes] = await Promise.all([
+      fetch(`/api/consumers1_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`),
+      fetch(`/api/farmers_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`)
+    ]);
 
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      console.error("Fetch error:", res.statusText);
+    if (!consumerRes.ok || !farmerRes.ok) {
+      console.error("Fetch error:", consumerRes.statusText, farmerRes.statusText);
       return;
     }
 
-    const data = await res.json();
+    const [consumerData, farmerData] = await Promise.all([
+      consumerRes.json(),
+      farmerRes.json()
+    ]);
 
-    if (!Array.isArray(data)) {
-      console.error("Unexpected API response:", data);
-      Swal.fire({
-        icon: "warning",
-        title: "No consumer data",
-        text: "The consumer price API did not return valid data.",
-      });
-      return;
-    }
+    // Sort and extract date/price
+    const sortedConsumer = Array.isArray(consumerData)
+      ? consumerData.sort((a, b) => new Date(a.date) - new Date(b.date))
+      : [];
 
-    // ✅ Sort safely by date
-    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedFarmer = Array.isArray(farmerData)
+      ? farmerData.sort((a, b) => new Date(a.date) - new Date(b.date))
+      : [];
 
-    const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
-    const prices = sortedData.map(d => parseFloat(d.price));
+    const labels = [...new Set([...sortedConsumer, ...sortedFarmer].map(d => new Date(d.date).toLocaleDateString("en-GB")))];
+
+    const consumerPrices = labels.map(label => {
+      const found = sortedConsumer.find(d => new Date(d.date).toLocaleDateString("en-GB") === label);
+      return found ? parseFloat(found.price) : null;
+    });
+
+    const farmerPrices = labels.map(label => {
+      const found = sortedFarmer.find(d => new Date(d.date).toLocaleDateString("en-GB") === label);
+      return found ? parseFloat(found.price) : null;
+    });
 
     const ctx = document.getElementById("consumersChart").getContext("2d");
 
-    if (consumersChart instanceof Chart) {
-      consumersChart.destroy();
-    }
+    if (consumersChart instanceof Chart) consumersChart.destroy();
 
     consumersChart = new Chart(ctx, {
       type: "line",
@@ -1052,108 +1308,18 @@ async function fetchConsumersPrices() {
         labels,
         datasets: [
           {
-            label: "Consumer Reported Price (₹)",
-            data: prices,
-            borderColor: "rgba(255, 99, 132, 1)",
-            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            label: "Consumer Buying Price (₹)",
+            data: consumerPrices,
+            borderColor: "rgba(54, 162, 235, 1)",       // blue
+            backgroundColor: "rgba(54, 162, 235, 0.2)",
             borderWidth: 2,
             tension: 0.3,
           },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: `Consumer Prices for ${commodity1}`,
-          },
-          legend: { position: "top" },
-        },
-        scales: {
-          x: { title: { display: true, text: "Date" } },
-          y: { title: { display: true, text: "Price (₹)" } },
-        },
-      },
-    });
-    // ✅ Register for resize logic
-    window.chartInstances = window.chartInstances || {};
-    window.chartInstances["consumersChart"] = consumersChart;
-    window.chartInstances["agmarkChart"] = agmarkChart;
-    window.chartInstances["farmerChart"] = farmerChart;
-
-  } catch (err) {
-    console.error("Error fetching consumer prices:", err);
-  }
-}
-
-// Attach to Filter button and commodity change
-// document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
-// document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
-document.getElementById("filterByDateBtn").addEventListener("click", fetchConsumersPrices);
-document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
-
-// Initial load (optional)
-fetchConsumersPrices();
-
-
-// --- Farmer1 Price Trend Chart ---
-let farmerChart = null;
-
-async function fetchFarmersPrices() {
-  const commodity2 = document.getElementById("commoditySelect").value;
-  const startDate = document.getElementById("startDate").value;
-  const endDate = document.getElementById("endDate").value;
-
-  if (!commodity2) return;
-
-  try {
-    const url = `/api/farmers_prices/${encodeURIComponent(commodity2)}/?` +
-      `${startDate ? `start_date=${startDate}&` : ""}` +
-      `${endDate ? `end_date=${endDate}` : ""}`;
-
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      console.error("Fetch error:", res.statusText);
-      return;
-    }
-
-    const data = await res.json();
-
-    if (!Array.isArray(data)) {
-      console.error("Unexpected API response:", data);
-      Swal.fire({
-        icon: "warning",
-        title: "No Famer data",
-        text: "The Farmer fetch price API did not return valid data.",
-      });
-      return;
-    }
-
-    // ✅ Sort safely by date
-    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
-    const prices = sortedData.map(d => parseFloat(d.price));
-
-    const ctx = document.getElementById("farmerChart").getContext("2d");
-
-    if (farmerChart instanceof Chart) {
-      farmerChart.destroy();
-    }
-
-    farmerChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
           {
-            label: "Famer's Reported Selling Price (₹)",
-            data: prices,
-            borderColor: "rgba(255, 99, 132, 1)",
-            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            label: "Farmer's Selling Price (₹)",
+            data: farmerPrices,
+            borderColor: "rgba(75, 192, 75, 1)",        // green
+            backgroundColor: "rgba(75, 192, 75, 0.2)",
             borderWidth: 2,
             tension: 0.3,
           },
@@ -1162,14 +1328,31 @@ async function fetchFarmersPrices() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-
         plugins: {
           title: {
             display: true,
-            text: `Farmer's Selling Price for ${commodity2}`,
+            text: `Consumer vs Farmer Prices for ${commodity}`,
           },
           legend: { position: "top" },
+          tooltip: { mode: "index", intersect: false },
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,     // ✅ zoom with mouse wheel
+                // modifierKey: "ctrl" // optional: require Ctrl+scroll
+              },
+              pinch: {
+                enabled: true      // ✅ zoom with pinch gesture
+              },
+              mode: "xy",          // zoom both axes
+            },
+            pan: {
+              enabled: true,       // ✅ allow dragging
+              mode: "xy",
+            }
+          }
         },
+        
         scales: {
           x: { title: { display: true, text: "Date" } },
           y: { title: { display: true, text: "Price (₹)" } },
@@ -1178,18 +1361,17 @@ async function fetchFarmersPrices() {
     });
 
   } catch (err) {
-    console.error("Error fetching Farmer selling prices:", err);
+    console.error("Error fetching prices:", err);
   }
 }
 
-// Attach to Filter button and commodity change
-// document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
-// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
-document.getElementById("filterByDateBtn").addEventListener("click", fetchFarmersPrices);
-document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
-// Initial load (optional)
-fetchFarmersPrices();
- 
+// Attach to filter & commodity change
+document.getElementById("filterByDateBtn").addEventListener("click", fetchConsumersAndFarmersPrices);
+document.getElementById("commoditySelect").addEventListener("change", fetchConsumersAndFarmersPrices);
+
+// Initial load
+fetchConsumersAndFarmersPrices();
+//unifoed over
 
 // Toggle Show/Hide for all trend charts
 document.querySelectorAll('.toggle-chart-btn').forEach(btn => {
