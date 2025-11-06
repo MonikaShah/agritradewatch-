@@ -111,7 +111,7 @@ main {
 
 /* Left panel (filters) */
 #left-panel {
-  width: 150px;
+  width: 188px;
   background: #f9f9f9;
   padding: 10px;
   box-shadow: 2px 0px 6px rgba(0,0,0,0.1);
@@ -155,7 +155,31 @@ main {
   color: #4285f4;  /* Google blue */
   font-size: 14px; /* smaller icon */
 }
+@media (max-width: 768px) {
+  #split-container {
+    flex-direction: column !important;
+    height: auto !important;          /* allow natural scroll */
+    min-height: 100vh !important;     /* ensure full screen usage */
+    overflow: visible !important;     /* fix truncation */
+  }
 
+  #map-container {
+    flex: none !important;
+    width: 100% !important;
+    height: 300px !important;         /* adjust map height for small screens */
+  }
+
+  #right-panel {
+    flex: none !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  #divider {
+    display: none !important;         /* hide divider in mobile */
+  }
+}
 
 /* 
 #left-panel button {
