@@ -200,7 +200,7 @@ class WebData(models.Model):
     maxprice = models.IntegerField(blank=True, null=True)
     modalprice = models.IntegerField(blank=True, null=True)
     unit = models.CharField(max_length=20, blank=True, null=True)
-    date = models.DateTimeField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
     district = models.CharField(max_length=50, blank=True, null=True)
     grade = models.CharField(max_length=20, blank=True, null=True)
     class Meta:
@@ -276,3 +276,43 @@ class APMC_Market_Prices(models.Model):
 
     def __str__(self):
         return f"{self.market_name} - {self.report_date}"
+
+PLACE_DAMAGE_CHOICES = [
+    ('on_field', 'On Field'),
+    ('on_market', 'On Market'),
+]
+DAMAGE_UNITS=[
+    ('ACRES','ACRES'),
+    ('TONN','TONN')
+]
+class DamageCrop(models.Model):
+    
+    commodity = models.CharField(max_length=100,null = False)
+    damage = models.DecimalField(max_digits=10, decimal_places=5, blank=True, null=True)  # max_digits and decimal_places have been guessed, as this database handles decimal fields as float
+    unit = models.CharField(max_length=20,choices=DAMAGE_UNITS, default='ACRES')
+    damage_date = models.DateField(blank=True, null=True)
+    report_date = models.DateField(blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+    userid = models.ForeignKey('User1', models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    place_damage = models.CharField(max_length=20, choices=PLACE_DAMAGE_CHOICES,default='on_field')
+    photo = models.ImageField(upload_to="damage_crop_images/", null=False, blank=False)  
+    # district = models.CharField(max_length=100, blank=True, null=True)
+    # tehsil = models.CharField(max_length=100, blank=True, null=True)
+    # village = models.CharField(max_length=100, blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'damage_crop'
+
+
+class MahaVillage(models.Model):
+    district = models.CharField(max_length=100)
+    tehsil = models.CharField(max_length=100)
+    village = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False  # ✅ important: don't let Django try to create or alter it
+        db_table = 'maha_villages_11july22'
+        ordering = ['district', 'tehsil', 'village']
+
+    def __str__(self):
+        return f"{self.village} ({self.tehsil}, {self.district})"

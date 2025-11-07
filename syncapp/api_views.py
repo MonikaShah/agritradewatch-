@@ -20,9 +20,9 @@ from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
 from django.contrib import messages
 
-from .forms import ThelaForm
+from .forms import DamageForm
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, Thela, MahaVillage
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, Thela, MahaVillage,DamageCrop
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -669,28 +669,28 @@ def damage_crop(request):
     if request.method == 'POST':
         print("POST DATA:", request.POST)
         print("FILES:", request.FILES)
-        form = ThelaForm(request.POST, request.FILES)  # ✅ include files
+        form = DamageForm(request.POST, request.FILES)  # ✅ include files
 
         print("FORM VALID?", form.is_valid())
         print("FORM ERRORS:", form.errors)
 
         if form.is_valid():
-            thela = form.save(commit=False)
-            thela.userid = request.user
-            thela.save()
+            damage = form.save(commit=False)
+            damage.userid = request.user
+            damage.save()
 
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'message': 'Saved successfully!'})
 
             messages.success(request, "Thela entry submitted successfully!")
-            form = ThelaForm()  # reset the form
+            form = DamageForm()  # reset the form
 
         else:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'errors': form.errors})
             messages.error(request, "❌ Please correct the errors below.")
     else:
-        form = ThelaForm()
+        form = DamageForm()
 
     return render(request, 'syncapp/damage_crop.html', {'form': form})
 
