@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt  # ← import here
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from rest_framework import status, generics, viewsets,permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -18,8 +18,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
+from django.contrib import messages
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices
+from .forms import ThelaForm
+
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, Thela, MahaVillage
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -292,7 +295,7 @@ def webdata_prices(request):
         for data in qs.order_by('date')
     ]
     
-    print("Sending JSON:", results)  # log in server console
+    # print("Sending JSON:", results)  # log in server console
 
     return JsonResponse(results, safe=False)
 
@@ -655,3 +658,58 @@ def password_reset_confirm(request):
 
 def test_api(request):
     return JsonResponse({"ok": True})
+
+def damage_crop(request):
+    if not request.user.is_authenticated or request.user.job not in ['farmer', 'retailer']:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+        messages.error(request, "You are not authorized to submit Thela entries.")
+        return redirect('login')
+
+    if request.method == 'POST':
+        print("POST DATA:", request.POST)
+        print("FILES:", request.FILES)
+        form = ThelaForm(request.POST, request.FILES)  # ✅ include files
+
+        print("FORM VALID?", form.is_valid())
+        print("FORM ERRORS:", form.errors)
+
+        if form.is_valid():
+            thela = form.save(commit=False)
+            thela.userid = request.user
+            thela.save()
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Saved successfully!'})
+
+            messages.success(request, "Thela entry submitted successfully!")
+            form = ThelaForm()  # reset the form
+
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors})
+            messages.error(request, "❌ Please correct the errors below.")
+    else:
+        form = ThelaForm()
+
+    return render(request, 'syncapp/damage_crop.html', {'form': form})
+
+def get_tehsils(request):
+    district = request.GET.get('district')
+    tehsils = (
+        MahaVillage.objects.filter(district=district)
+        .values_list('tehsil', flat=True)
+        .distinct()
+        .order_by('tehsil')
+    )
+    return JsonResponse({'tehsils': list(tehsils)})
+
+def get_villages(request):
+    tehsil = request.GET.get('tehsil')
+    villages = (
+        MahaVillage.objects.filter(tehsil=tehsil)
+        .values_list('village', flat=True)
+        .distinct()
+        .order_by('village')
+    )
+    return JsonResponse({'villages': list(villages)})

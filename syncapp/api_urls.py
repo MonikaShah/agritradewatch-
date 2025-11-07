@@ -15,6 +15,7 @@ urlpatterns = [
     path('register/', api_views.api_register, name='api_register'),
     path("consumers1_prices/<str:commodity>/", api_views.consumer_timeline, name="consumer_timeline"),
     path("farmers_prices/<str:commodity>/", api_views.farmer_timeline, name="farmer_timeline"),
+    path('damage/crop/', api_views.damage_crop, name='damage_crop'),
     # Mobile JWT APIs
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -34,6 +35,8 @@ urlpatterns = [
    
     path('apmc/', api_views.apmc_list, name='apmc_list'),
     path('test/', api_views.test_api),
+    path('get_tehsils/', api_views.get_tehsils, name='get_tehsils'),
+    path('get_villages/', api_views.get_villages, name='get_villages'),
     
     
 ]
