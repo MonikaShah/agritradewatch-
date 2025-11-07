@@ -293,7 +293,7 @@ class DamageCrop(models.Model):
     damage_date = models.DateField(blank=True, null=True)
     report_date = models.DateField(blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
-    userid = models.ForeignKey('User1', models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    userid = models.ForeignKey('User1', models.DO_NOTHING,  blank=True, null=True)
     place_damage = models.CharField(max_length=20, choices=PLACE_DAMAGE_CHOICES,default='on_field')
     photo = models.ImageField(upload_to="damage_crop_images/", null=False, blank=False)  
     # district = models.CharField(max_length=100, blank=True, null=True)

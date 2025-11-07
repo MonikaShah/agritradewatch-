@@ -22,7 +22,7 @@ from django.contrib import messages
 
 from .forms import DamageForm
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, Thela, MahaVillage,DamageCrop
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -663,7 +663,7 @@ def damage_crop(request):
     if not request.user.is_authenticated or request.user.job not in ['farmer', 'retailer']:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
-        messages.error(request, "You are not authorized to submit Thela entries.")
+        messages.error(request, "You are not authorized to submit Damage Crop entries.")
         return redirect('login')
 
     if request.method == 'POST':
@@ -682,7 +682,7 @@ def damage_crop(request):
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'message': 'Saved successfully!'})
 
-            messages.success(request, "Thela entry submitted successfully!")
+            messages.success(request, "Damge Crop  entry submitted successfully!")
             form = DamageForm()  # reset the form
 
         else:

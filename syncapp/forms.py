@@ -1,5 +1,5 @@
 from django import forms
-from .models import Consumer1, Farmer1, Commodity, User1, Thela, MahaVillage, DamageCrop
+from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop
 from django.contrib.auth.forms import PasswordResetForm
 
 UNIT_CHOICES = [
@@ -124,7 +124,7 @@ class MyCustomPasswordResetForm(PasswordResetForm):
 
 class DamageForm(forms.ModelForm):
     class Meta:
-        model = Thela
+        model = DamageCrop
         fields = [
             'commodity',
             'damage',
