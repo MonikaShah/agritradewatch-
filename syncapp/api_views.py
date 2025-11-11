@@ -3,7 +3,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password,check_password
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt  # ← import here
@@ -20,9 +20,9 @@ from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
 from django.contrib import messages
 
-from .forms import DamageForm
+from .forms import DamageForm,DtUserForm,DtProduceForm,DtLoginForm
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtUser
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -713,3 +713,147 @@ def get_villages(request):
         .order_by('village')
     )
     return JsonResponse({'villages': list(villages)})
+
+def create_user(request):
+    if request.method == 'POST':
+        form = DtUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.password = make_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request, "Digital Thela User created successfully!")
+            return redirect('api:create_dtuser')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = DtUserForm()
+
+    return render(request, 'syncapp/dt_userRegistration.html', {'form': form})
+
+def thela_login(request):
+    if request.method == "POST":
+        form = DtLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
+
+            try:
+                user = DtUser.objects.get(username=username)
+            except DtUser.DoesNotExist:
+                messages.error(request, "Invalid username or password.")
+                return render(request, "syncapp/thela_login.html", {"form": form})
+
+            # ✅ Compare using check_password
+            if check_password(password, user.password):
+                request.session["thela_user_id"] = user.id
+                request.session["thela_username"] = user.username
+                messages.success(request, f"Welcome {user.name}!")
+                return redirect("api:create_produce")
+            else:
+                messages.error(request, "Invalid username or password.")
+    else:
+        form = DtLoginForm()
+
+    return render(request, "syncapp/thela_login.html", {"form": form})
+# def create_produce(request):
+#     if request.method == 'POST':
+#         form = DtProduceForm(request.POST, request.FILES)
+#         # 🟢 Print raw POST data (everything from the form)
+#         print("\n=== RAW POST DATA ===")
+#         for key, value in request.POST.items():
+#             print(f"{key} → {value}")
+#         if form.is_valid():
+#             cleaned = form.cleaned_data
+#             username_str = cleaned["username"]
+
+#             try:
+#                 user = DtUser.objects.get(username=username_str)
+#             except DtUser.DoesNotExist:
+#                 return JsonResponse({"error": f"No user found with username '{username_str}'"}, status=400)
+
+#             produce = form.save(commit=False)
+#             produce.username = user  # assign the DtUser instance
+#             messages.success(request, "Produce entry submitted successfully!")
+#             return redirect('create_produce')
+#         else:
+#             print("\n=== FORM ERRORS ===")
+#             print(form.errors)
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = DtProduceForm()
+
+#     return render(request, 'syncapp/create_produce.html', {'form': form})
+
+# def create_produce(request):
+#     user_id = request.session.get("thela_user_id")
+#     username = request.session.get("thela_username")
+
+#     if not user_id:
+#         messages.error(request, "Please log in to add produce.")
+#         return redirect("thela_login")
+
+#     user = DtUser.objects.get(id=user_id)
+
+#     if request.method == "POST":
+#         form = DtProduceForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             produce = form.save(commit=False)
+#             produce.username = user  # ✅ attach user automatically
+#             produce.save()
+#             messages.success(request, "Produce added successfully!")
+#             return redirect("create_produce")
+#     else:
+#         form = DtProduceForm()
+
+#     return render(request, "syncapp/create_produce.html", {
+#         "form": form,
+#         "username": username,  # ✅ pass for display in template
+#     })
+def create_produce(request):
+    user_id = request.session.get("thela_user_id")
+    if not user_id:
+        messages.error(request, "Please log in to continue.")
+        return redirect("thela_login")
+    print("SESSION DEBUG:", request.session.get("thela_user_id"), request.session.get("thela_username"))
+
+    try:
+        user = DtUser.objects.get(id=user_id)
+    except DtUser.DoesNotExist:
+        messages.error(request, "User not found. Please log in again.")
+        return redirect("thela_login")
+
+    if request.method == 'POST':
+        form = DtProduceForm(request.POST, request.FILES)
+        if form.is_valid():
+            produce = form.save(commit=False)
+            produce.username = user  # ✅ link to valid user
+            # ✅ Convert empty strings to None for numeric fields
+            lat = request.POST.get('latitude') or None
+            lon = request.POST.get('longitude') or None
+            produce.latitude = lat
+            produce.longitude = lon
+
+            # handle cost, profit etc safely
+            if produce.cost == "":
+                produce.cost = None
+            if produce.produce_expense == "":
+                produce.produce_expense = None
+            if produce.profit_expectation == "":
+                produce.profit_expectation = None
+
+            produce.save()
+            messages.success(request, "Produce added successfully!")
+            return redirect("api:create_produce")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = DtProduceForm()
+
+    return render(
+        request,
+        'syncapp/create_produce.html',
+        {
+            'form': form,
+            'thela_username': user.name,  # 👈 show in template: "Welcome Monika Shah"
+        },
+    )

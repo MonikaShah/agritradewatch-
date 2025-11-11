@@ -3,7 +3,11 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
-import uuid
+import uuid,os
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from PIL import Image
+
 
 
 # class Consumer(models.Model):
@@ -316,3 +320,170 @@ class MahaVillage(models.Model):
 
     def __str__(self):
         return f"{self.village} ({self.tehsil}, {self.district})"
+
+
+class DtUser(models.Model):
+    JOB_CHOICES = [
+        ('farmer', 'Farmer'),
+        ('retailer', 'Retailer'),
+    ]
+
+    name = models.CharField(max_length=100)
+    username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(unique=True)
+    mobile = models.CharField(max_length=15, unique=True)
+    password = models.CharField(max_length=128)
+    latitude = models.DecimalField(max_digits=10, decimal_places=7)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+    job = models.CharField(max_length=20, choices=JOB_CHOICES)
+    date_joined = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.name} ({self.job})"
+    class Meta:
+        managed = True 
+        db_table = 'dt_users'
+
+# For uplaod video and photo 
+def validate_file_type_and_size(value):
+    max_size_mb = 20
+    allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+
+    if value.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+    if value.file.content_type not in allowed_types:
+        raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
+
+
+def validate_file_type_and_size(value):
+    max_size_mb = 20
+    allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+
+    if value.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+    if value.file.content_type not in allowed_types:
+        raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
+
+
+class DtProduce(models.Model):
+    username = models.ForeignKey(
+    'DtUser',
+    to_field='username',  # ✅ Tell Django to use username instead of id
+    on_delete=models.CASCADE,
+    db_column='username_id'
+)
+
+    # sale_commodity = models.CharField(max_length=100)
+    # variety_name = models.CharField(max_length=100)
+    # method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')])
+    # level_of_produce = models.CharField(max_length=50, choices=[
+    #     ('selling_surplus', 'Selling Surplus'),
+    #     ('selling_surplus_with_value_addition', 'Selling Surplus with Value Addition')
+    # ])
+    # sowing_date = models.DateField()
+    # harvest_date = models.DateField()
+    # quantity_for_sale = models.FloatField()
+    # cost = models.DecimalField(max_digits=10, decimal_places=2)
+    # unit = models.CharField(max_length=20, choices=[
+    #     ('Kg', 'Kg'), ('250 gm', '250 gm'), ('bundle', 'Bundle'),
+    #     ('piece', 'Piece'), ('dozen', 'Dozen')
+    # ])
+    # produce_expense = models.DecimalField(max_digits=10, decimal_places=2)
+    # profit_expectation = models.DecimalField(max_digits=10, decimal_places=2)
+    # photo_or_video = models.FileField(
+    #     upload_to='produce_media/',
+    #     blank=True,
+    #     null=True,
+    #     validators=[validate_file_type_and_size]
+    # )
+    # latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    # longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+
+    # def clean(self):
+    #     """Ensure location is mandatory if a photo/video is uploaded."""
+    #     if self.photo_or_video and (self.latitude is None or self.longitude is None):
+    #         raise ValidationError("Latitude and Longitude are required when uploading media.")
+
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()  # triggers model validation (including above clean())
+    #     super().save(*args, **kwargs)
+
+    #     # Compress images automatically (skip videos)
+    #     if self.photo_or_video:
+    #         file_path = self.photo_or_video.path
+    #         file_ext = os.path.splitext(file_path)[1].lower()
+    #         if file_ext in ['.jpg', '.jpeg', '.png']:
+    #             try:
+    #                 img = Image.open(file_path)
+    #                 max_width = 1200
+    #                 if img.width > max_width:
+    #                     w_percent = max_width / float(img.width)
+    #                     h_size = int(float(img.height) * w_percent)
+    #                     img = img.resize((max_width, h_size), Image.Resampling.LANCZOS)
+    #                 img.save(file_path, optimize=True, quality=70)
+    #             except Exception as e:
+    #                 print(f"Image compression error: {e}")
+
+    # class Meta:
+    #     db_table = 'dt_produce'
+   
+   
+    sale_commodity = models.CharField(max_length=100)
+    variety_name = models.CharField(max_length=100)
+    method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')])
+    level_of_produce = models.CharField(max_length=50, choices=[
+        ('selling_surplus', 'Selling Surplus'),
+        ('selling_surplus_with_value_addition', 'Selling Surplus with Value Addition')
+    ])
+    sowing_date = models.DateField()
+    harvest_date = models.DateField()
+    quantity_for_sale = models.FloatField()
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    unit = models.CharField(max_length=20, choices=[
+        ('Kg', 'Kg'), ('250 gm', '250 gm'), ('bundle', 'Bundle'),
+        ('piece', 'Piece'), ('dozen', 'Dozen')
+    ])
+    produce_expense = models.DecimalField(max_digits=10, decimal_places=2)
+    profit_expectation = models.DecimalField(max_digits=10, decimal_places=2)
+    photo_or_video = models.FileField(
+        upload_to='produce_media/',
+        blank=True,
+        null=True,
+        validators=[validate_file_type_and_size]
+    )
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+
+    def clean(self):
+        """
+        Ensure that if a photo/video is uploaded,
+        both latitude and longitude are provided and valid.
+        """
+        if self.photo_or_video:
+            if not self.latitude or not self.longitude:
+                raise ValidationError("Latitude and Longitude are required when uploading media.")
+
+    def save(self, *args, **kwargs):
+        # 🟢 Skip full_clean() — form already validates input
+        super().save(*args, **kwargs)
+
+        # 🟡 Optional image compression (only for images)
+        if self.photo_or_video:
+            file_path = self.photo_or_video.path
+            file_ext = os.path.splitext(file_path)[1].lower()
+            if file_ext in ['.jpg', '.jpeg', '.png']:
+                try:
+                    img = Image.open(file_path)
+                    max_width = 1200
+                    if img.width > max_width:
+                        w_percent = max_width / float(img.width)
+                        h_size = int(float(img.height) * w_percent)
+                        img = img.resize((max_width, h_size), Image.Resampling.LANCZOS)
+                    img.save(file_path, optimize=True, quality=70)
+                except Exception as e:
+                    print(f"⚠️ Image compression error: {e}")
+
+    class Meta:
+        db_table = 'dt_produce'

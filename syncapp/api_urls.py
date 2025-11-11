@@ -16,6 +16,11 @@ urlpatterns = [
     path("consumers1_prices/<str:commodity>/", api_views.consumer_timeline, name="consumer_timeline"),
     path("farmers_prices/<str:commodity>/", api_views.farmer_timeline, name="farmer_timeline"),
     path('damage/crop/', api_views.damage_crop, name='damage_crop'),
+    path('create_dtuser/', api_views.create_user,name='create_user'),
+    path("login/thela/", api_views.thela_login, name="thela_login"),
+
+    path('create-produce/', api_views.create_produce, name='create_produce'),
+
     # Mobile JWT APIs
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

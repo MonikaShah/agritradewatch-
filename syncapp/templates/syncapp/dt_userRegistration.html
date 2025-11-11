@@ -1,0 +1,58 @@
+{% extends "syncapp/base.html" %}
+{% load static %}
+
+{% block title %}Add Produce{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+      <h3 class="card-title text-center mb-4">Add Produce Details</h3>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-success btn-block">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        document.querySelector("[name='latitude']").value = pos.coords.latitude;
+        document.querySelector("[name='longitude']").value = pos.coords.longitude;
+        console.log("✅ Location set:", pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        console.warn("⚠️ Location not enabled:", err.message);
+      }
+    );
+  }
+});
+</script>
+
+<style>
+  body {
+    background-color: #f7f9fc;
+  }
+  .card {
+    border-radius: 1rem;
+  }
+  input, select, textarea {
+    border-radius: 0.5rem !important;
+  }
+</style>
+{% endblock %}

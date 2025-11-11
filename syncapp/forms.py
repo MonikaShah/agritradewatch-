@@ -1,5 +1,5 @@
 from django import forms
-from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop
+from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop,DtUser,DtProduce
 from django.contrib.auth.forms import PasswordResetForm
 
 UNIT_CHOICES = [
@@ -146,3 +146,188 @@ class DamageForm(forms.ModelForm):
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+class DtLoginForm(forms.Form):
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter your username"
+        })
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter your password"
+        })
+    )
+
+class DtUserForm(forms.ModelForm):
+    class Meta:
+        model = DtUser
+        fields = ['name', 'username', 'email', 'mobile', 'password', 'latitude', 'longitude', 'job']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email address'}),
+            'mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter mobile number'}),
+            'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
+            'job': forms.Select(attrs={'class': 'form-select'}),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+        }
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if len(password) < 6:
+            raise forms.ValidationError("Password must be at least 6 characters long.")
+        return password
+    
+
+# class DtProduceForm(forms.ModelForm):
+#     class Meta:
+#         model = DtProduce
+#         fields = [
+#             'sale_commodity', 'variety_name', 'method',
+#             'level_of_produce', 'sowing_date', 'harvest_date',
+#             'quantity_for_sale', 'cost', 'unit', 'produce_expense',
+#             'profit_expectation', 'photo_or_video', 'latitude', 'longitude'
+#         ]
+#         widgets = {
+#             'username': forms.Select(attrs={'class': 'form-select'}),
+#             'sale_commodity': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter commodity name'}),
+#             'variety_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter variety name'}),
+#             'method': forms.Select(attrs={'class': 'form-select'}),
+#             'level_of_produce': forms.Select(attrs={'class': 'form-select'}),
+#             'sowing_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+#             'harvest_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+#             'quantity_for_sale': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+#             'cost': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter cost per unit'}),
+#             'unit': forms.Select(attrs={'class': 'form-select'}),
+#             'produce_expense': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total expense'}),
+#             'profit_expectation': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Expected profit'}),
+#             'photo_or_video': forms.ClearableFileInput(attrs={
+#                 'class': 'form-control',
+#                 'accept': '.jpg,.jpeg,.png,.mp4,.mov'
+#             }),
+#             'latitude': forms.HiddenInput(),
+#             'longitude': forms.HiddenInput(),
+#         }
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         file = cleaned_data.get('photo_or_video')
+#         lat = cleaned_data.get('latitude')
+#         lon = cleaned_data.get('longitude')
+
+#         # ✅ Location required only if media uploaded
+#         if file:
+#             if not lat or not lon:
+#                 raise forms.ValidationError("Please enable location before uploading your photo or video.")
+
+#             # ✅ Restrict file size
+#             max_size_mb = 20
+#             if file.size > max_size_mb * 1024 * 1024:
+#                 raise forms.ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+#             # ✅ Restrict allowed formats
+#             allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+#             if file.content_type not in allowed_types:
+#                 raise forms.ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV")
+
+#         return cleaned_data
+
+class DtProduceForm(forms.ModelForm):
+    NEW_COMMODITY_VALUE = "add_new"
+
+    class Meta:
+        model = DtProduce
+        fields = [
+            'sale_commodity', 'variety_name', 'method',
+            'level_of_produce', 'sowing_date', 'harvest_date',
+            'quantity_for_sale', 'cost', 'unit', 'produce_expense',
+            'profit_expectation', 'photo_or_video', 'latitude', 'longitude'
+        ]
+
+        labels = {
+            'sale_commodity': 'Commodity',
+            'variety_name': 'Variety Name',
+            'method': 'Method of Production',
+            'level_of_produce': 'Production Level',
+            'sowing_date': 'Sowing / Production Date',
+            'harvest_date': 'Harvest / Expiry Date',
+            'quantity_for_sale': 'Quantity for Sale',
+            'cost': 'Cost per Unit',
+            'unit': 'Unit',
+            'produce_expense': 'Total Expense',
+            'profit_expectation': 'Expected Profit',
+            'photo_or_video': 'Photo / Video (optional)',
+        }
+
+        widgets = {
+            'sale_commodity': forms.Select(attrs={'class': 'form-select'}),
+            'variety_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter variety name'}),
+            'method': forms.Select(attrs={'class': 'form-select'}),
+            'level_of_produce': forms.Select(attrs={'class': 'form-select'}),
+            'sowing_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'harvest_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'quantity_for_sale': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+            'cost': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter cost per unit'}),
+            'unit': forms.Select(attrs={'class': 'form-select'}),
+            'produce_expense': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total expense'}),
+            'profit_expectation': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Expected profit'}),
+            'photo_or_video': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.jpg,.jpeg,.png,.mp4,.mov'
+            }),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ✅ Add predefined commodities + "Add new" option
+        commodity_choices = [
+            ('', 'Select a commodity'),
+            ('garlic', 'Garlic'),
+            ('wheat', 'Wheat'),
+            ('sugarcane', 'Sugarcane'),
+            ('maize', 'Maize'),
+            ('ghee', 'Ghee'),
+            ('honey', 'Honey'),
+            (self.NEW_COMMODITY_VALUE, '➕ Add New Commodity'),
+        ]
+        self.fields['sale_commodity'].widget = forms.Select(
+            choices=commodity_choices,
+            attrs={'class': 'form-select', 'id': 'id_sale_commodity'}
+        )
+
+        # ✅ Mark required fields visually with red asterisk
+        for field_name, field in self.fields.items():
+            if field.required:
+                field.label = forms.utils.mark_safe(f"{field.label} <span style='color:red;'>*</span>")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get('photo_or_video')
+        lat = cleaned_data.get('latitude')
+        lon = cleaned_data.get('longitude')
+
+        # ✅ Location required only if media uploaded
+        if file:
+            if not lat or not lon:
+                raise forms.ValidationError("Please enable location before uploading your photo or video.")
+
+            # ✅ Restrict file size
+            max_size_mb = 20
+            if file.size > max_size_mb * 1024 * 1024:
+                raise forms.ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+            # ✅ Restrict allowed formats
+            allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+            if file.content_type not in allowed_types:
+                raise forms.ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV")
+
+        return cleaned_data
