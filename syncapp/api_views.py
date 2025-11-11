@@ -722,7 +722,7 @@ def create_user(request):
             user.password = make_password(form.cleaned_data['password'])
             user.save()
             messages.success(request, "Digital Thela User created successfully!")
-            return redirect('api:create_dtuser')
+            return redirect('api:create_user')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
