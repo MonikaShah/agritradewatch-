@@ -109,7 +109,7 @@ body, html {
         {% if thela_username %}
             <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'thela_logout' %}">🚪 Logout</a></li>
+            <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
         {% else %}
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-success" href="{% url 'api:thela_login' %}">🔑 Login</a></li>
