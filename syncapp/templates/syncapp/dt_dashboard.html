@@ -105,11 +105,16 @@ body, html {
         ⚙️ Action / Profile
       </button>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-        <li><h6 class="dropdown-header">👤 {{ thela_username }}</h6></li>
-        <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
-      </ul>
+        <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
+        {% if thela_username %}
+            <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'thela_logout' %}">🚪 Logout</a></li>
+        {% else %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-success" href="{% url 'api:thela_login' %}">🔑 Login</a></li>
+        {% endif %}
+        </ul>
     </div>
   </div>
   </div>
