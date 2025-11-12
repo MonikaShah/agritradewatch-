@@ -484,3 +484,20 @@ class MyPasswordResetView(PasswordResetView):
     def get_users(self, email):
         """Return all active users matching the email."""
         return User1.objects.filter(email__iexact=email, is_active=True)
+
+def dtDashboard(request):
+    user_id = request.session.get("thela_user_id")
+    username = None
+
+    if user_id:
+        try:
+            from syncapp.models import DtUser
+            user = DtUser.objects.get(id=user_id)
+            username = user.name
+        except DtUser.DoesNotExist:
+            pass
+
+    context = {
+        "thela_username": username,
+    }
+    return render(request, "syncapp/dt_dashboard.html", context)

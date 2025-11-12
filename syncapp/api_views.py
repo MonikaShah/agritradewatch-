@@ -22,7 +22,7 @@ from django.contrib import messages
 
 from .forms import DamageForm,DtUserForm,DtProduceForm,DtLoginForm
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtUser
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtUser,DtProduce
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -857,3 +857,36 @@ def create_produce(request):
             'thela_username': user.name,  # 👈 show in template: "Welcome Monika Shah"
         },
     )
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_DtCommodities(request):
+    """
+    Fetch all unique commodities from DTProduce table
+    """
+    # If 'commodity' is a CharField, we can get distinct values
+    commodity = request.GET.get('sale_commodity')
+    entries = (
+        DtProduce.objects
+        .values(
+            'id',
+            'sale_commodity',
+            'variety_name',
+            'method',
+            'latitude',
+            'longitude',
+            'created_at',
+            'level_of_produce',
+            'quantity_for_sale',
+            'cost',
+            'unit',
+            'sowing_date',
+            'harvest_date',
+            'photo_or_video',
+        )
+        .order_by('-created_at')
+    )
+    if commodity:
+        entries = entries.filter(sale_commodity__iexact=commodity)
+
+    return Response(list(entries))

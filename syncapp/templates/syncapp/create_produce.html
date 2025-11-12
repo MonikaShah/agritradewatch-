@@ -7,8 +7,6 @@
 <div class="container my-5">
   <div class="card shadow-sm mx-auto" style="max-width: 600px;">
     <div class="card-body">
-        <!-- <h3>Welcome {{ thela_username }} — Add Your Produce</h3> -->
-
       <h3 class="card-title text-center mb-4">Welcome {{ thela_username }}<br>Add Produce Details</h3>
 
       {% if messages %}
@@ -22,8 +20,9 @@
         {{ form.as_p }}
 
         <!-- Hidden location fields -->
-        <!-- <input type="hidden" id="id_latitude" name="latitude">
-        <input type="hidden" id="id_longitude" name="longitude"> -->
+        <input type="hidden" id="id_latitude" name="latitude">
+        <input type="hidden" id="id_longitude" name="longitude">
+        <input type="hidden" id="id_timestamp" name="timestamp">
 
         <!-- Location enable button -->
         <div class="mb-3 text-center">
@@ -66,53 +65,76 @@ document.addEventListener("DOMContentLoaded", function () {
   const latInput = document.getElementById("id_latitude");
   const lonInput = document.getElementById("id_longitude");
   const status = document.getElementById("locationStatus");
+  const timestampInput = document.getElementById("id_timestamp");
 
-  if (!btn || !latInput || !lonInput) {
-    console.error("❌ Latitude/Longitude inputs not found in DOM");
-    return;
+  // Automatically set timestamp when page loads
+  if (timestampInput) {
+    timestampInput.value = new Date().toISOString();
   }
 
-  btn.addEventListener("click", function () {   
-    if (!navigator.geolocation) {
-      status.textContent = "❌ Geolocation is not supported by your browser.";
-      status.classList.add("text-danger");
-      return;
-    }
-
-    status.textContent = "Fetching your location...";
+  // Try to auto-fetch location on page load
+  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function (pos) {
         const lat = pos.coords.latitude.toFixed(7);
         const lon = pos.coords.longitude.toFixed(7);
         latInput.value = lat;
         lonInput.value = lon;
-        console.log("✅ Location captured:", lat, lon);
-        status.textContent = "✅ Location captured successfully!";
-        status.classList.remove("text-danger");
+        status.textContent = "✅ Location captured automatically.";
         status.classList.add("text-success");
       },
       function (err) {
-        console.error("Location error:", err);
-        status.textContent = "❌ Please allow location access and try again.";
-        status.classList.add("text-danger");
+        console.warn("Auto-location failed:", err.message);
+        status.textContent = "📍 Click the button to enable location.";
       }
     );
-  });
+  }
 
-  const select = document.getElementById("id_sale_commodity");
-
-  select.addEventListener("change", () => {
-    if (select.value === "add_new") {
-      const newCommodity = prompt("Enter the new commodity name:");
-      if (newCommodity) {
-        // Add it dynamically to the dropdown and select it
-        const option = new Option(newCommodity, newCommodity.toLowerCase(), true, true);
-        select.add(option);
-      } else {
-        select.value = "";
+  // Manual button-based location fetch
+  if (btn) {
+    btn.addEventListener("click", function () {   
+      if (!navigator.geolocation) {
+        status.textContent = "❌ Geolocation is not supported by your browser.";
+        status.classList.add("text-danger");
+        return;
       }
-    }
-  });
+
+      status.textContent = "Fetching your location...";
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude.toFixed(7);
+          const lon = pos.coords.longitude.toFixed(7);
+          latInput.value = lat;
+          lonInput.value = lon;
+          console.log("✅ Location captured:", lat, lon);
+          status.textContent = "✅ Location captured successfully!";
+          status.classList.remove("text-danger");
+          status.classList.add("text-success");
+        },
+        function (err) {
+          console.error("Location error:", err);
+          status.textContent = "❌ Please allow location access and try again.";
+          status.classList.add("text-danger");
+        }
+      );
+    });
+  }
+
+  // Commodity dropdown logic (unchanged)
+  const select = document.getElementById("id_sale_commodity");
+  if (select) {
+    select.addEventListener("change", () => {
+      if (select.value === "add_new") {
+        const newCommodity = prompt("Enter the new commodity name:");
+        if (newCommodity) {
+          const option = new Option(newCommodity, newCommodity.toLowerCase(), true, true);
+          select.add(option);
+        } else {
+          select.value = "";
+        }
+      }
+    });
+  }
 });
 </script>
 {% endblock %}

@@ -18,7 +18,7 @@ urlpatterns = [
     path('damage/crop/', api_views.damage_crop, name='damage_crop'),
     path('create_dtuser/', api_views.create_user,name='create_user'),
     path("login/thela/", api_views.thela_login, name="thela_login"),
-
+    path("DtEntries/",api_views.get_DtCommodities,name = 'get_DtCommodities'),
     path('create-produce/', api_views.create_produce, name='create_produce'),
 
     # Mobile JWT APIs

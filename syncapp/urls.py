@@ -67,11 +67,11 @@ urlpatterns = [
     path('apmc/<str:apmc_name>/timeline-ajax/', api_views.apmc_timeline_ajax, name='apmc_timeline_ajax'),
     path('ahmedapmc/',views.ahmedapmc,name='ahmedapmc'),
     path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
-    # path('dash/',views.dash,name='dash'),
+    path('dtDashboard/',views.dtDashboard,name='dtDashboard'),
 
      # include DRF router URLs under /api/
     path('api/', include('syncapp.api_urls', namespace='api')),
-    path('api/', include(router.urls)),
+    # path('api/', include(router.urls)),
     # 🔑 JWT login/refresh endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

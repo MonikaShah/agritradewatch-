@@ -1,0 +1,305 @@
+{% extends "syncapp/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 110px);
+  width: 100%;
+}
+
+/* Top controls bar */
+#topPanel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+  z-index: 1000;
+  width: 100%;
+}
+
+#topPanel label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+#topPanel select,
+#topPanel button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+#topPanel button {
+  background-color: #198754;
+  color: white;
+  border: none;
+}
+#topPanel button:hover {
+  background-color: #157347;
+}
+
+/* Map */
+#map {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#statusMsg {
+  font-size: 14px;
+  color: #555;
+}
+.leaflet-control.legend {
+  background: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  line-height: 1.4em;
+}
+.legend img {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.legend i {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+</style>
+
+<div id="dashboard-container">
+  <div id="topPanel">
+    <div>
+      <label for="commoditySelect">Select Commodity:</label>
+      <select id="commoditySelect">
+        <option value="">-- Select --</option>
+      </select>
+    </div>
+    <!-- <button id="locateBtn">📍 Use My Location</button> -->
+    <span id="statusMsg"></span>
+     
+  
+
+    <!-- Right section: Actions / Profile -->
+     <div class="ms-auto">
+      <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
+        ⚙️ Action / Profile
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
+        <li><h6 class="dropdown-header">👤 {{ thela_username }}</h6></li>
+        <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
+      </ul>
+    </div>
+  </div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+let map;
+let userMarker = null;
+let markers = [];
+let legend;
+let currentCommodity = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  map = L.map('map').setView([20.5937, 78.9629], 8);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  createLegend();
+  loadCommodities();
+  locateUser();
+});
+
+// 🟢 Legend
+// 🟢 Legend
+function createLegend() {
+  if (legend) legend.remove();
+
+  legend = L.control({ position: "bottomright" });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create("div", "leaflet-control legend");
+    const legendHTML = [`<b>Legend</b><br>
+      <i style="background:#007bff"></i> My Location<br>`];
+
+    // ✅ Add commodity entry line if selected
+    if (currentCommodity) {
+      const commodityIconPath = `/static/${currentCommodity.toLowerCase().replace(/\s+/g, "_")}.png`;
+
+      // create an <img> element that shows fallback dot if image fails to load
+      const imgHTML = `
+        <img src="${commodityIconPath}" 
+             onerror="this.outerHTML='<i style=&quot;background:#28a745&quot;></i>'"
+             alt="${currentCommodity}">
+      `;
+
+      legendHTML.push(`${imgHTML} ${currentCommodity}`);
+    }
+
+    div.innerHTML = legendHTML.join("<br>");
+    return div;
+  };
+  legend.addTo(map);
+}
+
+
+// 🟢 Load commodities from API
+async function loadCommodities() {
+  try {
+    const res = await fetch('/api/DtEntries/');
+    const commodities = await res.json();
+    const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
+
+    const select = document.getElementById('commoditySelect');
+    select.innerHTML = '<option value="">-- Select --</option>';
+    uniqueCommodities.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = item;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Failed to load commodities", err);
+  }
+}
+
+// 🟢 Locate user
+function locateUser() {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      map.setView([lat, lng], 10);
+
+      userMarker = L.circleMarker([lat, lng], {
+        radius: 8,
+        color: "#007bff",
+        fillColor: "#007bff",
+        fillOpacity: 0.5,
+      }).addTo(map);
+    },
+    (error) => {
+      console.error("Error getting user location:", error);
+      alert("Unable to get your location. Please enable GPS or location permissions.");
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// 🟢 Show markers
+async function showCommodityMarkers(commodity) {
+  if (!commodity) return;
+
+  currentCommodity = commodity;
+  createLegend();
+
+  const res = await fetch(`/api/DtEntries/?sale_commodity=${commodity}`);
+  const data = await res.json();
+
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
+  const iconExists = await checkImageExists(iconPath);
+
+  data.forEach(entry => {
+    if (entry.latitude && entry.longitude) {
+      let marker;
+      if (iconExists) {
+        const icon = L.icon({
+          iconUrl: iconPath,
+          iconSize: [28, 28],
+          iconAnchor: [14, 28],
+          popupAnchor: [0, -25]
+        });
+        marker = L.marker([entry.latitude, entry.longitude], { icon });
+      } else {
+        marker = L.circleMarker([entry.latitude, entry.longitude], {
+          radius: 7,
+          color: "#28a745",
+          fillColor: "#28a745",
+          fillOpacity: 0.6
+        });
+      }
+      marker.addTo(map).bindPopup(`<b>Commodity:</b>${entry.sale_commodity}</b>
+      <br><b>Updated on:</b>${new Date(entry.created_at).toLocaleDateString()}
+      <br><b>Variety:</b>${entry.variety_name}
+      <br><b>Method:</b>${entry.method}
+      <br><b>Production Level:</b>${entry.level_of_produce}
+      <br><b>Sowing Date:</b>${entry.sowing_date}
+      <br><b>Harvest Date:</b>${entry.harvest_date}
+      <br><b>Quantity for sale:</b>${entry.quantity_for_sale} ${entry.unit}
+      <br><b>Cost:</b>${entry.cost} / ${entry.unit}
+      <br>${entry.photo_or_video 
+            ? (entry.photo_or_video.endsWith('.mp4')
+                ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
+                : `<img src="../media/${entry.photo_or_video}" width="200">`
+              )
+            : ''}
+    `);
+      markers.push(marker);
+    }
+  });
+
+  const msg = document.getElementById('statusMsg');
+  msg.textContent = data.length
+    ? `Showing ${data.length} entries for ${commodity}.`
+    : "No entries found for this commodity.";
+}
+
+// 🟢 Check if image exists
+async function checkImageExists(url) {
+  try {
+    const res = await fetch(url, { method: 'HEAD' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// 🟢 Events
+// document.getElementById('locateBtn').addEventListener('click', locateUser);
+document.getElementById('commoditySelect').addEventListener('change', e => {
+  showCommodityMarkers(e.target.value);
+});
+</script>
+
+{% endblock %}
