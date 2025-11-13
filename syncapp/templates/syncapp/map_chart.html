@@ -223,7 +223,7 @@
     </div> <!--# stats-container div close -->
     <!-- <hr> -->
     <div style="text-align: right; margin-bottom: 10px;">
-      <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open All Charts</button>
+      <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open Charts</button>
     </div>
     
     <hr>
@@ -615,12 +615,6 @@ const divider = document.getElementById("divider");
 
           const indiaBounds = L.latLngBounds([6.5,68.0],[35.5,97.5]);
 
-//           const filteredFeatures = allData.features.filter(f=>{
-//               const latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
-//               const dbName = f.properties.commodity?.trim().toLowerCase();
-//               const selected = commodity.trim().toLowerCase();
-//               return indiaBounds.contains(latlng) && dbName === selected;          });
-
 // // Filter Map based on date range added
             const startDateInput = document.getElementById("startDate").value;
             const endDateInput = document.getElementById("endDate").value;
@@ -698,11 +692,24 @@ const divider = document.getElementById("divider");
 
       // --- Geolocation ---
       document.getElementById("locateBtn").addEventListener("click", ()=>{
+        
           if(navigator.geolocation){
               navigator.geolocation.getCurrentPosition(pos=>{
                   userLocation = L.latLng(pos.coords.latitude,pos.coords.longitude);
                   if(userMarker) map.removeLayer(userMarker);
-                  userMarker = L.marker(userLocation,{draggable:true,title:"APMC"}).addTo(map);
+                  // 🔵 Define a blue circle icon (SVG-based)
+                  const blueIcon = L.divIcon({
+                    html: '<div style="width:14px;height:14px;background-color:#007bff;border:2px solid white;border-radius:50%;box-shadow:0 0 3px rgba(0,0,0,0.5);"></div>',
+                    className: '', // remove default marker styles
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8],
+                  });
+
+                  userMarker = L.marker(userLocation,{draggable:true,title:"My Location",icon: blueIcon}).addTo(map);
+                  map.invalidateSize(); // ensures Leaflet recalculates map size
+                  setTimeout(() => {
+                    map.setView(userLocation, 14);
+                  }, 100);
                   userMarker.on("dragend",e=>{ 
                       userLocation=e.target.getLatLng(); 
                       drawCircle(scale[radiusSlider.value]); 
@@ -749,20 +756,7 @@ const divider = document.getElementById("divider");
          
       });
 
-            // --- Show total commodity count (case-insensitive) ---
-        // function updateCommodityCount() {
-        //     if (!allData || !Array.isArray(allData.features)) return;
-        //     const selectedCommodity = commoditySelect.value.trim().toLowerCase();
-
-        //     const count = allData.features.filter(f =>
-        //         f.properties?.commodity?.trim().toLowerCase() === selectedCommodity
-        //     ).length;
-
-        //     document.getElementById("commodityCount").innerText = 
-        //         count > 0
-        //         ? `Consumer's Records: ${count}`
-        //         : "No records found";
-        // }
+         
         async function updateCommodityCount() {
           if (!allData || !Array.isArray(allData.features)) return;
 
