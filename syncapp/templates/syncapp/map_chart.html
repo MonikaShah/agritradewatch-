@@ -36,6 +36,9 @@
 />
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
 <style>
   main {
   display: block !important; /* disable flex for main */
@@ -92,6 +95,28 @@
 .noUi-connect {
   background: #80bdff;
 }
+
+.chart-slider {
+  width: 100%;
+}
+.noUi-target {
+  background: #e9ecef;
+  border-radius: 5px;
+  height: 8px;
+}
+.noUi-handle {
+  background: #007bff;
+  border: none;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  width: 16px;
+  height: 16px;
+  top: -4px;
+}
+.noUi-connect {
+  background: #007bff;
+}
+
+
 #split-container {
   display: flex;
   width: 100%;
@@ -204,9 +229,9 @@
   <div id="divider"></div>
 <div id="right-panel">
   <div class="box" id="graph-box">
-    <h3>Charts for : 
+    <!-- <h3>Charts for : 
       <span id="selected-commodity"></span>
-    </h3>
+    </h3> -->
     <div id="stats-container" style="display: flex; gap: 20px;">
       <div id="global-stats" style="margin-top: 4px;display:none;">
         <strong>All Consumers:</strong><br>
@@ -226,58 +251,55 @@
       <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open Charts</button>
     </div>
     
-    <hr>
-    <h3>Consumers Buying Price Trend : <span id="consumerapan"></span>
+    
+    <h3><b>Consumer and Farmer Reported Price Trend : 
+      <span id="selected-commodity"></span></b>
+      <span id="consumerapan"></span>
       <button class="toggle-chart-btn" data-target="consumersChart">Hide Chart</button>
       <!-- <button class="resize-chart-btn" data-target="consumersChart">Expand</button> -->
     </h3>
-      <!-- New: Date range selection -->
-      <!-- <div id="date-range-container1" style="margin-bottom: 10px;">
-        <label>Start Date: <input type="date" id="startDate1"></label>
-        <label>End Date: <input type="date" id="endDate1"></label>
-        <button id="filterByDateBtn1" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-      </div> -->
-      
+     
       <canvas id="consumersChart" class="resizable-chart"></canvas>
+      <div class="chart-footer">
+      <div class="chart-slider mt-3 px-3">
+        <label for="dateRangeSlider" class="form-label fw-bold">{% trans "Adjust Date Range" %}</label>
+        <div id="dateRangeSlider"></div>
+        
+        <div class="d-flex justify-content-between mt-2 text-muted small">
+          <span id="sliderStartLabel">Start Date</span>
+          <span id="sliderEndLabel">End Date</span>
+        </div>
+      </div>
+      <br>
       <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
 
       <hr>
-      <!-- <h3>Farmers Selling Price Trend : <span id="farmerspan"></span>
-        <button class="toggle-chart-btn" data-target="farmerChart">Hide Chart</button>
-      </h3> -->
-      <!-- New: Date range selection -->
-      <!-- <div id="date-range-container2" style="margin-bottom: 10px;">
-        <label>Start Date: <input type="date" id="startDate2"></label>
-        <label>End Date: <input type="date" id="endDate2"></label>
-        <button id="filterByDateBtn2" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-      </div> -->
-      <!-- <canvas id="farmerChart" class="resizable-chart"></canvas> -->
-      <!-- <div class="chart-container" id="farmerChartContainer">
-        <canvas id="farmerChart"></canvas>
-      </div> -->
-
-    <hr>
-    <h3>Agmarknet Price Trend : <span id="agmarknet"></span>
+     
+    <h3><b>Agmarknet Price Trend :
+      <span id="selected-commodity"></span></b>
+      <span id="agmarknet"></span>
       <button class="toggle-chart-btn" data-target="chartCanvas">Hide Chart</button>
       <!-- <button class="resize-chart-btn" data-target="chartCanvas">Expand</button> -->
     </h3>
-    <!-- New: Date range selection -->
-    <!-- <div id="date-range-container" style="margin-bottom: 10px;">
-      <label>Start Date: <input type="date" id="startDate"></label>
-      <label>End Date: <input type="date" id="endDate"></label>
-      <button id="filterByDateBtn" style="margin-left: 5px; padding: 5px 10px;">Filter</button>
-    </div> -->
     
      <div class="chart-x-slider-container">
       <canvas id="chartCanvas"></canvas>
+      <div class="chart-footer1">
+      <div class="chart-slider mt-3 px-3">
+        <label for="dateRangeSlider" class="form-label fw-bold">{% trans "Adjust Date Range" %}</label>
+        <div id="dateRangeSlider1"></div>
+        
+        <div class="d-flex justify-content-between mt-2 text-muted small">
+          <span id="sliderStartLabel1">Start Date</span>
+          <span id="sliderEndLabel1">End Date</span>
+        </div>
+      </div>
+      <br>
       <p class="chart-tip">💡 {% trans "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan." %}</p>
        <!-- Dual slider -->
-  <div id="dateRangeSlider" style="margin: 20px auto; width: 90%;"></div>
-  <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
+      <div id="dateRangeSlider" style="margin: 20px auto; width: 90%;"></div>
+      <div id="dateRangeLabel" style="text-align:center; margin-top: 6px; font-size: 0.9rem;"></div>
     </div>
-
-
-
   </div><!--# graph-box div close -->
 </div><!--# <right>-panel div close -->
 </div> <!--split container close-->
@@ -1011,7 +1033,72 @@ const divider = document.getElementById("divider");
                     }
                 }
             });
-            
+            const slider1 = document.getElementById('dateRangeSlider1');
+const sliderStartLabel1 = document.getElementById('sliderStartLabel1');
+const sliderEndLabel1 = document.getElementById('sliderEndLabel1');
+
+// Destroy old slider if it exists (prevents duplicate sliders)
+if (slider1.noUiSlider) {
+    slider1.noUiSlider.destroy();
+}
+
+if (labels.length > 0) {
+    // Create new slider instance
+    noUiSlider.create(slider1, {
+        start: [0, labels.length - 1],
+        connect: true,
+        range: { min: 0, max: labels.length - 1 },
+        step: 1,
+        behaviour: 'drag', // smoother dual handle drag
+    });
+
+    // Initialize date labels below slider
+    sliderStartLabel1.textContent = labels[0];
+    sliderEndLabel1.textContent = labels[labels.length - 1];
+
+    // --- Debounce utility ---
+    function debounce(fn, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), delay);
+        };
+    }
+
+    // --- Debounced chart update ---
+    // --- Debounced chart update ---
+      const updateChart1 = debounce((values) => {
+        const startIndex1 = Math.floor(values[0]);
+        const endIndex1 = Math.floor(values[1]);
+
+        // Slice visible data
+        const visibleLabels1 = labels.slice(startIndex1, endIndex1 + 1);
+        const visibleMin = minPrices.slice(startIndex1, endIndex1 + 1);
+        const visibleMax = maxPrices.slice(startIndex1, endIndex1 + 1);
+        const visibleModal = modalPrices.slice(startIndex1, endIndex1 + 1);
+
+        // Update chart datasets
+        agmarkChart.data.labels = visibleLabels1;
+        agmarkChart.data.datasets[0].data = visibleMin;
+        agmarkChart.data.datasets[1].data = visibleMax;
+        agmarkChart.data.datasets[2].data = visibleModal;
+
+        agmarkChart.update('none'); // faster redraw
+    }, 50);
+
+
+    // --- Slider update handler ---
+    slider1.noUiSlider.on('update', function (values) {
+        const startIndex1 = Math.floor(values[0]);
+        const endIndex1 = Math.floor(values[1]);
+
+        sliderStartLabel1.textContent = labels[startIndex1];
+        sliderEndLabel1.textContent = labels[endIndex1];
+
+        updateChart1(values);
+    });
+}
+
                    
         
         } catch(err){
@@ -1055,195 +1142,6 @@ commoditySelect.addEventListener("change", () => {
     console.error(err);
   });
 });
-// --- Consumers1 Price Trend Chart ---
-// let consumersChart = null;
-
-// async function fetchConsumersPrices() {
-//   const commodity1 = document.getElementById("commoditySelect").value;
-//   const startDate = document.getElementById("startDate").value;
-//   const endDate = document.getElementById("endDate").value;
-
-//   if (!commodity1) return;
-
-//   try {
-//     const url = `/api/consumers1_prices/${encodeURIComponent(commodity1)}/?` +
-//       `${startDate ? `start_date=${startDate}&` : ""}` +
-//       `${endDate ? `end_date=${endDate}` : ""}`;
-
-//     const res = await fetch(url);
-
-//     if (!res.ok) {
-//       console.error("Fetch error:", res.statusText);
-//       return;
-//     }
-
-//     const data = await res.json();
-
-//     if (!Array.isArray(data)) {
-//       console.error("Unexpected API response:", data);
-//       Swal.fire({
-//         icon: "warning",
-//         title: "No consumer data",
-//         text: "The consumer price API did not return valid data.",
-//       });
-//       return;
-//     }
-
-//     // ✅ Sort safely by date
-//     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-//     const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
-//     const prices = sortedData.map(d => parseFloat(d.price));
-
-//     const ctx = document.getElementById("consumersChart").getContext("2d");
-
-//     if (consumersChart instanceof Chart) {
-//       consumersChart.destroy();
-//     }
-
-//     consumersChart = new Chart(ctx, {
-//       type: "line",
-//       data: {
-//         labels,
-//         datasets: [
-//           {
-//             label: "Consumer Reported Price (₹)",
-//             data: prices,
-//             borderColor: "rgba(255, 99, 132, 1)",
-//             backgroundColor: "rgba(255, 99, 132, 0.2)",
-//             borderWidth: 2,
-//             tension: 0.3,
-//           },
-//         ],
-//       },
-//       options: {
-//         responsive: true,
-//         maintainAspectRatio: false,
-//         plugins: {
-//           title: {
-//             display: true,
-//             text: `Consumer Prices for ${commodity1}`,
-//           },
-//           legend: { position: "top" },
-//         },
-//         scales: {
-//           x: { title: { display: true, text: "Date" } },
-//           y: { title: { display: true, text: "Price (₹)" } },
-//         },
-//       },
-//     });
-//     // ✅ Register for resize logic
-//     window.chartInstances = window.chartInstances || {};
-//     window.chartInstances["consumersChart"] = consumersChart;
-//     window.chartInstances["agmarkChart"] = agmarkChart;
-//     window.chartInstances["farmerChart"] = farmerChart;
-
-//   } catch (err) {
-//     console.error("Error fetching consumer prices:", err);
-//   }
-// }
-
-// // Attach to Filter button and commodity change
-// // document.getElementById("filterByDateBtn1").addEventListener("click", fetchConsumersPrices);
-// // document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
-// document.getElementById("filterByDateBtn").addEventListener("click", fetchConsumersPrices);
-// document.getElementById("commoditySelect").addEventListener("change", fetchConsumersPrices);
-
-// // Initial load (optional)
-// fetchConsumersPrices();
-
-
-// // --- Farmer1 Price Trend Chart ---
-// let farmerChart = null;
-
-// async function fetchFarmersPrices() {
-//   const commodity2 = document.getElementById("commoditySelect").value;
-//   const startDate = document.getElementById("startDate").value;
-//   const endDate = document.getElementById("endDate").value;
-
-//   if (!commodity2) return;
-
-//   try {
-//     const url = `/api/farmers_prices/${encodeURIComponent(commodity2)}/?` +
-//       `${startDate ? `start_date=${startDate}&` : ""}` +
-//       `${endDate ? `end_date=${endDate}` : ""}`;
-
-//     const res = await fetch(url);
-
-//     if (!res.ok) {
-//       console.error("Fetch error:", res.statusText);
-//       return;
-//     }
-
-//     const data = await res.json();
-
-//     if (!Array.isArray(data)) {
-//       console.error("Unexpected API response:", data);
-//       Swal.fire({
-//         icon: "warning",
-//         title: "No Famer data",
-//         text: "The Farmer fetch price API did not return valid data.",
-//       });
-//       return;
-//     }
-
-//     // ✅ Sort safely by date
-//     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-//     const labels = sortedData.map(d => new Date(d.date).toLocaleDateString("en-GB"));
-//     const prices = sortedData.map(d => parseFloat(d.price));
-
-//     const ctx = document.getElementById("farmerChart").getContext("2d");
-
-//     if (farmerChart instanceof Chart) {
-//       farmerChart.destroy();
-//     }
-
-//     farmerChart = new Chart(ctx, {
-//       type: "line",
-//       data: {
-//         labels,
-//         datasets: [
-//           {
-//             label: "Famer's Reported Selling Price (₹)",
-//             data: prices,
-//             borderColor: "rgba(255, 99, 132, 1)",
-//             backgroundColor: "rgba(255, 99, 132, 0.2)",
-//             borderWidth: 2,
-//             tension: 0.3,
-//           },
-//         ],
-//       },
-//       options: {
-//         responsive: true,
-//         maintainAspectRatio: false,
-
-//         plugins: {
-//           title: {
-//             display: true,
-//             text: `Farmer's Selling Price for ${commodity2}`,
-//           },
-//           legend: { position: "top" },
-//         },
-//         scales: {
-//           x: { title: { display: true, text: "Date" } },
-//           y: { title: { display: true, text: "Price (₹)" } },
-//         },
-//       },
-//     });
-
-//   } catch (err) {
-//     console.error("Error fetching Farmer selling prices:", err);
-//   }
-// }
-
-// Attach to Filter button and commodity change
-// document.getElementById("filterByDateBtn2").addEventListener("click", fetchFarmersPrices);
-// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
-// document.getElementById("filterByDateBtn").addEventListener("click", fetchFarmersPrices);
-// document.getElementById("commoditySelect").addEventListener("change", fetchFarmersPrices);
-// Initial load (optional)
-// fetchFarmersPrices();
 //  unified charts
 let consumersChart = null;
 
@@ -1353,6 +1251,62 @@ async function fetchConsumersAndFarmersPrices() {
         },
       },
     });
+   // ✅ Initialize Dual-handle Date Slider (noUiSlider)
+   const slider = document.getElementById('dateRangeSlider');
+   const sliderStartLabel = document.getElementById('sliderStartLabel');
+   const sliderEndLabel = document.getElementById('sliderEndLabel');
+
+    // Destroy old slider if it exists (prevents duplicate sliders)
+    if (slider.noUiSlider) {
+        slider.noUiSlider.destroy();
+    }
+
+    if (labels.length > 0) {
+        // Create new slider instance
+        noUiSlider.create(slider, {
+            start: [0, labels.length - 1],
+            connect: true,
+            range: { min: 0, max: labels.length - 1 },
+            step: 1,
+            behaviour: 'drag', // smoother dual handle drag
+        });
+
+        // Initialize date labels below slider
+        sliderStartLabel.textContent = labels[0];
+        sliderEndLabel.textContent = labels[labels.length - 1];
+
+    // --- Debounce utility ---
+    function debounce(fn, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), delay);
+        };
+    }
+
+    // --- Debounced chart update ---
+    const updateChart = debounce((values) => {
+        const startIndex = Math.floor(values[0]);
+        const endIndex = Math.floor(values[1]);
+        const visibleLabels = labels.slice(startIndex, endIndex + 1);
+
+        consumersChart.options.scales.x.min = visibleLabels[0];
+        consumersChart.options.scales.x.max = visibleLabels[visibleLabels.length - 1];
+        consumersChart.update('none');
+    }, 100); // updates every 100ms max
+
+    // --- Slider update handler ---
+    slider.noUiSlider.on('update', function (values) {
+        // Update labels immediately
+        const startIndex = Math.floor(values[0]);
+        const endIndex = Math.floor(values[1]);
+        sliderStartLabel.textContent = labels[startIndex];
+        sliderEndLabel.textContent = labels[endIndex];
+
+        // Trigger debounced chart update
+        updateChart(values);
+    });
+}
 
   } catch (err) {
     console.error("Error fetching prices:", err);
