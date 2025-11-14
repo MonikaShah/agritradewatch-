@@ -20,9 +20,9 @@ from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
 from django.contrib import messages
 
-from .forms import DamageForm,DtUserForm,DtProduceForm,DtLoginForm
+from .forms import DamageForm,DtProduceForm
 
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtUser,DtProduce
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -442,13 +442,13 @@ def webdata_prices_public(request):
 
     # Filter by APMC if provided
     if apmc_name:
-        data_qs = data_qs.filter(apmc__iexact=apmc_name)
-
+        data_qs = data_qs.filter(apmc__icontains=apmc_name)
     # Build results
     results = [
         {
             'commodity': data.commodity,
             'apmc': data.apmc,
+            'district': data.district,
             'variety': data.variety,
             'minprice': data.minprice,
             'maxprice': data.maxprice,
@@ -465,10 +465,25 @@ def webdata_prices_public(request):
 #@ api to view profile of logged in user
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def profile(request):
-    user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
+def user_profile(request, username):
+    user = get_object_or_404(User1, username=username)
+
+    # return render(request, "syncapp/profile.html", {
+    #     "user": user
+    # })
+    # Check if request wants JSON (API) or HTML
+    if request.accepted_renderer.format == 'json' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # API response
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "mobile": getattr(user, "mobile", None),
+            "job": getattr(user, "job", None),
+        })
+    
+    # Otherwise, render HTML template
+    return render(request, "syncapp/profile.html", {"user": user})
 
 
 #CRUD operations for consumer/farmer added crops
@@ -714,47 +729,47 @@ def get_villages(request):
     )
     return JsonResponse({'villages': list(villages)})
 
-def create_user(request):
-    if request.method == 'POST':
-        form = DtUserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])
-            user.save()
-            messages.success(request, "Digital Thela User created successfully!")
-            return redirect('api:create_user')
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = DtUserForm()
+# def create_user(request):
+#     if request.method == 'POST':
+#         form = DtUserForm(request.POST)
+#         if form.is_valid():
+#             user = form.save(commit=False)
+#             user.password = make_password(form.cleaned_data['password'])
+#             user.save()
+#             messages.success(request, "Digital Thela User created successfully!")
+#             return redirect('api:create_user')
+#         else:
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = DtUserForm()
 
     return render(request, 'syncapp/dt_userRegistration.html', {'form': form})
 
-def thela_login(request):
-    if request.method == "POST":
-        form = DtLoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
+# def thela_login(request):
+#     if request.method == "POST":
+#         form = DtLoginForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data["username"]
+#             password = form.cleaned_data["password"]
 
-            try:
-                user = DtUser.objects.get(username=username)
-            except DtUser.DoesNotExist:
-                messages.error(request, "Invalid username or password.")
-                return render(request, "syncapp/thela_login.html", {"form": form})
+#             try:
+#                 user = DtUser.objects.get(username=username)
+#             except DtUser.DoesNotExist:
+#                 messages.error(request, "Invalid username or password.")
+#                 return render(request, "syncapp/thela_login.html", {"form": form})
 
-            # ✅ Compare using check_password
-            if check_password(password, user.password):
-                request.session["thela_user_id"] = user.id
-                request.session["thela_username"] = user.username
-                messages.success(request, f"Welcome {user.name}!")
-                return redirect("api:create_produce")
-            else:
-                messages.error(request, "Invalid username or password.")
-    else:
-        form = DtLoginForm()
+#             # ✅ Compare using check_password
+#             if check_password(password, user.password):
+#                 request.session["thela_user_id"] = user.id
+#                 request.session["thela_username"] = user.username
+#                 messages.success(request, f"Welcome {user.name}!")
+#                 return redirect("api:create_produce")
+#             else:
+#                 messages.error(request, "Invalid username or password.")
+#     else:
+#         form = DtLoginForm()
 
-    return render(request, "syncapp/thela_login.html", {"form": form})
+#     return render(request, "syncapp/thela_login.html", {"form": form})
 # def create_produce(request):
 #     if request.method == 'POST':
 #         form = DtProduceForm(request.POST, request.FILES)
@@ -810,36 +825,35 @@ def thela_login(request):
 #         "username": username,  # ✅ pass for display in template
 #     })
 def create_produce(request):
-    user_id = request.session.get("thela_user_id")
-    if not user_id:
-        messages.error(request, "Please log in to continue.")
-        return redirect("thela_login")
-    print("SESSION DEBUG:", request.session.get("thela_user_id"), request.session.get("thela_username"))
+    # user_id = request.session.get("thela_user_id")
+    user = None
+     # ✅ Check if user is authenticated
+    if request.user.is_authenticated:
+        user = request.user
+        user_id = user.id    # user ID
+        username = user.username  # username string
 
-    try:
-        user = DtUser.objects.get(id=user_id)
-    except DtUser.DoesNotExist:
-        messages.error(request, "User not found. Please log in again.")
-        return redirect("thela_login")
+    if not user:
+        messages.error(request, "Please log in to continue.")
+        return redirect("api:api_login")
+
+    # ✅ Restrict based on job
+    if getattr(user, "job", None) not in ["farmer", "retailer"]:
+        messages.error(request, "You are not authorised to add produce. Farmers and Retailer may add their produce")
+        return redirect("dtDashboard")  # Change to your dashboard URL
 
     if request.method == 'POST':
         form = DtProduceForm(request.POST, request.FILES)
         if form.is_valid():
             produce = form.save(commit=False)
-            produce.username = user  # ✅ link to valid user
-            # ✅ Convert empty strings to None for numeric fields
-            lat = request.POST.get('latitude') or None
-            lon = request.POST.get('longitude') or None
-            produce.latitude = lat
-            produce.longitude = lon
+            produce.username = user  # Link produce to logged-in user
 
-            # handle cost, profit etc safely
-            if produce.cost == "":
-                produce.cost = None
-            if produce.produce_expense == "":
-                produce.produce_expense = None
-            if produce.profit_expectation == "":
-                produce.profit_expectation = None
+            # Convert empty strings to None for numeric/optional fields
+            produce.latitude = request.POST.get('latitude')
+            produce.longitude = request.POST.get('longitude')
+            produce.cost = produce.cost or None
+            produce.produce_expense = produce.produce_expense or None
+            produce.profit_expectation = produce.profit_expectation or None
 
             produce.save()
             messages.success(request, "Produce added successfully!")
@@ -854,9 +868,60 @@ def create_produce(request):
         'syncapp/create_produce.html',
         {
             'form': form,
-            'thela_username': user.name,  # 👈 show in template: "Welcome Monika Shah"
+            'thela_username': getattr(user, "name", username),  # Display full name or username
         },
     )
+    
+    # if request.user.is_authenticated:
+    #     username = request.user # or request.user.get_full_name()
+    #     user_id = request.user.id
+
+    # if not user_id:
+    #     messages.error(request, "Please log in to continue.")
+    #     return redirect("api:api_login")
+    # print("SESSION DEBUG:", request.session.get("user_id"), request.session.get("username"))
+
+    # try:
+    #     user = User1.objects.get(id=user_id)
+    # except DtUser.DoesNotExist:
+    #     messages.error(request, "User not found. Please log in again.")
+    #     return redirect("api:api_login")
+
+    # if request.method == 'POST':
+    #     form = DtProduceForm(request.POST, request.FILES)
+    #     if form.is_valid():
+    #         produce = form.save(commit=False)
+    #         produce.username = user  # ✅ link to valid user
+    #         # ✅ Convert empty strings to None for numeric fields
+    #         lat = request.POST.get('latitude') or None
+    #         lon = request.POST.get('longitude') or None
+    #         produce.latitude = lat
+    #         produce.longitude = lon
+
+    #         # handle cost, profit etc safely
+    #         if produce.cost == "":
+    #             produce.cost = None
+    #         if produce.produce_expense == "":
+    #             produce.produce_expense = None
+    #         if produce.profit_expectation == "":
+    #             produce.profit_expectation = None
+
+    #         produce.save()
+    #         messages.success(request, "Produce added successfully!")
+    #         return redirect("api:create_produce")
+    #     else:
+    #         messages.error(request, "Please correct the errors below.")
+    # else:
+    #     form = DtProduceForm()
+
+    # return render(
+    #     request,
+    #     'syncapp/create_produce.html',
+    #     {
+    #         'form': form,
+    #         'thela_username': user.name,  # 👈 show in template: "Welcome Monika Shah"
+    #     },
+    # )
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -870,6 +935,7 @@ def get_DtCommodities(request):
         DtProduce.objects
         .values(
             'id',
+            'username_id',
             'sale_commodity',
             'variety_name',
             'method',
