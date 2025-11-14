@@ -1,5 +1,5 @@
 from django import forms
-from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop,DtUser,DtProduce
+from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop,DtProduce
 from django.contrib.auth.forms import PasswordResetForm
 
 UNIT_CHOICES = [
@@ -147,42 +147,42 @@ class DamageForm(forms.ModelForm):
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
-class DtLoginForm(forms.Form):
-    username = forms.CharField(
-        label="Username",
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Enter your username"
-        })
-    )
-    password = forms.CharField(
-        label="Password",
-        widget=forms.PasswordInput(attrs={
-            "class": "form-control",
-            "placeholder": "Enter your password"
-        })
-    )
+# class DtLoginForm(forms.Form):
+#     username = forms.CharField(
+#         label="Username",
+#         widget=forms.TextInput(attrs={
+#             "class": "form-control",
+#             "placeholder": "Enter your username"
+#         })
+#     )
+#     password = forms.CharField(
+#         label="Password",
+#         widget=forms.PasswordInput(attrs={
+#             "class": "form-control",
+#             "placeholder": "Enter your password"
+#         })
+#     )
 
-class DtUserForm(forms.ModelForm):
-    class Meta:
-        model = DtUser
-        fields = ['name', 'username', 'email', 'mobile', 'password', 'latitude', 'longitude', 'job']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'}),
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email address'}),
-            'mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter mobile number'}),
-            'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
-            'job': forms.Select(attrs={'class': 'form-select'}),
-            'latitude': forms.HiddenInput(),
-            'longitude': forms.HiddenInput(),
-        }
+# class DtUserForm(forms.ModelForm):
+#     class Meta:
+#         model = DtUser
+#         fields = ['name', 'username', 'email', 'mobile', 'password', 'latitude', 'longitude', 'job']
+#         widgets = {
+#             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'}),
+#             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}),
+#             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email address'}),
+#             'mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter mobile number'}),
+#             'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
+#             'job': forms.Select(attrs={'class': 'form-select'}),
+#             'latitude': forms.HiddenInput(),
+#             'longitude': forms.HiddenInput(),
+#         }
 
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        if len(password) < 6:
-            raise forms.ValidationError("Password must be at least 6 characters long.")
-        return password
+#     def clean_password(self):
+#         password = self.cleaned_data.get('password')
+#         if len(password) < 6:
+#             raise forms.ValidationError("Password must be at least 6 characters long.")
+#         return password
     
 
 # class DtProduceForm(forms.ModelForm):
@@ -255,8 +255,8 @@ class DtProduceForm(forms.ModelForm):
             'variety_name': 'Variety Name',
             'method': 'Method of Production',
             'level_of_produce': 'Production Level',
-            'sowing_date': 'Sowing / Production Date',
-            'harvest_date': 'Harvest / Expiry Date',
+            'sowing_date': 'Sowing Date',
+            'harvest_date': 'Harvest',
             'quantity_for_sale': 'Quantity for Sale',
             'cost': 'Cost per Unit',
             'unit': 'Unit',
@@ -303,6 +303,11 @@ class DtProduceForm(forms.ModelForm):
             choices=commodity_choices,
             attrs={'class': 'form-select', 'id': 'id_sale_commodity'}
         )
+        self.fields['sowing_date'].required = False
+        self.fields['harvest_date'].required = False
+        self.fields['produce_expense'].required = False
+        self.fields['profit_expectation'].required = False
+
 
         # ✅ Mark required fields visually with red asterisk
         for field_name, field in self.fields.items():

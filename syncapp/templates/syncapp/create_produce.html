@@ -4,6 +4,7 @@
 {% block title %}Add Produce{% endblock %}
 
 {% block content %}
+
 <div class="container my-5">
   <div class="card shadow-sm mx-auto" style="max-width: 600px;">
     <div class="card-body">
@@ -19,21 +20,7 @@
         {% csrf_token %}
         {{ form.as_p }}
 
-        <!-- Hidden location fields -->
-        <input type="hidden" id="id_latitude" name="latitude">
-        <input type="hidden" id="id_longitude" name="longitude">
-        <input type="hidden" id="id_timestamp" name="timestamp">
-
-        <!-- Location enable button -->
-        <div class="mb-3 text-center">
-          <button type="button" id="enableLocationBtn" class="btn btn-outline-primary btn-sm">
-            📍 Enable Location
-          </button>
-          <small id="locationStatus" class="text-muted d-block mt-2">
-            Click above to enable your location before submitting.
-          </small>
-        </div>
-
+        
         <div class="d-grid mt-3">
           <button type="submit" class="btn btn-success btn-block">Submit</button>
         </div>
@@ -61,65 +48,25 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const btn = document.getElementById("enableLocationBtn");
   const latInput = document.getElementById("id_latitude");
   const lonInput = document.getElementById("id_longitude");
-  const status = document.getElementById("locationStatus");
-  const timestampInput = document.getElementById("id_timestamp");
+  // const status = document.getElementById("locationStatus");
 
-  // Automatically set timestamp when page loads
-  if (timestampInput) {
-    timestampInput.value = new Date().toISOString();
-  }
+  // Try auto location
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      latInput.value = pos.coords.latitude.toFixed(7);
+      lonInput.value = pos.coords.longitude.toFixed(7);
+      
+    },
+    function () {
+      // fallback values
+      latInput.value = "0.0000000";
+      lonInput.value = "0.0000000";
+    }
+  );
 
-  // Try to auto-fetch location on page load
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function (pos) {
-        const lat = pos.coords.latitude.toFixed(7);
-        const lon = pos.coords.longitude.toFixed(7);
-        latInput.value = lat;
-        lonInput.value = lon;
-        status.textContent = "✅ Location captured automatically.";
-        status.classList.add("text-success");
-      },
-      function (err) {
-        console.warn("Auto-location failed:", err.message);
-        status.textContent = "📍 Click the button to enable location.";
-      }
-    );
-  }
-
-  // Manual button-based location fetch
-  if (btn) {
-    btn.addEventListener("click", function () {   
-      if (!navigator.geolocation) {
-        status.textContent = "❌ Geolocation is not supported by your browser.";
-        status.classList.add("text-danger");
-        return;
-      }
-
-      status.textContent = "Fetching your location...";
-      navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          const lat = pos.coords.latitude.toFixed(7);
-          const lon = pos.coords.longitude.toFixed(7);
-          latInput.value = lat;
-          lonInput.value = lon;
-          console.log("✅ Location captured:", lat, lon);
-          status.textContent = "✅ Location captured successfully!";
-          status.classList.remove("text-danger");
-          status.classList.add("text-success");
-        },
-        function (err) {
-          console.error("Location error:", err);
-          status.textContent = "❌ Please allow location access and try again.";
-          status.classList.add("text-danger");
-        }
-      );
-    });
-  }
-
+  
   // Commodity dropdown logic (unchanged)
   const select = document.getElementById("id_sale_commodity");
   if (select) {

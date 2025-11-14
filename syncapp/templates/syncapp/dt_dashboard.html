@@ -83,6 +83,17 @@ body, html {
   margin-right: 6px;
   border-radius: 50%;
 }
+.leaflet-control.profile-panel {
+  background: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px; /* leaves space for legend below */
+}
+
 </style>
 
 <div id="dashboard-container">
@@ -95,28 +106,26 @@ body, html {
     </div>
     <!-- <button id="locateBtn">📍 Use My Location</button> -->
     <span id="statusMsg"></span>
-     
-  
 
     <!-- Right section: Actions / Profile -->
-     <div class="ms-auto">
+    <div class="ms-auto">
       <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-        ⚙️ Action / Profile
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-        <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
-        {% if thela_username %}
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          ⚙️ Action / Profile
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
+          <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
+          {% if thela_username %}
             <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
-        {% else %}
+          {% else %}
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-success" href="{% url 'api:thela_login' %}">🔑 Login</a></li>
-        {% endif %}
+            <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
+          {% endif %}
         </ul>
+      </div>
     </div>
-  </div>
   </div>
 
   <div id="map"></div>
@@ -148,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 🟢 Legend
-// 🟢 Legend
 function createLegend() {
   if (legend) legend.remove();
 
@@ -162,7 +170,6 @@ function createLegend() {
     if (currentCommodity) {
       const commodityIconPath = `/static/${currentCommodity.toLowerCase().replace(/\s+/g, "_")}.png`;
 
-      // create an <img> element that shows fallback dot if image fails to load
       const imgHTML = `
         <img src="${commodityIconPath}" 
              onerror="this.outerHTML='<i style=&quot;background:#28a745&quot;></i>'"
@@ -177,7 +184,6 @@ function createLegend() {
   };
   legend.addTo(map);
 }
-
 
 // 🟢 Load commodities from API
 async function loadCommodities() {
@@ -229,6 +235,42 @@ function locateUser() {
   );
 }
 
+let profileControl;
+
+function showProfileAboveLegend(entry) {
+  if (profileControl) profileControl.remove();
+
+  profileControl = L.control({ position: "bottomright" });
+
+  profileControl.onAdd = function () {
+    const div = L.DomUtil.create("div", "leaflet-control profile-panel");
+
+    div.innerHTML = `
+    <button id="closeProfileBtn" style="border:none; background:none; font-weight:bold; cursor:pointer;">X</button><br>  
+    <b>Profile:</b> ${entry.username_id}
+      
+      <br>
+      <b>Email:</b> ${entry.email || 'N/A'}<br>
+      <b>Phone:</b> ${entry.mobile || 'N/A'}<br>
+    `;
+
+    setTimeout(() => {
+      const closeBtn = div.querySelector("#closeProfileBtn");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          if (profileControl) {
+            profileControl.remove();
+            profileControl = null;
+          }
+        });
+      }
+    }, 0);
+    return div;
+  };
+
+  profileControl.addTo(map);
+}
+
 // 🟢 Show markers
 async function showCommodityMarkers(commodity) {
   if (!commodity) return;
@@ -246,43 +288,105 @@ async function showCommodityMarkers(commodity) {
   const iconExists = await checkImageExists(iconPath);
 
   data.forEach(entry => {
-    if (entry.latitude && entry.longitude) {
-      let marker;
-      if (iconExists) {
-        const icon = L.icon({
-          iconUrl: iconPath,
-          iconSize: [28, 28],
-          iconAnchor: [14, 28],
-          popupAnchor: [0, -25]
-        });
-        marker = L.marker([entry.latitude, entry.longitude], { icon });
-      } else {
-        marker = L.circleMarker([entry.latitude, entry.longitude], {
-          radius: 7,
-          color: "#28a745",
-          fillColor: "#28a745",
-          fillOpacity: 0.6
-        });
-      }
-      marker.addTo(map).bindPopup(`<b>Commodity:</b>${entry.sale_commodity}</b>
-      <br><b>Updated on:</b>${new Date(entry.created_at).toLocaleDateString()}
-      <br><b>Variety:</b>${entry.variety_name}
-      <br><b>Method:</b>${entry.method}
-      <br><b>Production Level:</b>${entry.level_of_produce}
-      <br><b>Sowing Date:</b>${entry.sowing_date}
-      <br><b>Harvest Date:</b>${entry.harvest_date}
-      <br><b>Quantity for sale:</b>${entry.quantity_for_sale} ${entry.unit}
-      <br><b>Cost:</b>${entry.cost} / ${entry.unit}
-      <br>${entry.photo_or_video 
+  if (entry.latitude && entry.longitude) {
+    let marker;
+
+    if (iconExists) {
+      const icon = L.icon({
+        iconUrl: iconPath,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28]
+      });
+      marker = L.marker([entry.latitude, entry.longitude], { icon });
+    } else {
+      marker = L.circleMarker([entry.latitude, entry.longitude], {
+        radius: 7,
+        color: "#28a745",
+        fillColor: "#28a745",
+        fillOpacity: 0.6
+      });
+    }
+
+    // ✅ define popupHTML properly
+    const popupHTML = `
+      <div>
+        <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
+          style="color:#0d6efd; text-decoration:underline; font-weight:bold;">
+          👤 ${entry.username_id} - View Profile
+        </a>
+        <br><br>
+        <b>Commodity:</b> ${entry.sale_commodity}<br>
+        <b>Cost:</b> ${entry.cost} / ${entry.unit}
+        <br><br>
+        <a href="#" class="toggle-details" style="color:#0d6efd; text-decoration:underline;">
+          🔍 More Details
+        </a>
+
+        <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
+          <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+          <b>Variety:</b> ${entry.variety_name}<br>
+          <b>Method:</b> ${entry.method}<br>
+          <b>Production Level:</b> ${entry.level_of_produce}<br>
+          <b>Sowing Date:</b> ${entry.sowing_date}<br>
+          <b>Harvest Date:</b> ${entry.harvest_date}<br>
+          <b>Quantity for sale:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+          ${entry.photo_or_video 
             ? (entry.photo_or_video.endsWith('.mp4')
                 ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
                 : `<img src="../media/${entry.photo_or_video}" width="200">`
               )
             : ''}
-    `);
-      markers.push(marker);
-    }
-  });
+        </div>
+      </div>
+    `;
+
+    marker.addTo(map).bindPopup(popupHTML);
+
+    // Popup event
+    marker.on("popupopen", e => {
+      const popup = e.popup._contentNode;
+
+      const toggle = popup.querySelector('.toggle-details');
+      const details = popup.querySelector('.more-details');
+      if (toggle && details) {
+        toggle.addEventListener('click', ev => {
+          ev.preventDefault();
+          if (details.style.maxHeight && details.style.maxHeight !== '0px') {
+            details.style.maxHeight = '0';
+            toggle.textContent = '🔍 More Details';
+          } else {
+            details.style.maxHeight = details.scrollHeight + 'px';
+            toggle.textContent = '🔽 Hide Details';
+          }
+        });
+      }
+
+      const profileLink = popup.querySelector('.view-profile-link');
+      if (profileLink) {
+        profileLink.addEventListener('click', async ev => {
+          ev.preventDefault();
+          const usernameId = profileLink.dataset.usernameId;
+          try {
+            const res = await fetch(`/api/profile/${usernameId}/`);
+            const profile = await res.json();
+            showProfileAboveLegend({
+              username_id: entry.username_id,
+              name: profile.name,
+              email: profile.email,
+              mobile: profile.mobile
+            });
+          } catch (err) {
+            console.error("Failed to fetch profile", err);
+            alert("Could not load profile details.");
+          }
+        });
+      }
+    });
+
+    markers.push(marker);
+  }
+});
 
   const msg = document.getElementById('statusMsg');
   msg.textContent = data.length

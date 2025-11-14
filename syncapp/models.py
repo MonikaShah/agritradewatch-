@@ -322,27 +322,27 @@ class MahaVillage(models.Model):
         return f"{self.village} ({self.tehsil}, {self.district})"
 
 
-class DtUser(models.Model):
-    JOB_CHOICES = [
-        ('farmer', 'Farmer'),
-        ('retailer', 'Retailer'),
-    ]
+# class DtUser(models.Model):
+#     JOB_CHOICES = [
+#         ('farmer', 'Farmer'),
+#         ('retailer', 'Retailer'),
+#     ]
 
-    name = models.CharField(max_length=100)
-    username = models.CharField(max_length=50, unique=True)
-    email = models.EmailField(unique=True)
-    mobile = models.CharField(max_length=15, unique=True)
-    password = models.CharField(max_length=128)
-    latitude = models.DecimalField(max_digits=10, decimal_places=7)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7)
-    job = models.CharField(max_length=20, choices=JOB_CHOICES)
-    date_joined = models.DateField(default=timezone.now)
+#     name = models.CharField(max_length=100)
+#     username = models.CharField(max_length=50, unique=True)
+#     email = models.EmailField(unique=True)
+#     mobile = models.CharField(max_length=15, unique=True)
+#     password = models.CharField(max_length=128)
+#     latitude = models.DecimalField(max_digits=10, decimal_places=7)
+#     longitude = models.DecimalField(max_digits=10, decimal_places=7)
+#     job = models.CharField(max_length=20, choices=JOB_CHOICES)
+#     date_joined = models.DateField(default=timezone.now)
 
-    def __str__(self):
-        return f"{self.name} ({self.job})"
-    class Meta:
-        managed = True 
-        db_table = 'dt_users'
+#     def __str__(self):
+#         return f"{self.name} ({self.job})"
+#     class Meta:
+#         managed = True 
+#         db_table = 'dt_users'
 
 # For uplaod video and photo 
 def validate_file_type_and_size(value):
@@ -369,7 +369,7 @@ def validate_file_type_and_size(value):
 
 class DtProduce(models.Model):
     username = models.ForeignKey(
-        'DtUser',
+        'User1',
         to_field='username',  # ✅ Tell Django to use username instead of id
         on_delete=models.CASCADE,
         db_column='username_id'
@@ -381,25 +381,25 @@ class DtProduce(models.Model):
         ('selling_surplus', 'Selling Surplus'),
         ('selling_surplus_with_value_addition', 'Selling Surplus with Value Addition')
     ])
-    sowing_date = models.DateField()
-    harvest_date = models.DateField()
+    sowing_date = models.DateField(blank=True, null=True)
+    harvest_date = models.DateField(blank=True, null=True)
     quantity_for_sale = models.FloatField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     unit = models.CharField(max_length=20, choices=[
         ('Kg', 'Kg'), ('250 gm', '250 gm'), ('bundle', 'Bundle'),
         ('piece', 'Piece'), ('dozen', 'Dozen')
     ])
-    produce_expense = models.DecimalField(max_digits=10, decimal_places=2)
-    profit_expectation = models.DecimalField(max_digits=10, decimal_places=2)
+    produce_expense = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    profit_expectation = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
     photo_or_video = models.FileField(
         upload_to='produce_media/',
         blank=True,
         null=True,
         validators=[validate_file_type_and_size]
     )
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    created_at = models.DateField()
+    latitude = models.DecimalField(max_digits=10, decimal_places=7)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+    created_at = models.DateField(auto_now_add=True)
     def clean(self):
         """
         Ensure that if a photo/video is uploaded,
