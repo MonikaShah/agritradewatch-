@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "syncapp/base.html" %}
 {% load static %}
 
 {% block title %}Profile - MandiGo{% endblock %}
@@ -22,17 +22,38 @@
                     </div>
 
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.get_full_name }}</li>
+                        <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.name }}</li>
                         <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
+                        <li class="list-group-item"><strong>Mobile:</strong> {{ request.user.mobile }}</li>
                         <li class="list-group-item"><strong>Date Joined:</strong> {{ request.user.date_joined|date:"d M Y" }}</li>
                         <li class="list-group-item"><strong>Last Login:</strong> {{ request.user.last_login|date:"d M Y H:i" }}</li>
                     </ul>
 
                     <!-- Actions -->
-                    <div class="mt-3 d-flex justify-content-between">
-                        <a href="{% url 'password_change' %}" class="btn btn-outline-primary btn-sm">Change Password</a>
-                        <a href="{% url 'map_chart' %}" class="btn btn-success btn-sm">Back to Dashboard</a>
-                    </div>
+                    <div class="mt-4 d-flex gap-3 flex-wrap">
+
+                    <!-- Back to Home -->
+                    <a id="btnHome" href="{% url 'landingpage' %}" 
+                    class="btn btn-success d-flex align-items-center">
+                        <i class="bi bi-house-door me-2"></i>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Back to Dashboard -->
+                    <a id="btnDashboard" href="{% url 'map_chart' %}" 
+                    class="btn btn-primary d-flex align-items-center">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <!-- Profile (example third button, you can modify URL) -->
+                    <a id="btnProfile" href="{% url 'dtDashboard' %}" 
+                    class="btn btn-info d-flex align-items-center">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <span>Digital Thela</span>
+                    </a>
+
+                </div>
 
                 </div>
             </div>

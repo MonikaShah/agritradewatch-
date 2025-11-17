@@ -307,7 +307,13 @@
 
 {% block extra_js %}
 <script>
+const USER_LOGGED_IN = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
 document.addEventListener("DOMContentLoaded", function() {
+  // Wait until modal exists, then check login state
+  const loginModal = document.getElementById("loginModal");
+  const loginForm = document.getElementById("loginForm");
+  const loginMessage = document.getElementById("loginMessage");
+
 // RESIZE the map and left panel
 const divider = document.getElementById("divider");
   const left = document.getElementById("map-container");
@@ -379,9 +385,7 @@ const divider = document.getElementById("divider");
   document.getElementById("filterByDateBtn").click();
     Chart.register(ChartZoom);
 
-  const loginModal = document.getElementById("loginModal");
-  const loginForm = document.getElementById("loginForm");
-  const loginMessage = document.getElementById("loginMessage");
+  
 
   const apmcCsvUrl = "{% static 'APMC_names.csv' %}";
   let apmcMarkers = L.layerGroup();  // Separate layer for APMC
@@ -498,6 +502,13 @@ const divider = document.getElementById("divider");
   // --------------------------
   // Auto-login check 
   // --------------------------
+  (function syncTokens() {
+    if (!sessionStorage.getItem("api_token") && localStorage.getItem("api_token")) {
+        sessionStorage.setItem("api_token", localStorage.getItem("api_token"));
+        sessionStorage.setItem("refresh_token", localStorage.getItem("refresh_token"));
+        sessionStorage.setItem("username", localStorage.getItem("username"));
+    }
+})();
   (async function autoLoginCheck() {
     const token = sessionStorage.getItem("api_token");
     const refresh = sessionStorage.getItem("refresh_token");
@@ -760,15 +771,46 @@ const divider = document.getElementById("divider");
       });
 
       // --- Fetch initial data ---
+      // try {
+      //       const res = await fetch("/api/consumers_geojson/", {
+      //         credentials: "same-origin"
+      //       });
+      //       if (!res.ok) throw new Error("Failed to fetch GeoJSON");
+      //       allData = await res.json();  // <-- FIXED
+      //       updateStatsForRadius(); 
+      //       updateMarkers(commoditySelect.value, true);
+      //   } catch(err){
+      //       console.error("Error loading GeoJSON:", err);
+      //   }
       try {
-            const res = await fetch("/api/consumers_geojson/");
-            if (!res.ok) throw new Error("Failed to fetch GeoJSON");
-            allData = await res.json();  // <-- FIXED
-            updateStatsForRadius(); 
-            updateMarkers(commoditySelect.value, true);
-        } catch(err){
-            console.error("Error loading GeoJSON:", err);
+
+          const token = sessionStorage.getItem("api_token");
+
+          // ⛔ STOP if user is not logged in
+          if (!token) {
+              console.warn("User not logged in → skipping API call");
+              loginModal.style.display = "block";  // show login window
+            return;
         }
+
+        const res = await fetch("/api/consumers_geojson/", {
+            credentials: "same-origin",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch GeoJSON");
+
+        allData = await res.json();
+
+        updateStatsForRadius();
+        updateMarkers(commoditySelect.value, true);
+
+    } catch (err) {
+        console.error("Error loading GeoJSON:", err);
+    }
+
 
       commoditySelect.addEventListener("change", function(){
           selectedCommoditySpan.innerText=this.value;
@@ -1103,7 +1145,17 @@ if (labels.length > 0) {
         
         } catch(err){
             console.error("Error fetching webdata prices:", err);
-            alert("Failed to load prices. Check console.");
+            alert("Please login to load Agmarknet prices.");
+            if (!USER_LOGGED_IN) {
+                const loginModal = document.getElementById("loginModal");
+
+                if (loginModal) {
+                    loginModal.style.display = "block";
+                } else {
+                    console.log("Modal not found in DOM");
+                }
+            }
+
         }
         // Refresh map markers to reflect selected date range
         updateMarkers(commoditySelect.value, true);

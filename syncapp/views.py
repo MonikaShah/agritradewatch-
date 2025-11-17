@@ -211,6 +211,7 @@ def aphmedapmc_market_view(request):
 
 
 # @login_required
+@login_required(login_url='/login/')
 def map_chart(request):
     print("User:", request.user, "| Authenticated:", request.user.is_authenticated)
 
