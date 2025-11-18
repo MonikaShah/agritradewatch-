@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Commodity,Consumer1,Farmer1,User1,WebData,Page,APMC_Market_Prices,APMC_Master  # replace with your actual models
+from .models import Commodity,Consumer1,Farmer1,User1,WebData,Page,APMC_Market_Prices,APMC_Master,DtProduce,DamageCrop  # replace with your actual models
 from django.utils.html import format_html
 from django.db.models import F  # Make sure to import F
 
@@ -43,6 +43,10 @@ class WebdataAdmin(admin.ModelAdmin):
     list_display = ('commodity', 'source', 'date', 'apmc')
     list_filter = ['date']
 
+class DrProduceAdmin(admin.ModelAdmin):
+    list_display = ('sale_commodity', 'variety_name','quantity_for_sale', 'created_at','photo_or_video')
+    list_filter = ['created_at']
+
     
 # Register models
 # admin.site.register(MarketPrices, MarketPricesAdmin)
@@ -53,6 +57,8 @@ admin.site.register(WebData,WebdataAdmin)
 admin.site.register(Page,PageAdmin)
 admin.site.register(Commodity)
 admin.site.register(APMC_Master)
+admin.site.register(DamageCrop)
+admin.site.register(DtProduce,DrProduceAdmin)
 
 
 # Register your models here.
