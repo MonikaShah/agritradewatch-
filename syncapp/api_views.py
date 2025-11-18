@@ -872,56 +872,7 @@ def create_produce(request):
         },
     )
     
-    # if request.user.is_authenticated:
-    #     username = request.user # or request.user.get_full_name()
-    #     user_id = request.user.id
-
-    # if not user_id:
-    #     messages.error(request, "Please log in to continue.")
-    #     return redirect("api:api_login")
-    # print("SESSION DEBUG:", request.session.get("user_id"), request.session.get("username"))
-
-    # try:
-    #     user = User1.objects.get(id=user_id)
-    # except DtUser.DoesNotExist:
-    #     messages.error(request, "User not found. Please log in again.")
-    #     return redirect("api:api_login")
-
-    # if request.method == 'POST':
-    #     form = DtProduceForm(request.POST, request.FILES)
-    #     if form.is_valid():
-    #         produce = form.save(commit=False)
-    #         produce.username = user  # ✅ link to valid user
-    #         # ✅ Convert empty strings to None for numeric fields
-    #         lat = request.POST.get('latitude') or None
-    #         lon = request.POST.get('longitude') or None
-    #         produce.latitude = lat
-    #         produce.longitude = lon
-
-    #         # handle cost, profit etc safely
-    #         if produce.cost == "":
-    #             produce.cost = None
-    #         if produce.produce_expense == "":
-    #             produce.produce_expense = None
-    #         if produce.profit_expectation == "":
-    #             produce.profit_expectation = None
-
-    #         produce.save()
-    #         messages.success(request, "Produce added successfully!")
-    #         return redirect("api:create_produce")
-    #     else:
-    #         messages.error(request, "Please correct the errors below.")
-    # else:
-    #     form = DtProduceForm()
-
-    # return render(
-    #     request,
-    #     'syncapp/create_produce.html',
-    #     {
-    #         'form': form,
-    #         'thela_username': user.name,  # 👈 show in template: "Welcome Monika Shah"
-    #     },
-    # )
+   
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -931,6 +882,7 @@ def get_DtCommodities(request):
     """
     # If 'commodity' is a CharField, we can get distinct values
     commodity = request.GET.get('sale_commodity')
+    username_id = request.GET.get('username_id')  # <-- NEW
     entries = (
         DtProduce.objects
         .values(
@@ -954,5 +906,53 @@ def get_DtCommodities(request):
     )
     if commodity:
         entries = entries.filter(sale_commodity__iexact=commodity)
+    # 🔥 filter by username_id (NEW)
+    if username_id:
+        entries = entries.filter(username_id=username_id)
+
 
     return Response(list(entries))
+
+# //Cost update for dt thela
+@api_view(['POST'])
+@permission_classes([AllowAny])   # we can restrict later if needed
+def update_produce_cost(request, pk):
+    try:
+        obj = DtProduce.objects.get(id=pk)
+    except DtProduce.DoesNotExist:
+        return Response({"error": "Item not found"}, status=404)
+
+    new_cost = request.data.get("cost")
+
+    if new_cost is None:
+        return Response({"error": "Missing cost in request"}, status=400)
+
+    try:
+        obj.cost = float(new_cost)
+        obj.save()
+    except:
+        return Response({"error": "Invalid cost format"}, status=400)
+
+    return Response({"success": True, "new_cost": obj.cost})
+
+def get_single_entry(request, pk):
+    try:
+        entry = DtProduce.objects.get(id=pk)
+        data = {
+            "id": entry.id,
+            "username_id": entry.username_id,
+            "sale_commodity": entry.sale_commodity,
+            "cost": entry.cost,
+            "unit": entry.unit,
+            "variety_name": entry.variety_name,
+            "method": entry.method,
+            "level_of_produce": entry.level_of_produce,
+            "sowing_date": entry.sowing_date,
+            "harvest_date": entry.harvest_date,
+            "quantity_for_sale": entry.quantity_for_sale,
+            "photo_or_video": entry.photo_or_video.name if entry.photo_or_video else "",  # <-- convert FieldFile to string            
+            "created_at": entry.created_at.isoformat() if entry.created_at else ""
+        }
+        return JsonResponse(data)
+    except DtProduce.DoesNotExist:
+        return JsonResponse({"error": "Not found"}, status=404)

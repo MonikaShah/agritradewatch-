@@ -242,7 +242,11 @@
       <div id="rightPanel">
         <div class="rightPanelInner">
           <button id="closeRightPanelBtn">✖</button>
-          <div id="profileContent"></div>
+          <div id="profileContent">
+            <h4>Commodities for Sale</h4>
+            <span id="profileUsername" style="display:none;"></span>
+            <div id="otherCommodities"></div>
+          </div>
         </div>
       </div>
 
@@ -256,6 +260,8 @@
   let userMarker = null;
   let markers = [];
   let currentCommodity = null;
+  const loggedInUser = "{{ thela_username }}";   // empty string if not logged in
+  let currentOpenMarker = null;
 
   document.addEventListener("DOMContentLoaded", () => {
     map = L.map('map').setView([20.5937, 78.9629], 8);
@@ -268,39 +274,52 @@
   });
 
   // Shrink map & show profile
-  function showProfileAboveLegend(profile){
+  function showProfileAboveLegend(profile, usernameIdFromPopup) {
     const mapDiv = document.getElementById('map');
     const rightPanel = document.getElementById('rightPanel');
     const contentDiv = document.getElementById('profileContent');
-
-    // Fill content
+    
     contentDiv.innerHTML = `
         <div class="profile-pic">👤</div>
-        <h4>${profile.username || 'Unknown'}</h4>
+        <h4>${profile.username || profile.display_name || usernameIdFromPopup || 'Unknown'}</h4>
+
         <div class="profile-row">
             <span class="profile-label">Job:</span>
             <span class="profile-value">${profile.job || 'N/A'}</span>
         </div>
+
         <div class="profile-row">
             <span class="profile-label">Email:</span>
             <span class="profile-value">${profile.email || 'N/A'}</span>
         </div>
+
         <div class="profile-row">
             <span class="profile-label">Phone:</span>
-            <span class="profile-value">${profile.mobile || 'N/A'}</span>
+            <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
         </div>
+
+        <h4>Other Items For Sale</h4>
+        <div id="otherCommodities">Loading...</div>
     `;
 
-    // OPEN right panel
-    rightPanel.classList.add('open');
+    // Use the username id that we got from the marker popup first (guaranteed to match DtEntries.username_id)
+    // If it's not provided, fall back to possible names on the profile object.
+    const usernameToQuery = usernameIdFromPopup ||
+                            profile.username_id ||
+                            profile.username ||
+                            profile.user ||
+                            profile.user_name ||
+                            null;
     
-    // Desktop: set width
+    loadOtherCommodities(usernameToQuery);
+        console.log("username for other commodity",usernameToQuery);
+    // OPEN PANEL
+    rightPanel.classList.add('open');
     if(window.innerWidth > 768){
         rightPanel.style.width = '35%';
         mapDiv.style.flex = '0 0 65%';
     }
 
-    // Close button
     document.getElementById('closeRightPanelBtn').onclick = () => {
         rightPanel.classList.remove('open');
         rightPanel.style.width = '0';
@@ -311,6 +330,106 @@
     setTimeout(()=>map.invalidateSize(), 300);
 }
 
+//load other commodities
+async function loadOtherCommodities(username) {
+    const container = document.getElementById("otherCommodities");
+    container.innerHTML = `<p>Loading...</p>`;
+
+    try {
+        // Fetch items from your API
+        const res = await fetch(`/api/DtEntries/?username_id=${encodeURIComponent(username)}`);
+        const items = await res.json();
+
+        container.innerHTML = ""; // clear
+
+        if (!items.length) {
+            container.innerHTML = `<p>No items found.</p>`;
+            return;
+        }
+
+        const loggedInUser = "{{ thela_username }}";   // from Django template
+        const isOwner = loggedInUser && (loggedInUser === username);
+
+        items.forEach(item => {
+            const row = document.createElement("div");
+            row.classList.add("profile-row");
+
+            // OWNER sees editable input
+            if (isOwner) {
+                row.innerHTML = `
+                    <span class="profile-label">${item.sale_commodity}</span>
+
+                    <span class="profile-value">
+                        ₹ <input type="number" id="edit_cost_${item.id}"
+                                 value="${item.cost}"
+                                 min="1"
+                                 style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
+                        / ${item.unit}
+
+                        <button class="btn btn-sm btn-primary"
+                                style="margin-left:5px;padding:2px 6px;"
+                                onclick="updateCost(${item.id})">
+                            Save
+                        </button>
+                    </span>
+                `;
+            }
+            else {
+                // OTHER USERS see read-only text
+                row.innerHTML = `
+                    <span class="profile-label">${item.sale_commodity}</span>
+                    <span class="profile-value">₹${item.cost} / ${item.unit}</span>
+                `;
+            }
+
+            container.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error("Error loading commodities:", err);
+        container.innerHTML = `<p style="color:red;">Error loading data</p>`;
+    }
+}
+async function updateCost(id) {
+    const input = document.getElementById(`edit_cost_${id}`);
+    const newCost = input.value;
+
+    if (!newCost || isNaN(newCost) || Number(newCost) < 1) {
+        alert("Enter a valid cost");
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/update_produce_cost/${id}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ cost: newCost })
+        });
+
+        if (!res.ok) throw new Error("Failed");
+
+        alert("Cost updated!");
+
+        // -------------------------------------------
+        // 🔵 1) Refresh RIGHT PANEL commodities
+        // -------------------------------------------
+        // const viewedUser = document.getElementById("profileUsername").innerText;
+        // loadOtherCommodities(viewedUser);
+
+        // 🔥 Refresh popup instantly if it is open
+        
+        if (currentOpenMarker) {
+            refreshPopup(id, currentOpenMarker);
+        }
+
+        } catch (error) {
+            console.error("Error updating:", error);
+            alert("Error updating cost");
+        }
+    }
 
 
   // Load commodities from API
@@ -334,6 +453,97 @@
       console.error(err);
     }
   }
+  async function refreshPopup(entryId) {
+    try {
+        const marker = markers.find(m => m._entryId === entryId);
+        if (!marker) return;  // no marker to update
+
+        const res = await fetch(`/api/get_single_entry/${entryId}/`);
+        if (!res.ok) {
+            console.error("Failed to fetch entry:", res.status);
+            return;
+        }
+
+        const entry = await res.json();
+
+        const popupHTML = `
+          <div>
+            <a href="#" class="view-profile-link" data-username-id="${entry.username_id}"
+              style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+              👤 ${entry.username_id} - View Profile
+            </a>
+            <br><br>
+            <b>Commodity:</b> ${entry.sale_commodity}<br>
+            <b>Cost:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
+            <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
+              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>Method:</b> ${entry.method}<br>
+              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              <b>Sowing Date:</b> ${entry.sowing_date}<br>
+              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              ${entry.photo_or_video
+                ? (entry.photo_or_video.endsWith('.mp4')
+                    ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
+                    : `<img src="../media/${entry.photo_or_video}" width="200">`)
+                : ''}
+            </div>
+          </div>
+        `;
+
+        marker.setPopupContent(popupHTML);
+
+        // Reattach popup events (toggle, profile link)
+        marker.on("popupopen", e => {
+            const popup = e.popup._contentNode;
+
+            // Toggle more details
+            const toggle = popup.querySelector('.toggle-details');
+            const details = popup.querySelector('.more-details');
+            if(toggle && details){
+                toggle.addEventListener('click', ev=>{
+                    ev.preventDefault();
+                    if(details.style.maxHeight && details.style.maxHeight !== '0px'){
+                        details.style.maxHeight='0';
+                        toggle.textContent='🔍 More Details';
+                    } else {
+                        details.style.maxHeight=details.scrollHeight+'px';
+                        toggle.textContent='🔽 Hide Details';
+                    }
+                });
+            }
+
+            // View profile
+            const profileLink = popup.querySelector('.view-profile-link');
+            if(profileLink){
+                profileLink.addEventListener('click', async ev => {
+                    ev.preventDefault();
+                    const usernameFromLink = profileLink.dataset.usernameId;
+                    if (!usernameFromLink) {
+                        alert("Username not available!");
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch(`/api/profile/${encodeURIComponent(usernameFromLink)}/`);
+                        if (!res.ok) throw new Error(res.statusText);
+                        const profile = await res.json();
+                        showProfileAboveLegend(profile, usernameFromLink);
+                    } catch(err) {
+                        console.error(err);
+                        alert("Could not load profile.");
+                    }
+                });
+            }
+        });
+
+    } catch (err) {
+        console.error("Popup refresh failed:", err);
+    }
+}
+
 
   // Locate user
   function locateUser(){
@@ -418,8 +628,10 @@
         `;
 
         marker.addTo(map).bindPopup(popupHTML);
+        marker._entryId = entry.id;  // store for later
 
         marker.on("popupopen", e=>{
+          currentOpenMarker = e.popup._source;  // store marker
           const popup = e.popup._contentNode;
           // More details toggle
           const toggle = popup.querySelector('.toggle-details');
@@ -442,24 +654,26 @@
           if(profileLink){
             profileLink.addEventListener('click', async ev => {
               ev.preventDefault();
-              // Get username safely from the link's data attribute
-              const username = profileLink.dataset.usernameId; // camelCase from data-username-id
-              if (!username) {
+              // username from marker popup attribute (this is the DB username_id)
+              const usernameFromLink = profileLink.dataset.usernameId;
+              if (!usernameFromLink) {
                 alert("Username not available!");
                 return;
               }
+
               try {
-                  const res = await fetch(`/api/profile/${username}/`);
-                  const profile = await res.json();
-                  console.log("Profile fetched:", profile); // Check API response
-                  showProfileAboveLegend(profile); // Pass the object directly
+                const res = await fetch(`/api/profile/${encodeURIComponent(usernameFromLink)}/`);
+                const profile = await res.json();
+                console.log("Profile fetched:", profile);
+                // IMPORTANT: pass both profile object AND the original username id from the popup
+                showProfileAboveLegend(profile, usernameFromLink);
               } catch(err) {
-                  console.error(err);
-                  alert("Could not load profile.");
-              }finally {
-                    spinner.style.display = 'none'; // hide spinner
-                }
-          });
+                console.error(err);
+                alert("Could not load profile.");
+              } finally {
+                spinner.style.display = 'none';
+              }
+            });
 
           }
         });
