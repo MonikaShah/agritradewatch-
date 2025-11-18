@@ -1,414 +1,517 @@
-{% extends "syncapp/base.html" %}
-{% load static %}
-{% block content %}
+  {% extends "syncapp/base.html" %}
+  {% load static %}
+  {% block content %}
 
-<style>
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-}
+  <style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
 
-#dashboard-container {
+  #dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+  }
+
+  /* Top Panel */
+  #topPanel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    z-index: 1000;
+  }
+
+  #topPanel label {
+    font-weight: bold;
+  }
+
+  #topPanel select,
+  #topPanel button {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  #topPanel button {
+    background-color: #198754;
+    color: white;
+    border: none;
+  }
+  #topPanel button:hover {
+    background-color: #157347;
+  }
+
+  /* Map + Right Panel Container */
+  #mapContainer {
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+    height: calc(100% - 60px); /* topPanel height */
+    transition: all 0.4s ease;
+  }
+
+  /* Map */
+  #map {
+    flex: 1;
+    height: 100%;
+    transition: flex 0.4s ease;
+  }
+
+  /* Right Panel */
+  #rightPanel {
+  width: 0;
+  overflow-x: hidden;
+  transition: width 0.4s ease;
+  background: #ffffff;
+  border-left: 1px solid #ddd;
+  box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 110px);
-  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
-/* Top controls bar */
-#topPanel {
+.rightPanelInner {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  padding: 10px 15px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #ddd;
-  flex-wrap: wrap;
-  z-index: 1000;
-  width: 100%;
-}
-
-#topPanel label {
-  font-weight: bold;
-  margin-right: 5px;
-}
-#topPanel select,
-#topPanel button {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-#topPanel button {
-  background-color: #198754;
-  color: white;
-  border: none;
-}
-#topPanel button:hover {
-  background-color: #157347;
-}
-
-/* Map */
-#map {
-  flex-grow: 1;
-  width: 100%;
+  flex-direction: column;
   height: 100%;
-  z-index: 1;
+  padding: 20px;
+  gap: 15px;
 }
 
-#statusMsg {
-  font-size: 14px;
+/* Header & Close Button */
+#closeRightPanelBtn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+#closeRightPanelBtn:hover {
+  color: #e74c3c;
+}
+
+/* Profile Content */
+#profileContent h4 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #198754;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.profile-label {
+  font-weight: 600;
   color: #555;
 }
-.leaflet-control.legend {
-  background: white;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
-  font-size: 14px;
-  line-height: 1.4em;
+
+.profile-value {
+  color: #222;
+  text-align: right;
 }
-.legend img {
-  width: 18px;
-  height: 18px;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-.legend i {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  margin-right: 6px;
+
+/* Optional: profile image placeholder */
+#profileContent .profile-pic {
+  width: 80px;
+  height: 80px;
+  background: #ddd;
   border-radius: 50%;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #aaa;
 }
-.leaflet-control.profile-panel {
-  background: white;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
-  font-size: 14px;
-  max-height: 200px;
+
+/* Scrollable content if too long */
+#profileContent {
   overflow-y: auto;
-  margin-bottom: 10px; /* leaves space for legend below */
+  flex-grow: 1;
 }
 
-</style>
+  /* Close Button */
 
-<div id="dashboard-container">
-  <div id="topPanel">
-    <div>
-      <label for="commoditySelect">Select Commodity:</label>
-      <select id="commoditySelect">
-        <option value="">-- Select --</option>
-      </select>
-    </div>
-    <!-- <button id="locateBtn">📍 Use My Location</button> -->
-    <span id="statusMsg"></span>
-
-    <!-- Right section: Actions / Profile -->
-    <div class="ms-auto">
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-          ⚙️ Action / Profile
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-          <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
-          {% if thela_username %}
-            <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
-          {% else %}
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div id="map"></div>
-</div>
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet/dist/leaflet.css"
-/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-let map;
-let userMarker = null;
-let markers = [];
-let legend;
-let currentCommodity = null;
-
-document.addEventListener("DOMContentLoaded", () => {
-  map = L.map('map').setView([20.5937, 78.9629], 8);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  createLegend();
-  loadCommodities();
-  locateUser();
-});
-
-// 🟢 Legend
-function createLegend() {
-  if (legend) legend.remove();
-
-  legend = L.control({ position: "bottomright" });
-  legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "leaflet-control legend");
-    const legendHTML = [`<b>Legend</b><br>
-      <i style="background:#007bff"></i> My Location<br>`];
-
-    // ✅ Add commodity entry line if selected
-    if (currentCommodity) {
-      const commodityIconPath = `/static/${currentCommodity.toLowerCase().replace(/\s+/g, "_")}.png`;
-
-      const imgHTML = `
-        <img src="${commodityIconPath}" 
-             onerror="this.outerHTML='<i style=&quot;background:#28a745&quot;></i>'"
-             alt="${currentCommodity}">
-      `;
-
-      legendHTML.push(`${imgHTML} ${currentCommodity}`);
-    }
-
-    div.innerHTML = legendHTML.join("<br>");
-    return div;
-  };
-  legend.addTo(map);
-}
-
-// 🟢 Load commodities from API
-async function loadCommodities() {
-  try {
-    const res = await fetch('/api/DtEntries/');
-    const commodities = await res.json();
-    const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
-
-    const select = document.getElementById('commoditySelect');
-    select.innerHTML = '<option value="">-- Select --</option>';
-    uniqueCommodities.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item;
-      opt.textContent = item;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Failed to load commodities", err);
+  /* Leaflet Legend */
+  .leaflet-control.legend {
+    background: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    font-size: 14px;
+    line-height: 1.4em;
   }
-}
-
-// 🟢 Locate user
-function locateUser() {
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported by your browser.");
-    return;
+  .legend img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .legend i {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 6px;
+    border-radius: 50%;
   }
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      if (isNaN(lat) || isNaN(lng)) return;
-
-      map.setView([lat, lng], 10);
-
-      userMarker = L.circleMarker([lat, lng], {
-        radius: 8,
-        color: "#007bff",
-        fillColor: "#007bff",
-        fillOpacity: 0.5,
-      }).addTo(map);
-    },
-    (error) => {
-      console.error("Error getting user location:", error);
-      alert("Unable to get your location. Please enable GPS or location permissions.");
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-let profileControl;
-
-function showProfileAboveLegend(entry) {
-  if (profileControl) profileControl.remove();
-
-  profileControl = L.control({ position: "bottomright" });
-
-  profileControl.onAdd = function () {
-    const div = L.DomUtil.create("div", "leaflet-control profile-panel");
-
-    div.innerHTML = `
-    <button id="closeProfileBtn" style="border:none; background:none; font-weight:bold; cursor:pointer;">X</button><br>  
-    <b>Profile:</b> ${entry.username_id}
-      
-      <br>
-      <b>Email:</b> ${entry.email || 'N/A'}<br>
-      <b>Phone:</b> ${entry.mobile || 'N/A'}<br>
-    `;
-
-    setTimeout(() => {
-      const closeBtn = div.querySelector("#closeProfileBtn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          if (profileControl) {
-            profileControl.remove();
-            profileControl = null;
-          }
-        });
-      }
-    }, 0);
-    return div;
-  };
-
-  profileControl.addTo(map);
-}
-
-// 🟢 Show markers
-async function showCommodityMarkers(commodity) {
-  if (!commodity) return;
-
-  currentCommodity = commodity;
-  createLegend();
-
-  const res = await fetch(`/api/DtEntries/?sale_commodity=${commodity}`);
-  const data = await res.json();
-
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-
-  const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
-  const iconExists = await checkImageExists(iconPath);
-
-  data.forEach(entry => {
-  if (entry.latitude && entry.longitude) {
-    let marker;
-
-    if (iconExists) {
-      const icon = L.icon({
-        iconUrl: iconPath,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -28]
-      });
-      marker = L.marker([entry.latitude, entry.longitude], { icon });
-    } else {
-      marker = L.circleMarker([entry.latitude, entry.longitude], {
-        radius: 7,
-        color: "#28a745",
-        fillColor: "#28a745",
-        fillOpacity: 0.6
-      });
+  /* Mobile responsiveness */
+  @media(max-width: 768px){
+    #mapContainer {
+      position: relative;  /* needed for absolutely positioned panel */
+      flex-direction: column;
     }
+    #map {
+      flex: 1 1 100%;
+      height: calc(100%); /* full height of container */
+    }
+    
+  #rightPanel {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    border-left: none;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
+    transition: bottom 0.4s ease;
+    z-index: 3000;
+  }
+  #rightPanel.open {
+    bottom: 0;
+  }
+}
+  </style>
 
-    // ✅ define popupHTML properly
-    const popupHTML = `
+  <div id="dashboard-container">
+    <div id="topPanel">
       <div>
-        <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
-          style="color:#0d6efd; text-decoration:underline; font-weight:bold;">
-          👤 ${entry.username_id} - View Profile
-        </a>
-        <br><br>
-        <b>Commodity:</b> ${entry.sale_commodity}<br>
-        <b>Cost:</b> ${entry.cost} / ${entry.unit}
-        <br><br>
-        <a href="#" class="toggle-details" style="color:#0d6efd; text-decoration:underline;">
-          🔍 More Details
-        </a>
-
-        <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
-          <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
-          <b>Variety:</b> ${entry.variety_name}<br>
-          <b>Method:</b> ${entry.method}<br>
-          <b>Production Level:</b> ${entry.level_of_produce}<br>
-          <b>Sowing Date:</b> ${entry.sowing_date}<br>
-          <b>Harvest Date:</b> ${entry.harvest_date}<br>
-          <b>Quantity for sale:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
-          ${entry.photo_or_video 
-            ? (entry.photo_or_video.endsWith('.mp4')
-                ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
-                : `<img src="../media/${entry.photo_or_video}" width="200">`
-              )
-            : ''}
+        <label for="commoditySelect">Select Commodity:</label>
+        <select id="commoditySelect">
+          <option value="">-- Select --</option>
+        </select>
+      </div>  
+      <div id="loadingSpinner" style="display:none; margin-left:10px;">
+        <span>⏳ Loading...</span>
+      </div>
+      <span id="statusMsg"></span>
+      <div class="ms-auto">
+        <div class="dropdown">
+          <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            ⚙️ Action / Profile
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
+            <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
+            {% if thela_username %}
+              <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
+            {% else %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
+            {% endif %}
+          </ul>
         </div>
       </div>
+    </div>
+
+    <div id="mapContainer">
+      <div id="map"></div>
+      <div id="rightPanel">
+        <div class="rightPanelInner">
+          <button id="closeRightPanelBtn">✖</button>
+          <div id="profileContent"></div>
+        </div>
+      </div>
+
+  </div>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+  let map;
+  let userMarker = null;
+  let markers = [];
+  let currentCommodity = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    map = L.map('map').setView([20.5937, 78.9629], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    loadCommodities();
+    locateUser();
+  });
+
+  // Shrink map & show profile
+  function showProfileAboveLegend(profile){
+    const mapDiv = document.getElementById('map');
+    const rightPanel = document.getElementById('rightPanel');
+    const contentDiv = document.getElementById('profileContent');
+
+    // Fill content
+    contentDiv.innerHTML = `
+        <div class="profile-pic">👤</div>
+        <h4>${profile.username || 'Unknown'}</h4>
+        <div class="profile-row">
+            <span class="profile-label">Job:</span>
+            <span class="profile-value">${profile.job || 'N/A'}</span>
+        </div>
+        <div class="profile-row">
+            <span class="profile-label">Email:</span>
+            <span class="profile-value">${profile.email || 'N/A'}</span>
+        </div>
+        <div class="profile-row">
+            <span class="profile-label">Phone:</span>
+            <span class="profile-value">${profile.mobile || 'N/A'}</span>
+        </div>
     `;
 
-    marker.addTo(map).bindPopup(popupHTML);
+    // OPEN right panel
+    rightPanel.classList.add('open');
+    
+    // Desktop: set width
+    if(window.innerWidth > 768){
+        rightPanel.style.width = '35%';
+        mapDiv.style.flex = '0 0 65%';
+    }
 
-    // Popup event
-    marker.on("popupopen", e => {
-      const popup = e.popup._contentNode;
+    // Close button
+    document.getElementById('closeRightPanelBtn').onclick = () => {
+        rightPanel.classList.remove('open');
+        rightPanel.style.width = '0';
+        mapDiv.style.flex = '1';
+        setTimeout(()=>map.invalidateSize(), 300);
+    };
 
-      const toggle = popup.querySelector('.toggle-details');
-      const details = popup.querySelector('.more-details');
-      if (toggle && details) {
-        toggle.addEventListener('click', ev => {
-          ev.preventDefault();
-          if (details.style.maxHeight && details.style.maxHeight !== '0px') {
-            details.style.maxHeight = '0';
-            toggle.textContent = '🔍 More Details';
-          } else {
-            details.style.maxHeight = details.scrollHeight + 'px';
-            toggle.textContent = '🔽 Hide Details';
-          }
+    setTimeout(()=>map.invalidateSize(), 300);
+}
+
+
+
+  // Load commodities from API
+  async function loadCommodities() {
+    try{
+      const res = await fetch('/api/DtEntries/');
+      const commodities = await res.json();
+      
+      const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
+
+      const select = document.getElementById('commoditySelect');
+      select.innerHTML = '<option value="">-- Select --</option>';
+      uniqueCommodities.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+
+    } catch(err){
+      console.error(err);
+    }
+  }
+
+  // Locate user
+  function locateUser(){
+    if(!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat=pos.coords.latitude;
+      const lng=pos.coords.longitude;
+      map.setView([lat,lng],10);
+
+      if(userMarker) map.removeLayer(userMarker);
+          userMarker = L.circleMarker([lat,lng],{
+              radius:8, color:"#007bff", fillColor:"#007bff", fillOpacity:0.5
+          }).addTo(map);
+        }, err=>{
+          console.warn("Geolocation failed, using default location.");
         });
       }
 
-      const profileLink = popup.querySelector('.view-profile-link');
-      if (profileLink) {
-        profileLink.addEventListener('click', async ev => {
-          ev.preventDefault();
-          const usernameId = profileLink.dataset.usernameId;
-          try {
-            const res = await fetch(`/api/profile/${usernameId}/`);
-            const profile = await res.json();
-            showProfileAboveLegend({
-              username_id: entry.username_id,
-              name: profile.name,
-              email: profile.email,
-              mobile: profile.mobile
+  // Show markers
+  document.getElementById('commoditySelect').addEventListener('change', e=>{
+    showCommodityMarkers(e.target.value);
+  });
+
+  async function showCommodityMarkers(commodity){
+    if(!commodity) return;
+    currentCommodity = commodity;
+    const spinner = document.getElementById('loadingSpinner');
+    spinner.style.display = 'inline';  // show spinner
+
+    const res = await fetch(`/api/DtEntries/?sale_commodity=${commodity}`);
+    const data = await res.json();
+    console.log("All entries for", commodity, data);
+
+    markers.forEach(m=>map.removeLayer(m));
+    markers=[];
+
+    const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
+    const iconExists = await checkImageExists(iconPath);
+
+    data.forEach(entry=>{
+      if(entry.latitude && entry.longitude){
+        let marker;
+        if(iconExists){
+          const icon = L.icon({
+            iconUrl: iconPath,
+            iconSize: [28,28],
+            iconAnchor: [14,28],
+            popupAnchor: [0,-28]
+          });
+          marker = L.marker([entry.latitude,entry.longitude],{icon});
+        } else {
+          marker = L.circleMarker([entry.latitude, entry.longitude],{
+            radius:7,color:"#28a745",fillColor:"#28a745",fillOpacity:0.6
+          });
+        }
+
+        const popupHTML = `
+          <div>
+            <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
+              style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+              👤 ${entry.username_id} - View Profile
+            </a>
+            <br><br>
+            <b>Commodity:</b> ${entry.sale_commodity}<br>
+            <b>Cost:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
+            <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
+              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>Method:</b> ${entry.method}<br>
+              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              <b>Sowing Date:</b> ${entry.sowing_date}<br>
+              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              ${entry.photo_or_video
+                ? (entry.photo_or_video.endsWith('.mp4')
+                    ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
+                    : `<img src="../media/${entry.photo_or_video}" width="200">`)
+                : ''}
+            </div>
+          </div>
+        `;
+
+        marker.addTo(map).bindPopup(popupHTML);
+
+        marker.on("popupopen", e=>{
+          const popup = e.popup._contentNode;
+          // More details toggle
+          const toggle = popup.querySelector('.toggle-details');
+          const details = popup.querySelector('.more-details');
+          if(toggle && details){
+            toggle.addEventListener('click', ev=>{
+              ev.preventDefault();
+              if(details.style.maxHeight && details.style.maxHeight !== '0px'){
+                details.style.maxHeight='0';
+                toggle.textContent='🔍 More Details';
+              } else {
+                details.style.maxHeight=details.scrollHeight+'px';
+                toggle.textContent='🔽 Hide Details';
+              }
             });
-          } catch (err) {
-            console.error("Failed to fetch profile", err);
-            alert("Could not load profile details.");
+          }
+          
+          // View profile
+          const profileLink = popup.querySelector('.view-profile-link');
+          if(profileLink){
+            profileLink.addEventListener('click', async ev => {
+              ev.preventDefault();
+              // Get username safely from the link's data attribute
+              const username = profileLink.dataset.usernameId; // camelCase from data-username-id
+              if (!username) {
+                alert("Username not available!");
+                return;
+              }
+              try {
+                  const res = await fetch(`/api/profile/${username}/`);
+                  const profile = await res.json();
+                  console.log("Profile fetched:", profile); // Check API response
+                  showProfileAboveLegend(profile); // Pass the object directly
+              } catch(err) {
+                  console.error(err);
+                  alert("Could not load profile.");
+              }finally {
+                    spinner.style.display = 'none'; // hide spinner
+                }
+          });
+
           }
         });
+
+        markers.push(marker);
       }
+      
     });
+        // ✅ Add legend after markers
+    updateLegend(commodity, data.length, iconExists, iconPath);
 
-    markers.push(marker);
+
+    document.getElementById('statusMsg').textContent = data.length
+      ? `Showing ${data.length} entries for ${commodity}.`
+      : "No entries found for this commodity.";
+
+          spinner.style.display = 'none';
   }
-});
 
-  const msg = document.getElementById('statusMsg');
-  msg.textContent = data.length
-    ? `Showing ${data.length} entries for ${commodity}.`
-    : "No entries found for this commodity.";
+  // Check image exists
+  async function checkImageExists(url){
+    try{
+      const res = await fetch(url,{method:'HEAD'});
+      return res.ok;
+    }catch{
+      return false;
+    }
+  }
+  let legendControl = null;
+
+function updateLegend(commodity, count, iconExists, iconPath){
+    // Remove old legend
+    if(legendControl) map.removeControl(legendControl);
+
+    legendControl = L.control({position: 'bottomright'});
+
+    legendControl.onAdd = function(map){
+        const div = L.DomUtil.create('div', 'leaflet-control legend');
+        div.innerHTML = `<b>${commodity}</b> - ${count} entries<br>`;
+
+        if(iconExists){
+            div.innerHTML += `<img src="${iconPath}" />`;
+        } else {
+            div.innerHTML += `<i style="background:#28a745"></i>`;
+        }
+
+        return div;
+    };
+
+    legendControl.addTo(map);
 }
 
-// 🟢 Check if image exists
-async function checkImageExists(url) {
-  try {
-    const res = await fetch(url, { method: 'HEAD' });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+  </script>
 
-// 🟢 Events
-// document.getElementById('locateBtn').addEventListener('click', locateUser);
-document.getElementById('commoditySelect').addEventListener('change', e => {
-  showCommodityMarkers(e.target.value);
-});
-</script>
-
-{% endblock %}
+  {% endblock %}
