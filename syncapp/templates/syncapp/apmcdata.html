@@ -605,7 +605,15 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
         fillColor: isSelected ? "#ff3333" : "#3399ff",
         fillOpacity: 0.6,
         weight: 2
-      }).bindPopup(`<b>${loc.apmc_name}</b>`);
+      }).bindPopup(`<b>${loc.apmc_name}</b>`)
+      .bindTooltip(`${loc.apmc_name}`, {      // hover tooltip
+        permanent: false,                     // tooltip disappears when not hovering
+        direction: 'top',
+        offset: [0, -10],
+        opacity: 0.9,
+        className: 'apmc-tooltip'            // optional: for custom styling
+      });
+     
 
       // On click: select and reload chart
       marker.on("click", () => {
