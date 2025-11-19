@@ -18,7 +18,7 @@
 
 <style>
   /* FILTER BAR */
-  .filter-bar {
+  .filter-bar1 {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -29,7 +29,7 @@
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   }
-  .filter-bar .form-group {
+  .filter-bar1 .form-group {
     flex: 1 1 180px;
     min-width: 160px;
   }
@@ -219,7 +219,7 @@
   <div id="dynamicAlert" class="alert alert-warning alert-dismissible fade show" style="display:none;"></div>
 
   <!-- FILTER BAR -->
-  <div class="filter-bar">
+  <div class="filter-bar1">
     <div class="form-group">
       <label for="commoditySelect" class="form-label">{% trans "Commodity" %}</label>
       <select id="commoditySelect" class="form-select w-100">
@@ -322,38 +322,50 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // --- Initialize Leaflet map ---
   async function initMap() {
-    // map = L.map('map').setView([20.5937, 78.9629], 5); // Center India;
-    map = L.map('map').setView([19.7515, 75.7139], 7); // Maharashtra center and zoom
+      // Initialize map centered on Maharashtra
+      map = L.map('map').setView([19.7515, 75.7139], 7);
 
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
 
-    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //   maxZoom: 18,
-    //   attribution: '© OpenStreetMap'
-    // }).addTo(map);
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© OpenStreetMap'
-    });
-    const googleSat= L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
-    });
-    const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: ''
-    });
-    osm.addTo(map);
-    const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
-    const baseMaps = { "OpenStreetMap": osm, "Google Satellite": satelliteWithBoundaries };
+      const googleSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
+      });
+
+      const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: ''
+      });
+
+      const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
+      const baseMaps = {
+        "OpenStreetMap": osm,
+        "Google Satellite": satelliteWithBoundaries
+      };
       L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
-    const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
-    const districtData = await districtResponse.json();
-    
-    districtLayer = L.geoJSON(districtData, {
-        style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
-    }).addTo(map); 
-    
-    markerLayer = L.layerGroup().addTo(map);
-  }
+
+      // --- Load and render district boundaries ---
+      const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
+      const districtData = await districtResponse.json();
+      districtCentroids = {};  // global variable
+
+      L.geoJSON(districtData, {
+        style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties?.DISTRICT) {
+            const bounds = layer.getBounds();
+            const center = bounds.getCenter();
+            districtCentroids[feature.properties.DISTRICT.toLowerCase()] = center;
+          }
+        }
+      }).addTo(map);
+
+      // ✅ Initialize marker layer here
+      markerLayer = L.layerGroup().addTo(map);
+    }
+
   initMap();
 
   // --- Alert Helper ---
@@ -393,8 +405,38 @@ document.addEventListener("DOMContentLoaded", function() {
         apmcSelect.appendChild(opt);
       });
       apmcSelect.disabled = uniqueApmcs.length === 0;
+      
+      // Example: detect which district this APMC belongs to (you can pass from backend or infer)
+      const selectedDistrict = dataList.length > 0 ? dataList[0].district : "ahmednagar";
+
+      if (selectedDistrict) {
+        // Normalize the name to match GeoJSON ("Ahmednagar" → "ahmednagar", "Mumbai Suburb" → "mumbai_suburb")
+        const normalizedDistrict = selectedDistrict
+          .toLowerCase()
+          .replace(/\s+/g, '_'); // convert spaces to underscores
+        console.log("👉 Selected District from API:", selectedDistrict);
+        console.log("👉 Normalized District:", normalizedDistrict);
+        console.log("👉 Available centroid keys:", Object.keys(districtCentroids));
+
+        const matchedKey = Object.keys(districtCentroids).find(k => {
+          const cleanKey = k.toLowerCase().replace(/[-\s]+/g, '_');
+          return cleanKey === normalizedDistrict;
+        });
+
+        if (matchedKey && districtCentroids[matchedKey]) {
+          const { lat, lng } = districtCentroids[matchedKey];
+          map.setView([lat, lng], 9);
+          console.log("✅ Zoomed to district:", matchedKey);
+        } else {
+          console.warn("⚠️ Centroid not found for", selectedDistrict);
+        }
+      }
 
       // --- Add markers ---
+      if (!markerLayer) {
+        console.warn("Map not ready yet — markerLayer is undefined.");
+        return;
+      }
       markerLayer.clearLayers();
       dataList.forEach(d=>{
         if (d.lat && d.lon) {
@@ -479,6 +521,10 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     }
 
     // Clear previous markers
+    if (!markerLayer) {
+    console.warn("Map not ready yet — markerLayer is undefined.");
+    return;
+  }
     markerLayer.clearLayers();
 
     // Add markers for APMC locations
@@ -716,20 +762,48 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 //     xScale.options.max = newMax;
 //     agmarkLineChart.update("none");
 // });
+// window.addEventListener("load", async function() {
+//     const defaultApmc = "Ahmednagar";   // 🔹 Default APMC
+//     const defaultCommodity = commoditySelect.value || "Tomato";  // pick a sensible default
+//     const startDate = lineStartDate.value;
+//     const endDate = lineEndDate.value;
+
+//     const displayApmc = gettext(defaultApmc);
+//     // Set dropdowns
+//     apmcSelect.innerHTML = `<option value="${defaultApmc}" selected>${displayApmc}</option>`;
+//     apmcSelect.disabled = false;
+
+//     // Fetch and render data
+//     await fetchLineChart();   // draw chart
+//     await loadAhmednagarAPMCs(defaultApmc, defaultCommodity, startDate, endDate); // load map markers
+// });
+// });
 window.addEventListener("load", async function() {
-    const defaultApmc = "Ahmednagar";   // 🔹 Default APMC
-    const defaultCommodity = commoditySelect.value || "Tomato";  // pick a sensible default
+    const defaultApmc = "Ahmednagar";
+    const defaultCommodity = commoditySelect.value || "Tomato";
     const startDate = lineStartDate.value;
     const endDate = lineEndDate.value;
 
+    // ✅ Wait for map to fully initialize and districtCentroids to be ready
+    await initMap();
+
     const displayApmc = gettext(defaultApmc);
-    // Set dropdowns
     apmcSelect.innerHTML = `<option value="${defaultApmc}" selected>${displayApmc}</option>`;
     apmcSelect.disabled = false;
 
-    // Fetch and render data
-    await fetchLineChart();   // draw chart
-    await loadAhmednagarAPMCs(defaultApmc, defaultCommodity, startDate, endDate); // load map markers
+    // ✅ Now everything else
+    await fetchLineChart();
+    await loadAhmednagarAPMCs(defaultApmc, defaultCommodity, startDate, endDate);
+
+    // ✅ Zoom directly to the APMC's district if centroid exists
+    const districtKey = "ahmednagar"; // lowercase match
+    if (districtCentroids[districtKey]) {
+        const { lat, lng } = districtCentroids[districtKey];
+        map.setView([lat, lng], 9);
+        console.log("✅ Map zoomed to Ahmednagar:", [lat, lng]);
+    } else {
+        console.warn("⚠️ Ahmednagar centroid not found:", Object.keys(districtCentroids));
+    }
 });
 });
 </script>
