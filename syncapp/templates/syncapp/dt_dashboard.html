@@ -301,9 +301,25 @@
 
   
     map = L.map('map').setView([20.5937, 78.9629], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    })
+
+    var googleHybrid = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+    ).addTo(map);
+
+    var baseMaps = {
+        "OpenStreetMap": osmLayer,
+        "Google Hybrid": googleHybrid
+    };
+
+    L.control.layers(baseMaps).addTo(map);
 
     loadCommodities();
     locateUser();
@@ -609,15 +625,16 @@ async function updateCost(id) {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
-        map.setView([lat, lng], 14, { animate: true });
+        map.setView([lat, lng], 16, { animate: true });
 
         if (userMarker) map.removeLayer(userMarker);
 
         userMarker = L.circleMarker([lat, lng], {
-            radius: 8,
-            color: "#007bff",
+            radius: 10,
+            color: "#ffffff",
+            weight:3,
             fillColor: "#007bff",
-            fillOpacity: 0.5
+            fillOpacity: 0.9
         }).addTo(map);
 
         // ⭐ Hide spinner AFTER map focuses
@@ -696,6 +713,7 @@ async function updateCost(id) {
         `;
 
         marker.addTo(map).bindPopup(popupHTML);
+        
         marker._entryId = entry.id;  // store for later
 
         marker.on("popupopen", e=>{
@@ -748,8 +766,20 @@ async function updateCost(id) {
 
         markers.push(marker);
       }
-      
+      // ⭐ AUTO-FOCUS MAP TO ALL MARKERS FOR SELECTED COMMODITY
+if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), {
+        padding: [40, 40],
+        maxZoom: 15,
+        animate: true
     });
+}
+
+// spinner.style.display = 'none';
+
+    });
+    
         // ✅ Add legend after markers
     updateLegend(commodity, data.length, iconExists, iconPath);
 
