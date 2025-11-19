@@ -15,6 +15,7 @@
 
 <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
   /* FILTER BAR */
@@ -264,6 +265,11 @@
 
   <div class="chart-panel">
     <h5 class="chart-title">{% trans "AgmarkNet Prices Trend" %}</h5>  
+    <div class="text-end mt-2">
+  <button id="downloadChartBtn" class="btn btn-success btn-sm">
+    {% trans "Download Chart" %}
+  </button>
+</div>
     <div id="chartContainer" class="chartContainer" style="height: 100%; min-height: 500px;">
       <div id="loading-spinner" class="text-center my-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
@@ -343,6 +349,43 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Call on page load
 setDefaultDates();
+
+const downloadPdfBtn = document.getElementById("downloadChartBtn");
+downloadPdfBtn.addEventListener("click", function() {
+    if (!agmarkLineChart) {
+        showAlert(gettext("No chart available to export"));
+        return;
+    }
+
+    // Create a jsPDF instance
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "pt",
+        format: "a4"
+    });
+
+    // Get chart as image
+    const chartImg = agmarkLineChart.toBase64Image();
+
+    // Calculate width & height to fit A4 landscape
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // Draw the chart image
+    doc.addImage(chartImg, "PNG", 20, 20, pageWidth - 40, pageHeight - 60);
+
+    // Optional: add title
+    const commodity = commoditySelect.value || "Chart";
+    const apmc = apmcSelect.value || "All APMCs";
+    doc.setFontSize(14);
+    doc.text(`${commodity} - ${apmc} Prices Trend`, pageWidth / 2, 15, { align: "center" });
+
+    // Save PDF
+    doc.save(`${commodity}_${apmc}_prices.pdf`);
+});
+
+
 
   Chart.register(ChartZoom);  // make sure this is done once
 
