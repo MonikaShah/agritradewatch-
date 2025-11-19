@@ -45,6 +45,17 @@
             font-size: 0.9rem;
             padding: 8px 0;
         }
+        /* FIX: Ensure Login dropdown appears above Top Panel */
+        nav.navbar {
+            position: relative;
+            z-index: 2001 !important;
+        }
+
+        .navbar .dropdown-menu {
+            position: absolute;
+            z-index: 3000 !important;
+        }
+
         @media (max-width: 576px) {
             .footer-custom {
                 padding: 4px 0;
