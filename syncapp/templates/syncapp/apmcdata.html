@@ -224,7 +224,7 @@
       <label for="commoditySelect" class="form-label">{% trans "Commodity" %}</label>
       <select id="commoditySelect" class="form-select w-100">
         <option value="">{% trans "All Commodities" %}</option>
-        {% for item in commodities %}
+      {% for item in commodities %}
         <option value="{{ item }}">{{ item }}</option>
         {% endfor %}
       </select>
@@ -239,13 +239,14 @@
     <div class="form-group">
       <label for="lineEndDate" class="form-label">{% trans "End Date" %}</label>
       <input type="date" id="lineEndDate" class="form-control w-100"
-             value="{{ today|date:'Y-m-d' }}" min="2025-08-11" max="{{ today|date:'Y-m-d' }}">
+             value="{{ today|date:'Y-m-d' }}" min="2014-01-01" max="{{ today|date:'Y-m-d' }}">
     </div>
 
     <div class="form-group">
       <label for="apmcSelect" class="form-label">{% trans "APMC" %}</label>
       <select id="apmcSelect" class="form-select w-100" disabled>
         <option value="">{% trans "Select APMC" %}</option>
+        
       </select>
     </div>
 
@@ -317,7 +318,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let agmarkLineChart = null;
   let map, markerLayer;
- 
+    
+  // const startDateInput = document.getElementById("startDate");
+  // const lineEndDate = document.getElementById("endDate");
+
+  // Set default: endDate = today, startDate = today - 1 year
+  function setDefaultDates() {
+      const today = new Date();
+      const lastYear = new Date();
+      lastYear.setFullYear(today.getFullYear() - 1);
+
+      lineEndDate.value = today.toISOString().split("T")[0];
+      lineStartDate.value = lastYear.toISOString().split("T")[0];
+  }
+
+  // When end date changes → auto-update start date to 1 year before
+  lineEndDate.addEventListener("change", () => {
+      const endVal = new Date(lineEndDate.value);
+      const newStart = new Date(endVal);
+      newStart.setFullYear(endVal.getFullYear() - 1);
+
+      lineStartDate.value = newStart.toISOString().split("T")[0];
+  });
+
+// Call on page load
+setDefaultDates();
+
   Chart.register(ChartZoom);  // make sure this is done once
 
   // --- Initialize Leaflet map ---
@@ -462,7 +488,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
   if (!selectedApmc) {
   Swal.fire({
     icon: "info",
-    title:  gettext("Data not available for selected Filter."),
+    // title:  gettext("Data not available for selected Filter."),
     html:  gettext("Showing average prices for all apmcs within selected date range."),
     confirmButtonColor: "#3085d6"
   });
