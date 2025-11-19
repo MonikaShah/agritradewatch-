@@ -161,70 +161,81 @@
     <div id="loginMessage" style="margin-top:10px; color:red;"></div>
   </div>
 </div>
+<!-- new filter panel-->
+
+
+<!-- ====== TOP HORIZONTAL FILTER BAR ====== -->
+<div id="filter-bar">
+    
+    <!-- Commodity -->
+    <!-- <div class="fi"> -->
+        <label><b>Commodity</b></label>
+        <select id="commoditySelect">
+            {% for type, items in grouped_commodities.items %}
+            <optgroup label="{{ type }}">
+                {% for item in items %}
+                <option value="{{ item.name }}"
+                  {% if item.name == "Onion" %}selected{% endif %} 
+                  {% if item.disabled %}disabled{% endif %}>
+                  {{ item.name }}
+                </option>
+                {% endfor %}
+            </optgroup>
+            {% endfor %}
+        </select>
+    <!-- </div> -->
+
+    <!-- Start Date -->
+    <!-- <div class="fi"> -->
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+    <!-- </div> -->
+
+    <!-- End Date -->
+    <!-- <div class="fi"> -->
+        <label>End Date</label>
+        <input type="date" id="endDate">
+    <!-- </div> -->
+
+    <!-- Filter Button -->
+    <!-- <div class="filter-btn"> -->
+        <label>&nbsp;</label>
+        <button id="filterByDateBtn" class="btn btn-primary btn-sm">Filter</button>
+    <!-- </div> -->
+
+    <!-- Radius Slider -->
+    <div class="radius-container">
+        <label>Radius: <span id="radiusValue">8 Km</span></label>
+        <input type="range" id="radiusSlider" min="1" max="8" value="5" step="1">
+    </div>
+    <!-- Radius Stats -->
+    <!-- <div class="stats-box" style="min-width: 200px;"> -->
+        <!-- <label><b>Within Radius</b></label> -->
+        <div id="radius-stats1" style="min-width: 200px;font-size: 0.85rem; line-height: 1.2; display:none;">
+            <strong>Stats Within Radius:</strong><br>
+            Average Price: <span id="avg-price-radius">--</span><br>
+            <!-- Weighted: <span id="weighted-avg-radius">--</span><br> -->
+            Modal Price: <span id="modal-price-radius">--</span>
+        </div>
+    <!-- </div> -->
+
+    <!-- Location Button -->
+    
+        <label>&nbsp;</label>
+        <button id="locateBtn" class="btn btn-light" style="border:1px solid #ccc;">
+            <i class="fas fa-crosshairs"></i> Locate Me
+        </button>
+    
+</div>
+<!-- ====== FILTER BAR END ====== -->
 
 <div id="split-container">
 <div id="map-container">
  <div id="map"></div>
-  <div id="map-controls">
-    <label for="commoditySelect"><b>Select Commodity</b></label>
-    <select id="commoditySelect" class="form-control">
-      {% for type, items in grouped_commodities.items %}
-        <optgroup label="{{ type }}">
-          {% for item in items %}
-            <!-- <option value="{{ item.name }}" {% if item.disabled %}disabled{% endif %}>
-              {{ item.name }}
-            </option> -->
-             <option value="{{ item.name }}"
-                  {% if item.name == "Onion" %}selected{% endif %} 
-                  {% if item.disabled %}disabled{% endif %}>
-            {{ item.name }}
-          </option>
-          {% endfor %}
-        </optgroup>
-      {% endfor %}
-    </select>
-        
-    <!-- Show total commodity count -->
-    <p id="commodityCount" style="margin-top: 5px; font-weight: bold; color: #333;"></p>
-    <hr>
-      <div id="date-range-container" style="margin-bottom: 10px;">
-      <label>Start Date:</label>
-      <input type="date" id="startDate" class="form-control" style="margin-bottom: 5px; font-size: 12px;">
-
-      <label>End Date:</label>
-      <input type="date" id="endDate" class="form-control" style="margin-bottom: 5px; font-size: 12px;">
-
-      <button id="filterByDateBtn" class="btn btn-primary btn-sm" style="width: 100%;">Filter</button>
-    </div>
-  <hr>
-    <div id="left-panel">
-      <button id="locateBtn" title="My Location">
-        <i class="fas fa-crosshairs"></i>
-        </button>
-      <label>Radius: <span id="radiusValue">100</span></label>
-      <input type="range" id="radiusSlider" min="1" max="8" value="2" step="1" list="tickmarks">
-        <datalist id="tickmarks">
-        <option value="1" label="50 m"></option>
-        <option value="2" label="100 m"></option>
-        <option value="3" label="500 m"></option>
-        <option value="4" label="1 km"></option>
-        <option value="5" label="5 km"></option>
-        <option value="6" label="20 km"></option>
-        <option value="7" label="100 km"></option>
-        <option value="8" label="500 km"></option>
-        </datalist>
-        <div id="radius-stats" style="margin-top: 4px;">
-        <strong>Within Selected Radius:</strong><br>
-        Average Price: <span id="avg-price-radius">--</span><br>
-        Modal Price: <span id="modal-price-radius">--</span>
-      </div>
-    </div>
-    <hr>
-    <button id="toggleDistrictBtn">🗺️ Hide Districts</button>
-    <!-- <hr> -->
-    <!-- <button id="toggleApmcBtn">🛒 Show All APMC</button> -->
-  </div>
-  <button id="toggle-map-controls">⚙️ Hide/Show</button>
+ <!-- <div id="filter-bar"> -->
+  
+  <!-- </div> -->
+  <!-- <button id="toggle-map-controls">⚙️ Hide/Show</button> -->
 </div>
   <div id="divider"></div>
 <div id="right-panel">
@@ -309,10 +320,15 @@
 <script>
 const USER_LOGGED_IN = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
 document.addEventListener("DOMContentLoaded", function() {
+      
   // Wait until modal exists, then check login state
   const loginModal = document.getElementById("loginModal");
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
+
+  // setTimeout(() => {
+  //     locateUser();   // <-- place here
+  // }, 100);
 
 // RESIZE the map and left panel
 const divider = document.getElementById("divider");
@@ -562,16 +578,38 @@ const divider = document.getElementById("divider");
       const googleSat= L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
       });
-      const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: ''
-      });
-      //googleSat.addTo(map);
-      osm.addTo(map);
-      const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
-      const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
+     var googleHybrid = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+      ).addTo(map);
+      googleHybrid.addTo(map);
+      // osm.addTo(map);
+      // const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
+      const baseMaps = { 
+        "OpenStreetMap": osm, 
+        "Google Satellite": googleHybrid 
+      };
+      const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
+      const districtData = await districtResponse.json();
+      // const districtStyle = {
+      //     color: "#3388ff",
+      //     weight: 2,
+      //     fillOpacity: 0.1
+      // };
+
+      // const districtLayer1 = L.geoJSON(districtData, { style: districtStyle });
+      districtLayer1 = L.geoJSON(districtData, {
+                  style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
+              });
+      const overlayMaps = {
+          "District Boundaries": districtLayer1
+      };
+
     //   const baseMaps = { "OpenStreetMap": osm, "Google Satellite": googleSat };
-      L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+      L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
 
       const markers = L.markerClusterGroup();
@@ -584,11 +622,11 @@ const divider = document.getElementById("divider");
       const radiusSlider = document.getElementById("radiusSlider");
       const radiusValue = document.getElementById("radiusValue");
       const scale = {
-                    1: 50,
-                    2: 100,
-                    3: 500,
-                    4: 1000,
-                    5: 5000,
+                    1: 100,
+                    2: 500,
+                    3: 1000,
+                    4: 5000,
+                    5: 8000,
                     6: 20000,
                     7: 100000,
                     8: 500000
@@ -621,15 +659,17 @@ const divider = document.getElementById("divider");
       }
 
       function showGlobalStats(stats){
-          document.getElementById("avg-price").innerText = stats.avg!==null ?` ₹${stats.avg.toFixed(2)} ${stats.unit || ''}`: "No data";
+          document.getElementById("avg-price").innerText = stats.avg!==null ?` ₹${stats.avg.toFixed(2)} / ${stats.unit || ''}`: "No data";
           document.getElementById("weighted-avg").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
           document.getElementById("modal-price").innerText = stats.modal!==null ? `₹${stats.modal}` : "No data";
       }
 
       function showRadiusStats(stats){
-          document.getElementById("avg-price-radius").innerText = stats.avg!==null ? stats.avg.toFixed(2) : "No data";
+          document.getElementById("avg-price-radius").innerText = stats.avg!==null ?` ₹${stats.avg.toFixed(2)}  ${stats.unit || ''}`: "No data";
           document.getElementById("weighted-avg-radius").innerText = stats.weighted!==null ? stats.weighted.toFixed(2) : "No data";
-          document.getElementById("modal-price-radius").innerText = stats.modal!==null ? stats.modal : "No data";
+          document.getElementById("modal-price-radius").innerText = stats.modal!==null ?`₹${stats.modal} ${stats.unit || ''}` : "No data";
+
+          document.getElementById("radius-stats1").style.display = "block";
       }
 
       function updateStatsForRadius(){
@@ -724,24 +764,26 @@ const divider = document.getElementById("divider");
       }
 
       // --- Geolocation ---
-      document.getElementById("locateBtn").addEventListener("click", ()=>{
-        
+      document.getElementById("locateBtn").addEventListener("click", locateUser);
+
+        function locateUser() {
           if(navigator.geolocation){
               navigator.geolocation.getCurrentPosition(pos=>{
                   userLocation = L.latLng(pos.coords.latitude,pos.coords.longitude);
                   if(userMarker) map.removeLayer(userMarker);
                   // 🔵 Define a blue circle icon (SVG-based)
                   const blueIcon = L.divIcon({
-                    html: '<div style="width:14px;height:14px;background-color:#007bff;border:2px solid white;border-radius:50%;box-shadow:0 0 3px rgba(0,0,0,0.5);"></div>',
+                    html: '<div style="width:18px;height:18px;background-color:#00aaff;;border:3px solid white;border-radius:50%;box-shadow:0 0 8px rgba(0,0,0,0.9);"></div>',
                     className: '', // remove default marker styles
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8],
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9],
                   });
 
                   userMarker = L.marker(userLocation,{draggable:true,title:"My Location",icon: blueIcon}).addTo(map);
                   map.invalidateSize(); // ensures Leaflet recalculates map size
                   setTimeout(() => {
-                    map.setView(userLocation, 14);
+                    
+                    map.setView(userLocation, 16);
                   }, 100);
                   userMarker.on("dragend",e=>{ 
                       userLocation=e.target.getLatLng(); 
@@ -754,7 +796,8 @@ const divider = document.getElementById("divider");
                   updateMarkers(commoditySelect.value,true);
               });
           } else alert("Geolocation not supported by your browser.");
-      });
+        }
+      
 
       radiusSlider.addEventListener("input", function(){
         const meters = scale[radiusSlider.value];
@@ -769,7 +812,7 @@ const divider = document.getElementById("divider");
               updateMarkers(commoditySelect.value,false); 
           }
       });
-
+      locateUser();
       // --- Fetch initial data ---
       // try {
       //       const res = await fetch("/api/consumers_geojson/", {
@@ -859,7 +902,7 @@ const divider = document.getElementById("divider");
               ? `Consumer: ${consumerCount} records | Farmer: ${farmerCount} records`
               : "No records found";
 
-          document.getElementById("commodityCount").innerText = totalText;
+          // document.getElementById("commodityCount").innerText = totalText;
         }
 
 
@@ -874,38 +917,38 @@ const divider = document.getElementById("divider");
 
       let districtLayer = null;
 
-      const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
-      let districtVisible = true;
+      // const toggleDistrictBtn = document.getElementById("toggleDistrictBtn");
+      // let districtVisible = true;
 
-       toggleDistrictBtn.addEventListener("click", () => {
-          if(!districtLayer || !districtLayer.addTo) return; // safety check
+      //  toggleDistrictBtn.addEventListener("click", () => {
+      //     if(!districtLayer || !districtLayer.addTo) return; // safety check
 
-          if(districtVisible){
-              map.removeLayer(districtLayer);
-              districtVisible = false;
-              toggleDistrictBtn.innerText = "🗺️ Show Districts";
-          } else {
-              districtLayer.addTo(map);
-              districtVisible = true;
-              toggleDistrictBtn.innerText = "🗺️ Hide Districts";
-          }
-        });
+      //     if(districtVisible){
+      //         map.removeLayer(districtLayer);
+      //         districtVisible = false;
+      //         toggleDistrictBtn.innerText = "🗺️ Show Districts";
+      //     } else {
+      //         districtLayer.addTo(map);
+      //         districtVisible = true;
+      //         toggleDistrictBtn.innerText = "🗺️ Hide Districts";
+      //     }
+      //   });
       
-        try {
-              const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
-              const districtData = await districtResponse.json();
+      //   try {
+      //         const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
+      //         const districtData = await districtResponse.json();
               
-              districtLayer = L.geoJSON(districtData, {
-                  style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
-              }).addTo(map); // initially visible
-          } catch(err){
-              console.error("Error loading district GeoJSON:", err);
-          } 
+      //         // districtLayer = L.geoJSON(districtData, {
+      //         //     style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 }
+      //         // }).addTo(map); // initially visible
+      //     } catch(err){
+      //         console.error("Error loading district GeoJSON:", err);
+      //     } 
         
        
       // --- Initial chart fetch ---
      
-      document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
+      // document.getElementById('toggle-map-controls').addEventListener('click',()=>document.getElementById('map-controls').classList.toggle('collapsed'));
 
       function showTimeline(apmcName) {
         const url = `/apmc/${encodeURIComponent(apmcName)}/timeline-ajax/`;
