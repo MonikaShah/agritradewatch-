@@ -592,8 +592,8 @@ function renderCommodityRow(item, isSelected) {
         
         ${item.photo_or_video
             ? (item.photo_or_video.endsWith('.mp4')
-                ? `<video src="${item.photo_or_video}" controls width="200" style="margin-top:5px;"></video>`
-                : `<img src="${item.photo_or_video}" width="200" style="margin-top:5px;">`)
+                ? `<video src="/media/${item.photo_or_video}" controls width="200" style="margin-top:5px;"></video>`
+                : `<img src="/media/${item.photo_or_video}" width="200" style="margin-top:5px;" />`)
             : ''}
     `;
     row.appendChild(detailsDiv);
@@ -706,8 +706,8 @@ async function updateProduce(id) {
               <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
-                    ? `<video src="${entry.photo_or_video}" controls width="300"></video>`
-                    : `<img src="${entry.photo_or_video}" width="200">`)
+                    ? `<video src="/media/${entry.photo_or_video}" controls width="300"></video>`
+                    : `<img src="/media/${entry.photo_or_video}" width="200">`)
                 : ''}
             </div>
           </div>
