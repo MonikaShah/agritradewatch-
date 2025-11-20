@@ -923,17 +923,37 @@ def update_produce_cost(request, pk):
         return Response({"error": "Item not found"}, status=404)
 
     new_cost = request.data.get("cost")
+    new_qty = request.data.get("quantity_for_sale")
+    new_unit = request.data.get("unit")
 
     if new_cost is None:
         return Response({"error": "Missing cost in request"}, status=400)
-
     try:
         obj.cost = float(new_cost)
-        obj.save()
     except:
         return Response({"error": "Invalid cost format"}, status=400)
 
-    return Response({"success": True, "new_cost": obj.cost})
+    # Validate quantity
+    if new_qty is None:
+        return Response({"error": "Missing quantity_for_sale in request"}, status=400)
+    try:
+        obj.quantity_for_sale = float(new_qty)
+    except:
+        return Response({"error": "Invalid quantity format"}, status=400)
+
+    # Validate unit
+    if not new_unit:
+        return Response({"error": "Missing unit in request"}, status=400)
+    obj.unit = new_unit.strip()
+
+    obj.save()
+
+    return Response({
+        "success": True,
+        "new_cost": obj.cost,
+        "new_quantity_for_sale": obj.quantity_for_sale,
+        "new_unit": obj.unit
+    })
 
 def get_single_entry(request, pk):
     try:

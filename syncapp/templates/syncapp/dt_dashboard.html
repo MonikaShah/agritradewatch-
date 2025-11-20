@@ -55,7 +55,7 @@
     display: flex;
     flex-grow: 1;
     width: 100%;
-    height: calc(100% - 60px); /* topPanel height */
+    height: calc(100vh - 60px); /* topPanel height */
     transition: all 0.4s ease;
   }
 
@@ -67,7 +67,7 @@
   }
 
   /* Right Panel */
-  #rightPanel {
+  .rightPanelBase {
   width: 0;
   overflow-x: hidden;
   transition: width 0.4s ease;
@@ -174,16 +174,78 @@
     margin-right: 6px;
     border-radius: 50%;
   }
+  /* Resizer between map and right panel */
+#resizer {
+  width: 6px;
+  cursor: ew-resize;
+  background-color: rgba(0,0,0,0.1);
+  z-index: 2500;
+  transition: background-color 0.2s ease;
+}
+#resizer:hover {
+  background-color: rgba(0,0,0,0.3);
+}
+/* Prevent popup content from expanding outside popup on mobile */
+.leaflet-popup-content {
+    max-width: 240px !important;
+    overflow-x: hidden;
+}
 
+.leaflet-popup-content-wrapper {
+    overflow: hidden !important;
+}
+.profile-row,
+.edit-row,
+.popup-edit-container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+@media(min-width: 769px) {
+  #rightPanel {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 0;   /* ❗ Hidden on load */
+    height: 100%;
+    border-left: 1px solid #ddd;
+    border-radius: 0 !important;
+    box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+    transition: width 0.2s ease;
+  }
+   #rightPanel.open {
+    width: 35%; /* Open state */
+  }
+
+  #mapContainer {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 60px); /* adjust for top panel */
+  }
+  
+  #map {
+    flex-grow:1; flex-shrink:0;
+    height: 100%;
+  }
+
+  #resizer {
+    display: block;
+  }
+}
   /* Mobile responsiveness */
   @media(max-width: 768px){
+    #dashboard-container {
+    height: 100dvh; /* fixes mobile browser shrink issues */
+  }
+
     #mapContainer {
       position: relative;  /* needed for absolutely positioned panel */
       flex-direction: column;
+      height: calc(100dvh - 60px); /* safe mobile height */
     }
     #map {
       flex: 1 1 100%;
       height: calc(100%); /* full height of container */
+      min-height: 300px; /* ensures map never collapses */
     }
     
   #rightPanel {
@@ -192,15 +254,21 @@
     left: 0;
     width: 100%;
     height: 50%;
+    max-height: 70%;  /* prevents full screen block */
     border-left: none;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
     box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
-    transition: bottom 0.4s ease;
+    transition: bottom 0.2s ease;
     z-index: 3000;
   }
+
   #rightPanel.open {
     bottom: 0;
+  }
+
+  #resizer {
+    display: none; /* hide slider on mobile */
   }
 }
 #mapLoading {
@@ -249,14 +317,14 @@
       <div class="ms-auto">
         <div class="dropdown">
           <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-            ⚙️ Action / Profile
+            ⚙️ Action 
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-            <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li>
+            <!-- <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li> -->
             {% if thela_username %}
               <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li>
+              <!-- <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li> -->
             {% else %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
@@ -273,6 +341,10 @@
     </div>
 
       <div id="map"></div>
+
+      <!-- Slider / resizer -->
+      <div id="resizer"></div>
+
       <div id="rightPanel">
         <div class="rightPanelInner">
           <button id="closeRightPanelBtn">✖</button>
@@ -350,6 +422,9 @@
             <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
         </div>
 
+        <h4>Selected Commodity</h4>
+          <div id="selectedCommodity">Loading...</div>
+
         <h4>Other Items For Sale</h4>
         <div id="otherCommodities">Loading...</div>
     `;
@@ -363,13 +438,13 @@
                             profile.user_name ||
                             null;
     
-    loadOtherCommodities(usernameToQuery);
+        loadOtherCommodities(usernameToQuery, currentCommodity);
         console.log("username for other commodity",usernameToQuery);
     // OPEN PANEL
     rightPanel.classList.add('open');
     if(window.innerWidth > 768){
-        rightPanel.style.width = '35%';
-        mapDiv.style.flex = '0 0 65%';
+        rightPanel.style.width = '45%';
+        mapDiv.style.flex = '0 0 55%';
     }
 
     document.getElementById('closeRightPanelBtn').onclick = () => {
@@ -383,71 +458,155 @@
 }
 
 //load other commodities
-async function loadOtherCommodities(username) {
-    const container = document.getElementById("otherCommodities");
-    container.innerHTML = `<p>Loading...</p>`;
+async function loadOtherCommodities(username, selectedCommodityName = null) {
+    const selectedContainer = document.getElementById("selectedCommodity");
+    const otherContainer = document.getElementById("otherCommodities");
+
+    selectedContainer.innerHTML = `<p>Loading...</p>`;
+    otherContainer.innerHTML = `<p>Loading...</p>`;
 
     try {
-        // Fetch items from your API
         const res = await fetch(`/api/DtEntries/?username_id=${encodeURIComponent(username)}`);
         const items = await res.json();
 
-        container.innerHTML = ""; // clear
-
         if (!items.length) {
-            container.innerHTML = `<p>No items found.</p>`;
+            selectedContainer.innerHTML = `<p>No items found.</p>`;
+            otherContainer.innerHTML = ``;
             return;
         }
 
-        const loggedInUser = "{{ thela_username }}";   // from Django template
-        const isOwner = loggedInUser && (loggedInUser === username);
+        // Split items: selected commodity goes in top, rest go below
+        let selectedItem = null;
+        const otherItems = [];
 
         items.forEach(item => {
-            const row = document.createElement("div");
-            row.classList.add("profile-row");
-
-            // OWNER sees editable input
-            if (isOwner) {
-                row.innerHTML = `
-                    <span class="profile-label">${item.sale_commodity}</span>
-
-                    <span class="profile-value">
-                        ₹ <input type="number" id="edit_cost_${item.id}"
-                                 value="${item.cost}"
-                                 min="1"
-                                 style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
-                        / ${item.unit}
-
-                        <button class="btn btn-sm btn-primary"
-                                style="margin-left:5px;padding:2px 6px;"
-                                onclick="updateCost(${item.id})">
-                            Save
-                        </button>
-                    </span>
-                `;
+            if (selectedCommodityName && item.sale_commodity === selectedCommodityName) {
+                selectedItem = item;
+            } else {
+                otherItems.push(item);
             }
-            else {
-                // OTHER USERS see read-only text
-                row.innerHTML = `
-                    <span class="profile-label">${item.sale_commodity}</span>
-                    <span class="profile-value">₹${item.cost} / ${item.unit}</span>
-                `;
-            }
-
-            container.appendChild(row);
         });
+
+        // Render selected commodity
+        if (selectedItem) {
+            selectedContainer.innerHTML = ""; // clear
+            selectedContainer.appendChild(renderCommodityRow(selectedItem, true));
+
+        } else {
+            selectedContainer.innerHTML = `<p>No selected commodity found.</p>`;
+        }
+
+        // Render other commodities
+        otherContainer.innerHTML = "";
+        if (otherItems.length) {
+            otherItems.forEach(item => {
+                otherContainer.appendChild(renderCommodityRow(item, false));
+            });
+        } else {
+            otherContainer.innerHTML = `<p>No other items.</p>`;
+        }
 
     } catch (err) {
         console.error("Error loading commodities:", err);
-        container.innerHTML = `<p style="color:red;">Error loading data</p>`;
+        selectedContainer.innerHTML = `<p style="color:red;">Error loading data</p>`;
+        otherContainer.innerHTML = ``;
     }
 }
-async function updateCost(id) {
-    const input = document.getElementById(`edit_cost_${id}`);
-    const newCost = input.value;
+function renderCommodityRow(item, isSelected) {
+    const row = document.createElement("div");
+    row.classList.add("profile-row");
+    row.style.flexDirection = "column";
+    row.style.padding = "8px";
+    row.style.borderBottom = "1px solid #ddd";
 
-    if (!newCost || isNaN(newCost) || Number(newCost) < 1) {
+    const loggedInUser = "{{ thela_username }}";
+    const isOwner = loggedInUser && (loggedInUser === item.username_id);
+
+    const topLine = document.createElement("div");
+    topLine.style.display = "flex";
+    topLine.style.flexWrap = "wrap";
+    topLine.style.justifyContent = "space-between";
+    topLine.style.alignItems = "center";
+    topLine.style.gap = "5px";
+
+    if (isOwner) {
+        topLine.innerHTML = `
+            <span class="profile-label"><b>${item.sale_commodity}</b></span>
+            <span class="profile-value">
+                ₹ <input type="number" id="edit_cost_${item.id}" value="${item.cost}" min="1" 
+                    style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
+                /<span class="profile-label">${item.unit}</span>
+            </span>
+            <br>
+            <span class="profile-label"><b>Quantity For sale:</b></span>
+            <span class="profile-value">
+                <input type="number" id="edit_qty_${item.id}" value="${item.quantity_for_sale}" min="1" 
+                    style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
+            </span>
+            <span class="profile-value">
+            <select id="edit_unit_${item.id}" style="width:100px; padding:2px; border:1px solid #ccc;">
+                <option value="Kg" ${item.unit === 'Kg' ? 'selected' : ''}>Kg</option>
+                <option value="250 gm" ${item.unit === '250 gm' ? 'selected' : ''}>250 gm</option>
+                <option value="bundle" ${item.unit === 'bundle' ? 'selected' : ''}>bundle</option>
+                <option value="piece" ${item.unit === 'piece' ? 'selected' : ''}>piece</option>
+                <option value="dozen" ${item.unit === 'dozen' ? 'selected' : ''}>dozen</option>
+            </select>
+                <button class="btn btn-sm btn-primary" style="margin-left:5px;padding:2px 6px;"
+                    onclick="updateProduce(${item.id})">
+                    Save
+                </button>
+            </span>
+        `;
+    } else {
+        topLine.innerHTML = `
+            <span class="profile-label">${item.sale_commodity}</span>
+            <span class="profile-value">₹${item.cost} / ${item.quantity_for_sale} ${item.unit}</span>
+        `;
+    }
+
+    row.appendChild(topLine);
+
+    // Details
+    const detailsDiv = document.createElement("div");
+    detailsDiv.style.marginTop = "6px";
+    detailsDiv.style.fontSize = "13px";
+    detailsDiv.style.color = "#555";
+    detailsDiv.innerHTML = `
+        <div><b>Variety:</b> ${item.variety_name || 'N/A'}</div>
+        <div><b>Method:</b> ${item.method || 'N/A'}</div>
+        <div><b>Production Level:</b> ${item.level_of_produce || 'N/A'}</div>
+        <div><b>Sowing Date:</b> ${item.sowing_date || 'N/A'}</div>
+        <div><b>Harvest Date:</b> ${item.harvest_date || 'N/A'}</div>
+        ${item.photo_or_video
+            ? (item.photo_or_video.endsWith('.mp4')
+                ? `<video src="/media/produce_media/${item.photo_or_video}" controls width="200" style="margin-top:5px;"></video>`
+                : `<img src="/media/produce_media/${item.photo_or_video}" width="200" style="margin-top:5px;">`)
+            : ''}
+    `;
+    row.appendChild(detailsDiv);
+
+    if (isSelected) row.style.background = "#e6f4ea";
+
+    return row;
+}
+
+
+async function updateProduce(id) {
+// alert(id);
+    const cost = document.getElementById(`edit_cost_${id}`).value;
+    const qty = document.getElementById(`edit_qty_${id}`).value;
+    const unit = document.getElementById(`edit_unit_${id}`).value.trim();
+alert(qty);
+    if (!cost || isNaN(cost) || cost < 1) {
         alert("Enter a valid cost");
+        return;
+    }
+    if (!qty || isNaN(qty) || qty < 1) {
+        alert("Enter a valid quantity");
+        return;
+    }
+    if (!unit) {
+        alert("Enter a valid unit");
         return;
     }
 
@@ -458,30 +617,26 @@ async function updateCost(id) {
                 "Content-Type": "application/json",
                 "X-CSRFToken": "{{ csrf_token }}"
             },
-            body: JSON.stringify({ cost: newCost })
+            body: JSON.stringify({
+                cost: cost,
+                quantity_for_sale: qty,
+                unit: unit
+            })
         });
 
-        if (!res.ok) throw new Error("Failed");
+        if (!res.ok) throw new Error("Failed to update");
 
-        alert("Cost updated!");
+        alert("Produce updated!");
+        // Refresh right panel and popup
+        const username = "{{ thela_username }}"; // or fetch actual viewed user
+        loadOtherCommodities(username, currentCommodity);
+        if (currentOpenMarker) refreshPopup(id, currentOpenMarker);
 
-        // -------------------------------------------
-        // 🔵 1) Refresh RIGHT PANEL commodities
-        // -------------------------------------------
-        // const viewedUser = document.getElementById("profileUsername").innerText;
-        // loadOtherCommodities(viewedUser);
-
-        // 🔥 Refresh popup instantly if it is open
-        
-        if (currentOpenMarker) {
-            refreshPopup(id, currentOpenMarker);
-        }
-
-        } catch (error) {
-            console.error("Error updating:", error);
-            alert("Error updating cost");
-        }
+    } catch (err) {
+        console.error(err);
+        alert("Error updating produce");
     }
+}
 
 
   // Load commodities from API
@@ -822,6 +977,43 @@ function updateLegend(commodity, count, iconExists, iconPath){
     };
 
     legendControl.addTo(map);
+}
+  if(window.innerWidth > 768){  // only for desktop
+  const mapDiv = document.getElementById('map');
+  const rightPanel = document.getElementById('rightPanel');
+  const resizer = document.getElementById('resizer');
+
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', e => {
+      isResizing = true;
+      document.body.style.cursor = 'ew-resize';
+  });
+
+  document.addEventListener('mousemove', e => {
+      if (!isResizing) return;
+      const containerOffsetLeft = mapDiv.parentElement.getBoundingClientRect().left;
+      const pointerRelativeX = e.clientX - containerOffsetLeft;
+      const containerWidth = mapDiv.parentElement.offsetWidth;
+
+      const minRightWidth = 250; // px
+      const maxRightWidth = containerWidth - 200; // map at least 200px
+
+      let newRightWidth = containerWidth - pointerRelativeX;
+      if (newRightWidth < minRightWidth) newRightWidth = minRightWidth;
+      if (newRightWidth > maxRightWidth) newRightWidth = maxRightWidth;
+
+      rightPanel.style.width = newRightWidth + 'px';
+      mapDiv.style.flex = '0 0 ' + (containerWidth - newRightWidth) + 'px';
+      map.invalidateSize();
+  });
+
+  document.addEventListener('mouseup', e => {
+      if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = 'default';
+      }
+  });
 }
 
   </script>
