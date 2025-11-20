@@ -114,7 +114,11 @@ class User1(AbstractUser):
     email = models.EmailField(unique=True, blank=False, null=False)
     USERNAME_FIELD = 'username'  # keep login by username (or change to email/mobile if needed)
     REQUIRED_FIELDS = ['email', 'mobile']
-
+    profile_pic = models.ImageField(
+        upload_to='user_profile_upload/',
+        null=True,
+        blank=True
+    )
     
     # Keep these so admin does not break
     groups = models.ManyToManyField(Group, blank=True, related_name="custom_user_set")

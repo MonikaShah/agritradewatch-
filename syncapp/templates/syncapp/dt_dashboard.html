@@ -403,8 +403,24 @@
     const rightPanel = document.getElementById('rightPanel');
     const contentDiv = document.getElementById('profileContent');
     
-    contentDiv.innerHTML = `
+    // contentDiv.innerHTML = `
+    //     <div class="profile-pic">👤</div>
+       // Build profile image
+    let profileImgHTML = `
         <div class="profile-pic">👤</div>
+    `;
+
+    if (profile.profile_pic) {
+      alert("image there")
+        profileImgHTML = `
+            <img src="${profile.profile_pic}" 
+                 class="profile-pic" 
+                 style="object-fit: cover; width:80px; height:80px; border-radius:50%;" />
+        `;
+    }
+
+    contentDiv.innerHTML = `
+        ${profileImgHTML}
         <h4>${profile.username || profile.display_name || usernameIdFromPopup || 'Unknown'}</h4>
 
         <div class="profile-row">
