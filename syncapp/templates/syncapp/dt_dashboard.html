@@ -411,7 +411,7 @@
     `;
 
     if (profile.profile_pic) {
-      alert("image there")
+      // alert("image there")
         profileImgHTML = `
             <img src="${profile.profile_pic}" 
                  class="profile-pic" 
@@ -612,7 +612,7 @@ async function updateProduce(id) {
     const cost = document.getElementById(`edit_cost_${id}`).value;
     const qty = document.getElementById(`edit_qty_${id}`).value;
     const unit = document.getElementById(`edit_unit_${id}`).value.trim();
-alert(qty);
+// alert(qty);
     if (!cost || isNaN(cost) || cost < 1) {
         alert("Enter a valid cost");
         return;
@@ -710,7 +710,7 @@ alert(qty);
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
                     ? `<video src="/media/produce_media/${entry.photo_or_video}" controls width="300"></video>`
-                    : `<img src="../media/${entry.photo_or_video}" width="200">`)
+                    : `<img src="${entry.photo_or_video}" width="200">`)
                 : ''}
             </div>
           </div>
