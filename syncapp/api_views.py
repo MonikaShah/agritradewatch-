@@ -30,6 +30,7 @@ from .serializers import (
     ConsumerSerializer,
     WebDataSerializer,
     CommoditySerializer,
+    DtProduceSerializer,
     
 )
 from django.contrib.auth.tokens import default_token_generator
@@ -80,6 +81,10 @@ class CommodityViewSet(viewsets.ModelViewSet):
     serializer_class = CommoditySerializer
     permission_classes = [permissions.AllowAny]  # 👈 add this line
 
+class DtProduceViewSet(viewsets.ModelViewSet):
+    queryset = DtProduce.objects.all()
+    serializer_class = DtProduceSerializer
+    permission_classes = [IsAuthenticated]   # or use IsAuthenticated
 # ---------------------------------------------------------------------
 # Register new user
 # ---------------------------------------------------------------------
