@@ -264,7 +264,10 @@
   </div>
 
   <div class="chart-panel">
-    <h5 class="chart-title">{% trans "AgmarkNet Prices Trend" %}</h5>  
+    <h5 class="chart-title">
+      {% trans "AgmarkNet Prices Trend" %}
+    <span id="selectedApmcLabel" class="fw-bold"></span>
+    </h5>  
     <div class="text-end mt-2">
   <button id="downloadChartBtn" class="btn btn-success btn-sm">
     {% trans "Download Chart" %}
@@ -620,6 +623,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
         const apmcSelect = document.getElementById("apmcSelect");
         apmcSelect.value = loc.apmc_name;
         marker.closePopup();
+        updateApmcLabel();   // <-- ADD THIS
         fetchLineChart();
       });
 
@@ -645,6 +649,8 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 
   // --- Fetch Chart ---
   async function fetchLineChart() {
+  updateApmcLabel();
+
   const ctx = document.getElementById("agmarkLineChart").getContext("2d");
   const spinner = document.getElementById("loading-spinner");
   const chartContainer = document.getElementById("chartContainer");
@@ -882,6 +888,22 @@ window.addEventListener("load", async function() {
         console.warn("⚠️ Ahmednagar centroid not found:", Object.keys(districtCentroids));
     }
 });
+const selectedApmcLabel = document.getElementById("selectedApmcLabel");
+
+apmcSelect.addEventListener("change", () => {
+    updateApmcLabel();
+});
+function updateApmcLabel() {
+    const apmc = apmcSelect.value;
+
+    if (!apmc) {
+        selectedApmcLabel.textContent = "- ALL APMCs";  // show nothing
+    } else {
+        selectedApmcLabel.textContent = ` — ${apmc}`;
+    }
+}
+
+
 });
 </script>
 {% endblock %}
