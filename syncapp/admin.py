@@ -19,7 +19,7 @@ class PageAdmin(admin.ModelAdmin):
     image_tag.short_description = 'Image'
 
 class Users1Admin(admin.ModelAdmin):
-    list_display = ('username', 'name', 'mobile')
+    list_display = ('username', 'name', 'mobile','profile_pic')
     list_filter = ('username', 'job', 'is_staff')                          # search bar
 
 class Consumers1Admin(admin.ModelAdmin):

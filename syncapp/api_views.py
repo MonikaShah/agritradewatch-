@@ -485,6 +485,7 @@ def user_profile(request, username):
             "email": user.email,
             "mobile": getattr(user, "mobile", None),
             "job": getattr(user, "job", None),
+            "profile_pic": user.profile_pic.url if user.profile_pic else None
         })
     
     # Otherwise, render HTML template
@@ -906,6 +907,7 @@ def get_DtCommodities(request):
             'sowing_date',
             'harvest_date',
             'photo_or_video',
+            
         )
         .order_by('-created_at')
     )
