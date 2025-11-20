@@ -589,10 +589,7 @@ function renderCommodityRow(item, isSelected) {
     detailsDiv.style.color = "#555";
     detailsDiv.innerHTML = `
         <div><b>Variety:</b> ${item.variety_name || 'N/A'}</div>
-        <div><b>Method:</b> ${item.method || 'N/A'}</div>
-        <div><b>Production Level:</b> ${item.level_of_produce || 'N/A'}</div>
-        <div><b>Sowing Date:</b> ${item.sowing_date || 'N/A'}</div>
-        <div><b>Harvest Date:</b> ${item.harvest_date || 'N/A'}</div>
+        
         ${item.photo_or_video
             ? (item.photo_or_video.endsWith('.mp4')
                 ? `<video src="${item.photo_or_video}" controls width="200" style="margin-top:5px;"></video>`
@@ -617,7 +614,7 @@ async function updateProduce(id) {
         alert("Enter a valid cost");
         return;
     }
-    if (!qty || isNaN(qty) || qty < 1) {
+    if (!qty || isNaN(qty) || qty < 0) {
         alert("Enter a valid quantity");
         return;
     }
@@ -877,7 +874,7 @@ async function updateProduce(id) {
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
                     ? `<video src="${entry.photo_or_video}" controls width="300"></video>`
-                    : `<img src="{entry.photo_or_video}" width="200">`)
+                    : `<img src="${entry.photo_or_video}" width="200">`)
                 : ''}
             </div>
           </div>
