@@ -44,10 +44,13 @@ class WebdataAdmin(admin.ModelAdmin):
     list_filter = ['date']
 
 class DrProduceAdmin(admin.ModelAdmin):
-    list_display = ('sale_commodity', 'variety_name','quantity_for_sale', 'created_at','photo_or_video')
+    list_display = ('sale_commodity', 'username_id','variety_name','quantity_for_sale', 'created_at','photo_or_video')
     list_filter = ['created_at']
 
-    
+class CommodityAdmin(admin.ModelAdmin):
+    list_display = ('name','alias_marathi','type')
+    ordering = ['name']
+
 # Register models
 # admin.site.register(MarketPrices, MarketPricesAdmin)
 admin.site.register(Consumer1,Consumers1Admin)
@@ -55,7 +58,7 @@ admin.site.register(Farmer1)
 admin.site.register(User1,Users1Admin)
 admin.site.register(WebData,WebdataAdmin)
 admin.site.register(Page,PageAdmin)
-admin.site.register(Commodity)
+admin.site.register(Commodity,CommodityAdmin)
 admin.site.register(APMC_Master)
 admin.site.register(DamageCrop)
 admin.site.register(DtProduce,DrProduceAdmin)
