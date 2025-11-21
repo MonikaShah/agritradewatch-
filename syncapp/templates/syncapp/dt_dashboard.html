@@ -13,7 +13,7 @@
   #dashboard-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100dvh;
     width: 100%;
   }
 
@@ -23,7 +23,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
     padding: 10px 15px;
     background: #f8f9fa;
     border-bottom: 1px solid #ddd;
@@ -39,6 +39,7 @@
     padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    flex-shrink: 1; /* allows shrinking on small screens */
   }
 
   #topPanel button {
@@ -55,7 +56,7 @@
     display: flex;
     flex-grow: 1;
     width: 100%;
-    height: calc(100vh - 60px); /* topPanel height */
+    height: calc(100dvh - 60px); /* topPanel height */
     transition: all 0.4s ease;
   }
 
@@ -63,14 +64,15 @@
   #map {
     flex: 1;
     height: 100%;
+    min-height: 300px; /* ensures map never collapses */
     transition: flex 0.4s ease;
   }
 
-  /* Right Panel */
-  .rightPanelBase {
-  width: 0;
+/* Right Panel (desktop default) */
+  .rightPanelBase,#rightPanel {
+  /* width: 0; */
   overflow-x: hidden;
-  transition: width 0.4s ease;
+  transition: width 0.3s ease;
   background: #ffffff;
   border-left: 1px solid #ddd;
   box-shadow: -3px 0 12px rgba(0,0,0,0.15);
@@ -88,6 +90,7 @@
   height: 100%;
   padding: 20px;
   gap: 15px;
+  overflow-y: auto; /* scroll if content is long */
 }
 
 /* Header & Close Button */
@@ -115,6 +118,7 @@
 
 .profile-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   margin-bottom: 8px;
   font-size: 15px;
@@ -128,19 +132,20 @@
 .profile-value {
   color: #222;
   text-align: right;
+  flex-shrink: 0;
 }
 
 /* Optional: profile image placeholder */
 #profileContent .profile-pic {
-  width: 80px;
-  height: 80px;
+  width: 60%;
+  height: 60px;
   background: #ddd;
   border-radius: 50%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: 28px;
   color: #aaa;
 }
 
@@ -149,7 +154,16 @@
   overflow-y: auto;
   flex-grow: 1;
 }
-
+/* Make images/videos responsive */
+.profile-row img,
+.profile-row video,
+#otherCommodities img,
+#otherCommodities video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin-top: 5px;
+}
   /* Close Button */
 
   /* Leaflet Legend */
@@ -161,13 +175,13 @@
     font-size: 14px;
     line-height: 1.4em;
   }
-  .legend img {
+  .leaflet-control.legend img {
     width: 18px;
     height: 18px;
     vertical-align: middle;
     margin-right: 6px;
   }
-  .legend i {
+  .leaflet-control.legend i {
     width: 14px;
     height: 14px;
     display: inline-block;
@@ -185,121 +199,159 @@
 #resizer:hover {
   background-color: rgba(0,0,0,0.3);
 }
-/* Prevent popup content from expanding outside popup on mobile */
-.leaflet-popup-content {
-    max-width: 240px !important;
-    overflow-x: hidden;
-}
-
-.leaflet-popup-content-wrapper {
-    overflow: hidden !important;
-}
+/* Leaflet popup responsiveness */
+.leaflet-popup-content,
 .profile-row,
 .edit-row,
 .popup-edit-container {
     max-width: 100%;
     overflow-x: hidden;
+    word-break: break-word;
 }
-@media(min-width: 769px) {
-  #rightPanel {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    width: 0;   /* ❗ Hidden on load */
-    height: 100%;
-    border-left: 1px solid #ddd;
-    border-radius: 0 !important;
-    box-shadow: -3px 0 12px rgba(0,0,0,0.15);
-    transition: width 0.2s ease;
-  }
-   #rightPanel.open {
-    width: 35%; /* Open state */
+/* ====== Media Queries ====== */
+
+/* Tablet / Desktop */
+@media(min-width: 769px){
+    #rightPanel {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        width: 0;
+        height: 100%;
+        border-radius: 0 !important;
+        box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+        transition: width 0.2s ease;
+    }
+    #rightPanel.open {
+        width: 35%;
+    }
+    #mapContainer {
+        flex-direction: row;
+        height: calc(100vh - 60px);
+    }
+    #map {
+        flex-grow:1; flex-shrink:0;
+        height: 100%;
+    }
+    #resizer {
+        display: block;
+    }
+}
+
+/* Mobile */
+/* Mobile adjustments */
+@media(max-width: 768px) {
+  #dashboard-container {
+    height: 100dvh;
   }
 
   #mapContainer {
-    display: flex;
-    flex-direction: row;
-    height: calc(100vh - 60px); /* adjust for top panel */
+    flex-direction: column;
+    height: calc(100dvh - 60px);
   }
-  
+
   #map {
-    flex-grow:1; flex-shrink:0;
+    flex: 1 1 100%;
     height: 100%;
+    min-height: 300px;
   }
 
-  #resizer {
-    display: block;
-  }
-}
-  /* Mobile responsiveness */
-  @media(max-width: 768px){
-    #dashboard-container {
-    height: 100dvh; /* fixes mobile browser shrink issues */
-  }
-
-    #mapContainer {
-      position: relative;  /* needed for absolutely positioned panel */
-      flex-direction: column;
-      height: calc(100dvh - 60px); /* safe mobile height */
-    }
-    #map {
-      flex: 1 1 100%;
-      height: calc(100%); /* full height of container */
-      min-height: 300px; /* ensures map never collapses */
-    }
-    
   #rightPanel {
     position: fixed;
     bottom: -100%;
     left: 0;
     width: 100%;
-    height: 50%;
-    max-height: 70%;  /* prevents full screen block */
+    height: 60%;
+    max-height: 80%;
     border-left: none;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
-    box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
-    transition: bottom 0.2s ease;
+    box-shadow: 0 -3px 15px rgba(0,0,0,0.25);
+    transition: bottom 0.3s ease;
     z-index: 3000;
+    padding: 15px;
   }
 
   #rightPanel.open {
     bottom: 0;
   }
 
+  .rightPanelInner {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .profile-row,
+  .edit-row,
+  .popup-edit-container {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  .profile-row input,
+  .profile-row select {
+    width: 100% !important;
+    margin-top: 4px;
+  }
+
+  .profile-row img,
+  .profile-row video {
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  #topPanel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .leaflet-popup-content {
+    max-width: 90vw !important;
+    overflow-x: hidden;
+  }
+
+  .leaflet-popup-content img,
+  .leaflet-popup-content video {
+    max-width: 100%;
+    height: auto;
+  }
+
   #resizer {
-    display: none; /* hide slider on mobile */
+    display: none;
   }
 }
+
+
+/* ====== Loading Spinner ====== */
 #mapLoading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 2000;
-  font-size: 16px;
-  color: #444;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.75);
+    display: flex; justify-content: center; align-items: center;
+    flex-direction: column;
+    z-index: 2000;
+    font-size: 16px;
+    color: #444;
 }
 
 .spinner {
-  width: 45px;
-  height: 45px;
-  border: 5px solid #ddd;
-  border-top: 5px solid #198754;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
+    width: 45px;
+    height: 45px;
+    border: 5px solid #ddd;
+    border-top: 5px solid #198754;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
-  100% { transform: rotate(360deg); }
+    100% { transform: rotate(360deg); }
 }
-
+</style>
   </style>
 
   <div id="dashboard-container">
@@ -698,7 +750,7 @@ async function updateProduce(id) {
             </a>
             <br><br>
             <b>Commodity:</b> ${entry.sale_commodity}<br>
-            <b>Cost:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
             <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
@@ -865,7 +917,7 @@ async function updateProduce(id) {
             </a>
             <br><br>
             <b>Commodity:</b> ${entry.sale_commodity}<br>
-            <b>Cost:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
             <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
