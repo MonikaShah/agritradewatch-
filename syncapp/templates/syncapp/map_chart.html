@@ -1072,9 +1072,9 @@ const divider = document.getElementById("divider");
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Min Price', data: minPrices, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5 },
-                        { label: 'Max Price', data: maxPrices, borderColor: 'red', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5},
-                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 2, pointHoverRadius: 8, pointBorderWidth: 1.5}
+                        { label: 'Min Price', data: minPrices, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12, },
+                        { label: 'Max Price', data: maxPrices, borderColor: 'red', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,},
+                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,}
                     ]
                 },
                 options: {
