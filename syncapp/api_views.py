@@ -46,6 +46,7 @@ User = get_user_model()
 # ---------------------------------------------------------------------
 # ViewSets (protected with JWT)
 # ---------------------------------------------------------------------
+print("🔥 views.py loaded")
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User1.objects.all()
@@ -472,11 +473,14 @@ def webdata_prices_public(request):
 @permission_classes([IsAuthenticated])
 def user_profile(request, username):
     user = get_object_or_404(User1, username=username)
+    produces = DtProduce.objects.filter(username=user).order_by('-created_at')
 
-    # return render(request, "syncapp/profile.html", {
-    #     "user": user
-    # })
-    # Check if request wants JSON (API) or HTML
+    # Print queryset info
+    print("🔹 Produces count:", produces.count())
+    print("🔹 Produces raw:", list(produces.values()))
+    print("DB usernames:", list(DtProduce.objects.values_list('username_id', flat=True)))
+
+    
     if request.accepted_renderer.format == 'json' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
         # API response
         return Response({
@@ -489,7 +493,8 @@ def user_profile(request, username):
         })
     
     # Otherwise, render HTML template
-    return render(request, "syncapp/profile.html", {"user": user})
+    return render(request, "syncapp/profile.html", {"user": user,
+        "produces": produces,})
 
 
 #CRUD operations for consumer/farmer added crops
@@ -928,7 +933,15 @@ def update_produce_cost(request, pk):
         obj = DtProduce.objects.get(id=pk)
     except DtProduce.DoesNotExist:
         return Response({"error": "Item not found"}, status=404)
+    
+    action = request.data.get("action", "update").lower()  # default to update
 
+    if action == "delete":
+        obj.delete()
+        return Response({"success": True, "message": "Produce deleted"})
+
+    # ====== Update logic ======
+    
     new_cost = request.data.get("cost")
     new_qty = request.data.get("quantity_for_sale")
     new_unit = request.data.get("unit")
@@ -953,13 +966,20 @@ def update_produce_cost(request, pk):
         return Response({"error": "Missing unit in request"}, status=400)
     obj.unit = new_unit.strip()
 
+    # Update file if present
+    uploaded_file = request.FILES.get('photo_or_video')
+    if uploaded_file:
+        obj.photo_or_video = uploaded_file
+
+
     obj.save()
 
     return Response({
         "success": True,
         "new_cost": obj.cost,
         "new_quantity_for_sale": obj.quantity_for_sale,
-        "new_unit": obj.unit
+        "new_unit": obj.unit,
+        "photo_or_video_url": obj.photo_or_video.url if obj.photo_or_video else None
     })
 
 def get_single_entry(request, pk):

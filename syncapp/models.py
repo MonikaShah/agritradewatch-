@@ -356,10 +356,13 @@ def validate_file_type_and_size(value):
     if value.size > max_size_mb * 1024 * 1024:
         raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
 
-    if value.file.content_type not in allowed_types:
+    # SAFELY read content_type
+    content_type = getattr(value.file, "content_type", None)
+
+    if not content_type or content_type not in allowed_types:
         raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
 
-
+    
 def validate_file_type_and_size(value):
     max_size_mb = 20
     allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
@@ -380,10 +383,11 @@ class DtProduce(models.Model):
     )
     sale_commodity = models.CharField(max_length=100)
     variety_name = models.CharField(max_length=100)
-    method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')])
+    method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')], blank=True,   # allows form submissions to leave it empty
+    null=True )    # allows NULL value in database)
     level_of_produce = models.CharField(max_length=50, choices=[
-        ('selling_surplus', 'Selling Surplus'),
-        ('selling_surplus_with_value_addition', 'Selling Surplus with Value Addition')
+        ('selling surplus', 'Selling Surplus'),
+        ('selling surplus with value addition', 'Selling Surplus with Value Addition')
     ])
     sowing_date = models.DateField(blank=True, null=True)
     harvest_date = models.DateField(blank=True, null=True)

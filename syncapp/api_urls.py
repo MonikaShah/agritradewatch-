@@ -22,6 +22,8 @@ urlpatterns = [
     path('create-produce/', api_views.create_produce, name='create_produce'),
     path("profile/<str:username>/", api_views.user_profile, name="user_profile"),
     path("update_produce_cost/<int:pk>/", api_views.update_produce_cost, name="update-produce-cost"),
+    
+    # path("update_produce_cost/<int:pk>/", api_views.update_or_delete_produce, name="update-produce-cost"),
     path('get_single_entry/<int:pk>/', api_views.get_single_entry, name='get_single_entry'),
     # Mobile JWT APIs
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

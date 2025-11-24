@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm
@@ -296,6 +296,31 @@ def web_logout(request):
 
 def profile(request):
     return render(request, "syncapp/profile.html")
+def simple_profile(request):
+    user = request.user  # logged-in user
+    produces = DtProduce.objects.filter(username=user).order_by('-created_at')
+
+    print("🔍 Produces count:", produces.count())
+    print("🔍 Produces queryset:", list(produces.values()))
+
+    return render(request, "syncapp/profile.html", {
+        "user": user,
+        "produces": produces,
+    })
+def profile_crud(request):
+    if request.method == 'POST':
+        produce_id = request.POST.get('produce_id')
+        action = request.POST.get('action')
+        produce = get_object_or_404(DtProduce, id=produce_id, username=request.user)
+
+        if action == 'save':
+            form = DtProduceForm(request.POST, request.FILES, instance=produce)
+            if form.is_valid():
+                form.save()
+        elif action == 'delete':
+            produce.delete()
+
+    return redirect('simple_profile')
 
 def web_register(request):
     if request.method == "POST":

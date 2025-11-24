@@ -48,7 +48,12 @@ urlpatterns = [
     # custom login & register for web portal
     path('login/', views.web_login, name='login'),
     path("logout/", views.web_logout, name="web_logout"),
-    path("profile/",views.profile,name='profile'),
+    path("profile/",views.simple_profile,name='simple_profile'),
+    # path('dtproduce/add/', views.dtproduce_add, name='dtproduce_add'),
+    # path('dtproduce/<int:pk>/', views.dtproduce_view, name='dtproduce_view'),
+    # path('dtproduce/edit/<int:pk>/', views.dtproduce_edit, name='dtproduce_edit'),
+    # path('dtproduce/delete/<int:pk>/', views.dtproduce_delete, name='dtproduce_delete'),
+
     path('register/', views.web_register, name='register'),
     
     path('password_reset/', MyPasswordResetView.as_view(), name='password_reset'),
