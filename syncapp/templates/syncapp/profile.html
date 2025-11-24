@@ -7,159 +7,128 @@
 {% block content %}
 <div class="container my-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-
+        <div class="col-md-10">
             <!-- Profile Card -->
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">User Profile</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body d-flex flex-column flex-md-row p-0 align-items-stretch">
+                    <!-- Left Column: Profile Details -->
+                    <div class="flex-grow-1 p-3 d-flex flex-column">
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="fs-4 me-3">👤</span>
+                            <h5 class="mb-0">{{ request.user.username|title }}</h5>
+                        </div>
 
-                    <!-- Profile Details -->
-                    <div class="mb-3 d-flex align-items-center">
-                        <span class="fs-4 me-3">👤</span>
-                        <h5 class="mb-0">{{ request.user.username|title }}</h5>
+                        <ul class="list-group list-group-flush mb-3 flex-grow-1">
+                            <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.name }}</li>
+                            <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
+                            <li class="list-group-item"><strong>Mobile:</strong> {{ request.user.mobile }}</li>
+                            <li class="list-group-item"><strong>Date Joined:</strong> {{ request.user.date_joined|date:"d M Y" }}</li>
+                            <li class="list-group-item"><strong>Last Login:</strong> {{ request.user.last_login|date:"d M Y H:i" }}</li>
+                        </ul>
+
+                        <div class="d-flex gap-3 flex-wrap mt-3">
+                            <a href="{% url 'landingpage' %}" class="btn btn-success d-flex align-items-center">
+                                <i class="bi bi-house-door me-2"></i>Home
+                            </a>
+                            <a href="{% url 'map_chart' %}" class="btn btn-primary d-flex align-items-center">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            </a>
+                            <a href="{% url 'dtDashboard' %}" class="btn btn-info d-flex align-items-center">
+                                <i class="bi bi-person-circle me-2"></i>Digital Thela
+                            </a>
+                        </div>
                     </div>
 
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.name }}</li>
-                        <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
-                        <li class="list-group-item"><strong>Mobile:</strong> {{ request.user.mobile }}</li>
-                        <li class="list-group-item"><strong>Date Joined:</strong> {{ request.user.date_joined|date:"d M Y" }}</li>
-                        <li class="list-group-item"><strong>Last Login:</strong> {{ request.user.last_login|date:"d M Y H:i" }}</li>
-                    </ul>
-
-                    <!-- Actions -->
-                    <div class="mt-4 d-flex gap-3 flex-wrap">
-
-                    <!-- Back to Home -->
-                    <a id="btnHome" href="{% url 'landingpage' %}" 
-                    class="btn btn-success d-flex align-items-center">
-                        <i class="bi bi-house-door me-2"></i>
-                        <span>Home</span>
-                    </a>
-
-                    <!-- Back to Dashboard -->
-                    <a id="btnDashboard" href="{% url 'map_chart' %}" 
-                    class="btn btn-primary d-flex align-items-center">
-                        <i class="bi bi-speedometer2 me-2"></i>
-                        <span>Dashboard</span>
-                    </a>
-
-                    <!-- Profile (example third button, you can modify URL) -->
-                    <a id="btnProfile" href="{% url 'dtDashboard' %}" 
-                    class="btn btn-info d-flex align-items-center">
-                        <i class="bi bi-person-circle me-2"></i>
-                        <span>Digital Thela</span>
-                    </a>
-
-                </div>
-
+                    <!-- Right Column: Map -->
+                    <div class="flex-shrink-0" style="width:350px; min-width:250px;">
+                        <div id="userMap" class="h-100"></div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Digital Thela CRUD table below -->
+            <h4 class="mt-4">Digital Thela Entries</h4>
+            {% if produces %}
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Commodity</th>
+                        <th>Variety</th>
+                        <th>Method</th>
+                        <th>Level</th>
+                        <th>Sowing Date</th>
+                        <th>Harvest Date</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Unit</th>
+                        <th>Expense</th>
+                        <th>Profit</th>
+                        <th>Photo</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in produces %}
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'api:update-produce-cost' p.id %}">
+                        <tr>
+                            {% csrf_token %}
+                            <input type="hidden" name="produce_id" value="{{ p.id }}">
+
+                            <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{{ p.sale_commodity }}"></td>
+                            <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{{ p.variety_name }}"></td>
+                            <td><input class="form-control form-control-sm" type="text" name="method" value="{{ p.method }}"></td>
+                            <td><input class="form-control form-control-sm" type="text" name="level_of_produce" value="{{ p.level_of_produce }}"></td>
+                            <td><input class="form-control form-control-sm" type="date" name="sowing_date" value="{{ p.sowing_date|date:'Y-m-d' }}"></td>
+                            <td><input class="form-control form-control-sm" type="date" name="harvest_date" value="{{ p.harvest_date|date:'Y-m-d' }}"></td>
+                            <td><input class="form-control form-control-sm" type="number" step="0.50" id="edit_qty_{{p.id}}" value="{{ p.quantity_for_sale }}"></td>
+                            <td><input class="form-control form-control-sm" type="text" id="edit_cost_{{p.id}}" value="{{ p.cost }}" oninput='validateDecimal(this)'></td>
+                            {% with units_list="Kg,250 gm,bundle,piece,dozen" %}
+                            <td>
+                                <select class="form-control form-control-sm" id="edit_unit_{{p.id}}">
+                                    {% for u in units_list|split:"," %}
+                                        <option value="{{ u }}" {% if p.unit == u %}selected{% endif %}>{{ u }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            {% endwith %}
+                            <td><input class="form-control form-control-sm" type="number" step="0.50" name="produce_expense" value="{{ p.produce_expense }}"></td>
+                            <td><input class="form-control form-control-sm" type="number" step="0.01" name="profit_expectation" value="{{ p.profit_expectation }}"></td>
+                            <td>
+                                {% if p.photo_or_video %}
+                                    <img src="{{ p.photo_or_video.url }}" width="50"><br>
+                                {% endif %}
+                                <input type="file" id="edit_file_{{p.id}}" name="photo_or_video" class="form-control form-control-sm">
+                            </td>
+                            <td class="d-flex gap-1">
+                                <button type="button" name="action" value="save" class="btn btn-sm btn-success" onclick="updateProduce('{{p.id}}','update')">Save</button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="updateProduce('{{p.id}}','delete')">Delete</button>
+                            </td>
+                        </tr>
+                    </form>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p class="text-muted">No produce added yet.</p>
+            {% endif %}
         </div>
     </div>
-    <h4 class="mt-4">Digital Thela Entries</h4>
-
-    {% if produces %}
-    <table class="table table-bordered table-sm">
-        <thead class="table-light">
-            <tr>
-                <th>Commodity</th>
-                <th>Variety</th>
-                <th>Method</th>
-                <th>Level</th>
-                <th>Sowing Date</th>
-                <th>Harvest Date</th>
-                <th>Quantity</th>
-                <th>Cost</th>
-                <th>Unit</th>
-                <th>Expense</th>
-                <th>Profit</th>
-                <th>Photo</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in produces %}
-            <form method="POST" enctype="multipart/form-data" action="{% url 'api:update-produce-cost' p.id %}">
-            <tr>
-               
-                
-                    {% csrf_token %}
-                    <input type="hidden" name="produce_id" value="{{ p.id }}">
-
-                    <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{{ p.sale_commodity }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{{ p.variety_name }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="text" name="method" value="{{ p.method }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="text" name="level_of_produce" value="{{ p.level_of_produce }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="date" name="sowing_date" value="{{ p.sowing_date|date:'Y-m-d' }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="date" name="harvest_date" value="{{ p.harvest_date|date:'Y-m-d' }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="number" step="0.50" id="edit_qty_{{p.id}}" value="{{ p.quantity_for_sale }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="text" id="edit_cost_{{p.id}}" value="{{ p.cost }}" oninput='validateDecimal(this)'></td>
-
-                    <!-- <td><input class="form-control form-control-sm" type="text" id="edit_unit_{{p.id}}" value="{{ p.unit }}"></td> -->
-
-                    {% with units_list="Kg,250 gm,bundle,piece,dozen" %}
-                    <td>
-                        <select class="form-control form-control-sm" id="edit_unit_{{p.id}}">
-                            {% for u in units_list|split:"," %}
-                                <option value="{{ u }}" {% if p.unit == u %}selected{% endif %}>{{ u }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    {% endwith %}
-
-
-                    <td><input class="form-control form-control-sm" type="number" step="0.50" name="produce_expense" value="{{ p.produce_expense }}"></td>
-
-                    <td><input class="form-control form-control-sm" type="number" step="0.01" name="profit_expectation" value="{{ p.profit_expectation }}"></td>
-
-                    <td>
-                        {% if p.photo_or_video %}
-                            <img src="{{ p.photo_or_video.url }}" width="50"><br>
-                        {% endif %}
-                            <input type="file" id="edit_file_{{p.id}}" name="photo_or_video" class="form-control form-control-sm">
-                    </td>
-
-                    <td class="d-flex gap-1">
-                            <button type="button" name="action" value="save" class="btn btn-sm btn-success" onclick="updateProduce('{{p.id}}','update')">Save</button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="updateProduce('{{p.id}}','delete')">Delete</button>                    </td>
-                </tr>
-            </form>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p class="text-muted">No produce added yet.</p>
-    {% endif %}
 </div>
+
+<!-- Leaflet JS & CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"></script>
+
 <script>
-    function validateDecimal(input) {
-    const regex = /^\d+(\.\d{1,2})?$/; // integers or decimals up to 2 places
-
-    if (input.value === "") {
-        input.setCustomValidity("");
-        return;
-    }
-
-    if (!regex.test(input.value)) {
-        input.setCustomValidity("Enter a valid number (max 2 decimals). Example: 22, 23.5, 100.50");
-    } else {
-        input.setCustomValidity("");
-    }
+function validateDecimal(input) {
+    const regex = /^\d+(\.\d{1,2})?$/;
+    input.setCustomValidity(regex.test(input.value) || input.value === "" ? "" : "Enter a valid number (max 2 decimals)");
 }
 
-async function updateProduce(id,action) {
+async function updateProduce(id, action) {
     const formData = new FormData();
     formData.append("action", action);
 
@@ -167,46 +136,28 @@ async function updateProduce(id,action) {
         const cost = document.getElementById(`edit_cost_${id}`).value;
         const qty = document.getElementById(`edit_qty_${id}`).value;
         const unit = document.getElementById(`edit_unit_${id}`).value.trim();
-
-        // Get file from input
         const fileInput = document.getElementById(`edit_file_${id}`);
-        const file = fileInput ? fileInput.files[0] : null;  // <-- this avoids "file is not defined"
+        const file = fileInput ? fileInput.files[0] : null;
 
-        if (!cost || isNaN(cost) || cost < 1) {
-            alert("Enter a valid cost");
-            return;
-        }
-        if (!qty || isNaN(qty) || qty < 0) {
-            alert("Enter a valid quantity");
-            return;
-        }
-        if (!unit) {
-            alert("Enter a valid unit");
-            return;
-        }
+        if (!cost || isNaN(cost) || cost < 1) { alert("Enter a valid cost"); return; }
+        if (!qty || isNaN(qty) || qty < 0) { alert("Enter a valid quantity"); return; }
+        if (!unit) { alert("Enter a valid unit"); return; }
 
         formData.append("cost", cost);
         formData.append("quantity_for_sale", qty);
         formData.append("unit", unit);
-
-        if (file) {
-            formData.append("photo_or_video", file);  // append file only if selected
-        }
-    }else if (action === "delete") {
+        if (file) formData.append("photo_or_video", file);
+    } else if (action === "delete") {
         if (!confirm("Are you sure you want to delete this produce?")) return;
     }
 
     try {
         const res = await fetch(`/api/update_produce_cost/${id}/`, {
             method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}" // do NOT set Content-Type; browser sets it automatically for FormData
-            },
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
             body: formData
         });
-
         if (!res.ok) throw new Error("Failed to update");
-
         alert(action === "update" ? "Produce updated!" : "Produce deleted!");
         location.reload();
     } catch (err) {
@@ -215,8 +166,23 @@ async function updateProduce(id,action) {
     }
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+    const lat = parseFloat("{{ request.user.latitude|default:'0' }}");
+const lng = parseFloat("{{ request.user.longitude|default:'0' }}");
+
+    const map = L.map('userMap').setView([lat, lng], 13);
+
+    L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+    ).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup("Located here.")
+        .openPopup();
+});
 </script>
-
-
 
 {% endblock %}
