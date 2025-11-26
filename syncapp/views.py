@@ -523,3 +523,14 @@ def dtDashboard(request):
         "thela_username": username,
     }
     return render(request, "syncapp/dt_dashboard.html", context)
+
+
+@csrf_exempt
+def update_user_location(request):
+    if request.method == "POST" and request.user.is_authenticated:
+        data = json.loads(request.body)
+        request.user.latitude = data.get("latitude")
+        request.user.longitude = data.get("longitude")
+        request.user.save()  # Saves inside syncapp_users1 table
+        return JsonResponse({"status":"success"})
+    return JsonResponse({"status":"error"}, status=400)

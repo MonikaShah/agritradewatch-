@@ -244,39 +244,38 @@ class DtProduceForm(forms.ModelForm):
     class Meta:
         model = DtProduce
         fields = [
-            'sale_commodity', 'variety_name', 'method',
-            'level_of_produce', 'sowing_date', 'harvest_date',
-            'quantity_for_sale', 'cost', 'unit', 'produce_expense',
-            'profit_expectation', 'photo_or_video', 'latitude', 'longitude'
+            'sale_commodity', 'variety_name', 
+            'level_of_produce',
+            'quantity_for_sale', 'cost', 'unit', 'photo_or_video', 'latitude', 'longitude'
         ]
 
         labels = {
             'sale_commodity': 'Commodity',
             'variety_name': 'Variety Name',
-            'method': 'Method of Production',
+            # 'method': 'Method of Production',
             'level_of_produce': 'Production Level',
-            'sowing_date': 'Sowing Date',
-            'harvest_date': 'Harvest',
+            # 'sowing_date': 'Sowing Date',
+            # 'harvest_date': 'Harvest',
             'quantity_for_sale': 'Quantity for Sale',
             'cost': 'Cost per Unit',
             'unit': 'Unit',
-            'produce_expense': 'Total Expense',
-            'profit_expectation': 'Expected Profit',
+            # 'produce_expense': 'Total Expense',
+            # 'profit_expectation': 'Expected Profit',
             'photo_or_video': 'Photo / Video (optional)',
         }
 
         widgets = {
             'sale_commodity': forms.Select(attrs={'class': 'form-select'}),
             'variety_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter variety name'}),
-            'method': forms.Select(attrs={'class': 'form-select'}),
+            # 'method': forms.Select(attrs={'class': 'form-select'}),
             'level_of_produce': forms.Select(attrs={'class': 'form-select'}),
-            'sowing_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'harvest_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            # 'sowing_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            # 'harvest_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'quantity_for_sale': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
             'cost': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter cost per unit'}),
             'unit': forms.Select(attrs={'class': 'form-select'}),
-            'produce_expense': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total expense'}),
-            'profit_expectation': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Expected profit'}),
+            # 'produce_expense': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total expense'}),
+            # 'profit_expectation': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Expected profit'}),
             'photo_or_video': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
                 'accept': '.jpg,.jpeg,.png,.mp4,.mov'
@@ -303,10 +302,10 @@ class DtProduceForm(forms.ModelForm):
             choices=commodity_choices,
             attrs={'class': 'form-select', 'id': 'id_sale_commodity'}
         )
-        self.fields['sowing_date'].required = False
-        self.fields['harvest_date'].required = False
-        self.fields['produce_expense'].required = False
-        self.fields['profit_expectation'].required = False
+        # self.fields['sowing_date'].required = False
+        # self.fields['harvest_date'].required = False
+        # self.fields['produce_expense'].required = False
+        # self.fields['profit_expectation'].required = False
 
 
         # ✅ Mark required fields visually with red asterisk

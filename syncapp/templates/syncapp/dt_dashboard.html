@@ -772,10 +772,9 @@ async function updateProduce(id) {
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
               <b>Variety:</b> ${entry.variety_name}<br>
-              <b>Method:</b> ${entry.method}<br>
+              
               <b>Production Level:</b> ${entry.level_of_produce}<br>
-              <b>Sowing Date:</b> ${entry.sowing_date}<br>
-              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+              
               <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
@@ -939,10 +938,9 @@ async function updateProduce(id) {
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
               <b>Variety:</b> ${entry.variety_name}<br>
-              <b>Method:</b> ${entry.method}<br>
+              
               <b>Production Level:</b> ${entry.level_of_produce}<br>
-              <b>Sowing Date:</b> ${entry.sowing_date}<br>
-              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+             
               <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')

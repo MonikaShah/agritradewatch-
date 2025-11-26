@@ -5,114 +5,181 @@
 {% block title %}Profile - MandiGo{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container-fluid my-4 px-3 px-lg-5">
+
+    <style>
+        /* Desktop layout: horizontal 40:60 */
+        .profile-map-wrapper {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: nowrap;
+        }
+
+        .profile-col { width: 40%; }
+        .map-col { width: 60%; }
+
+        #userMap {
+            width: 100%;
+            min-height: 500px;
+        }
+
+        /* Mobile layout: stacked vertically */
+        @media (max-width: 992px) {
+            .profile-map-wrapper {
+                flex-direction: column !important;
+            }
+            .profile-col, .map-col {
+                width: 100% !important;
+                margin-top: 1rem;
+            }
+            .btn-group-responsive {
+                flex-direction: column !important;
+                gap: 0.5rem;
+            }
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+
+    <!-- Profile + Map aligned with Digital Thela entries -->
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <!-- Profile Card -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">User Profile</h5>
-                </div>
-                <div class="card-body d-flex flex-column flex-md-row p-0 align-items-stretch">
-                    <!-- Left Column: Profile Details -->
-                    <div class="flex-grow-1 p-3 d-flex flex-column">
-                        <div class="mb-3 d-flex align-items-center">
-                            <span class="fs-4 me-3">👤</span>
-                            <h5 class="mb-0">{{ request.user.username|title }}</h5>
+        <div class="col-12 col-lg-10"> <!-- same width as Digital Thela table -->
+            <div class="profile-map-wrapper">
+
+                <!-- Profile Details (40%) -->
+                <div class="profile-col">
+                    <div class="card shadow-sm w-100 h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">User Profile</h5>
                         </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3 d-flex align-items-center">
+                                <span class="fs-4 me-3">👤</span>
+                                <h5 class="mb-0">{{ request.user.username|title }}</h5>
+                            </div>
 
-                        <ul class="list-group list-group-flush mb-3 flex-grow-1">
-                            <li class="list-group-item"><strong>Full Name:</strong> {{ request.user.name }}</li>
-                            <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
-                            <li class="list-group-item"><strong>Mobile:</strong> {{ request.user.mobile }}</li>
-                            <li class="list-group-item"><strong>Date Joined:</strong> {{ request.user.date_joined|date:"d M Y" }}</li>
-                            <li class="list-group-item"><strong>Last Login:</strong> {{ request.user.last_login|date:"d M Y H:i" }}</li>
-                        </ul>
+                            <ul class="list-group list-group-flush mb-3 flex-grow-1">
+                                <li class="list-group-item"><strong>Name:</strong> {{ request.user.name }}</li>
+                                <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
+                                <li class="list-group-item"><strong>Mobile:</strong> {{ request.user.mobile }}</li>
+                            </ul>
 
-                        <div class="d-flex gap-3 flex-wrap mt-3">
-                            <a href="{% url 'landingpage' %}" class="btn btn-success d-flex align-items-center">
-                                <i class="bi bi-house-door me-2"></i>Home
-                            </a>
-                            <a href="{% url 'map_chart' %}" class="btn btn-primary d-flex align-items-center">
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                            </a>
-                            <a href="{% url 'dtDashboard' %}" class="btn btn-info d-flex align-items-center">
-                                <i class="bi bi-person-circle me-2"></i>Digital Thela
-                            </a>
+                            <div class="d-flex btn-group-responsive mt-3 gap-2 flex-wrap">
+                                <a href="{% url 'landingpage' %}" class="btn btn-success d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-house-door me-2"></i>Home
+                                </a>
+                                <a href="{% url 'map_chart' %}" class="btn btn-primary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a>
+                                <a href="{% url 'dtDashboard' %}" class="btn btn-info d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-circle me-2"></i>Digital Thela
+                                </a>
+                            </div>
+
+                            <div class="mt-3 border rounded p-2 bg-light">
+                                <h6>Update Farm Location</h6>
+                                <div class="row g-2">
+                                    <div class="col-12 col-sm-4">
+                                        <select id="stateSelect" class="form-select form-select-sm">
+                                            <option value="Maharashtra" selected>Maharashtra</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <select id="districtSelect" class="form-select form-select-sm">
+                                            <option value="">Select District</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <select id="tehsilSelect" class="form-select form-select-sm">
+                                            <option value="">Select Tehsil</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button id="updateLocationBtn" class="btn btn-sm btn-warning mt-2 w-100 w-sm-auto">Select on Map</button>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Right Column: Map -->
-                    <div class="flex-shrink-0" style="width:350px; min-width:250px;">
-                        <div id="userMap" class="h-100"></div>
+                <!-- Map (60%) -->
+                <div class="map-col">
+                    <div class="card shadow-sm w-100 h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Farm Location</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="userMap"></div>
+                        </div>
                     </div>
                 </div>
+
             </div>
+        </div>
+    </div>
 
-            <!-- Digital Thela CRUD table below -->
-            <h4 class="mt-4">Digital Thela Entries</h4>
+    <!-- Digital Thela Entries -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-12 col-lg-10"> <!-- same width as profile-map -->
+            <h4>Digital Thela Entries</h4>
             {% if produces %}
-            <table class="table table-bordered table-sm">
-                <thead class="table-light">
-                    <tr>
-                        <th>Commodity</th>
-                        <th>Variety</th>
-                        <th>Method</th>
-                        <th>Level</th>
-                        <th>Sowing Date</th>
-                        <th>Harvest Date</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Unit</th>
-                        <th>Expense</th>
-                        <th>Profit</th>
-                        <th>Photo</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in produces %}
-                    <form method="POST" enctype="multipart/form-data" action="{% url 'api:update-produce-cost' p.id %}">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm w-100">
+                    <thead class="table-light">
                         <tr>
-                            {% csrf_token %}
-                            <input type="hidden" name="produce_id" value="{{ p.id }}">
-
-                            <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{{ p.sale_commodity }}"></td>
-                            <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{{ p.variety_name }}"></td>
-                            <td><input class="form-control form-control-sm" type="text" name="method" value="{{ p.method }}"></td>
-                            <td><input class="form-control form-control-sm" type="text" name="level_of_produce" value="{{ p.level_of_produce }}"></td>
-                            <td><input class="form-control form-control-sm" type="date" name="sowing_date" value="{{ p.sowing_date|date:'Y-m-d' }}"></td>
-                            <td><input class="form-control form-control-sm" type="date" name="harvest_date" value="{{ p.harvest_date|date:'Y-m-d' }}"></td>
-                            <td><input class="form-control form-control-sm" type="number" step="0.50" id="edit_qty_{{p.id}}" value="{{ p.quantity_for_sale }}"></td>
-                            <td><input class="form-control form-control-sm" type="text" id="edit_cost_{{p.id}}" value="{{ p.cost }}" oninput='validateDecimal(this)'></td>
-                            {% with units_list="Kg,250 gm,bundle,piece,dozen" %}
-                            <td>
-                                <select class="form-control form-control-sm" id="edit_unit_{{p.id}}">
-                                    {% for u in units_list|split:"," %}
-                                        <option value="{{ u }}" {% if p.unit == u %}selected{% endif %}>{{ u }}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            {% endwith %}
-                            <td><input class="form-control form-control-sm" type="number" step="0.50" name="produce_expense" value="{{ p.produce_expense }}"></td>
-                            <td><input class="form-control form-control-sm" type="number" step="0.01" name="profit_expectation" value="{{ p.profit_expectation }}"></td>
-                            <td>
-                                {% if p.photo_or_video %}
-                                    <img src="{{ p.photo_or_video.url }}" width="50"><br>
-                                {% endif %}
-                                <input type="file" id="edit_file_{{p.id}}" name="photo_or_video" class="form-control form-control-sm">
-                            </td>
-                            <td class="d-flex gap-1">
-                                <button type="button" name="action" value="save" class="btn btn-sm btn-success" onclick="updateProduce('{{p.id}}','update')">Edit</button>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="updateProduce('{{p.id}}','delete')">Delete</button>
-                            </td>
+                            <th>Commodity</th>
+                            <th>Variety</th>
+                            <th>Level</th>
+                            <!-- <th>Sowing</th>
+                            <th>Harvest</th> -->
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Unit</th>
+                            <th>Photo</th>
+                            <th>Actions</th>
                         </tr>
-                    </form>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for p in produces %}
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'api:update-produce-cost' p.id %}">
+                            <tr>
+                                {% csrf_token %}
+                                <input type="hidden" name="produce_id" value="{{ p.id }}">
+                                <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{{ p.sale_commodity }}"></td>
+                                <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{{ p.variety_name }}"></td>
+                                <td><input class="form-control form-control-sm" type="text" name="level_of_produce" value="{{ p.level_of_produce }}"></td>
+                                <!-- <td><input class="form-control form-control-sm" type="date" name="sowing_date" value="{{ p.sowing_date|date:'Y-m-d' }}"></td>
+                                <td><input class="form-control form-control-sm" type="date" name="harvest_date" value="{{ p.harvest_date|date:'Y-m-d' }}"></td> -->
+                                <td><input class="form-control form-control-sm" type="number" step="0.50" id="edit_qty_{{p.id}}" value="{{ p.quantity_for_sale }}"></td>
+                                <td><input class="form-control form-control-sm" type="text" id="edit_cost_{{p.id}}" value="{{ p.cost }}" oninput='validateDecimal(this)'></td>
+                                {% with units_list="Kg,250 gm,bundle,piece,dozen" %}
+                                <td>
+                                    <select class="form-control form-control-sm" id="edit_unit_{{p.id}}">
+                                        {% for u in units_list|split:"," %}
+                                            <option value="{{ u }}" {% if p.unit == u %}selected{% endif %}>{{ u }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                {% endwith %}
+                                <td>
+                                    {% if p.photo_or_video %}
+                                        <img src="{{ p.photo_or_video.url }}" width="50"><br>
+                                    {% endif %}
+                                    <input type="file" id="edit_file_{{p.id}}" name="photo_or_video" class="form-control form-control-sm">
+                                </td>
+                                <td class="d-flex gap-1 flex-wrap">
+                                    <button type="button" name="action" value="save" class="btn btn-sm btn-success" onclick="updateProduce('{{p.id}}','update')">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="updateProduce('{{p.id}}','delete')">Delete</button>
+                                </td>
+                            </tr>
+                        </form>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <p class="text-muted">No produce added yet.</p>
+            <p class="text-muted">No produce added yet.</p>
             {% endif %}
         </div>
     </div>
@@ -121,6 +188,13 @@
 <!-- Leaflet JS & CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"></script>
+
+<script>
+    // Keep your JS code for validateDecimal, updateProduce, and map initialization
+</script>
+
+
+
 
 <script>
 function validateDecimal(input) {
@@ -165,24 +239,217 @@ async function updateProduce(id, action) {
         alert("Error updating produce");
     }
 }
+// Adding to update user location
+let map, marker;
 
-document.addEventListener("DOMContentLoaded", function() {
-    const lat = parseFloat("{{ request.user.latitude|default:'0' }}");
-const lng = parseFloat("{{ request.user.longitude|default:'0' }}");
+// Load districts & tehsils mapping
+const locationData = {
+  "Maharashtra": {
+    "Pune": ["Haveli", "Khed", "Mawal", "Mulshi", "Baramati", "Indapur", "Junnar", "Shirur", "Purandar", "Ambegaon"],
+    "Satara": ["Satara", "Wai", "Karad", "Koregaon", "Jaoli", "Khatav", "Man", "Phaltan", "Mahabaleshwar", "Patan"],
+    "Ahmednagar": ["Nagar", "Sangamner", "Shrigonda", "Pathardi", "Parner", "Rahata", "Rahuri", "Shevgaon", "Akole", "Kopargaon"],
+    "Nashik": ["Nashik", "Trimbakeshwar", "Igatpuri", "Dindori", "Peth", "Kalwan", "Baglan (Satana)", "Niphad", "Sinnar", "Yeola", "Chandwad", "Deola"],
+    "Aurangabad (Chhatrapati Sambhajinagar)": ["Aurangabad", "Phulambri", "Sillod", "Kannad", "Vaijapur", "Gangapur", "Paithan", "Khuldabad", "Soegaon"],
+    "Nagpur": ["Nagpur", "Hingna", "Kalameshwar", "Kamptee", "Katol", "Narkhed", "Ramtek", "Mouda", "Parseoni", "Umred", "Kuhi", "Bhiwapur"],
+    "Amravati": ["Amravati", "Bhatkuli", "Daryapur", "Nandgaon Khandeshwar", "Chandur Railway", "Chandur Bazar", "Morshi", "Warud", "Achalpur", "Anjangaon Surji", "Dharni", "Chikhaldara"],
+    "Kolhapur": ["Karvir", "Panhala", "Shahuwadi", "Kagal", "Hatkanangale", "Shirol", "Radhanagari", "Gaganbawada", "Ajra", "Bhudargad", "Chandgad", "Gadhinglaj"],
+    "Solapur": ["Solapur North", "Solapur South", "Barshi", "Akkalkot", "Mohol", "Pandharpur", "Malshiras", "Sangole", "Mangalwedha", "Madha", "Karmala"],
+    "Thane": ["Thane", "Kalyan", "Murbad", "Bhiwandi", "Shahapur", "Ulhasnagar", "Ambarnath", "Palghar (old tehsil, now district)", "Vasai"],
+    "Mumbai Suburban": ["Andheri", "Borivali", "Kurla"],
+    "Raigad": ["Alibag", "Panvel", "Uran", "Karjat", "Khalapur", "Pen", "Sudhagad (Pali)", "Roha", "Tala", "Mangaon", "Mahad", "Murud", "Shrivardhan", "Poladpur"],
+    "Sangli": ["Miraj", "Walwa (Islampur)", "Shirala", "Khanapur (Vita)", "Atpadi", "Tasgaon", "Palus", "Kadegaon", "Jath"],
+    "Jalgaon": ["Jalgaon", "Jamner", "Erandol", "Dharangaon", "Bhusawal", "Raver", "Muktainagar", "Bodwad", "Chopda", "Yawal", "Amalner", "Parola", "Pachora", "Bhadgaon", "Chalisgaon"],
+    "Jalna": ["Jalna", "Bhokardan", "Jafrabad", "Badnapur", "Ambad", "Partur", "Mantha", "Ghansawangi"],
+    "Parbhani": ["Parbhani", "Gangakhed", "Sonpeth", "Pathri", "Manwat", "Purna", "Palam", "Jintur", "Selu"],
+    "Nanded": ["Nanded", "Ardhapur", "Mudkhed", "Bhokar", "Umri", "Loha", "Kandhar", "Kinwat", "Himayatnagar", "Hadgaon", "Mahur", "Deglur", "Mukhed", "Dharmabad", "Biloli"],
+    "Beed": ["Beed", "Ashti", "Patoda", "Shirur Kasar", "Georai", "Manjlegaon", "Wadwani", "Kaij", "Dharur", "Parli", "Ambejogai"],
+    "Latur": ["Latur", "Renapur", "Ahmadpur", "Jalkot", "Chakur", "Shirur Anantpal", "Ausa", "Nilanga", "Deoni", "Udgir"],
+    "Dhule": ["Dhule", "Sakri", "Shirpur", "Sindkheda"],
+    "Bhandara": ["Bhandara", "Tumsar", "Pauni", "Mohadi", "Sakoli", "Lakhani", "Lakhandur"],
+    "Gondia": ["Gondia", "Tirora", "Goregaon", "Arjuni Morgaon", "Deori", "Sadak Arjuni", "Amgaon", "Salekasa"],
+    "Chandrapur": ["Chandrapur", "Ballarpur", "Mul", "Saoli", "Sindewahi", "Brahmapuri", "Nagbhir", "Chimur", "Bhadravati", "Warora", "Rajura", "Korpana", "Jiwati", "Pombhurna", "Gondpipri"],
+    "Yavatmal": ["Yavatmal", "Arni", "Babhulgaon", "Kalamb", "Darwha", "Digras", "Ner", "Pusad", "Umarkhed", "Mahagaon", "Maregaon", "Zari Jamani", "Wani", "Ralegaon", "Ghatanji", "Kelapur (Pandharkawada)"]
+  }
+};
 
-    const map = L.map('userMap').setView([lat, lng], 13);
 
-    L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-        {
-            maxZoom: 20,
-            attribution: "&copy; Google"
-        }
-    ).addTo(map);
-
-    L.marker([lat, lng]).addTo(map)
-        .bindPopup("Located here.")
-        .openPopup();
+// Populate district dropdown
+document.getElementById("districtSelect").addEventListener("focus", function() {
+  this.innerHTML = `<option value="">Select District</option>` +
+    Object.keys(locationData["Maharashtra"])
+      .map(d => `<option value="${d}">${d}</option>`).join("");
 });
+
+// Populate tehsil dropdown on district change
+document.getElementById("districtSelect").addEventListener("change", function() {
+  const tehsils = locationData["Maharashtra"][this.value] || [];
+  document.getElementById("tehsilSelect").innerHTML = `<option value="">Select Tehsil</option>` +
+    tehsils.map(t => `<option value="${t}">${t}</option>`).join("");
+});
+// Populate map marker update with change in tehsil
+document.getElementById("tehsilSelect").addEventListener("change", function() {
+    const district = document.getElementById("districtSelect").value;
+    const tehsil = this.value;
+
+    if (district && tehsil) {
+        const query = `Maharashtra ${district} ${tehsil}`;
+
+        fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`)
+        .then(r => r.json())
+        .then(res => {
+            if (res.length > 0) {
+                const tlat = parseFloat(res[0].lat);
+                const tlng = parseFloat(res[0].lon);
+
+                // ✅ Zoom the map
+                map.setView([tlat, tlng], 12);
+
+                // ✅ ALSO move the marker
+                marker.setLatLng([tlat, tlng])
+                      .bindPopup(`Selected: ${tehsil}, ${district}`)
+                      .openPopup();
+            // ✅ Now ask to save location
+                    setTimeout(() => {
+                        if (confirm("Do you want to save this farm location? 📍")) {
+                            fetch("{% url 'update_location' %}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": "{{ csrf_token }}",
+                                },
+                                body: JSON.stringify({
+                                    latitude: tlat,
+                                    longitude: tlng,
+                                }),
+                            })
+                                .then((r) => r.json())
+                                .then((d) => {
+                                    if (d.status === "success") {
+                                        alert("Location saved to syncapp_users1 ✅");
+                                        location.reload();
+                                    } else {
+                                        alert("Error saving location");
+                                    }
+                                });
+                        }
+                    }, 1200); // ⏳ small delay before asking (not instant)
+                } else {
+                    alert("Tehsil location not found");
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("Error fetching tehsil location");
+            });
+    }
+});
+
+// Initialize map normally with saved location
+document.addEventListener("DOMContentLoaded", function() {
+  let lat = parseFloat("{{ request.user.latitude|default:'19.7515' }}");
+  let lng = parseFloat("{{ request.user.longitude|default:'75.7139' }}");
+
+  map = L.map('userMap').setView([lat, lng], 6);
+  L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+    maxZoom: 20,
+    attribution: "&copy; Google"
+  }).addTo(map);
+
+  marker = L.marker([lat, lng]).addTo(map).bindPopup("Your saved farm location").openPopup();
+});
+
+// When user clicks Select on Map
+document.getElementById("updateLocationBtn").addEventListener("click", function() {
+  alert("Drag marker or click map to choose location");
+
+  // Enable draggable marker
+  marker.dragging.enable();
+  marker.bindPopup("Drag or click map, then confirm update").openPopup();
+
+  map.on('click', function(e) {
+    marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+  });
+
+  marker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    map.setView([pos.lat, pos.lng], 10);
+  });
+
+  // Zoom to selected district/tehsil
+  const district = document.getElementById("districtSelect").value;
+  const tehsil = document.getElementById("tehsilSelect").value;
+  if (district && tehsil) {
+    map.setView([marker.getLatLng().lat, marker.getLatLng().lng], 9);
+  }
+
+  // Ask for confirmation to save
+  // ✅ REPLACE previous fast alert trigger with this slower, safer flow
+    let interactionComplete = false;
+
+    marker.on('dragend', function(e) {
+        interactionComplete = true;
+        const pos = e.target.getLatLng();
+        map.setView([pos.lat, pos.lng], 10);
+
+        setTimeout(() => {
+            if(interactionComplete) confirmAndSave();
+        }, 1500);  // ⏳ waits 1.5 sec after drag end
+    });
+
+    map.on('click', function(e) {
+        interactionComplete = true;
+        marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+
+        setTimeout(() => {
+            if(interactionComplete) confirmAndSave();
+        }, 1800);  // ⏳ waits 1.8 sec after click
+    });
+
+    });
+
+// Confirmation + save to syncapp_users1 table
+function confirmAndSave() {
+  const pos = marker.getLatLng();
+  if (confirm("Update this location?")) {
+    fetch("{% url 'update_location' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+        latitude: pos.lat,
+        longitude: pos.lng
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if(d.status==="success") {
+        alert("Location saved to syncapp_users1 ✅");
+        location.reload();
+      } else {
+        alert("Error saving location");
+      }
+    });
+  }
+}
+// document.addEventListener("DOMContentLoaded", function() {
+//     const lat = parseFloat("{{ request.user.latitude|default:'0' }}");
+// const lng = parseFloat("{{ request.user.longitude|default:'0' }}");
+
+//     const map = L.map('userMap').setView([lat, lng], 13);
+
+//     L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+//         {
+//             maxZoom: 20,
+//             attribution: "&copy; Google"
+//         }
+//     ).addTo(map);
+
+//     L.marker([lat, lng]).addTo(map)
+//         .bindPopup("Located here.")
+//         .openPopup();
+// });
 </script>
 
 {% endblock %}

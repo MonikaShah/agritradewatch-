@@ -863,8 +863,8 @@ def create_produce(request):
             produce.latitude = request.POST.get('latitude')
             produce.longitude = request.POST.get('longitude')
             produce.cost = produce.cost or None
-            produce.produce_expense = produce.produce_expense or None
-            produce.profit_expectation = produce.profit_expectation or None
+            # produce.produce_expense = produce.produce_expense or None
+            # produce.profit_expectation = produce.profit_expectation or None
 
             produce.save()
             messages.success(request, "Produce added successfully!")
@@ -901,7 +901,7 @@ def get_DtCommodities(request):
             'username_id',
             'sale_commodity',
             'variety_name',
-            'method',
+            
             'latitude',
             'longitude',
             'created_at',
@@ -909,8 +909,7 @@ def get_DtCommodities(request):
             'quantity_for_sale',
             'cost',
             'unit',
-            'sowing_date',
-            'harvest_date',
+            
             'photo_or_video',
             
         )
