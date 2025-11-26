@@ -42,7 +42,7 @@ pip3 install django psycopg2 social-auth-app-django
 
 💀 setup database using postgres-setup.txt
 
-🙏 email at nautiyalanimesh@gmail.com for asking keys for projects
+🙏 email at nautiyalanimeshmonikapatira@gmail.com for asking keys for projects
 
 👏 create tables
 
