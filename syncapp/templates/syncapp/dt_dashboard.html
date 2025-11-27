@@ -663,12 +663,15 @@ function renderCommodityRow(item, isSelected) {
         
         ${item.photo_or_video
           ? (item.photo_or_video.endsWith('.mp4')
-              ? `<video src="/media/${item.photo_or_video}" controls width="100" height="60" style="margin-top:5px;"></video>`
+              ? `<video src="/media/${item.photo_or_video}" controls
+                      style="width:100px; height:60px; max-width:140px; max-height:90px;
+                            object-fit:cover; border-radius:6px; margin-top:5px;"></video>`
               : `<img src="/media/${item.photo_or_video}" 
-                      style="width:60px; height:60px; object-fit:cover; border-radius:6px; margin-top:5px;" />`)
+                      style="width:60px; height:60px; max-width:90px; max-height:90px;
+                            object-fit:cover; border-radius:6px; margin-top:5px;" />`)
           : ''}
+        `;
 
-    `;
     row.appendChild(detailsDiv);
 
     if (isSelected) row.style.background = "#e6f4ea";
@@ -773,7 +776,7 @@ async function updateProduce(id) {
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
               <b>Variety:</b> ${entry.variety_name}<br>
               
-              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              
               
               <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
@@ -939,7 +942,7 @@ async function updateProduce(id) {
               <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
               <b>Variety:</b> ${entry.variety_name}<br>
               
-              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              
              
               <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
