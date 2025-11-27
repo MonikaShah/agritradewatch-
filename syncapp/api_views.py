@@ -854,21 +854,36 @@ def create_produce(request):
         return redirect("dtDashboard")  # Change to your dashboard URL
 
     if request.method == 'POST':
+        print("==== MOBILE APP REQUEST DEBUG ====")
+        print("POST data:", request.POST)
+        print("FILES:", request.FILES)
+        print("User authenticated:", request.user.is_authenticated)
+        print("Latitude:", request.POST.get("latitude"))
+        print("Longitude:", request.POST.get("longitude"))
+
         form = DtProduceForm(request.POST, request.FILES)
         if form.is_valid():
-            produce = form.save(commit=False)
-            produce.username = user  # Link produce to logged-in user
+            try:
+                produce = form.save(commit=False)
+                print("Cleaned form data:", form.cleaned_data)
 
-            # Convert empty strings to None for numeric/optional fields
-            produce.latitude = request.POST.get('latitude')
-            produce.longitude = request.POST.get('longitude')
-            produce.cost = produce.cost or None
-            # produce.produce_expense = produce.produce_expense or None
-            # produce.profit_expectation = produce.profit_expectation or None
+                # produce.username = user
+                produce.username = User1.objects.get(username=request.user.username)
+                produce.latitude = request.POST.get("latitude")
+                produce.longitude = request.POST.get("longitude")
+                print("Before save → Lat/Lon:", produce.latitude, produce.longitude)
 
-            produce.save()
-            messages.success(request, "Produce added successfully!")
-            return redirect("api:create_produce")
+                produce.save()
+                print("✅ Saved produce object:", produce.id)
+
+                messages.success(request, "Produce added successfully!")
+                return redirect("api:create_produce")
+
+            except Exception as e:
+                print("🔥 ERROR WHILE SAVING PRODUCE:", str(e))
+                import traceback
+                traceback.print_exc()
+                return Response({"error": "Server error, check logs"}, status=500)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -905,7 +920,7 @@ def get_DtCommodities(request):
             'latitude',
             'longitude',
             'created_at',
-            'level_of_produce',
+            # 'level_of_produce',
             'quantity_for_sale',
             'cost',
             'unit',
@@ -992,7 +1007,7 @@ def get_single_entry(request, pk):
             "unit": entry.unit,
             "variety_name": entry.variety_name,
             "method": entry.method,
-            "level_of_produce": entry.level_of_produce,
+            # "level_of_produce": entry.level_of_produce,
             "sowing_date": entry.sowing_date,
             "harvest_date": entry.harvest_date,
             "quantity_for_sale": entry.quantity_for_sale,
