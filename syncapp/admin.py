@@ -39,6 +39,22 @@ class Consumers1Admin(admin.ModelAdmin):
             return '-'
 
     user_name.short_description = 'Username'
+
+class Farmer1Admin(admin.ModelAdmin):
+    list_display = ('commodity', 'date', 'sellingprice','user_name','userid')
+    list_filter = ['date']
+    ordering = ['-date']
+
+    def user_name(self, obj):
+        try:
+            user = User1.objects.get(id=obj.userid)
+            return user.username
+        except User1.DoesNotExist:
+            return '-'
+
+    user_name.short_description = 'Username'
+
+
 class WebdataAdmin(admin.ModelAdmin):
     list_display = ('commodity', 'source', 'date', 'apmc')
     list_filter = ['date']
@@ -54,7 +70,7 @@ class CommodityAdmin(admin.ModelAdmin):
 # Register models
 # admin.site.register(MarketPrices, MarketPricesAdmin)
 admin.site.register(Consumer1,Consumers1Admin)
-admin.site.register(Farmer1)
+admin.site.register(Farmer1,Farmer1Admin)
 admin.site.register(User1,Users1Admin)
 admin.site.register(WebData,WebdataAdmin)
 admin.site.register(Page,PageAdmin)
