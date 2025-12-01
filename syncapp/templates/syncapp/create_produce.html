@@ -1,14 +1,14 @@
 {% extends "syncapp/base.html" %}
 {% load static %}
-
 {% block title %}Add Produce{% endblock %}
 
 {% block content %}
-
 <div class="container my-5">
-  <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+  <div class="card shadow-sm mx-auto p-3" style="max-width:600px;">
     <div class="card-body">
-      <h3 class="card-title text-center mb-4">Welcome {{ thela_username }}<br>Add Produce Details</h3>
+      <h3 class="card-title text-center mb-4">
+        Welcome {{ thela_username }}<br>Add Produce Details
+      </h3>
 
       {% if messages %}
         {% for message in messages %}
@@ -18,11 +18,69 @@
 
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
 
-        
-        <div class="d-grid mt-3">
-          <button type="submit" class="btn btn-success btn-block">Submit</button>
+        <!-- Commodity -->
+        <div class="mb-3">
+          <label for="id_sale_commodity" class="form-label">Commodity</label>
+          <select id="id_sale_commodity" name="sale_commodity" class="form-select">
+            <option value="">-- Select Commodity --</option>
+            {% for com in commodity_list %}
+              <option value="{{ com }}">{{ com }}</option>
+            {% endfor %}
+            <option value="Other">Other</option> <!-- Show input for new commodity -->
+          </select>
+        </div>
+
+        <div class="mb-3" id="newCommodityDiv" style="display:none;">
+          <label for="id_new_commodity" class="form-label">New Commodity</label>
+          <input type="text" id="id_new_commodity" name="new_commodity" class="form-control">
+        </div>
+
+        <!-- Other visible fields -->
+        {% for field in form %}
+          {% if not field.is_hidden and field.name not in "sale_commodity new_commodity" %}
+            <div class="mb-3">
+              {{ field.label_tag }}
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <h6><b>Drag the marker OR choose district and Tehsil to change the location.</b></h6>
+
+        <!-- State / District / Tehsil selects -->
+        <div class="mt-3">
+          <label class="fw-bold">State</label>
+          <select id="stateSelect" class="form-select mb-2">
+            <option value="">-- Select State --</option>
+          </select>
+
+          <label class="fw-bold">District</label>
+          <select id="districtSelect" class="form-select mb-2" disabled>
+            <option value="">-- Select District --</option>
+          </select>
+
+          <label class="fw-bold">Tehsil</label>
+          <select id="tehsilSelect" class="form-select mb-3" disabled>
+            <option value="">-- Select Tehsil --</option>
+          </select>
+        </div>
+
+        <!-- Map -->
+        <div id="map" style="height:320px;border-radius:12px;" class="shadow mb-3"></div>
+
+        <button type="button" id="confirmLocationBtn" class="btn btn-primary w-100 mb-3">
+          Confirm Location
+        </button>
+
+        <!-- Hidden fields for POST -->
+        <input type="hidden" id="locationConfirmed" name="location_confirmed" value="false">
+        <input type="hidden" id="finalLat" name="latitude">
+        <input type="hidden" id="finalLon" name="longitude">
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-success w-100">Submit</button>
         </div>
       </form>
     </div>
@@ -30,58 +88,123 @@
 </div>
 
 <style>
-  body {
-    background-color: #f7f9fc;
-  }
-  .card {
-    border-radius: 1rem;
-  }
-  input, select, textarea {
-    border-radius: 0.5rem !important;
-  }
-  @media (max-width: 576px) {
-    .card {
-      margin: 10px;
-    }
-  }
+body{background:#f7f9fc;}
+.card{border-radius:1rem;}
+input,select,textarea{border-radius:0.5rem!important;}
+@media(max-width:576px){.card{margin:10px;}}
 </style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const latInput = document.getElementById("id_latitude");
-  const lonInput = document.getElementById("id_longitude");
-  // const status = document.getElementById("locationStatus");
-
-  // Try auto location
-  navigator.geolocation.getCurrentPosition(
-    function (pos) {
-      latInput.value = pos.coords.latitude.toFixed(7);
-      lonInput.value = pos.coords.longitude.toFixed(7);
-      
-    },
-    function () {
-      // fallback values
-      latInput.value = "0.0000000";
-      lonInput.value = "0.0000000";
-    }
-  );
-
-  
-  // Commodity dropdown logic (unchanged)
-  const select = document.getElementById("id_sale_commodity");
-  if (select) {
-    select.addEventListener("change", () => {
-      if (select.value === "add_new") {
-        const newCommodity = prompt("Enter the new commodity name:");
-        if (newCommodity) {
-          const option = new Option(newCommodity, newCommodity.toLowerCase(), true, true);
-          select.add(option);
+    // Show new commodity input if selected
+    const select = document.getElementById("id_sale_commodity");
+    const newDiv = document.getElementById("newCommodityDiv");
+    select.addEventListener("change", function() {
+        if (this.value === "Other") {
+            newDiv.style.display = "block";
         } else {
-          select.value = "";
+            newDiv.style.display = "none";
+            document.getElementById("id_new_commodity").value = "";
         }
-      }
     });
-  }
+    const form = select.closest("form");
+    form.addEventListener("submit", function(e) {
+        const newInput = document.getElementById("id_new_commodity");
+        if (newInput.value.trim() !== "") {
+            const newCommodity = newInput.value.trim();
+            let exists = Array.from(select.options).some(opt => opt.value.toLowerCase() === newCommodity.toLowerCase());
+            if (!exists) {
+                const option = new Option(newCommodity, newCommodity, true, true);
+                select.add(option);
+            }
+            select.value = newCommodity;
+        }
+    });
+
+
+    // Location data from Django
+    const locationData = JSON.parse('{{ location_data_json|escapejs }}');
+        console.log(locationData);  // ✅ Check in browser console
+
+    const stateSelect = document.getElementById("stateSelect");
+    const districtSelect = document.getElementById("districtSelect");
+    const tehsilSelect = document.getElementById("tehsilSelect");
+    const finalLat = document.getElementById("finalLat");
+    const finalLon = document.getElementById("finalLon");
+    const locationConfirmed = document.getElementById("locationConfirmed");
+
+    // Initialize map
+    let map = L.map("map").setView([19.7515, 75.7139], 6);
+    L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        attribution: "&copy; Google"
+    }).addTo(map);
+    let marker = L.marker([19.7515,75.7139], {draggable:true}).addTo(map);
+
+    // Update hidden fields on marker drag
+    marker.on("dragend", () => {
+        const p = marker.getLatLng();
+        finalLat.value = p.lat.toFixed(7);
+        finalLon.value = p.lng.toFixed(7);
+    });
+
+    // Populate State dropdown
+    Object.keys(locationData).forEach(s => stateSelect.add(new Option(s,s)));
+
+    // Populate District
+    stateSelect.addEventListener("change", function(){
+        districtSelect.innerHTML = "<option value=''>-- Select District --</option>";
+        tehsilSelect.innerHTML = "<option value=''>-- Select Tehsil --</option>";
+        districtSelect.disabled = true;
+        tehsilSelect.disabled = true;
+        if(!this.value) return;
+        // Sorted districts
+        const districts = Object.keys(locationData[this.value]).sort();
+        districts.forEach(d => districtSelect.add(new Option(d,d)));
+        districtSelect.disabled = false;
+        
+    });
+
+    // Populate Tehsil
+    districtSelect.addEventListener("change", function(){
+        tehsilSelect.innerHTML = "<option value=''>-- Select Tehsil --</option>";
+        tehsilSelect.disabled = true;
+        if(!this.value) return;
+        const state = stateSelect.value;
+        const tehsils = locationData[state][this.value].slice().sort();
+        tehsils.forEach(t => tehsilSelect.add(new Option(t,t)));
+        tehsilSelect.disabled = false;
+        });
+
+    // Move marker when Tehsil is selected
+    tehsilSelect.addEventListener("change", function(){
+        if(!this.value) return;
+        const address = `${this.value}, ${districtSelect.value}, ${stateSelect.value}, India`;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.length > 0){
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    map.setView([lat,lon],14);
+                    marker.setLatLng([lat,lon]);
+                    finalLat.value = lat.toFixed(7);
+                    finalLon.value = lon.toFixed(7);
+                }
+            });
+    });
+
+    // Confirm location button
+    document.getElementById("confirmLocationBtn").addEventListener("click", function(){
+        if(!finalLat.value || !finalLon.value) return alert("Move marker or select location first.");
+        locationConfirmed.value = "true";
+        this.classList.remove("btn-primary");
+        this.classList.add("btn-success");
+        this.innerText = "Location Confirmed ✅";
+    });
 });
 </script>
 {% endblock %}

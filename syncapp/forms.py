@@ -240,12 +240,17 @@ class DamageForm(forms.ModelForm):
 
 class DtProduceForm(forms.ModelForm):
     NEW_COMMODITY_VALUE = "add_new"
-
+    # Add a new field for custom commodity
+    new_commodity = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Add New Commodity",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter new commodity name'})
+    )
     class Meta:
         model = DtProduce
         fields = [
             'sale_commodity', 'variety_name', 
-            'level_of_produce',
             'quantity_for_sale', 'cost', 'unit', 'photo_or_video', 'latitude', 'longitude'
         ]
 
@@ -253,7 +258,7 @@ class DtProduceForm(forms.ModelForm):
             'sale_commodity': 'Commodity',
             'variety_name': 'Variety Name',
             # 'method': 'Method of Production',
-            'level_of_produce': 'Production Level',
+            # 'level_of_produce': 'Production Level',
             # 'sowing_date': 'Sowing Date',
             # 'harvest_date': 'Harvest',
             'quantity_for_sale': 'Quantity for Sale',
@@ -298,10 +303,13 @@ class DtProduceForm(forms.ModelForm):
             ('honey', 'Honey'),
             (self.NEW_COMMODITY_VALUE, '➕ Add New Commodity'),
         ]
-        self.fields['sale_commodity'].widget = forms.Select(
-            choices=commodity_choices,
-            attrs={'class': 'form-select', 'id': 'id_sale_commodity'}
-        )
+        self.fields['sale_commodity'].widget.choices = commodity_choices
+
+        # self.fields['sale_commodity'].widget = forms.Select(
+        #     choices=commodity_choices,
+        #     attrs={'class': 'form-select', 'id': 'id_sale_commodity'}
+        # )
+
         # self.fields['sowing_date'].required = False
         # self.fields['harvest_date'].required = False
         # self.fields['produce_expense'].required = False
@@ -315,6 +323,15 @@ class DtProduceForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        sale = cleaned_data.get("sale_commodity")
+        new_sale = cleaned_data.get("new_commodity")
+
+        # If "Add New Commodity" selected, require new_commodity
+        if sale == self.NEW_COMMODITY_VALUE:
+            if not new_sale:
+                raise forms.ValidationError("Please enter a new commodity name.")
+            cleaned_data["sale_commodity"] = new_sale  # replace with new commodity
+
         file = cleaned_data.get('photo_or_video')
         lat = cleaned_data.get('latitude')
         lon = cleaned_data.get('longitude')

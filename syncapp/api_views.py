@@ -836,68 +836,107 @@ def get_villages(request):
 #         "username": username,  # ✅ pass for display in template
 #     })
 def create_produce(request):
-    # user_id = request.session.get("thela_user_id")
     user = None
-     # ✅ Check if user is authenticated
+    locationData = {
+    "Maharashtra": {
+      "Pune": ["Haveli","Khed","Mawal","Mulshi","Baramati","Indapur","Junnar","Shirur","Purandar","Ambegaon"],
+      "Satara": ["Satara","Wai","Karad","Koregaon","Jaoli","Khatav","Man","Phaltan","Mahabaleshwar","Patan"],
+      "Ahmednagar": ["Nagar","Sangamner","Shrigonda","Pathardi","Parner","Rahata","Rahuri","Shevgaon","Akole","Kopargaon"],
+      "Nashik": ["Nashik","Trimbakeshwar","Igatpuri","Dindori","Peth","Kalwan","Baglan (Satana)","Niphad","Sinnar","Yeola","Chandwad","Deola"],
+      "Aurangabad (Chhatrapati Sambhajinagar)": ["Aurangabad","Phulambri","Sillod","Kannad","Vaijapur","Gangapur","Paithan","Khuldabad","Soegaon"],
+      "Nagpur": ["Nagpur","Hingna","Kalameshwar","Kamptee","Katol","Narkhed","Ramtek","Mouda","Parseoni","Umred","Kuhi","Bhiwapur"],
+      "Amravati": ["Amravati","Bhatkuli","Daryapur","Nandgaon Khandeshwar","Chandur Railway","Chandur Bazar","Morshi","Warud","Achalpur","Anjangaon Surji","Dharni","Chikhaldara"],
+      "Kolhapur": ["Karvir","Panhala","Shahuwadi","Kagal","Hatkanangale","Shirol","Radhanagari","Gaganbawada","Ajra","Bhudargad","Chandgad","Gadhinglaj"],
+      "Solapur": ["Solapur North","Solapur South","Barshi","Akkalkot","Mohol","Pandharpur","Malshiras","Sangole","Mangalwedha","Madha","Karmala"],
+      "Thane": ["Thane","Kalyan","Murbad","Bhiwandi","Shahapur","Ulhasnagar","Ambarnath","Palghar (old tehsil, now district)","Vasai"],
+      "Mumbai Suburban": ["Andheri","Borivali","Kurla"],
+      "Raigad": ["Alibag","Panvel","Uran","Karjat","Khalapur","Pen","Sudhagad (Pali)","Roha","Tala","Mangaon","Mahad","Murud","Shrivardhan","Poladpur"],
+      "Sangli": ["Miraj","Walwa (Islampur)","Shirala","Khanapur (Vita)","Atpadi","Tasgaon","Palus","Kadegaon","Jath"],
+      "Jalgaon": ["Jalgaon","Jamner","Erandol","Dharangaon","Bhusawal","Raver","Muktainagar","Bodwad","Chopda","Yawal","Amalner","Parola","Pachora","Bhadgaon","Chalisgaon"],
+      "Jalna": ["Jalna","Bhokardan","Jafrabad","Badnapur","Ambad","Partur","Mantha","Ghansawangi"],
+      "Parbhani": ["Parbhani","Gangakhed","Sonpeth","Pathri","Manwat","Purna","Palam","Jintur","Selu"],
+      "Nanded": ["Nanded","Ardhapur","Mudkhed","Bhokar","Umri","Loha","Kandhar","Kinwat","Himayatnagar","Hadgaon","Mahur","Deglur","Mukhed","Dharmabad","Biloli"],
+      "Beed": ["Beed","Ashti","Patoda","Shirur Kasar","Georai","Manjlegaon","Wadwani","Kaij","Dharur","Parli","Ambejogai"],
+      "Latur": ["Latur","Renapur","Ahmadpur","Jalkot","Chakur","Shirur Anantpal","Ausa","Nilanga","Deoni","Udgir"],
+      "Dhule": ["Dhule","Sakri","Shirpur","Sindkheda"],
+      "Bhandara": ["Bhandara","Tumsar","Pauni","Mohadi","Sakoli","Lakhani","Lakhandur"],
+      "Gondia": ["Gondia","Tirora","Goregaon","Arjuni Morgaon","Deori","Sadak Arjuni","Amgaon","Salekasa"],
+      "Chandrapur": ["Chandrapur","Ballarpur","Mul","Saoli","Sindewahi","Brahmapuri","Nagbhir","Chimur","Bhadravati","Warora","Rajura","Korpana","Jiwati","Pombhurna","Gondpipri"],
+      "Yavatmal": ["Yavatmal","Arni","Babhulgaon","Kalamb","Darwha","Digras","Ner","Pusad","Umarkhed","Maregaon","Zari Jamani","Wani","Ralegaon","Ghatanji","Kelapur (Pandharkawada)"]
+    }
+  }
+
+    # ✅ Safe user lookup (prevents 500 crash)
     if request.user.is_authenticated:
-        user = request.user
-        user_id = user.id    # user ID
-        username = user.username  # username string
+        from syncapp.models import User1
+        try:
+            user = User1.objects.get(username=request.user.username)
+            print("Logged-in produce user:", user)
+        except User1.DoesNotExist:
+            messages.error(request, "User profile not found. Please contact support.")
+            return redirect("api:api_login")
 
     if not user:
         messages.error(request, "Please log in to continue.")
         return redirect("api:api_login")
 
-    # ✅ Restrict based on job
-    if getattr(user, "job", None) not in ["farmer", "retailer"]:
-        messages.error(request, "You are not authorised to add produce. Farmers and Retailer may add their produce")
-        return redirect("dtDashboard")  # Change to your dashboard URL
+    if user.job not in ["farmer", "retailer"]:
+        messages.error(request, "You are not authorised to add produce.")
+        return redirect("dtDashboard")
+    
+    # Fetch all unique commodities from DtProduce
+    commodity_list = DtProduce.objects.values_list("sale_commodity", flat=True).distinct().order_by("sale_commodity")
 
-    if request.method == 'POST':
-        print("==== MOBILE APP REQUEST DEBUG ====")
-        print("POST data:", request.POST)
-        print("FILES:", request.FILES)
-        print("User authenticated:", request.user.is_authenticated)
-        print("Latitude:", request.POST.get("latitude"))
-        print("Longitude:", request.POST.get("longitude"))
-
+    if request.method == "POST":
         form = DtProduceForm(request.POST, request.FILES)
+
+        # Debug logs (you may remove later)
+        print("\n==== MOBILE POST DEBUG ====")
+        print(request.POST, request.FILES)
+        lat = request.POST.get("latitude")
+        lon = request.POST.get("longitude")
+        print("Received lat/lon:", lat, lon)
+
         if form.is_valid():
-            try:
-                produce = form.save(commit=False)
-                print("Cleaned form data:", form.cleaned_data)
+            produce = form.save(commit=False)
+            produce.username = user  # ✅ Correct FK assignment
 
-                # produce.username = user
-                produce.username = User1.objects.get(username=request.user.username)
-                produce.latitude = request.POST.get("latitude")
-                produce.longitude = request.POST.get("longitude")
-                print("Before save → Lat/Lon:", produce.latitude, produce.longitude)
+            produce.latitude = float(lat) if lat else None
+            produce.longitude = float(lon) if lon else None
 
-                produce.save()
-                print("✅ Saved produce object:", produce.id)
+            if request.POST.get("location_confirmed") != "true":
+                messages.error(request, "Please confirm location before submitting.")
+                return render(request, "syncapp/create_produce.html", {
+                    "form": form,
+                    "thela_username": user.name or user.username,
+                    "commodity_list": commodity_list,
+                    "location_data_json": json.dumps(locationData)
+                })
 
-                messages.success(request, "Produce added successfully!")
-                return redirect("api:create_produce")
 
-            except Exception as e:
-                print("🔥 ERROR WHILE SAVING PRODUCE:", str(e))
-                import traceback
-                traceback.print_exc()
-                return Response({"error": "Server error, check logs"}, status=500)
+            produce.save()
+
+            print("✅ Produce saved. ID:", produce.id)
+            print("Saved lat/lon:", produce.latitude, produce.longitude)
+
+            messages.success(request, "Produce added successfully!")
+            return redirect("api:create_produce")
+
         else:
+            print("Form errors:", form.errors)
             messages.error(request, "Please correct the errors below.")
+
     else:
         form = DtProduceForm()
 
-    return render(
-        request,
-        'syncapp/create_produce.html',
-        {
-            'form': form,
-            'thela_username': getattr(user, "name", username),  # Display full name or username
-        },
-    )
-    
+    return render(request, "syncapp/create_produce.html", {
+        "form": form,
+        "thela_username": user.name or user.username,
+        "commodity_list": commodity_list,
+        "location_data_json": json.dumps(locationData)
+    })
+
+
    
 
 @api_view(['GET'])
@@ -1017,3 +1056,34 @@ def get_single_entry(request, pk):
         return JsonResponse(data)
     except DtProduce.DoesNotExist:
         return JsonResponse({"error": "Not found"}, status=404)
+    
+
+
+def update_produce_location(request, produce_id):
+    if request.method == "POST":
+        import json
+        body = json.loads(request.body)
+
+        lat = body.get("latitude")
+        lng = body.get("longitude")
+        is_current = body.get("is_current_location", True)
+        district = body.get("district")
+        tehsil = body.get("tehsil")
+
+        try:
+            produce = DtProduce.objects.get(id=produce_id)
+            produce.latitude = lat
+            produce.longitude = lng
+
+            if not is_current:  # ✅ user changed location
+                produce.district = district
+                produce.tehsil = tehsil
+
+            produce.save()
+
+            return JsonResponse({"status": "success"})
+        except:
+            return JsonResponse({"status": "error", "message": "Invalid produce ID"})
+
+    return JsonResponse({"status": "invalid request"})
+
