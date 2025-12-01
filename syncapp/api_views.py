@@ -965,6 +965,8 @@ def get_DtCommodities(request):
             'unit',
             
             'photo_or_video',
+            'description',
+            'description_voice'
             
         )
         .order_by('-created_at')

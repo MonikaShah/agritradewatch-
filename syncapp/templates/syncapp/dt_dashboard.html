@@ -660,7 +660,15 @@ function renderCommodityRow(item, isSelected) {
     detailsDiv.style.color = "#555";
     detailsDiv.innerHTML = `
         <div><b>Variety:</b> ${item.variety_name || 'N/A'}</div>
-        
+        <div><b>Description:</b> ${item.description|| 'N/A'}</div>
+        <div><b>Description Voice:</b>
+          ${item.description_voice 
+              ? `<audio controls style="width:100%;margin-top:4px;">
+                  <source src="/media/${item.description_voice}">
+                  Your browser does not support audio.
+                </audio>`
+              : 'N/A'}
+        </div>
         ${item.photo_or_video
           ? (item.photo_or_video.endsWith('.mp4')
               ? `<video src="/media/${item.photo_or_video}" controls
