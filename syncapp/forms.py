@@ -247,11 +247,30 @@ class DtProduceForm(forms.ModelForm):
         label="Add New Commodity",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter new commodity name'})
     )
+    description = forms.CharField(
+        required=False,
+        label="Description (English / Marathi / Hindi)",
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Describe your produce...',
+            'rows': 3
+        })
+    )
+
+    description_voice = forms.FileField(
+        required=False,
+        label="Voice Description (optional)",
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.mp3,.wav,.ogg'  # Only audio
+        })
+    )
     class Meta:
         model = DtProduce
         fields = [
             'sale_commodity', 'variety_name', 
-            'quantity_for_sale', 'cost', 'unit', 'photo_or_video', 'latitude', 'longitude'
+            'quantity_for_sale', 'cost', 'unit', 'photo_or_video', 'latitude', 'longitude',
+             'description','description_voice'
         ]
 
         labels = {
@@ -273,7 +292,7 @@ class DtProduceForm(forms.ModelForm):
             'sale_commodity': forms.Select(attrs={'class': 'form-select'}),
             'variety_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter variety name'}),
             # 'method': forms.Select(attrs={'class': 'form-select'}),
-            'level_of_produce': forms.Select(attrs={'class': 'form-select'}),
+            # 'level_of_produce': forms.Select(attrs={'class': 'form-select'}),
             # 'sowing_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             # 'harvest_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'quantity_for_sale': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
@@ -288,6 +307,7 @@ class DtProduceForm(forms.ModelForm):
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
         }
+        widget=forms.ClearableFileInput(attrs={'accept': 'audio/*'})
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -321,34 +341,92 @@ class DtProduceForm(forms.ModelForm):
             if field.required:
                 field.label = forms.utils.mark_safe(f"{field.label} <span style='color:red;'>*</span>")
 
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     sale = cleaned_data.get("sale_commodity")
+    #     new_sale = cleaned_data.get("new_commodity")
+
+    #     # If "Add New Commodity" selected, require new_commodity
+    #     if sale == self.NEW_COMMODITY_VALUE:
+    #         if not new_sale:
+    #             raise forms.ValidationError("Please enter a new commodity name.")
+    #         cleaned_data["sale_commodity"] = new_sale  # replace with new commodity
+
+    #     file = cleaned_data.get('photo_or_video')
+    #     lat = cleaned_data.get('latitude')
+    #     lon = cleaned_data.get('longitude')
+    #     voice = cleaned_data.get('description_voice')
+
+    #     # ✅ Location required only if media uploaded
+    #     if file:
+    #         if not lat or not lon:
+    #             raise forms.ValidationError("Please enable location before uploading your photo or video.")
+
+    #         # ✅ Restrict file size
+    #         max_size_mb = 20
+    #         if file.size > max_size_mb * 1024 * 1024:
+    #             raise forms.ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+    #         # ✅ Restrict allowed formats
+    #         allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+    #         if file.content_type not in allowed_types:
+    #             raise forms.ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV")
+
+    #         # Optional voice file size/type check
+    #     if voice:
+    #         max_size_mb = 20
+    #         if voice.size > max_size_mb * 1024 * 1024:
+    #             raise forms.ValidationError(f"Voice file too large! Max {max_size_mb} MB allowed.")
+
+    #     allowed_audio = ['audio/mpeg', 'audio/wav', 'audio/ogg']
+    #     if voice.content_type not in allowed_audio:
+    #         raise forms.ValidationError("Unsupported audio format. Allowed: MP3, WAV, OGG")
+
+    #     return cleaned_data
     def clean(self):
         cleaned_data = super().clean()
+
+        # Handle Add New commodity
         sale = cleaned_data.get("sale_commodity")
         new_sale = cleaned_data.get("new_commodity")
-
-        # If "Add New Commodity" selected, require new_commodity
         if sale == self.NEW_COMMODITY_VALUE:
             if not new_sale:
                 raise forms.ValidationError("Please enter a new commodity name.")
-            cleaned_data["sale_commodity"] = new_sale  # replace with new commodity
+            cleaned_data["sale_commodity"] = new_sale
 
-        file = cleaned_data.get('photo_or_video')
-        lat = cleaned_data.get('latitude')
-        lon = cleaned_data.get('longitude')
+        file = cleaned_data.get("photo_or_video")
+        voice = cleaned_data.get("description_voice")
+        lat = cleaned_data.get("latitude")
+        lon = cleaned_data.get("longitude")
 
-        # ✅ Location required only if media uploaded
+        #Validate media separately
         if file:
             if not lat or not lon:
-                raise forms.ValidationError("Please enable location before uploading your photo or video.")
-
-            # ✅ Restrict file size
+                raise forms.ValidationError("Please select location before uploading media.")
             max_size_mb = 20
             if file.size > max_size_mb * 1024 * 1024:
-                raise forms.ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+                raise forms.ValidationError(f"File too large! Max allowed size is {max_size_mb} MB.")
+            allowed_media = ["image/jpeg", "image/png", "video/mp4", "video/quicktime"]
+            if file.content_type not in allowed_media:
+                raise forms.ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
 
-            # ✅ Restrict allowed formats
-            allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
-            if file.content_type not in allowed_types:
-                raise forms.ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV")
+        # Accept correct WAV mime variants + MP3/OGG
+        if voice:
+            max_size_mb = 20
+            if voice.size > max_size_mb * 1024 * 1024:
+                raise forms.ValidationError(f"Voice file too large! Max allowed size is {max_size_mb} MB.")
+
+            allowed_audio_types = [
+                "audio/wav",
+                "audio/x-wav",    
+                "audio/wave",
+                "audio/x-pn-wav", 
+                "audio/ogg",
+                "audio/mpeg",
+                "audio/mp3",
+            ]
+
+            if voice.content_type not in allowed_audio_types:
+                raise forms.ValidationError("Unsupported audio format. Allowed: MP3, WAV, OGG.")
 
         return cleaned_data

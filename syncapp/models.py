@@ -228,7 +228,7 @@ class Page(models.Model):
     slug = models.SlugField(unique=True, help_text="URL-friendly unique identifier, e.g., 'about-us'")
     title = models.CharField(max_length=255)
     content = RichTextField(help_text="Page content with formatting (bold, bullets, images, etc.)")
-    image = models.ImageField(upload_to='page_images/', blank=True, null=True)  # ✅ New field
+    image = models.ImageField(upload_to='page_images/', blank=True, null=True)  #   New field
     status = models.BooleanField(default=True, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -318,7 +318,7 @@ class MahaVillage(models.Model):
     village = models.CharField(max_length=100)
 
     class Meta:
-        managed = False  # ✅ important: don't let Django try to create or alter it
+        managed = False  #   important: don't let Django try to create or alter it
         db_table = 'maha_villages_11july22'
         ordering = ['district', 'tehsil', 'village']
 
@@ -347,7 +347,18 @@ def validate_file_type_and_size(value):
 
     if value.size > max_size_mb * 1024 * 1024:
         raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
-
+    allowed_types = [
+        "image/jpeg",
+        "image/png",
+        "video/mp4",
+        "video/quicktime",
+        "audio/wav",
+          "audio/x-wav",
+          "audio/wave",
+          "audio/ogg",
+          "audio/mpeg",
+          "audio/mp3"
+    ]
     if value.file.content_type not in allowed_types:
         raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
 
@@ -355,7 +366,7 @@ def validate_file_type_and_size(value):
 class DtProduce(models.Model):
     username = models.ForeignKey(
         'User1',
-        to_field='username',  # ✅ Tell Django to use username instead of id
+        to_field='username',  #   Tell Django to use username instead of id
         on_delete=models.CASCADE,
         db_column='username_id'
     )
@@ -363,10 +374,10 @@ class DtProduce(models.Model):
     variety_name = models.CharField(max_length=100)
     # method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')], blank=True,   # allows form submissions to leave it empty
     # null=True )    # allows NULL value in database)
-    level_of_produce = models.CharField(max_length=50, choices=[
-        ('selling surplus', 'Selling Surplus'),
-        ('selling surplus with value addition', 'Selling Surplus with Value Addition')
-    ])
+    # level_of_produce = models.CharField(max_length=50, choices=[
+    #     ('selling surplus', 'Selling Surplus'),
+    #     ('selling surplus with value addition', 'Selling Surplus with Value Addition')
+    # ])
     # sowing_date = models.DateField(blank=True, null=True)
     # harvest_date = models.DateField(blank=True, null=True)
     quantity_for_sale = models.FloatField()
@@ -383,9 +394,18 @@ class DtProduce(models.Model):
         null=True,
         validators=[validate_file_type_and_size]
     )
-    latitude = models.DecimalField(max_digits=10, decimal_places=7)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+
     created_at = models.DateField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)  # Multi language text
+    description_voice = models.FileField(
+        upload_to='produce_voice/',
+        blank=True,
+        null=True,
+        validators=[validate_file_type_and_size]
+    )  # Voice input file (audio)
+
     def clean(self):
         """
         Ensure that if a photo/video is uploaded,
@@ -417,3 +437,4 @@ class DtProduce(models.Model):
 
     class Meta:
         db_table = 'dt_produce'
+        
