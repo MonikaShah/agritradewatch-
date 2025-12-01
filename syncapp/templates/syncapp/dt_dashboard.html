@@ -474,17 +474,41 @@
     //     <div class="profile-pic">👤</div>
        // Build profile image
     let profileImgHTML = `
-        <div class="profile-pic">👤</div>
-    `;
+  <div style="position:relative; width:80px; height:80px; margin:auto;">
+      <div style="width:80px; height:80px; background:#ddd; border-radius:50%;
+          display:flex; align-items:center; justify-content:center;
+          font-size:30px; color:#777;">👤</div>
 
-    if (profile.profile_pic) {
-      // alert("image there")
-        profileImgHTML = `
-            <img src="${profile.profile_pic}" 
-                 class="profile-pic" 
-                 style="object-fit: cover; width:80px; height:80px; border-radius:50%;" />
-        `;
-    }
+      <label for="profilePicInput"
+          style="position:absolute; bottom:0; right:0; background:#198754; color:white;
+                width:28px; height:28px; border-radius:50%; display:flex;
+                align-items:center; justify-content:center; cursor:pointer;
+                font-size:16px; border:2px solid #fff;">✏</label>
+
+      <input type="file" id="profilePicInput" accept="image/*"
+          style="display:none;" onchange="uploadProfilePhoto()" />
+  </div>
+`;
+
+if (profile.profile_pic) {
+  profileImgHTML = `
+    <div style="position:relative; width:80px; height:80px; margin:auto;">
+        <img src="${profile.profile_pic}" 
+             class="profile-pic"
+             style="object-fit:cover; width:80px; height:80px; border-radius:50%;" />
+
+        <label for="profilePicInput"
+            style="position:absolute; bottom:0; right:0; background:#198754; color:white;
+                  width:28px; height:28px; border-radius:50%; display:flex;
+                  align-items:center; justify-content:center; cursor:pointer;
+                  font-size:16px; border:2px solid #fff;">✏</label>
+
+        <input type="file" id="profilePicInput" accept="image/*"
+            style="display:none;" onchange="uploadProfilePhoto()" />
+    </div>
+  `;
+}
+
 
     contentDiv.innerHTML = `
         ${profileImgHTML}
@@ -1109,6 +1133,36 @@ function updateLegend(commodity, count, iconExists, iconPath){
           document.body.style.cursor = 'default';
       }
   });
+
+  
+}
+async function uploadProfilePhoto() {
+  const fileInput = document.getElementById("profilePicInput");
+  if (!fileInput.files.length) return;
+
+  const formData = new FormData();
+  formData.append("profile_pic", fileInput.files[0]);
+
+  try {
+    const res = await fetch("/api/update-profile-photo/", {
+      method: "POST",
+      headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Upload failed");
+
+    alert("✅ Profile photo updated!");
+    // Reload profile panel to reflect new image
+    const user = "{{ thela_username }}";
+    const pRes = await fetch(`/api/profile/${encodeURIComponent(user)}/`);
+    const newProfile = await pRes.json();
+    showProfileAboveLegend(newProfile, user);
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error uploading profile photo");
+  }
 }
 
   </script>

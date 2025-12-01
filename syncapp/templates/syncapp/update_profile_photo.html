@@ -1,0 +1,26 @@
+{% extends "syncapp/base.html" %}
+{% block content %}
+
+<div class="container my-4" style="max-width:400px;">
+  <h4 class="text-success mb-3">Update Profile Photo</h4>
+
+  <!-- Current photo preview -->
+  {% if request.user.profile_pic %}
+      <img src="{{ request.user.profile_pic.url }}?v={{ now|date:'U' }}"
+           style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:12px;">
+  {% else %}
+      <div style="width:90px;height:90px;border-radius:50%;background:#ddd;
+                  display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;color:#777;">
+          👤
+      </div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <br><br>
+    <button class="btn btn-success w-100">Upload Photo</button>
+  </form>
+</div>
+
+{% endblock %}

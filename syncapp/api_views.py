@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
 from django.contrib import messages
 
-from .forms import DamageForm,DtProduceForm
+from .forms import DamageForm,DtProduceForm,UserProfilePhotoForm
 
 from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce
 from .serializers import (
@@ -495,6 +495,19 @@ def user_profile(request, username):
     # Otherwise, render HTML template
     return render(request, "syncapp/profile.html", {"user": user,
         "produces": produces,})
+
+@permission_classes([IsAuthenticated])
+def update_profile_photo(request):
+    if request.method == "POST":
+        form = UserProfilePhotoForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile photo updated!")
+            return redirect("dtDashboard")  # change to your dashboard URL name
+    else:
+        form = UserProfilePhotoForm(instance=request.user)
+
+    return render(request, "syncapp/update_profile_photo.html", {"form": form})
 
 
 #CRUD operations for consumer/farmer added crops

@@ -430,3 +430,8 @@ class DtProduceForm(forms.ModelForm):
                 raise forms.ValidationError("Unsupported audio format. Allowed: MP3, WAV, OGG.")
 
         return cleaned_data
+    
+class UserProfilePhotoForm(forms.ModelForm):
+    class Meta:
+        model = User1
+        fields = ["profile_pic"]
