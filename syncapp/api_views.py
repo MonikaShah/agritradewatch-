@@ -91,9 +91,30 @@ class DtProduceViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------
 
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = User1.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        # Prepare a clean response for mobile
+        data = {
+            "status": "success",
+            "message": "Registration successful",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "mobile": user.mobile,
+                "job": user.job,
+                "latitude": user.latitude,
+                "longitude": user.longitude,
+            }
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------
@@ -496,10 +517,12 @@ def user_profile(request, username):
     return render(request, "syncapp/profile.html", {"user": user,
         "produces": produces,})
 
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def update_profile_photo(request):
+    user = request.user
     if request.method == "POST":
-        form = UserProfilePhotoForm(request.POST, request.FILES, instance=request.user)
+        form = UserProfilePhotoForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile photo updated!")
@@ -998,9 +1021,9 @@ def get_DtCommodities(request):
 @permission_classes([AllowAny])   # we can restrict later if needed
 def update_produce_cost(request, pk):
     try:
-        obj = DtProduce.objects.get(id=pk)
+        obj = DtProduce.objects.get(id=pk,username=request.user)
     except DtProduce.DoesNotExist:
-        return Response({"error": "Item not found"}, status=404)
+        return Response({"error": "Item not found or unauthorized"}, status=404)
     
     action = request.data.get("action", "update").lower()  # default to update
 
@@ -1052,7 +1075,7 @@ def update_produce_cost(request, pk):
 
 def get_single_entry(request, pk):
     try:
-        entry = DtProduce.objects.get(id=pk)
+        entry = DtProduce.objects.get(id=pk,username=request.user)
         data = {
             "id": entry.id,
             "username_id": entry.username_id,
