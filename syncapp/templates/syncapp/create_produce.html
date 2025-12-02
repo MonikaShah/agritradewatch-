@@ -363,11 +363,20 @@ fetch("/api/commodities")
     .then(data => {
         const select = document.getElementById("id_sale_commodity");
         select.innerHTML = '<option value="">-- Select Commodity --</option>';
-        data.forEach(item => {
-            const option = new Option(item.name || item, item.name || item);
+
+        // Extract names if objects, otherwise use as is
+        let names = data.map(item => item.name || item);
+
+        // Sort alphabetically
+        names.sort((a, b) => a.localeCompare(b));
+
+        // Add options to select
+        names.forEach(name => {
+            const option = new Option(name, name);
             select.add(option);
         });
-        // Always add "Other" option at end
+
+        // Add "Other" option at end
         select.add(new Option("Other", "Other"));
     })
     .catch(err => {
@@ -376,7 +385,7 @@ fetch("/api/commodities")
         select.innerHTML = '<option value="">-- Failed to load --</option>';
     });
 
-    
+
 });
 </script>
 {% endblock %}
