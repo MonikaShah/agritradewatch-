@@ -28,6 +28,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from django.template.loader import render_to_string
 from django.contrib.auth.views import PasswordResetView
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 # from .serializers import UserSerializer, FarmerSerializer, ConsumerSerializer, WebDataSerializer
 from .serializers import (
     RegisterSerializer,
@@ -41,6 +43,7 @@ from .serializers import (
 from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
+
 def landingpage(request):
     return render(request, "syncapp/landingpage.html")
 
@@ -324,19 +327,70 @@ def profile_crud(request):
 
 def web_register(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = make_password(request.POST.get("password"))
-        name = request.POST.get("name")           # new
-        mobile = request.POST.get("mobile_number")       # new
-        job = request.POST.get("job")     
-        latitude = request.POST.get("latitude")   # new
-        longitude = request.POST.get("longitude") # new
+        try:
+            username = request.POST.get("username")
+            email = request.POST.get("email")
+            password = make_password(request.POST.get("password"))
+            name = request.POST.get("name")           # new
+            mobile = request.POST.get("mobile_number")       # new
+            job = request.POST.get("job")     
+            latitude = request.POST.get("latitude")   # new
+            longitude = request.POST.get("longitude") # new
 
+            # ----------------------------------------------------------
+                # VALIDATION
+            # ----------------------------------------------------------
 
-        if User1.objects.filter(username=username).exists():
-            messages.error(request, "Username already taken")
-        else:
+            # Username empty?
+            if not username:
+                messages.error(request, "Username cannot be empty.")
+                return redirect("register")
+            # Email validation
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, "Invalid email format.")
+                return redirect("register")
+
+            # Mobile: only digits allowed
+            if not mobile.isdigit():
+                messages.error(request, "Mobile number must contain only digits.")
+                return redirect("register")
+
+            # Mobile: correct length (you can set any rule)
+            if len(mobile) != 10:
+                messages.error(request, "Mobile number must be exactly 10 digits.")
+                return redirect("register")
+
+            # Job must be selected
+            if not job or job.strip() == "":
+                messages.error(request, "Please select a job.")
+                return redirect("register")
+
+            # Latitude / Longitude must not be empty
+            if not latitude or not longitude or latitude in ["", "null"] or longitude in ["", "null"]:
+                messages.error(request, "Location permission required. Allow location and try again.")
+                return redirect("register")
+
+            try:
+                latitude = float(latitude)
+                longitude = float(longitude)
+            except ValueError:
+                messages.error(request, "Invalid location coordinates.")
+                return redirect("register")
+
+            if User1.objects.filter(username=username).exists():
+                messages.error(request, "Username already taken")
+                return redirect("register")
+            
+            if User1.objects.filter(email=email).exists():
+                messages.error(request, "Email already registered.")
+                return redirect("register")
+            
+            if User1.objects.filter(mobile=mobile).exists():
+                messages.error(request, "Mobile number already registered.")
+                return redirect("register")
+            
             User1.objects.create(
                 id=str(uuid.uuid4()),
                 username=username,
@@ -350,6 +404,11 @@ def web_register(request):
             )
             messages.success(request, "Registration successful, please login")
             return redirect("login")
+        except Exception as e:
+            logger.error("Registration failed: %s", str(e), exc_info=True)
+            messages.error(request, "Something went wrong. Please try again.")
+            return redirect("register")
+        
     return render(request, "syncapp/register.html")
 
 
@@ -534,3 +593,5 @@ def update_user_location(request):
         request.user.save()  # Saves inside syncapp_users1 table
         return JsonResponse({"status":"success"})
     return JsonResponse({"status":"error"}, status=400)
+
+
