@@ -24,9 +24,9 @@
           <label for="id_sale_commodity" class="form-label">Commodity</label>
           <select id="id_sale_commodity" name="sale_commodity" class="form-select">
             <option value="">-- Select Commodity --</option>
-            {% for com in commodity_list %}
+            <!-- {% for com in commodity_list %}
               <option value="{{ com }}">{{ com }}</option>
-            {% endfor %}
+            {% endfor %} -->
             <option value="Other">Other</option> <!-- Show input for new commodity -->
           </select>
         </div>
@@ -357,7 +357,26 @@ stopBtn.addEventListener("click", () => {
         audioPlayback.style.display = "block";
     };
 });
+// Fetch commodities from API and populate dropdown
+fetch("/api/commodities")
+    .then(response => response.json())
+    .then(data => {
+        const select = document.getElementById("id_sale_commodity");
+        select.innerHTML = '<option value="">-- Select Commodity --</option>';
+        data.forEach(item => {
+            const option = new Option(item.name || item, item.name || item);
+            select.add(option);
+        });
+        // Always add "Other" option at end
+        select.add(new Option("Other", "Other"));
+    })
+    .catch(err => {
+        console.error("Error fetching commodities:", err);
+        const select = document.getElementById("id_sale_commodity");
+        select.innerHTML = '<option value="">-- Failed to load --</option>';
+    });
 
+    
 });
 </script>
 {% endblock %}
