@@ -38,7 +38,7 @@
 
         <!-- Other visible fields -->
         {% for field in form %}
-          {% if not field.is_hidden and field.name not in "sale_commodity new_commodity" %}
+          {% if not field.is_hidden and field.name not in "sale_commodity new_commodity description_voice"  %}
             <div class="mb-3">
               {{ field.label_tag }}
               {{ field }}
@@ -46,6 +46,29 @@
             </div>
           {% endif %}
         {% endfor %}
+        <!-- Voice Description -->
+        <div class="mb-3">
+  <label class="form-label">Voice Description</label>
+  <div class="btn-group w-100 mb-2" role="group" id="voiceToggle">
+    <button type="button" class="btn btn-outline-primary active" data-mode="upload">Upload</button>
+    <button type="button" class="btn btn-outline-primary" data-mode="record">Record</button>
+  </div>
+
+  <!-- Upload -->
+  <div id="uploadDiv">
+    <input type="file" accept="audio/*" name="description_voice" id="voiceUpload" class="form-control">
+  </div>
+
+  <!-- Record -->
+  <div id="recordDiv" style="display:none;">
+    <div class="d-flex gap-2">
+      <button type="button" id="startRecording" class="btn btn-outline-primary">🎤 Start</button>
+      <button type="button" id="stopRecording" class="btn btn-outline-danger" disabled>⏹ Stop</button>
+    </div>
+    <audio id="audioPlayback" controls style="display:none; margin-top:10px;"></audio>
+  </div>
+</div>
+
 
         <h6><b>Drag the marker OR choose district and Tehsil to change the location.</b></h6>
 
@@ -78,7 +101,7 @@
         <input type="hidden" id="locationConfirmed" name="location_confirmed" value="false">
         <input type="hidden" id="finalLat" name="latitude">
         <input type="hidden" id="finalLon" name="longitude">
-
+        
         <div class="d-grid">
           <button type="submit" class="btn btn-success w-100">Submit</button>
         </div>
@@ -205,6 +228,136 @@ document.addEventListener("DOMContentLoaded", function () {
         this.classList.add("btn-success");
         this.innerText = "Location Confirmed ✅";
     });
+    // Custom control for "Current Location"
+const locateControl = L.Control.extend({
+    options: { position: 'topleft' }, // position like Google Maps
+    onAdd: function(map) {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        container.style.backgroundColor = 'white';
+        container.style.width = '34px';
+        container.style.height = '34px';
+        container.style.cursor = 'pointer';
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.fontSize = '18px';
+        container.title = "Get Current Location";
+        container.innerHTML = '📍'; // pin emoji, you can replace with an icon
+
+        container.onclick = function() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Move marker
+                    marker.setLatLng([lat, lon]);
+
+                    // Center map
+                    map.setView([lat, lon], 14);
+
+                    // Update hidden fields
+                    finalLat.value = lat.toFixed(7);
+                    finalLon.value = lon.toFixed(7);
+
+                    // Do NOT confirm location automatically
+                    alert("Marker moved to your current location. Click 'Confirm Location' to confirm.");
+                },
+                (err) => {
+                    console.error(err);
+                    alert("Unable to retrieve your location. Please allow location access.");
+                }
+            );
+        };
+        return container;
+    }
+});
+map.addControl(new locateControl());
+
+// Toggle between upload and record
+const voiceToggle = document.getElementById("voiceToggle");
+const uploadDiv = document.getElementById("uploadDiv");
+const recordDiv = document.getElementById("recordDiv");
+const voiceUpload = document.getElementById("voiceUpload");
+const audioPlayback = document.getElementById("audioPlayback");
+const descriptionVoice = document.getElementById("descriptionVoice");
+
+voiceToggle.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+        // Set active button
+        voiceToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (btn.dataset.mode === "upload") {
+            uploadDiv.style.display = "block";
+            recordDiv.style.display = "none";
+            audioPlayback.style.display = "none";
+            descriptionVoice.value = ""; // clear previous
+        } else {
+            uploadDiv.style.display = "none";
+            recordDiv.style.display = "block";
+            descriptionVoice.value = ""; // clear previous
+        }
+    });
+});
+
+// Handle file upload
+voiceUpload.addEventListener("change", function() {
+    if (this.files.length > 0) {
+        const file = this.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            descriptionVoice.value = reader.result; // Base64 string
+        };
+        reader.readAsDataURL(file);
+
+        audioPlayback.src = URL.createObjectURL(file);
+        audioPlayback.style.display = "block";
+    }
+});
+
+// Recording logic
+let mediaRecorder;
+let audioChunks = [];
+const formEl = document.querySelector("form");
+const startBtn = document.getElementById("startRecording");
+const stopBtn = document.getElementById("stopRecording");
+
+startBtn.addEventListener("click", async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.start();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+});
+
+stopBtn.addEventListener("click", () => {
+    mediaRecorder.stop();
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+
+        // Replace the file input with recorded file
+        const fileInput = document.getElementById("voiceUpload");
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(new File([blob], "recording.webm", { type: blob.type }));
+        fileInput.files = dataTransfer.files;
+
+        // Show playback
+        const audioPlayback = document.getElementById("audioPlayback");
+        audioPlayback.src = URL.createObjectURL(blob);
+        audioPlayback.style.display = "block";
+    };
+});
+
 });
 </script>
 {% endblock %}

@@ -327,40 +327,83 @@ class MahaVillage(models.Model):
 
 
 # For uplaod video and photo 
-def validate_file_type_and_size(value):
-    max_size_mb = 20
-    allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+# def validate_file_type_and_size(value):
+#     max_size_mb = 20
+#     if value.size > max_size_mb * 1024 * 1024:
+#         raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
 
-    if value.size > max_size_mb * 1024 * 1024:
-        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+#     # Determine content type safely
+#     content_type = getattr(value.file, "content_type", "").lower()
 
-    # SAFELY read content_type
-    content_type = getattr(value.file, "content_type", None)
+#     allowed_images = ["image/jpeg", "image/png"]
+#     allowed_videos = ["video/mp4", "video/quicktime", "video/webm"]
+#     allowed_audio  = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/wave", "audio/ogg", "audio/webm"]
 
-    if not content_type or content_type not in allowed_types:
-        raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
+#     if content_type in allowed_images:
+#         return
+#     elif content_type in allowed_videos:
+#         return
+#     elif content_type in allowed_audio:
+#         return
+#     else:
+#         raise ValidationError(
+#             "Unsupported file format. Allowed:\n"
+#             "Images: JPG, PNG\n"
+#             "Videos: MP4, MOV, WEBM\n"
+#             "Audio: MP3, WAV, OGG, WEBM"
+#         )
+def validate_file_type_and_size(allowed_types, max_size_mb=20):
+    def validator(value):
+        if value.size > max_size_mb * 1024 * 1024:
+            raise ValidationError(
+                f"File too large! Maximum allowed size is {max_size_mb} MB."
+            )
+
+        content_type = getattr(value.file, "content_type", "").lower()
+
+        if content_type not in allowed_types:
+            raise ValidationError(
+                f"Unsupported file format. Allowed: {', '.join(allowed_types)}"
+            )
+
+    return validator
+
+
+# def validate_file_type_and_size(value):
+#     max_size_mb = 20
+#     allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+
+#     if value.size > max_size_mb * 1024 * 1024:
+#         raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+#     # SAFELY read content_type
+#     content_type = getattr(value.file, "content_type", None)
+
+#     if not content_type or content_type not in allowed_types:
+#         raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
 
     
-def validate_file_type_and_size(value):
-    max_size_mb = 20
-    allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
+# def validate_file_type_and_size(value):
+#     max_size_mb = 20
+#     allowed_types = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime']
 
-    if value.size > max_size_mb * 1024 * 1024:
-        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
-    allowed_types = [
-        "image/jpeg",
-        "image/png",
-        "video/mp4",
-        "video/quicktime",
-        "audio/wav",
-          "audio/x-wav",
-          "audio/wave",
-          "audio/ogg",
-          "audio/mpeg",
-          "audio/mp3"
-    ]
-    if value.file.content_type not in allowed_types:
-        raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
+#     if value.size > max_size_mb * 1024 * 1024:
+#         raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+#     allowed_types = [
+#         "image/jpeg",
+#         "image/png",
+#         "video/mp4",
+#         "video/quicktime",
+#         "audio/wav",
+#           "audio/x-wav",
+#           "audio/wave",
+#           "audio/ogg",
+#           "audio/mpeg",
+#           "audio/mp3",
+#           "audio/webm"
+#     ]
+#     if value.file.content_type not in allowed_types:
+#         raise ValidationError("Unsupported file format. Allowed: JPG, PNG, MP4, MOV.")
 
 
 class DtProduce(models.Model):
@@ -392,7 +435,10 @@ class DtProduce(models.Model):
         upload_to='produce_media/',
         blank=True,
         null=True,
-        validators=[validate_file_type_and_size]
+        validators=[validate_file_type_and_size([
+            "image/jpeg", "image/png",
+            "video/mp4", "video/quicktime", "video/webm"
+        ])]
     )
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
@@ -403,7 +449,12 @@ class DtProduce(models.Model):
         upload_to='produce_voice/',
         blank=True,
         null=True,
-        validators=[validate_file_type_and_size]
+        validators=[validate_file_type_and_size([
+            "audio/mpeg", "audio/mp3", "audio/wav",
+            "audio/x-wav", "audio/wave",
+            "audio/ogg", "audio/webm"
+        ])
+    ]
     )  # Voice input file (audio)
 
     def clean(self):
