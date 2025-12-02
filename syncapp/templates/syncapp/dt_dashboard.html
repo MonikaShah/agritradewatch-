@@ -669,7 +669,7 @@ function renderCommodityRow(item, isSelected) {
     row.style.borderBottom = "1px solid #ddd";
 
     const loggedInUser = "{{ thela_username }}";
-    const isOwner = loggedInUser && (loggedInUser === item.username_id);
+    isOwner = loggedInUser && (loggedInUser === item.username_id);
 
     const topLine = document.createElement("div");
     topLine.style.display = "flex";
