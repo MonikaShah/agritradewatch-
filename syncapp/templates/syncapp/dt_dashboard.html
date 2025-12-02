@@ -734,11 +734,13 @@ function renderCommodityRow(item, isSelected) {
         ${item.photo_or_video
           ? (item.photo_or_video.endsWith('.mp4')
               ? `<video src="/media/${item.photo_or_video}" controls
-                      style="width:100px; height:60px; max-width:140px; max-height:90px;
-                            object-fit:cover; border-radius:6px; margin-top:5px;"></video>`
+                    style="width:100px; height:60px; max-width:140px; max-height:90px;
+                    object-fit:cover; border-radius:6px; margin-top:5px;cursor:pointer;"
+                    onclick="window.open('/media/${item.photo_or_video}', '_blank')"></video>`
               : `<img src="/media/${item.photo_or_video}" 
                       style="width:60px; height:60px; max-width:90px; max-height:90px;
-                            object-fit:cover; border-radius:6px; margin-top:5px;" />`)
+                            object-fit:cover; border-radius:6px; margin-top:5px;cursor:pointer;"
+                            onclick="window.open('/media/${item.photo_or_video}', '_blank')" />`)
           : ''}
         `;
 
@@ -987,14 +989,16 @@ async function updateProduce(id) {
         if(iconExists){
           const icon = L.icon({
             iconUrl: iconPath,
-            iconSize: [28,28],
-            iconAnchor: [14,28],
-            popupAnchor: [0,-28]
+            iconSize: [40,40],
+            iconAnchor: [20,40],
+            popupAnchor: [0,-40]
           });
           marker = L.marker([entry.latitude,entry.longitude],{icon});
         } else {
           marker = L.circleMarker([entry.latitude, entry.longitude],{
-            radius:7,color:"#28a745",fillColor:"#28a745",fillOpacity:0.6
+            radius:12,color:"#155724",       // darker border
+            fillColor:"#28a745",   // fill color
+            fillOpacity:0.9
           });
         }
 
