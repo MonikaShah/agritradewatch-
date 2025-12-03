@@ -107,14 +107,15 @@
                     <!-- Left nav links -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
+                            <a class="nav-link px-3" href="{% url 'dtDashboard' %}">{% trans "Digital Thela" %}</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'map_chart' %}">{% trans "Dashboard" %}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'apmc' %}">{% trans "Wholesale Market Data" %}</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link px-3" href="{% url 'dtDashboard' %}">{% trans "Digital Thela" %}</a>
-                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">{% trans "About Us" %}</a>
                         </li>
