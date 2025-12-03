@@ -1294,20 +1294,23 @@ const pointCountPlugin = {
 };
 
 
-
 const nCountPlugin = {
     id: "nCountPlugin",
-    afterDraw(chart, args, options) {
+    afterLayout(chart, args, options) {
         const { ctx, scales: { x } } = chart;
         const counts = options.counts || {};
+        if (!x) return; // x scale not ready
 
         ctx.save();
         ctx.font = "12px sans-serif";
         ctx.textAlign = "center";
 
         Object.keys(counts).sort().forEach(dateKey => {
-            const dateObj = new Date(dateKey); // ensure Date for scale
-            const pixelX = x.getPixelForValue(dateObj);
+            // Convert to timestamp for safety
+            const dateObj = new Date(dateKey);
+            if (isNaN(dateObj)) return;
+
+            const pixelX = x.getPixelForValue(dateObj.getTime());
             const entry = counts[dateKey] || { c: 0, f: 0 };
 
             // Consumer count – blue
