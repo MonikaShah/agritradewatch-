@@ -497,10 +497,13 @@ const loggedInUser = "{{ request.user.username }}";   // ✅ correct owner value
 const viewedUser = profile.username;                 // user being viewed in marker/sidebar
 
 const isOwner = loggedInUser === viewedUser;         // ✅ real comparison
+const isLoggedIn = loggedInUser && loggedInUser !== "AnonymousUser";
+
 // ✅ Debug prints
 console.log("Logged in user (Django):", loggedInUser);
 console.log("Viewed profile user (JS API response):", viewedUser);
 console.log("Is owner check result:", isOwner);
+console.log("Is loggedIn check result:", loggedInUser);
 
 if (profile.profile_pic) {
   profileImgHTML = `
@@ -546,25 +549,41 @@ if (profile.profile_pic) {
     contentDiv.innerHTML = `
         ${profileImgHTML}
         <h4>${profile.username || profile.display_name || usernameIdFromPopup || 'Unknown'}</h4>
+         ${!isLoggedIn ? `
+            <div style="color:red; font-weight:bold; margin-top:10px;">
+                Please login to view Farmer details
+            </div>
+        ` : `
+            <div class="profile-row">
+                <span class="profile-label">Job:</span>
+                <span class="profile-value">${profile.job || 'N/A'}</span>
+            </div>
 
-        <div class="profile-row">
-            <span class="profile-label">Job:</span>
-            <span class="profile-value">${profile.job || 'N/A'}</span>
-        </div>
+            <div class="profile-row">
+                <span class="profile-label">Email:</span>
+                <span class="profile-value">${profile.email || 'N/A'}</span>
+            </div>
 
-        <div class="profile-row">
-            <span class="profile-label">Email:</span>
-            <span class="profile-value">${profile.email || 'N/A'}</span>
-        </div>
-
-        <div class="profile-row">
-            <span class="profile-label">Phone:</span>
-            <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
-        </div>
-        <div class="profile-row">
-            <span class="profile-label">Payment Option:</span>
-            <span class="profile-value">Cash</span>
-        </div>
+            <div class="profile-row">
+                <span class="profile-label">Phone:</span>
+                <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
+            </div>
+            ${profile.mobile ? `
+            <div class="profile-row">
+                <span class="profile-label">WhatsApp:</span>
+                <span class="profile-value">
+                    <a href="https://wa.me/${profile.mobile.replace(/\\D/g,'')}" target="_blank" 
+                      style="color:#25D366; font-weight:bold; text-decoration:underline;">
+                      Leave message on WhatsApp
+                    </a>
+                </span>
+            </div>` : ''}
+            <div class="profile-row">
+                <span class="profile-label">Payment Option:</span>
+                <span class="profile-value">Cash</span>
+            </div>
+            `}
+            
 
         <h4>Selected Commodity</h4>
           <div id="selectedCommodity">Loading...</div>
@@ -670,6 +689,7 @@ function renderCommodityRow(item, isSelected) {
 
     const loggedInUser = "{{ thela_username }}";
     isOwner = loggedInUser && (loggedInUser === item.username_id);
+
 
     const topLine = document.createElement("div");
     topLine.style.display = "flex";
