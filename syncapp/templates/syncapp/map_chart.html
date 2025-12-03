@@ -317,6 +317,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
 <script>
 const USER_LOGGED_IN = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
 document.addEventListener("DOMContentLoaded", function() {
@@ -1240,172 +1242,270 @@ commoditySelect.addEventListener("change", () => {
 //  unified charts
 let consumersChart = null;
 
-async function fetchConsumersAndFarmersPrices() {
-  const commodity = document.getElementById("commoditySelect").value;
-  const startDate = document.getElementById("startDate").value;
-  const endDate = document.getElementById("endDate").value;
+/* ---------------------------------------
+   Plugin: Draw separate c/f counts under x-axis
+---------------------------------------- */
+const pointCountPlugin = {
+    id: 'pointCountPlugin',
+    afterDatasetsDraw(chart, args, options) {
+        const { ctx } = chart;
+        const counts = options.counts || {};
 
-  if (!commodity) return;
+        // Get all unique dates from all datasets
+        const allDates = chart.data.datasets
+            .flatMap(ds => ds.data.map(d => d.x.toISOString().split("T")[0]));
+        const uniqueDates = [...new Set(allDates)];
 
-  try {
-    // Fetch both datasets in parallel
-    const [consumerRes, farmerRes] = await Promise.all([
-      fetch(`/api/consumers1_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`),
-      fetch(`/api/farmers_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`)
-    ]);
+        uniqueDates.forEach(dateKey => {
+            // For each dataset
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const entry = counts[dateKey] || { c: 0, f: 0 };
+                const nValue = datasetIndex === 0 ? entry.c : entry.f;
 
-    if (!consumerRes.ok || !farmerRes.ok) {
-      console.error("Fetch error:", consumerRes.statusText, farmerRes.statusText);
-      return;
+                // Find the first point in this dataset matching the date
+                const point = dataset.data.find(d => d.x.toISOString().split("T")[0] === dateKey);
+                if (!point) return;
+
+                const meta = chart.getDatasetMeta(datasetIndex);
+                const chartPoint = meta.data.find(p => p.x === chart.scales.x.getPixelForValue(point.x));
+                
+                const x = chart.scales.x.getPixelForValue(point.x);
+                const y = chartPoint ? chartPoint.y + (datasetIndex === 0 ? 20 : 36) : 0;
+
+                ctx.save();
+                ctx.font = "12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillStyle = dataset.borderColor || "black";
+                ctx.fillText(`n=${nValue}`, x, y);
+                ctx.restore();
+            });
+        });
     }
+};
 
-    const [consumerData, farmerData] = await Promise.all([
-      consumerRes.json(),
-      farmerRes.json()
-    ]);
 
-    // Sort and extract date/price
-    const sortedConsumer = Array.isArray(consumerData)
-      ? consumerData.sort((a, b) => new Date(a.date) - new Date(b.date))
-      : [];
 
-    const sortedFarmer = Array.isArray(farmerData)
-      ? farmerData.sort((a, b) => new Date(a.date) - new Date(b.date))
-      : [];
+const nCountPlugin = {
+    id: "nCountPlugin",
+    afterDraw(chart, args, options) {
+        const { ctx, scales: { x } } = chart;
+        const counts = options.counts || {};
 
-    const labels = [...new Set([...sortedConsumer, ...sortedFarmer].map(d => new Date(d.date).toLocaleDateString("en-GB")))];
+        ctx.save();
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "center";
 
-    const consumerPrices = labels.map(label => {
-      const found = sortedConsumer.find(d => new Date(d.date).toLocaleDateString("en-GB") === label);
-      return found ? parseFloat(found.price) : null;
-    });
+        x.ticks.forEach(tick => {
+            const pixel = x.getPixelForValue(tick.value);
+            const dateKey = new Date(tick.value).toISOString().split("T")[0];
+            const entry = counts[dateKey] || { c: 0, f: 0 };
 
-    const farmerPrices = labels.map(label => {
-      const found = sortedFarmer.find(d => new Date(d.date).toLocaleDateString("en-GB") === label);
-      return found ? parseFloat(found.price) : null;
-    });
+            // Consumer count – blue
+            ctx.fillStyle = "rgb(54, 162, 235)";
+            ctx.fillText(`c=${entry.c}`, pixel, chart.chartArea.bottom + 20);
 
-    const ctx = document.getElementById("consumersChart").getContext("2d");
-
-    if (consumersChart instanceof Chart) consumersChart.destroy();
-
-    consumersChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
-          {
-            label: "Consumer Buying Price (₹)",
-            data: consumerPrices,
-            borderColor: "rgba(54, 162, 235, 1)",       // blue
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
-            borderWidth: 2,
-            tension: 0.3,
-          },
-          {
-            label: "Farmer's Selling Price (₹)",
-            data: farmerPrices,
-            borderColor: "rgba(75, 192, 75, 1)",        // green
-            backgroundColor: "rgba(75, 192, 75, 0.2)",
-            borderWidth: 2,
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: `Consumer vs Farmer Prices for ${commodity}`,
-          },
-          legend: { position: "top" },
-          tooltip: { mode: "index", intersect: false },
-          zoom: {
-            zoom: {
-              wheel: {
-                enabled: true,     // ✅ zoom with mouse wheel
-                // modifierKey: "ctrl" // optional: require Ctrl+scroll
-              },
-              pinch: {
-                enabled: true      // ✅ zoom with pinch gesture
-              },
-              mode: "xy",          // zoom both axes
-            },
-            pan: {
-              enabled: true,       // ✅ allow dragging
-              mode: "xy",
-            }
-          }
-        },
-        
-        scales: {
-          x: { title: { display: true, text: "Date" } },
-          y: { title: { display: true, text: "Price (₹)" } },
-        },
-      },
-    });
-   // ✅ Initialize Dual-handle Date Slider (noUiSlider)
-   const slider = document.getElementById('dateRangeSlider');
-   const sliderStartLabel = document.getElementById('sliderStartLabel');
-   const sliderEndLabel = document.getElementById('sliderEndLabel');
-
-    // Destroy old slider if it exists (prevents duplicate sliders)
-    if (slider.noUiSlider) {
-        slider.noUiSlider.destroy();
-    }
-
-    if (labels.length > 0) {
-        // Create new slider instance
-        noUiSlider.create(slider, {
-            start: [0, labels.length - 1],
-            connect: true,
-            range: { min: 0, max: labels.length - 1 },
-            step: 1,
-            behaviour: 'drag', // smoother dual handle drag
+            // Farmer count – green
+            ctx.fillStyle = "rgb(75, 192, 75)";
+            ctx.fillText(`f=${entry.f}`, pixel, chart.chartArea.bottom + 36);
         });
 
-        // Initialize date labels below slider
-        sliderStartLabel.textContent = labels[0];
-        sliderEndLabel.textContent = labels[labels.length - 1];
-
-    // --- Debounce utility ---
-    function debounce(fn, delay) {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => fn(...args), delay);
-        };
+        ctx.restore();
     }
+};
 
-    // --- Debounced chart update ---
-    const updateChart = debounce((values) => {
-        const startIndex = Math.floor(values[0]);
-        const endIndex = Math.floor(values[1]);
-        const visibleLabels = labels.slice(startIndex, endIndex + 1);
 
-        consumersChart.options.scales.x.min = visibleLabels[0];
-        consumersChart.options.scales.x.max = visibleLabels[visibleLabels.length - 1];
-        consumersChart.update('none');
-    }, 100); // updates every 100ms max
 
-    // --- Slider update handler ---
-    slider.noUiSlider.on('update', function (values) {
-        // Update labels immediately
-        const startIndex = Math.floor(values[0]);
-        const endIndex = Math.floor(values[1]);
-        sliderStartLabel.textContent = labels[startIndex];
-        sliderEndLabel.textContent = labels[endIndex];
+async function fetchConsumersAndFarmersPrices() {
+    const commodity = document.getElementById("commoditySelect").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
 
-        // Trigger debounced chart update
-        updateChart(values);
-    });
-}
+    if (!commodity) return;
 
-  } catch (err) {
-    console.error("Error fetching prices:", err);
-  }
+    try {
+        const [consumerRes, farmerRes] = await Promise.all([
+            fetch(`/api/consumers1_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`),
+            fetch(`/api/farmers_prices/${encodeURIComponent(commodity)}/?${startDate ? `start_date=${startDate}&` : ""}${endDate ? `end_date=${endDate}` : ""}`)
+        ]);
+
+        const [consumerData, farmerData] = await Promise.all([
+            consumerRes.json(),
+            farmerRes.json()
+        ]);
+
+        const sortedConsumer = Array.isArray(consumerData)
+            ? consumerData.sort((a, b) => new Date(a.date) - new Date(b.date))
+            : [];
+
+        const sortedFarmer = Array.isArray(farmerData)
+            ? farmerData.sort((a, b) => new Date(a.date) - new Date(b.date))
+            : [];
+
+        // Extract unified sorted date list
+        const dateList = [...new Set([
+            ...sortedConsumer.map(d => new Date(d.date)),
+            ...sortedFarmer.map(d => new Date(d.date))
+        ])].sort((a, b) => a - b);
+
+        // Prepare time-series datasets
+        const consumerPrices = sortedConsumer.map(d => ({
+            x: new Date(d.date),
+            y: parseFloat(d.price)
+        }));
+
+        const farmerPrices = sortedFarmer.map(d => ({
+            x: new Date(d.date),
+            y: parseFloat(d.price)
+        }));
+
+
+        /* ---------------------------------------
+           Separate n-counts per date (c,f)
+        ---------------------------------------- */
+        const dateCounts = {};
+
+        consumerPrices.forEach(p => {
+            const key = p.x.toISOString().split("T")[0];
+            if (!dateCounts[key]) dateCounts[key] = { c: 0, f: 0 };
+            dateCounts[key].c += 1;
+        });
+
+        farmerPrices.forEach(p => {
+            const key = p.x.toISOString().split("T")[0];
+            if (!dateCounts[key]) dateCounts[key] = { c: 0, f: 0 };
+            dateCounts[key].f += 1;
+        });
+
+
+        const ctx = document.getElementById("consumersChart").getContext("2d");
+
+        if (Chart.getChart("consumersChart")) {
+            Chart.getChart("consumersChart").destroy();
+        }
+
+        consumersChart = new Chart(ctx, {
+            type: "line",
+            plugins: [pointCountPlugin],   // <---- IMPORTANT
+            data: {
+                datasets: [
+                    {
+                        label: "Consumer Buying Price (₹)",
+                        data: consumerPrices,
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        backgroundColor: "rgba(54, 162, 235, 0.2)",
+                        borderWidth: 2,
+                        tension: 0.3
+                    },
+                    {
+                        label: "Farmer's Selling Price (₹)",
+                        data: farmerPrices,
+                        borderColor: "rgba(75, 192, 75, 1)",
+                        backgroundColor: "rgba(75, 192, 75, 0.2)",
+                        borderWidth: 2,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                parsing: false, // REQUIRED for {x,y} data
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Consumer vs Farmer Prices for ${commodity}`,
+                    },
+                    legend: { position: "top" },
+
+                    // <---- PASS counts to plugin
+                    pointCountPlugin: {
+                        counts: dateCounts
+                    },
+
+                    zoom: {
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: "xy"
+                        },
+                        pan: { enabled: true, mode: "xy" }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            unit: "day",
+                            tooltipFormat: "dd/MM/yyyy",
+                            displayFormats: { day: "dd/MM/yyyy" }
+                        },
+                        title: { display: true, text: "Date" }
+                    },
+                    y: {
+                        title: { display: true, text: "Price (₹)" },
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            callback: v => Math.round(v)
+                        }
+                    }
+                }
+            }
+        });
+
+        /** -----------------------------
+         *  SLIDER SETUP (noUiSlider)
+         ----------------------------- */
+
+        const slider = document.getElementById('dateRangeSlider');
+        const sliderStartLabel = document.getElementById('sliderStartLabel');
+        const sliderEndLabel = document.getElementById('sliderEndLabel');
+
+        if (slider.noUiSlider) slider.noUiSlider.destroy();
+
+        if (dateList.length > 0) {
+            noUiSlider.create(slider, {
+                start: [0, dateList.length - 1],
+                connect: true,
+                range: { min: 0, max: dateList.length - 1 },
+                step: 1
+            });
+
+            sliderStartLabel.textContent = dateList[0].toLocaleDateString("en-GB");
+            sliderEndLabel.textContent = dateList[dateList.length - 1].toLocaleDateString("en-GB");
+
+            function debounce(fn, delay) {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => fn(...args), delay);
+                };
+            }
+
+            const updateChart = debounce(values => {
+                const startIndex = Math.floor(values[0]);
+                const endIndex = Math.floor(values[1]);
+
+                consumersChart.options.scales.x.min = dateList[startIndex];
+                consumersChart.options.scales.x.max = dateList[endIndex];
+
+                consumersChart.update('none');
+            }, 100);
+
+            slider.noUiSlider.on("update", values => {
+                const startIndex = Math.floor(values[0]);
+                const endIndex = Math.floor(values[1]);
+
+                sliderStartLabel.textContent = dateList[startIndex].toLocaleDateString("en-GB");
+                sliderEndLabel.textContent = dateList[endIndex].toLocaleDateString("en-GB");
+
+                updateChart(values);
+            });
+        }
+
+    } catch (err) {
+        console.error("Error fetching prices:", err);
+    }
 }
 
 // Attach to filter & commodity change
