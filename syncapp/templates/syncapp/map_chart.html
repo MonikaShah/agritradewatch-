@@ -1272,15 +1272,14 @@ const pointCountPlugin = {
                 // const x = chart.scales.x.getPixelForValue(point.x);
                 // const y = chartPoint ? chartPoint.y + (datasetIndex === 0 ? 20 : 36) : 0;
                 // get correct X,Y directly from meta for this point index
-                const pointIndex = dataset.data.indexOf(point);
-                if (pointIndex === -1) return;
-                
+              const pointIndex = dataset.data.indexOf(point);
+              if (pointIndex === -1) return;
 
-                const chartPoint = meta.data[pointIndex];
-                if (!chartPoint) return;
+              const chartPoint = meta.data[pointIndex];
+              if (!chartPoint) return;
 
-                const x = chartPoint.x;
-                const y = chartPoint.y + (datasetIndex === 0 ? 20 : 36);
+              const x = chartPoint.x;
+              const y = chartPoint.y + (datasetIndex === 0 ? 20 : 36);
 
 
                 ctx.save();
@@ -1306,18 +1305,18 @@ const nCountPlugin = {
         ctx.font = "12px sans-serif";
         ctx.textAlign = "center";
 
-        x.ticks.forEach(tick => {
-            const pixel = x.getPixelForValue(tick.value);
-            const dateKey = new Date(tick.value).toISOString().split("T")[0];
+        Object.keys(counts).sort().forEach(dateKey => {
+            const dateObj = new Date(dateKey); // ensure Date for scale
+            const pixelX = x.getPixelForValue(dateObj);
             const entry = counts[dateKey] || { c: 0, f: 0 };
 
             // Consumer count – blue
             ctx.fillStyle = "rgb(54, 162, 235)";
-            ctx.fillText(`c=${entry.c}`, pixel, chart.chartArea.bottom + 20);
+            ctx.fillText(`c=${entry.c}`, pixelX, chart.chartArea.bottom + 20);
 
             // Farmer count – green
             ctx.fillStyle = "rgb(75, 192, 75)";
-            ctx.fillText(`f=${entry.f}`, pixel, chart.chartArea.bottom + 36);
+            ctx.fillText(`f=${entry.f}`, pixelX, chart.chartArea.bottom + 36);
         });
 
         ctx.restore();
