@@ -1267,10 +1267,20 @@ const pointCountPlugin = {
                 if (!point) return;
 
                 const meta = chart.getDatasetMeta(datasetIndex);
-                const chartPoint = meta.data.find(p => p.x === chart.scales.x.getPixelForValue(point.x));
+                // const chartPoint = meta.data.find(p => p.x === chart.scales.x.getPixelForValue(point.x));
                 
-                const x = chart.scales.x.getPixelForValue(point.x);
-                const y = chartPoint ? chartPoint.y + (datasetIndex === 0 ? 20 : 36) : 0;
+                // const x = chart.scales.x.getPixelForValue(point.x);
+                // const y = chartPoint ? chartPoint.y + (datasetIndex === 0 ? 20 : 36) : 0;
+                // get correct X,Y directly from meta for this point index
+                const pointIndex = dataset.data.indexOf(point);
+                if (pointIndex === -1) return;
+
+                const chartPoint = meta.data[pointIndex];
+                if (!chartPoint) return;
+
+                const x = chartPoint.x;
+                const y = chartPoint.y + (datasetIndex === 0 ? 20 : 36);
+
 
                 ctx.save();
                 ctx.font = "12px sans-serif";
@@ -1442,6 +1452,7 @@ async function fetchConsumersAndFarmersPrices() {
                         pan: { enabled: true, mode: "xy" }
                     }
                 },
+                
                 scales: {
                     x: {
                         type: "time",
