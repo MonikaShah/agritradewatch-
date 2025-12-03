@@ -775,105 +775,7 @@ def get_villages(request):
         .order_by('village')
     )
     return JsonResponse({'villages': list(villages)})
-
-# def create_user(request):
-#     if request.method == 'POST':
-#         form = DtUserForm(request.POST)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.password = make_password(form.cleaned_data['password'])
-#             user.save()
-#             messages.success(request, "Digital Thela User created successfully!")
-#             return redirect('api:create_user')
-#         else:
-#             messages.error(request, "Please correct the errors below.")
-#     else:
-#         form = DtUserForm()
-
-    return render(request, 'syncapp/dt_userRegistration.html', {'form': form})
-
-# def thela_login(request):
-#     if request.method == "POST":
-#         form = DtLoginForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data["username"]
-#             password = form.cleaned_data["password"]
-
-#             try:
-#                 user = DtUser.objects.get(username=username)
-#             except DtUser.DoesNotExist:
-#                 messages.error(request, "Invalid username or password.")
-#                 return render(request, "syncapp/thela_login.html", {"form": form})
-
-#             # ✅ Compare using check_password
-#             if check_password(password, user.password):
-#                 request.session["thela_user_id"] = user.id
-#                 request.session["thela_username"] = user.username
-#                 messages.success(request, f"Welcome {user.name}!")
-#                 return redirect("api:create_produce")
-#             else:
-#                 messages.error(request, "Invalid username or password.")
-#     else:
-#         form = DtLoginForm()
-
-#     return render(request, "syncapp/thela_login.html", {"form": form})
-# def create_produce(request):
-#     if request.method == 'POST':
-#         form = DtProduceForm(request.POST, request.FILES)
-#         # 🟢 Print raw POST data (everything from the form)
-#         print("\n=== RAW POST DATA ===")
-#         for key, value in request.POST.items():
-#             print(f"{key} → {value}")
-#         if form.is_valid():
-#             cleaned = form.cleaned_data
-#             username_str = cleaned["username"]
-
-#             try:
-#                 user = DtUser.objects.get(username=username_str)
-#             except DtUser.DoesNotExist:
-#                 return JsonResponse({"error": f"No user found with username '{username_str}'"}, status=400)
-
-#             produce = form.save(commit=False)
-#             produce.username = user  # assign the DtUser instance
-#             messages.success(request, "Produce entry submitted successfully!")
-#             return redirect('create_produce')
-#         else:
-#             print("\n=== FORM ERRORS ===")
-#             print(form.errors)
-#             messages.error(request, "Please correct the errors below.")
-#     else:
-#         form = DtProduceForm()
-
-#     return render(request, 'syncapp/create_produce.html', {'form': form})
-
-# def create_produce(request):
-#     user_id = request.session.get("thela_user_id")
-#     username = request.session.get("thela_username")
-
-#     if not user_id:
-#         messages.error(request, "Please log in to add produce.")
-#         return redirect("thela_login")
-
-#     user = DtUser.objects.get(id=user_id)
-
-#     if request.method == "POST":
-#         form = DtProduceForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             produce = form.save(commit=False)
-#             produce.username = user  # ✅ attach user automatically
-#             produce.save()
-#             messages.success(request, "Produce added successfully!")
-#             return redirect("create_produce")
-#     else:
-#         form = DtProduceForm()
-
-#     return render(request, "syncapp/create_produce.html", {
-#         "form": form,
-#         "username": username,  # ✅ pass for display in template
-#     })
-def create_produce(request):
-    user = None
-    locationData = {
+locationData = {
     "Maharashtra": {
       "Pune": ["Haveli","Khed","Mawal","Mulshi","Baramati","Indapur","Junnar","Shirur","Purandar","Ambegaon"],
       "Satara": ["Satara","Wai","Karad","Koregaon","Jaoli","Khatav","Man","Phaltan","Mahabaleshwar","Patan"],
@@ -901,6 +803,10 @@ def create_produce(request):
       "Yavatmal": ["Yavatmal","Arni","Babhulgaon","Kalamb","Darwha","Digras","Ner","Pusad","Umarkhed","Maregaon","Zari Jamani","Wani","Ralegaon","Ghatanji","Kelapur (Pandharkawada)"]
     }
   }
+
+def create_produce(request):
+    user = None
+    
 
     # ✅ Safe user lookup (prevents 500 crash)
     if request.user.is_authenticated:
@@ -972,7 +878,65 @@ def create_produce(request):
         "location_data_json": json.dumps(locationData)
     })
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_produce_api(request):
+    """
+    DRF API endpoint to add produce and return commodities + location data
+    """
+    # ✅ Ensure the user exists
+    try:
+        user = User1.objects.get(username=request.user.username)
+    except User1.DoesNotExist:
+        return Response({"success": False, "error": "User profile not found"}, status=404)
 
+    # ✅ Check job type
+    if user.job not in ["farmer", "retailer"]:
+        return Response({"success": False, "error": "You are not authorised to add produce"}, status=403)
+
+    # Bind form with POST data and files
+    form = DtProduceForm(request.data, request.FILES)
+
+    if form.is_valid():
+        produce = form.save(commit=False)
+        produce.username = user  # link produce to user
+
+        # Optional: latitude/longitude
+        lat = request.data.get("latitude")
+        lon = request.data.get("longitude")
+        if lat: produce.latitude = float(lat)
+        if lon: produce.longitude = float(lon)
+
+        # Optional: district/tehsil
+        # produce.district = request.data.get("district", produce.district)
+        # produce.tehsil = request.data.get("tehsil", produce.tehsil)
+
+        # Confirm location
+        if request.data.get("location_confirmed") != "true":
+            return Response({"success": False, "error": "Please confirm location before submitting"}, status=400)
+
+        produce.save()
+
+        # ✅ Fetch unique commodities for this user
+        commodity_list = list(
+            DtProduce.objects.filter(username=user)
+            .values_list("sale_commodity", flat=True)
+            .distinct()
+            .order_by("sale_commodity")
+        )
+
+        return Response({
+            "success": True,
+            "message": "Produce added successfully",
+            "produce_id": produce.id,
+            "latitude": produce.latitude,
+            "longitude": produce.longitude,
+            "commodity_list": commodity_list,
+            "location_data": locationData
+        })
+
+    else:
+        return Response({"success": False, "errors": form.errors}, status=400)
    
 
 @api_view(['GET'])

@@ -20,6 +20,7 @@ urlpatterns = [
     # path("login/thela/", api_views.thela_login, name="thela_login"),
     path("DtEntries/",api_views.get_DtCommodities,name = 'get_DtCommodities'),
     path('create-produce/', api_views.create_produce, name='create_produce'),
+    path('create-produce-api/', api_views.create_produce_api, name='create_produce_api'),
     path("profile/<str:username>/", api_views.user_profile, name="user_profile"),
     path("update_produce_cost/<int:pk>/", api_views.update_produce_cost, name="update-produce-cost"),
     path("update_produce_location/<int:produce_id>/", api_views.update_produce_location, name="update_produce_location"),
