@@ -1274,6 +1274,7 @@ const pointCountPlugin = {
                 // get correct X,Y directly from meta for this point index
                 const pointIndex = dataset.data.indexOf(point);
                 if (pointIndex === -1) return;
+                
 
                 const chartPoint = meta.data[pointIndex];
                 if (!chartPoint) return;
