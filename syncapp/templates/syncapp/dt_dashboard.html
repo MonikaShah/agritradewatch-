@@ -371,7 +371,7 @@
 
   <div id="dashboard-container">
     <div id="topPanel">
-      <div>
+      <div style ="position: sticky;top: 0;z-index: 9999;">
         <label for="commoditySelect">Select Commodity:</label>
         <select id="commoditySelect">
           <option value="">-- Select --</option>
@@ -440,9 +440,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
 
-  // ⛔ Prevent Leaflet from scrolling page when opening popup
-    L.Popup.prototype.options.autoPan = false;
-
+  
     map = L.map('map').setView([20.5937, 78.9629], 8);
 
     var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
