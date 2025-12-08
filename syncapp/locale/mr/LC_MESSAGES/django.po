@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 14:00+0530\n"
+"POT-Creation-Date: 2025-12-08 17:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,140 +18,227 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: syncapp/templates/syncapp/apmcdata.html:193
+#: syncapp/templates/syncapp/apmcdata.html:219
 msgid "Wholesale Market Prices"
 msgstr "घाऊक बाजार डेटा"
 
-#: syncapp/templates/syncapp/apmcdata.html:199
+#: syncapp/templates/syncapp/apmcdata.html:225
 msgid "Commodity"
 msgstr "वस्तू"
 
-#: syncapp/templates/syncapp/apmcdata.html:201
+#: syncapp/templates/syncapp/apmcdata.html:227
 msgid "All Commodities"
 msgstr "सर्व वस्तू"
 
-#: syncapp/templates/syncapp/apmcdata.html:209
+#: syncapp/templates/syncapp/apmcdata.html:235
 msgid "Start Date"
 msgstr "प्रारंभ तारीख"
 
-#: syncapp/templates/syncapp/apmcdata.html:215
+#: syncapp/templates/syncapp/apmcdata.html:241
 msgid "End Date"
 msgstr "समाप्ती तारीख"
 
-#: syncapp/templates/syncapp/apmcdata.html:221
+#: syncapp/templates/syncapp/apmcdata.html:247
 msgid "APMC"
 msgstr "एपीएमसी"
 
-#: syncapp/templates/syncapp/apmcdata.html:223
+#: syncapp/templates/syncapp/apmcdata.html:249
 msgid "Select APMC"
 msgstr "एपीएमसी निवडा"
 
-#: syncapp/templates/syncapp/apmcdata.html:228
+#: syncapp/templates/syncapp/apmcdata.html:255
 msgid "Show Prices"
 msgstr "किंमती दाखवा"
 
-#: syncapp/templates/syncapp/apmcdata.html:240
+#: syncapp/templates/syncapp/apmcdata.html:268
 msgid "AgmarkNet Prices Trend"
 msgstr "अ‍ॅगमार्कनेट किमतींचा ट्रेंड"
 
-#: syncapp/templates/syncapp/apmcdata.html:244
+#: syncapp/templates/syncapp/apmcdata.html:273
+msgid "Download Chart"
+msgstr "चार्ट डाउनलोड करा"
+
+#: syncapp/templates/syncapp/apmcdata.html:279
+#: syncapp/templates/syncapp/dt_dashboard.html:383
+#: syncapp/templates/syncapp/dt_dashboard.html:444
 msgid "Loading..."
 msgstr "लोड करत आहे..."
 
-#: syncapp/templates/syncapp/apmcdata.html:246
+#: syncapp/templates/syncapp/apmcdata.html:281
 msgid "Processing data, please wait..."
 msgstr "डेटा प्रक्रिया करत आहे, कृपया वाट पहा..."
 
-#: syncapp/templates/syncapp/apmcdata.html:253
+#: syncapp/templates/syncapp/apmcdata.html:290
+#: syncapp/templates/syncapp/map_chart.html:276
+#: syncapp/templates/syncapp/map_chart.html:300
+msgid "Adjust Date Range"
+msgstr "तारीख श्रेणी समायोजित करा"
+
+#: syncapp/templates/syncapp/apmcdata.html:301
+#: syncapp/templates/syncapp/map_chart.html:285
+#: syncapp/templates/syncapp/map_chart.html:309
 msgid "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan."
 msgstr ""
 "टीप: झूम करण्यासाठी स्क्रोल करा, पॅन करण्यासाठी ड्रॅग करा (किंवा Ctrl + ड्रॅग करा)."
 
-#: syncapp/templates/syncapp/apmcdata.html:254
+#: syncapp/templates/syncapp/apmcdata.html:302
 msgid "Data Source"
 msgstr "डेटा स्रोत"
 
-#: syncapp/templates/syncapp/apmcdata.html:254
+#: syncapp/templates/syncapp/apmcdata.html:302
 msgid "data.gov.in"
 msgstr ""
 
-#: syncapp/templates/syncapp/base.html:66
-#: syncapp/templates/syncapp/landingpage.html:204
+#: syncapp/templates/syncapp/base.html:96
+#: syncapp/templates/syncapp/landingpage.html:207
 msgid "MandiGo"
 msgstr "मंडीगो"
 
-#: syncapp/templates/syncapp/base.html:81
+#: syncapp/templates/syncapp/base.html:110
+#: syncapp/templates/syncapp/landingpage.html:249
+msgid "Digital Thela"
+msgstr "डिजिटल कार्ट"
+
+#: syncapp/templates/syncapp/base.html:113
 msgid "Dashboard"
 msgstr "डॅशबोर्ड"
 
-#: syncapp/templates/syncapp/base.html:84
-#: syncapp/templates/syncapp/landingpage.html:236
+#: syncapp/templates/syncapp/base.html:116
+#: syncapp/templates/syncapp/landingpage.html:239
 msgid "Wholesale Market Data"
 msgstr "घाऊक बाजार डेटा"
 
-#: syncapp/templates/syncapp/base.html:87
+#: syncapp/templates/syncapp/base.html:120
 msgid "About Us"
 msgstr "आमच्याबद्दल"
 
-#: syncapp/templates/syncapp/base.html:111
+#: syncapp/templates/syncapp/base.html:123
 msgid "App Vault"
 msgstr "ॲप व्हॉल्ट"
 
-#: syncapp/templates/syncapp/base.html:123
+#: syncapp/templates/syncapp/base.html:135
 msgid "Profile"
 msgstr "प्रोफाइल"
 
-#: syncapp/templates/syncapp/base.html:125
-#: syncapp/templates/syncapp/landingpage.html:179
+#: syncapp/templates/syncapp/base.html:137
+#: syncapp/templates/syncapp/landingpage.html:182
 msgid "Logout"
 msgstr "लॉग आउट करा"
 
-#: syncapp/templates/syncapp/base.html:130
+#: syncapp/templates/syncapp/base.html:142
+#: syncapp/templates/syncapp/dt_dashboard.html:399
 msgid "Login"
 msgstr "लॉगिन करा"
 
-#: syncapp/templates/syncapp/base.html:145
-#: syncapp/templates/syncapp/landingpage.html:195
+#: syncapp/templates/syncapp/base.html:159
+#: syncapp/templates/syncapp/landingpage.html:198
 msgid "Change"
 msgstr "बदल"
 
-#: syncapp/templates/syncapp/base.html:161
-#: syncapp/templates/syncapp/landingpage.html:275
-msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
-msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
+#: syncapp/templates/syncapp/base.html:187
+#: syncapp/templates/syncapp/landingpage.html:278
+msgid "This is a trial version and the platform is not fully operational yet."
+msgstr "ही एक चाचणी आवृत्ती आहे आणि प्लॅटफॉर्म अद्याप पूर्णपणे कार्यरत नाही."
 
-#: syncapp/templates/syncapp/landingpage.html:178
-msgid "Welcome,"
-msgstr "स्वागत "
+#: syncapp/templates/syncapp/base.html:189
+#: syncapp/templates/syncapp/landingpage.html:280
+msgid "2025 MandiGo | 'सही दाम, किसान सम्मान'"
+msgstr "२०२५ मँडिगो | 'योग्य किंमत, शेतकऱ्यांचा आदर'"
 
-#: syncapp/templates/syncapp/landingpage.html:181
-msgid "Login / Register"
-msgstr "लॉगिन/नोंदणी करा"
+#: syncapp/templates/syncapp/dt_dashboard.html:377
 
-#: syncapp/templates/syncapp/landingpage.html:205
-msgid "Empowering Farmers, Consumers, and Markets with Data"
-msgstr "डेटासह शेतकरी, ग्राहक आणि बाजारपेठांना सक्षम बनवणे"
+msgid "Select Commodity"
+msgstr "कमोडिटी निवडा"
 
-#: syncapp/templates/syncapp/landingpage.html:216
-msgid "Price Watch Dashboard"
-msgstr "किंमत तपासणी डॅशबोर्ड"
+#: syncapp/templates/syncapp/dt_dashboard.html:379
+#, fuzzy
+#| msgid "Select APMC"
+msgid "Select"
+msgstr "एपीएमसी निवडा"
 
-#: syncapp/templates/syncapp/landingpage.html:217
-#: syncapp/templates/syncapp/landingpage.html:237
-msgid "Open"
-msgstr "उघडा"
+#: syncapp/templates/syncapp/dt_dashboard.html:389
+msgid "Action"
+msgstr "क्रिया"
 
-#: syncapp/templates/syncapp/landingpage.html:265
+#: syncapp/templates/syncapp/dt_dashboard.html:394
+msgid "Add Produce"
+msgstr "उत्पादन जोडा"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:409
+msgid "Locating you..."
+msgstr "नकाशावर वर्तमान स्थान"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:421
+#, fuzzy
 msgid "My Commodities"
 msgstr "माझ्या वस्तू"
 
-#: syncapp/views.py:283
+msgid "Commodities for Sale"
+msgstr "विक्रीसाठी वस्तू"
+
+
+#: syncapp/templates/syncapp/dt_dashboard.html:443
+msgid "No items found."
+msgstr "कोणतीही वस्तू आढळली नाही"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:445
+msgid "No other items."
+msgstr "इतर वस्तू नाहीत."
+
+#: syncapp/templates/syncapp/dt_dashboard.html:446
+
+
+msgid "Selected Commodity"
+msgstr "निवडलेला वस्तू"
+
+
+#: syncapp/templates/syncapp/dt_dashboard.html:447
+msgid "Other Items For Sale"
+msgstr "इतर वस्तू विक्रीसाठी"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:448
+msgid "Please login to view Farmer details"
+msgstr "शेतकऱ्यांची माहिती पाहण्यासाठी कृपया लॉगिन करा."
+
+#: syncapp/templates/syncapp/dt_dashboard.html:449
+msgid "Leave message on WhatsApp"
+msgstr "व्हाट्सएप वर मेसेज टाका"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:450
+msgid "Payment Option:"
+msgstr "पेमेंट पर्याय:"
+
+#: syncapp/templates/syncapp/landingpage.html:181
+msgid "Welcome,"
+msgstr "स्वागत "
+
+#: syncapp/templates/syncapp/landingpage.html:184
+msgid "Login / Register"
+msgstr "लॉगिन/नोंदणी करा"
+
+#: syncapp/templates/syncapp/landingpage.html:208
+msgid "Empowering Farmers, Consumers, and Markets with Data"
+msgstr "डेटासह शेतकरी, ग्राहक आणि बाजारपेठांना सक्षम बनवणे"
+
+#: syncapp/templates/syncapp/landingpage.html:219
+msgid "Price Watch Dashboard"
+msgstr "किंमत तपासणी डॅशबोर्ड"
+
+#: syncapp/templates/syncapp/landingpage.html:220
+#: syncapp/templates/syncapp/landingpage.html:240
+#: syncapp/templates/syncapp/landingpage.html:250
+msgid "Open"
+msgstr "क्लिक करा"
+
+
+#: syncapp/views.py:287
 #, python-format
 msgid "Welcome %(username)s!"
 msgstr "स्वागत आहे %(username)s!"
 
-#: syncapp/views.py:286
+#: syncapp/views.py:290
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
 
-
+#~ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
+#~ msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
