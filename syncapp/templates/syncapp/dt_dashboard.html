@@ -1,5 +1,6 @@
   {% extends "syncapp/base.html" %}
   {% load static %}
+  {% load i18n %}
   {% block content %}
 
   <style>
@@ -367,34 +368,35 @@
     100% { transform: rotate(360deg); }
 }
 </style>
+<script src="{% url 'javascript-catalog' %}"></script>
   </style>
 
   <div id="dashboard-container">
     <div id="topPanel">
-      <div style ="position: sticky;top: 0;z-index: 9999;">
-        <label for="commoditySelect">Select Commodity:</label>
+      <div>
+        <label for="commoditySelect">{% trans "Select Commodity" %}:</label>
         <select id="commoditySelect">
-          <option value="">-- Select --</option>
+          <option value="">-- {% trans "Select" %} --</option>
         </select>
       </div>  
       <div id="loadingSpinner" style="display:none; margin-left:10px;">
-        <span>⏳ Loading...</span>
+        <span>⏳ {% trans "Loading..." %}</span>
       </div>
       <span id="statusMsg"></span>
       <div class="ms-auto">
         <div class="dropdown">
           <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-            ⚙️ Action 
+            ⚙️ {% trans "Action" %} 
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
             <!-- <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li> -->
             {% if thela_username %}
-              <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
+              <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ {% trans "Add Produce" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               <!-- <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li> -->
             {% else %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
+              <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 {% trans "Login" %}</a></li>
             {% endif %}
           </ul>
         </div>
@@ -404,7 +406,7 @@
     <div id="mapContainer">
       <div id="mapLoading">
     <div class="spinner"></div>
-        <p>Locating you...</p>
+        <p>{% trans "Locating you..." %}</p>
     </div>
 
       <div id="map"></div>
@@ -416,7 +418,7 @@
         <div class="rightPanelInner">
           <button id="closeRightPanelBtn">✖</button>
           <div id="profileContent">
-            <h4>Commodities for Sale</h4>
+            <h4>{% trans "Commodities for Sale" %}</h4>
             <span id="profileUsername" style="display:none;"></span>
             <div id="otherCommodities"></div>
           </div>
@@ -437,6 +439,15 @@
   let currentCommodity = null;
   const loggedInUser = "{{ thela_username }}";   // empty string if not logged in
   let currentOpenMarker = null;
+
+  const TXT_NO_ITEMS = "{% trans 'No items found.' %}";
+  const TXT_LOADING = "{% trans 'Loading...' %}";
+  const TXT_NO_OTHER = "{% trans 'No other items.' %}";
+  const TXT_SELECTED = "{% trans 'Selected Commodity' %}";
+  const TXT_OTHER = "{% trans 'Other Items For Sale' %}";
+  const TXT_LOGIN_TO_VIEW = "{% trans 'Please login to view Farmer details' %}";
+  const TXT_WHATSAPP = "{% trans 'Leave message on WhatsApp' %}";
+  const TXT_PAYMENT = "{% trans 'Payment Option:' %}";
 
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -468,6 +479,8 @@
 
   // Shrink map & show profile
   function showProfileAboveLegend(profile, usernameIdFromPopup) {
+    
+
     const mapDiv = document.getElementById('map');
     const rightPanel = document.getElementById('rightPanel');
     const contentDiv = document.getElementById('profileContent');
@@ -594,31 +607,47 @@ if (profile.profile_pic) {
 
     // Use the username id that we got from the marker popup first (guaranteed to match DtEntries.username_id)
     // If it's not provided, fall back to possible names on the profile object.
-    const usernameToQuery = usernameIdFromPopup ||
-                            profile.username_id ||
-                            profile.username ||
-                            profile.user ||
-                            profile.user_name ||
-                            null;
+    // const usernameToQuery = usernameIdFromPopup ||
+    //                         profile.username_id ||
+    //                         profile.username ||
+    //                         profile.user ||
+    //                         profile.user_name ||
+    //                         null;
+      let usernameToQuery = usernameIdFromPopup;
+
+      if (!usernameToQuery || usernameToQuery === "undefined" || usernameToQuery === "null") {
+          usernameToQuery = profile.username_id || profile.username;  
+      }
+
+      // Final fallback → DO NOT ALLOW EMPTY USERNAME
+      if (!usernameToQuery) {
+          console.error("❌ No username found. Profile cannot load");
+          return;
+      }
+
     
         loadOtherCommodities(usernameToQuery, currentCommodity);
         console.log("username for other commodity",usernameToQuery);
-    // OPEN PANEL
-    rightPanel.classList.add('open');
-    if(window.innerWidth > 768){
-        rightPanel.style.width = '45%';
-        mapDiv.style.flex = '0 0 55%';
-    }
+        // OPEN PANEL
+        rightPanel.classList.add('open');
+        if(window.innerWidth > 768){
+            rightPanel.style.width = '45%';
+            mapDiv.style.flex = '0 0 55%';
+        }else {
+          // Mobile MUST NOT modify width or flex
+          rightPanel.style.width = "100%";
+          mapDiv.style.flex = "1 1 auto";
+      }
 
-    document.getElementById('closeRightPanelBtn').onclick = () => {
-        rightPanel.classList.remove('open');
-        rightPanel.style.width = '0';
-        mapDiv.style.flex = '1';
+        document.getElementById('closeRightPanelBtn').onclick = () => {
+            rightPanel.classList.remove('open');
+            rightPanel.style.width = '0';
+            mapDiv.style.flex = '1';
+            setTimeout(()=>map.invalidateSize(), 300);
+        };
+
         setTimeout(()=>map.invalidateSize(), 300);
-    };
-
-    setTimeout(()=>map.invalidateSize(), 300);
-}
+    }
 
 //load other commodities
 async function loadOtherCommodities(username, selectedCommodityName = null) {
@@ -627,13 +656,16 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
 
     selectedContainer.innerHTML = `<p>Loading...</p>`;
     otherContainer.innerHTML = `<p>Loading...</p>`;
-
+    if (!username || username === "undefined" || username === "null") {
+          console.error("❌ Cannot load profile - username missing");
+          return;
+      }
     try {
         const res = await fetch(`/api/DtEntries/?username_id=${encodeURIComponent(username)}`);
         const items = await res.json();
 
         if (!items.length) {
-            selectedContainer.innerHTML = `<p>No items found.</p>`;
+            selectedContainer.innerHTML = `<p>${gettext("TXT_NO_ITEMS")}</p>`;
             otherContainer.innerHTML = ``;
             return;
         }
@@ -651,7 +683,7 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
         });
 
         // Render selected commodity(s)
-          const selectedContainer = document.getElementById("selectedCommodity");
+          // const selectedContainer = document.getElementById("selectedCommodity");
           selectedContainer.innerHTML = ""; // clear first
 
           if (selectedItem.length) {
@@ -659,7 +691,7 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
                   selectedContainer.appendChild(renderCommodityRow(item, true));
               });
           } else {
-              selectedContainer.innerHTML = `<p>No selected commodity found.</p>`;
+              selectedContainer.innerHTML = `<p>${gettext("TXT_NO_SELECTED")}</p>`;
           }
 
           // Render other commodities
@@ -671,7 +703,7 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
                   otherContainer.appendChild(renderCommodityRow(item, false));
               });
           } else {
-              otherContainer.innerHTML = `<p>No other items.</p>`;
+              otherContainer.innerHTML = `<p>${gettext("TXT_NO_OTHER")}</p>`;
           }
 
     } catch (err) {
@@ -707,7 +739,7 @@ function renderCommodityRow(item, isSelected) {
                 /<span class="profile-label">${item.unit}</span>
             </span>
             <br>
-            <span class="profile-label"><b>Quantity For sale:</b></span>
+            <span class="profile-label"><b>${gettext("TXT_QUANTITY_SALE")}:</b></span>
             <span class="profile-value">
                 <input type="number" id="edit_qty_${item.id}" value="${item.quantity_for_sale}" min="1" 
                     style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
@@ -851,6 +883,8 @@ async function updateProduce(id) {
             console.error("Failed to fetch entry:", res.status);
             return;
         }
+        console.log("Attempting profile fetch for username:", usernameFromLink);
+        console.log("Fetch URL:", `/api/profile/${encodeURIComponent(usernameFromLink)}/`);
 
         const entry = await res.json();
 
@@ -1235,6 +1269,8 @@ async function uploadProfilePhoto() {
     console.error(err);
     alert("❌ Error uploading profile photo");
   }
+
+  
 }
 
   </script>
