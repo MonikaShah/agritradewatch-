@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 14:31+0530\n"
+"POT-Creation-Date: 2025-12-08 12:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -467,7 +467,6 @@ msgstr "चयनित फ़िल्टर के लिए डेटा उ�
 msgid "Showing average prices for all apmcs within selected date range."
 msgstr "चयनित तिथि के लिए सभी एपीएमसी की औसत कीमतें दिखा रहा है।"
 
-
 msgid "Please select commodity and date range first"
 msgstr "कृपया पहले वस्तु और दिनांक सीमा का चयन करें"
 
@@ -477,5 +476,125 @@ msgstr "टमाटर"
 msgid "Onion"
 msgstr "प्याज"
 
+msgid "onion"
+msgstr "प्याज"
+
 msgid "Potato"
 msgstr "आलू"
+
+msgid "Ambat Chukka (Sorrel Leaves)"
+msgstr "चुक्का पत्ता"
+
+msgid "Ginger"
+msgstr "अदरक"
+
+msgid "Cucumber"
+msgstr "खीरा"
+
+msgid "Bitter Gourd"
+msgstr "करेला"
+
+msgid "Coriander Leaves"
+msgstr "धनिया पत्ती"
+
+msgid "Cabbage"
+msgstr "पत्ता गोभी"
+
+msgid "Cluster Beans (Gawar)"
+msgstr "ग्वार फली"
+
+msgid "Carrot"
+msgstr "गाजर"
+
+msgid "Cowpea (Chawli)"
+msgstr "लोबिया"
+
+msgid "Capsicum (Shimla Mirch)"
+msgstr "शिमला मिर्च"
+
+msgid "Bottle Gourd"
+msgstr "लौकी"
+
+msgid "Ridge Gourd (Dodka)"
+msgstr "तुरई"
+
+msgid "Spinach"
+msgstr "पालक"
+
+msgid "Cauliflower"
+msgstr "फूलगोभी"
+
+msgid "Beetroot"
+msgstr "चुकंदर"
+
+msgid "Ladies Finger (Okra)"
+msgstr "भिंडी"
+
+msgid "Pumpkin"
+msgstr "कद्दू"
+
+msgid "Radish"
+msgstr "मूली"
+
+msgid "Fenugreek Leaves"
+msgstr "मेथी पत्ती"
+
+msgid "Garlic"
+msgstr "लहसुन"
+
+msgid "Lemon"
+msgstr "नींबू"
+
+msgid "Brinjal"
+msgstr "बैंगन"
+
+msgid "Drumstick (Moringa Pods)"
+msgstr "सहजन"
+
+msgid "Green Chilli"
+msgstr "हरी मिर्च"
+
+msgid "Pomegranate"
+msgstr "अनार"
+
+msgid "Custard Apple"
+msgstr "सीताफल"
+
+msgid "Dragon Fruit"
+msgstr "ड्रैगन फ्रूट"
+
+msgid "Grapes"
+msgstr "अंगूर"
+
+msgid "Guava"
+msgstr "अमरूद"
+
+msgid "Orange"
+msgstr "संतरा"
+
+msgid "Papaya"
+msgstr "पपीता"
+
+msgid "Sapota (Chikoo)"
+msgstr "चीकू"
+
+msgid "Sugarcane"
+msgstr "गन्ना"
+
+msgid "sugarcane"
+msgstr "ऊस"
+
+msgid "wheat"
+msgstr "गेहूँ"
+
+msgid "maize"
+msgstr "मक्का"
+
+msgid "honey"
+msgstr "शहद"
+
+msgid "ghee"
+msgstr "घी"
+
+msgid "kela"
+msgstr "केला"

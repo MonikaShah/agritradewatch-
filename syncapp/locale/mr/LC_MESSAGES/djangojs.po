@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 14:31+0530\n"
+"POT-Creation-Date: 2025-12-08 12:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -476,5 +476,121 @@ msgstr "टोमॅटो"
 msgid "Onion"
 msgstr "कांदा"
 
+msgid "onion"
+msgstr "कांदा"
+
 msgid "Potato"
 msgstr "बटाटा"
+msgid "Ambat Chukka (Sorrel Leaves)"
+msgstr "आंबट चुक्का"
+
+msgid "Ginger"
+msgstr "आले"
+
+msgid "Cucumber"
+msgstr "काकडी"
+
+msgid "Bitter Gourd"
+msgstr "कारले"
+
+msgid "Coriander Leaves"
+msgstr "कोथिंबीर"
+
+msgid "Cabbage"
+msgstr "कोबी"
+
+msgid "Cluster Beans (Gawar)"
+msgstr "गवार"
+
+msgid "Carrot"
+msgstr "गाजर"
+
+msgid "Cowpea (Chawli)"
+msgstr "चवळी"
+
+msgid "Capsicum (Shimla Mirch)"
+msgstr "ढोबळी मिरची"
+
+msgid "Bottle Gourd"
+msgstr "दुधी भोपळा"
+
+msgid "Ridge Gourd (Dodka)"
+msgstr "दोडका"
+
+msgid "Spinach"
+msgstr "पालक"
+
+msgid "Cauliflower"
+msgstr "फुलकोबी"
+
+msgid "Beetroot"
+msgstr "बीट"
+
+msgid "Ladies Finger (Okra)"
+msgstr "भेंडी"
+
+msgid "Pumpkin"
+msgstr "भोपळा"
+
+msgid "Radish"
+msgstr "मूळा"
+
+msgid "Fenugreek Leaves"
+msgstr "मेथी"
+
+msgid "Garlic"
+msgstr "लसूण"
+
+msgid "Lemon"
+msgstr "लिंबू"
+
+msgid "Brinjal"
+msgstr "वांगी"
+
+msgid "Drumstick (Moringa Pods)"
+msgstr "शेवगा"
+
+msgid "Green Chilli"
+msgstr "हिरवी मिरची"
+
+msgid "Pomegranate"
+msgstr "डाळिंब"
+
+msgid "Custard Apple"
+msgstr "सीताफळ"
+
+msgid "Dragon Fruit"
+msgstr "ड्रॅगन फळ"
+
+msgid "Grapes"
+msgstr "द्राक्षे"
+
+msgid "Guava"
+msgstr "पेरू"
+
+msgid "Orange"
+msgstr "संत्रे"
+
+msgid "Papaya"
+msgstr "पपई"
+
+msgid "Sapota (Chikoo)"
+msgstr "चिकू"
+
+msgid "sugarcane"
+msgstr "ऊस बेणे"
+
+msgid "wheat"
+msgstr "गहू"
+
+msgid "maize"
+msgstr "मका"
+
+msgid "honey"
+msgstr "मध"
+
+msgid "ghee"
+msgstr "साजूक तूप"
+
+msgid "kela"
+msgstr "केळी"

@@ -307,7 +307,7 @@
     max-width: 100%;
     height: auto !important;
   }
-   .profile-label {
+  .profile-label {
       width: 100%;
       font-weight: 600;
   }
@@ -369,7 +369,6 @@
 }
 </style>
 <script src="{% url 'javascript-catalog' %}"></script>
-  </style>
 
   <div id="dashboard-container">
     <div id="topPanel">
@@ -448,7 +447,8 @@
   const TXT_LOGIN_TO_VIEW = "{% trans 'Please login to view Farmer details' %}";
   const TXT_WHATSAPP = "{% trans 'Leave message on WhatsApp' %}";
   const TXT_PAYMENT = "{% trans 'Payment Option:' %}";
-
+  const TXT_QUANTITY_SALE ="{% trans 'Quantity for sale' %}";
+  const TXT_NO_SELECTED = "{% trans 'No selected items' %}"
   document.addEventListener("DOMContentLoaded", () => {
 
   
@@ -564,45 +564,45 @@ if (profile.profile_pic) {
         <h4>${profile.username || profile.display_name || usernameIdFromPopup || 'Unknown'}</h4>
          ${!isLoggedIn ? `
             <div style="color:red; font-weight:bold; margin-top:10px;">
-                Please login to view Farmer details
+                ${TXT_LOGIN_TO_VIEW}
             </div>
         ` : `
             <div class="profile-row">
-                <span class="profile-label">Job:</span>
+                <span class="profile-label">{% trans "Job" %}:</span>
                 <span class="profile-value">${profile.job || 'N/A'}</span>
             </div>
 
             <div class="profile-row">
-                <span class="profile-label">Email:</span>
+                <span class="profile-label">{% trans "Email" %}:</span>
                 <span class="profile-value">${profile.email || 'N/A'}</span>
             </div>
 
             <div class="profile-row">
-                <span class="profile-label">Phone:</span>
+                <span class="profile-label">{% trans "Mobile" %}:</span>
                 <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
             </div>
             ${profile.mobile ? `
             <div class="profile-row">
-                <span class="profile-label">WhatsApp:</span>
+                <span class="profile-label">{% trans "WhatsApp" %}:</span>
                 <span class="profile-value">
                     <a href="https://wa.me/${profile.mobile.replace(/\\D/g,'')}" target="_blank" 
                       style="color:#25D366; font-weight:bold; text-decoration:underline;">
-                      Leave message on WhatsApp
+                      {% trans "Leave message on WhatsApp" %}
                     </a>
                 </span>
             </div>` : ''}
             <div class="profile-row">
-                <span class="profile-label">Payment Option:</span>
-                <span class="profile-value">Cash</span>
+                <span class="profile-label">{% trans "Payment Option" %}:</span>
+                <span class="profile-value">{% trans "Cash" %}</span>
             </div>
             `}
             
 
-        <h4>Selected Commodity</h4>
-          <div id="selectedCommodity">Loading...</div>
+        <h4>{% trans "Selected Commodity" %}</h4>
+          <div id="selectedCommodity">{% trans "Loading" %}...</div>
 
-        <h4>Other Items For Sale</h4>
-        <div id="otherCommodities">Loading...</div>
+        <h4>{% trans "Other Items For Sale" %}</h4>
+        <div id="otherCommodities">{% trans "Loading..." %}</div>
     `;
 
     // Use the username id that we got from the marker popup first (guaranteed to match DtEntries.username_id)
@@ -665,7 +665,7 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
         const items = await res.json();
 
         if (!items.length) {
-            selectedContainer.innerHTML = `<p>${gettext("TXT_NO_ITEMS")}</p>`;
+            selectedContainer.innerHTML = `<p>${TXT_NO_ITEMS}</p>`;
             otherContainer.innerHTML = ``;
             return;
         }
@@ -688,10 +688,16 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
 
           if (selectedItem.length) {
               selectedItem.forEach(item => {
-                  selectedContainer.appendChild(renderCommodityRow(item, true));
+                
+                // Translate the commodity name before passing
+                  const translatedItem = {
+                      ...item,
+                      name: gettext(item.sale_commodity)   // choose correct field
+                  };
+                  selectedContainer.appendChild(renderCommodityRow(translatedItem, true));
               });
           } else {
-              selectedContainer.innerHTML = `<p>${gettext("TXT_NO_SELECTED")}</p>`;
+              selectedContainer.innerHTML = `<p>${TXT_NO_SELECTED}</p>`;
           }
 
           // Render other commodities
@@ -700,10 +706,15 @@ async function loadOtherCommodities(username, selectedCommodityName = null) {
 
           if (otherItems.length) {
               otherItems.forEach(item => {
-                  otherContainer.appendChild(renderCommodityRow(item, false));
+                const translatedItem = {
+                      ...item,
+                      name: gettext(item.sale_commodity)   // choose correct field
+                  };
+                  
+                  otherContainer.appendChild(renderCommodityRow(translatedItem, false));
               });
           } else {
-              otherContainer.innerHTML = `<p>${gettext("TXT_NO_OTHER")}</p>`;
+              otherContainer.innerHTML = `<p>${TXT_NO_OTHER}</p>`;
           }
 
     } catch (err) {
@@ -732,35 +743,35 @@ function renderCommodityRow(item, isSelected) {
 
     if (isOwner) {
         topLine.innerHTML = `
-            <span class="profile-label"><b>${item.sale_commodity}</b></span>
+            <span class="profile-label"><b>${item.name || item.sale_commodity}</b></span>
             <span class="profile-value">
                 ₹ <input type="number" id="edit_cost_${item.id}" value="${item.cost}" min="1" 
                     style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
                 /<span class="profile-label">${item.unit}</span>
             </span>
             <br>
-            <span class="profile-label"><b>${gettext("TXT_QUANTITY_SALE")}:</b></span>
+            <span class="profile-label"><b>${TXT_QUANTITY_SALE}</b></span>
             <span class="profile-value">
                 <input type="number" id="edit_qty_${item.id}" value="${item.quantity_for_sale}" min="1" 
                     style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
             </span>
             <span class="profile-value">
             <select id="edit_unit_${item.id}" style="width:100px; padding:2px; border:1px solid #ccc;">
-                <option value="Kg" ${item.unit === 'Kg' ? 'selected' : ''}>Kg</option>
-                <option value="250 gm" ${item.unit === '250 gm' ? 'selected' : ''}>250 gm</option>
-                <option value="bundle" ${item.unit === 'bundle' ? 'selected' : ''}>bundle</option>
-                <option value="piece" ${item.unit === 'piece' ? 'selected' : ''}>piece</option>
-                <option value="dozen" ${item.unit === 'dozen' ? 'selected' : ''}>dozen</option>
+                <option value="Kg" ${item.unit === 'Kg' ? 'selected' : ''}>{% trans "Kg" %}</option>
+                <option value="250 gm" ${item.unit === '250 gm' ? 'selected' : ''}>{% trans "250 gm" %}</option>
+                <option value="bundle" ${item.unit === 'bundle' ? 'selected' : ''}>{% trans "bundle" %}</option>
+                <option value="piece" ${item.unit === 'piece' ? 'selected' : ''}>{% trans "piece" %}</option>
+                <option value="dozen" ${item.unit === 'dozen' ? 'selected' : ''}>{% trans "dozen" %}</option>
             </select>
                 <button class="btn btn-sm btn-primary" style="margin-left:5px;padding:2px 6px;"
                     onclick="updateProduce(${item.id})">
-                    Save
+                    {% trans "Save" %}
                 </button>
             </span>
         `;
     } else {
         topLine.innerHTML = `
-            <span class="profile-label">${item.sale_commodity}</span>
+            <span class="profile-label">${item.name ||item.sale_commodity}</span>
             <span class="profile-value">₹${item.cost} / ${item.quantity_for_sale} ${item.unit}</span>
         `;
     }
@@ -772,10 +783,11 @@ function renderCommodityRow(item, isSelected) {
     detailsDiv.style.marginTop = "6px";
     detailsDiv.style.fontSize = "13px";
     detailsDiv.style.color = "#555";
+    
     detailsDiv.innerHTML = `
-        <div><b>Variety:</b> ${item.variety_name || 'N/A'}</div>
-        <div><b>Description:</b> ${item.description|| 'N/A'}</div>
-        <div><b>Description Voice:</b>
+        <div><b>{% trans "Variety" %}:</b> ${item.variety_name || 'N/A'}</div>
+        <div><b>{% trans "Description" %}:</b> ${item.description|| 'N/A'}</div>
+        <div><b>{% trans "Description Voice" %}:</b>
           ${item.description_voice 
               ? `<audio controls style="width:100%;margin-top:4px;">
                   <source src="/media/${item.description_voice}">
@@ -805,21 +817,21 @@ function renderCommodityRow(item, isSelected) {
 
 
 async function updateProduce(id) {
-// alert(id);
+// alert(gettext(id);
     const cost = document.getElementById(`edit_cost_${id}`).value;
     const qty = document.getElementById(`edit_qty_${id}`).value;
     const unit = document.getElementById(`edit_unit_${id}`).value.trim();
-// alert(qty);
+// alert(gettext(qty);
     if (!cost || isNaN(cost) || cost < 1) {
-        alert("Enter a valid cost");
+        alert(gettext("Enter a valid cost"));
         return;
     }
     if (!qty || isNaN(qty) || qty < 0) {
-        alert("Enter a valid quantity");
+        alert(gettext("Enter a valid quantity"));
         return;
     }
     if (!unit) {
-        alert("Enter a valid unit");
+        alert(gettext("Enter a valid unit"));
         return;
     }
 
@@ -839,7 +851,7 @@ async function updateProduce(id) {
 
         if (!res.ok) throw new Error("Failed to update");
 
-        alert("Produce updated!");
+        alert(gettext("Produce updated!"));
         // Refresh right panel and popup
         const username = "{{ thela_username }}"; // or fetch actual viewed user
         loadOtherCommodities(username, currentCommodity);
@@ -847,7 +859,7 @@ async function updateProduce(id) {
 
     } catch (err) {
         console.error(err);
-        alert("Error updating produce");
+        alert(gettext("Error updating produce"));
     }
 }
 
@@ -861,11 +873,11 @@ async function updateProduce(id) {
       const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
 
       const select = document.getElementById('commoditySelect');
-      select.innerHTML = '<option value="">-- Select --</option>';
+      select.innerHTML = '<option value="">-- {% trans "Select" %} --</option>';
       uniqueCommodities.forEach(item => {
         const opt = document.createElement('option');
         opt.value = item;
-        opt.textContent = item;
+        opt.textContent = gettext(item);
         select.appendChild(opt);
       });
 
@@ -892,19 +904,18 @@ async function updateProduce(id) {
           <div>
             <a href="#" class="view-profile-link" data-username-id="${entry.username_id}"
               style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
-              👤 ${entry.username_id} - View Profile
+              👤 ${entry.username_id} - {% trans "View Profile" %}
             </a>
             <br><br>
-            <b>Commodity:</b> ${entry.sale_commodity}<br>
-            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <b>{% trans "Commodity" %}:</b> ${entry.sale_commodity}<br>
+            <b>{% trans "Price" %}:</b> ${entry.cost} / ${entry.unit}<br><br>
             <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
-              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
-              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>{% trans "Updated on" %}:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>{% trans "Variety" %}:</b> ${entry.variety_name}<br>
+                       
               
-              
-              
-              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              <b>{% trans "Quantity" %}:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
                     ? `<video src="/media/${entry.photo_or_video}" controls width="300"></video>`
@@ -943,7 +954,7 @@ async function updateProduce(id) {
                     ev.preventDefault();
                     const usernameFromLink = profileLink.dataset.usernameId;
                     if (!usernameFromLink) {
-                        alert("Username not available!");
+                        alert(gettext("Username not available!"));
                         return;
                     }
 
@@ -954,7 +965,7 @@ async function updateProduce(id) {
                         showProfileAboveLegend(profile, usernameFromLink);
                     } catch(err) {
                         console.error(err);
-                        alert("Could not load profile.");
+                        alert(gettext("Could not load profile."));
                     }
                 });
             }
@@ -1022,6 +1033,12 @@ async function updateProduce(id) {
   });
 
   async function showCommodityMarkers(commodity){
+    const i18n = {
+      showing: "{% trans 'Showing' %}",
+      entries_for: "{% trans 'entries for' %}",
+      no_entries: "{% trans 'No entries found for this commodity.' %}"
+    };
+
     if(!commodity) return;
     currentCommodity = commodity;
     const spinner = document.getElementById('loadingSpinner');
@@ -1060,19 +1077,19 @@ async function updateProduce(id) {
           <div>
             <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
               style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
-              👤 ${entry.username_id} - View Profile
+              👤 ${entry.username_id} - {% trans "View Profile" %}
             </a>
             <br><br>
-            <b>Commodity:</b> ${entry.sale_commodity}<br>
-            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
-            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
+            <b>{% trans "Commodity" %}:</b> ${entry.sale_commodity}<br>
+            <b>{% trans "Price" %}:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 {% trans "More Details" %}</a>
             <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
-              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
-              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>{% trans "Updated on" %}:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>{% trans "Variety" %}:</b> ${entry.variety_name}<br>
               
               
              
-              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              <b>{% trans "Quantity" %}:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
               ${entry.photo_or_video
                 ? (entry.photo_or_video.endsWith('.mp4')
                     ? `<video src="/media/${entry.photo_or_video}" controls width="100" height="60" style="margin-top:5px;"></video>`
@@ -1113,7 +1130,7 @@ async function updateProduce(id) {
               // username from marker popup attribute (this is the DB username_id)
               const usernameFromLink = profileLink.dataset.usernameId;
               if (!usernameFromLink) {
-                alert("Username not available!");
+                alert(gettext("Username not available!"));
                 return;
               }
 
@@ -1125,7 +1142,7 @@ async function updateProduce(id) {
                 showProfileAboveLegend(profile, usernameFromLink);
               } catch(err) {
                 console.error(err);
-                alert("Could not load profile.");
+                alert(gettext("Could not load profile."));
               } finally {
                 spinner.style.display = 'none';
               }
@@ -1154,12 +1171,12 @@ if (markers.length > 0) {
     updateLegend(commodity, data.length, iconExists, iconPath);
 
 
-    document.getElementById('statusMsg').textContent = data.length
-      ? `Showing ${data.length} entries for ${commodity}.`
-      : "No entries found for this commodity.";
+    document.getElementById('statusMsg').textContent =
+      data.length
+        ? `${i18n.showing} ${data.length} ${i18n.entries_for} ${commodity}.`
+        : i18n.no_entries;
 
-          spinner.style.display = 'none';
-  }
+    spinner.style.display = 'none';
 
   // Check image exists
   async function checkImageExists(url){
@@ -1236,7 +1253,7 @@ function updateLegend(commodity, count, iconExists, iconPath){
 // ✅ Block normal upload function if not owner
 function uploadProfilePhotoOwnerOnly() {
    if (!isOwner) {
-       alert("You cannot change another user's profile photo!");
+       alert(gettext("You cannot change another user's profile photo!"));
        return;
    }
    uploadProfilePhoto();  // call original upload only if owner
@@ -1258,7 +1275,7 @@ async function uploadProfilePhoto() {
 
     if (!res.ok) throw new Error("Upload failed");
 
-    alert("✅ Profile photo updated!");
+    alert(gettext("✅ Profile photo updated!"));
     // Reload profile panel to reflect new image
     const user = "{{ thela_username }}";
     const pRes = await fetch(`/api/profile/${encodeURIComponent(user)}/`);
@@ -1267,12 +1284,12 @@ async function uploadProfilePhoto() {
 
   } catch (err) {
     console.error(err);
-    alert("❌ Error uploading profile photo");
+    alert(gettextgettext("❌ Error uploading profile photo"));
   }
 
   
-}
+}}
 
   </script>
-
+  
   {% endblock %}

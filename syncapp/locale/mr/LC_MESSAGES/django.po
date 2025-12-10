@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-08 17:00+0000\n"
+"POT-Creation-Date: 2025-12-10 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,6 +23,8 @@ msgid "Wholesale Market Prices"
 msgstr "घाऊक बाजार डेटा"
 
 #: syncapp/templates/syncapp/apmcdata.html:225
+#: syncapp/templates/syncapp/dt_dashboard.html:905
+#: syncapp/templates/syncapp/dt_dashboard.html:1078
 msgid "Commodity"
 msgstr "वस्तू"
 
@@ -59,8 +61,9 @@ msgid "Download Chart"
 msgstr "चार्ट डाउनलोड करा"
 
 #: syncapp/templates/syncapp/apmcdata.html:279
-#: syncapp/templates/syncapp/dt_dashboard.html:383
-#: syncapp/templates/syncapp/dt_dashboard.html:444
+#: syncapp/templates/syncapp/dt_dashboard.html:382
+#: syncapp/templates/syncapp/dt_dashboard.html:443
+#: syncapp/templates/syncapp/dt_dashboard.html:605
 msgid "Loading..."
 msgstr "लोड करत आहे..."
 
@@ -126,7 +129,7 @@ msgid "Logout"
 msgstr "लॉग आउट करा"
 
 #: syncapp/templates/syncapp/base.html:142
-#: syncapp/templates/syncapp/dt_dashboard.html:399
+#: syncapp/templates/syncapp/dt_dashboard.html:398
 msgid "Login"
 msgstr "लॉगिन करा"
 
@@ -145,68 +148,180 @@ msgstr "ही एक चाचणी आवृत्ती आहे आणि 
 msgid "2025 MandiGo | 'सही दाम, किसान सम्मान'"
 msgstr "२०२५ मँडिगो | 'योग्य किंमत, शेतकऱ्यांचा आदर'"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:377
-
+#: syncapp/templates/syncapp/dt_dashboard.html:376
 msgid "Select Commodity"
 msgstr "कमोडिटी निवडा"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:379
-#, fuzzy
-#| msgid "Select APMC"
+#: syncapp/templates/syncapp/dt_dashboard.html:378
+#: syncapp/templates/syncapp/dt_dashboard.html:871
 msgid "Select"
-msgstr "एपीएमसी निवडा"
+msgstr "निवडा"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:389
+#: syncapp/templates/syncapp/dt_dashboard.html:388
 msgid "Action"
 msgstr "क्रिया"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:394
+#: syncapp/templates/syncapp/dt_dashboard.html:393
 msgid "Add Produce"
 msgstr "उत्पादन जोडा"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:409
+#: syncapp/templates/syncapp/dt_dashboard.html:408
 msgid "Locating you..."
 msgstr "नकाशावर वर्तमान स्थान"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:421
-#, fuzzy
-msgid "My Commodities"
-msgstr "माझ्या वस्तू"
-
+#: syncapp/templates/syncapp/dt_dashboard.html:420
 msgid "Commodities for Sale"
 msgstr "विक्रीसाठी वस्तू"
 
-
-#: syncapp/templates/syncapp/dt_dashboard.html:443
+#: syncapp/templates/syncapp/dt_dashboard.html:442
 msgid "No items found."
 msgstr "कोणतीही वस्तू आढळली नाही"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:445
+#: syncapp/templates/syncapp/dt_dashboard.html:444
 msgid "No other items."
 msgstr "इतर वस्तू नाहीत."
 
-#: syncapp/templates/syncapp/dt_dashboard.html:446
-
-
+#: syncapp/templates/syncapp/dt_dashboard.html:445
+#: syncapp/templates/syncapp/dt_dashboard.html:601
 msgid "Selected Commodity"
 msgstr "निवडलेला वस्तू"
 
-
-#: syncapp/templates/syncapp/dt_dashboard.html:447
+#: syncapp/templates/syncapp/dt_dashboard.html:446
+#: syncapp/templates/syncapp/dt_dashboard.html:604
 msgid "Other Items For Sale"
 msgstr "इतर वस्तू विक्रीसाठी"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:448
+#: syncapp/templates/syncapp/dt_dashboard.html:447
 msgid "Please login to view Farmer details"
 msgstr "शेतकऱ्यांची माहिती पाहण्यासाठी कृपया लॉगिन करा."
 
-#: syncapp/templates/syncapp/dt_dashboard.html:449
+#: syncapp/templates/syncapp/dt_dashboard.html:448
+#: syncapp/templates/syncapp/dt_dashboard.html:590
 msgid "Leave message on WhatsApp"
 msgstr "व्हाट्सएप वर मेसेज टाका"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:450
+#: syncapp/templates/syncapp/dt_dashboard.html:449
 msgid "Payment Option:"
 msgstr "पेमेंट पर्याय:"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:450
+#, fuzzy
+#| msgid "Quantity"
+msgid "Quantity for sale"
+msgstr "रक्कम"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:451
+#, fuzzy
+#| msgid "No other items."
+msgid "No selected items"
+msgstr "इतर वस्तू नाहीत."
+
+#: syncapp/templates/syncapp/dt_dashboard.html:571
+msgid "Job"
+msgstr "काम"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:576
+msgid "Email"
+msgstr "ईमेल"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:581
+msgid "Mobile"
+msgstr "मोबाइल"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:586
+msgid "WhatsApp"
+msgstr "व्हॉट्सएप"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:595
+msgid "Payment Option"
+msgstr "पेमेंट पर्याय"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:596
+msgid "Cash"
+msgstr "रोख"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:602
+#, fuzzy
+#| msgid "Loading..."
+msgid "Loading"
+msgstr "लोड करत आहे..."
+
+#: syncapp/templates/syncapp/dt_dashboard.html:756
+msgid "Kg"
+msgstr "किलो"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:757
+msgid "250 gm"
+msgstr "२५० ग्रॅम"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:758
+msgid "bundle"
+msgstr "बंडल"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:759
+msgid "piece"
+msgstr "नंग"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:760
+msgid "dozen"
+msgstr "डझन"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:764
+msgid "Save"
+msgstr "जतन करा"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:783
+#: syncapp/templates/syncapp/dt_dashboard.html:910
+#: syncapp/templates/syncapp/dt_dashboard.html:1083
+msgid "Variety"
+msgstr "जात"
+
+msgid "Local"
+msgstr "स्थानिक"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:784
+msgid "Description"
+msgstr "वर्णन"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:785
+msgid "Description Voice"
+msgstr "व्हॉइस नोट्स"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:902
+#: syncapp/templates/syncapp/dt_dashboard.html:1075
+msgid "View Profile"
+msgstr "प्रोफाइल"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:906
+#: syncapp/templates/syncapp/dt_dashboard.html:1079
+msgid "Price"
+msgstr "किंमत"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:909
+#: syncapp/templates/syncapp/dt_dashboard.html:1082
+msgid "Updated on"
+msgstr "अपडेट"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:913
+#: syncapp/templates/syncapp/dt_dashboard.html:1087
+msgid "Quantity"
+msgstr "रक्कम"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:1032
+msgid "Showing"
+msgstr "दाखवत आहे"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:1033
+msgid "entries for"
+msgstr "यासाठी नोंदी"
+
+#: syncapp/templates/syncapp/dt_dashboard.html:1034
+msgid "No entries found for this commodity."
+msgstr "या आयटमसाठी कोणत्याही सूची आढळल्या नाहीत."
+
+#: syncapp/templates/syncapp/dt_dashboard.html:1080
+msgid "More Details"
+msgstr "अधिक तपशील"
 
 #: syncapp/templates/syncapp/landingpage.html:181
 msgid "Welcome,"
@@ -230,6 +345,10 @@ msgstr "किंमत तपासणी डॅशबोर्ड"
 msgid "Open"
 msgstr "क्लिक करा"
 
+#: syncapp/templates/syncapp/landingpage.html:268
+#, fuzzy
+msgid "My Commodities"
+msgstr "माझ्या वस्तू"
 
 #: syncapp/views.py:287
 #, python-format
@@ -242,3 +361,6 @@ msgstr "अवैध क्रेडेन्शियल"
 
 #~ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
 #~ msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
+
+#~ msgid "TXT_QUANTITY_SALE"
+#~ msgstr "विक्रीसाठी प्रमाण"
