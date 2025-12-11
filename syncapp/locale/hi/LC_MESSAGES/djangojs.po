@@ -485,10 +485,19 @@ msgstr "आलू"
 msgid "Ambat Chukka (Sorrel Leaves)"
 msgstr "चुक्का पत्ता"
 
+msgid "ambat chukka"
+msgstr "चुक्का पत्ता"
+
 msgid "Ginger"
 msgstr "अदरक"
 
 msgid "Cucumber"
+msgstr "खीरा"
+
+msgid "ginger"
+msgstr "अदरक"
+
+msgid "cucumber"
 msgstr "खीरा"
 
 msgid "Bitter Gourd"
@@ -578,6 +587,9 @@ msgstr "संतरा"
 msgid "Papaya"
 msgstr "पपीता"
 
+msgid "papaya"
+msgstr "पपीता"
+
 msgid "Sapota (Chikoo)"
 msgstr "चीकू"
 
@@ -601,3 +613,9 @@ msgstr "घी"
 
 msgid "kela"
 msgstr "केला"
+
+msgid "Tender Coconut"
+msgstr "हरा नारियल"
+
+msgid "tender coconut"
+msgstr "हरा नारियल"
