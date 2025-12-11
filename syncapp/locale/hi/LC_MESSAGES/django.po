@@ -148,6 +148,8 @@ msgid "2025 MandiGo | 'सही दाम, किसान सम्मान'"
 msgstr "2025 मंडीगो | 'सही दाम, किसान सम्मान'"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:376
+msgid "Select Commodity"
+msgstr "कमोडिटी का चयन करें"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:378
 #: syncapp/templates/syncapp/dt_dashboard.html:871
@@ -180,9 +182,7 @@ msgstr "कोई अन्य वस्तु नहीं."
 
 #: syncapp/templates/syncapp/dt_dashboard.html:445
 #: syncapp/templates/syncapp/dt_dashboard.html:601
-#, fuzzy
-msgid "Select Commodity"
-msgstr "कमोडिटी का चयन करें"
+
 
 msgid "Selected Commodity"
 msgstr "चयनित आइटम"
