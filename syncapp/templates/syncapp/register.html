@@ -1,6 +1,7 @@
 {% extends "syncapp/base.html" %}
+{% load i18n %}
 
-{% block title %}Register{% endblock %}
+{% block title %}{% trans "Register" %}{% endblock %}
 
 {% block content %}
 <style>
@@ -78,68 +79,69 @@
 
 <div class="d-flex justify-content-center align-items-center w-100 py-5">
     <div class="register-card">
-        <h2 class="text-center mb-4">Register for MandiGo</h2>
+        <h2 class="text-center mb-4">            
+            {% blocktrans %}Register for MandiGo{% endblocktrans %}</h2>
         
         <form method="post" id="registerForm">
             {% csrf_token %}
             <div class="form-floating mb-3">
                 <input type="text" name="name" id="name" class="form-control" placeholder="Name" required>
-                <label for="name">Name</label>
+                <label for="name">{% trans "Name" %}</label>
             </div>
 
             <!-- Username -->
             <div class="form-floating mb-3">
                 <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
-                <label for="username">Username</label>
+                <label for="username">{% trans "Username" %}</label>
             </div>
 
             <!-- Email -->
             <div class="form-floating mb-3">
                 <input type="email" name="email" id="email" class="form-control" placeholder="Email" required>
-                <label for="email">Email</label>
+                <label for="email">{% trans "Email" %}</label>
             </div>
 
             <!-- Mobile Number -->
             <div class="form-floating mb-3">
                 <input type="text" name="mobile_number" id="mobile_number" class="form-control" placeholder="Mobile Number" required>
-                <label for="mobile_number">Mobile Number</label>
+                <label for="mobile_number">{% trans "Mobile" %}</label>
             </div>
 
             <!-- Job -->
             <div class="form-floating mb-3">
                 <select name="job" id="job" class="form-select" required>
-                    <option value="" disabled selected>Select Job</option>
-                    <option value="consumer">Consumer</option>
-                    <option value="farmer">Farmer</option>
-                    <option value="retailer">Retailer</option>
+                    <option value="" disabled selected>{% trans "Job" %}</option>
+                    <option value="consumer">{% trans "Consumer" %}</option>
+                    <option value="farmer">{% trans "Farmer" %}</option>
+                    <option value="retailer">{% trans "Retailer" %}</option>
                 </select>
-                <label for="job">Job</label>
+                <label for="job">{% trans "Job" %}</label>
             </div>
 
             <!-- Password -->
             <div class="form-floating mb-4">
                 <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
-                <label for="password">Password</label>
+                <label for="password">{% trans "Password" %}</label>
             </div>
             <div class="form-floating mb-4">
                 <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm Password" required>
-                <label for="confirm_password">Confirm Password</label>
+                <label for="confirm_password">{% trans "Confirm Password" %}</label>
             </div>
 
             <!-- Password Mismatch Error -->
             <p id="passwordError" class="text-danger" style="display:none; font-size:14px;">
-                Passwords do not match.
+                {% trans "Passwords do not match." %}
             </p>
 
             <!-- Hidden latitude and longitude -->
             <input type="hidden" name="latitude" id="latitude">
             <input type="hidden" name="longitude" id="longitude">
 
-            <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
+            <button type="submit" class="btn btn-primary w-100 py-2">{% trans "Register" %}</button>
         </form>
 
         <p class="text-center mt-3 mb-0">
-            Already have an account? <a href="{% url 'login' %}">Login here</a>
+            {% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Login" %}</a>
             
         </p>
     </div>
