@@ -183,10 +183,11 @@ msgstr "कोई अन्य वस्तु नहीं."
 #: syncapp/templates/syncapp/dt_dashboard.html:445
 #: syncapp/templates/syncapp/dt_dashboard.html:601
 #, fuzzy
-#| msgid "Select Commodity"
-msgid "Selected Commodity"
+msgid "Select Commodity"
 msgstr "कमोडिटी का चयन करें"
 
+msgid "Selected Commodity"
+msgstr "चयनित आइटम"
 #: syncapp/templates/syncapp/dt_dashboard.html:446
 #: syncapp/templates/syncapp/dt_dashboard.html:604
 msgid "Other Items For Sale"
