@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 07:12+0000\n"
+"POT-Creation-Date: 2025-12-11 08:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -92,43 +92,43 @@ msgstr "डेटा स्रोत"
 msgid "data.gov.in"
 msgstr ""
 
-#: syncapp/templates/syncapp/base.html:96
+#: syncapp/templates/syncapp/base.html:99
 #: syncapp/templates/syncapp/landingpage.html:207
 msgid "MandiGo"
 msgstr "मंडीगो"
 
-#: syncapp/templates/syncapp/base.html:110
+#: syncapp/templates/syncapp/base.html:113
 #: syncapp/templates/syncapp/landingpage.html:249
 msgid "Digital Thela"
 msgstr "डिजिटल कार्ट"
 
-#: syncapp/templates/syncapp/base.html:113
+#: syncapp/templates/syncapp/base.html:116
 msgid "Dashboard"
 msgstr "डॅशबोर्ड"
 
-#: syncapp/templates/syncapp/base.html:116
+#: syncapp/templates/syncapp/base.html:119
 #: syncapp/templates/syncapp/landingpage.html:239
 msgid "Wholesale Market Data"
 msgstr "घाऊक बाजार डेटा"
 
-#: syncapp/templates/syncapp/base.html:120
+#: syncapp/templates/syncapp/base.html:123
 msgid "About Us"
 msgstr "आमच्याबद्दल"
 
-#: syncapp/templates/syncapp/base.html:123
+#: syncapp/templates/syncapp/base.html:126
 msgid "App Vault"
 msgstr "ॲप व्हॉल्ट"
 
-#: syncapp/templates/syncapp/base.html:135
+#: syncapp/templates/syncapp/base.html:138
 msgid "Profile"
 msgstr "प्रोफाइल"
 
-#: syncapp/templates/syncapp/base.html:137
+#: syncapp/templates/syncapp/base.html:140
 #: syncapp/templates/syncapp/landingpage.html:182
 msgid "Logout"
 msgstr "लॉग आउट करा"
 
-#: syncapp/templates/syncapp/base.html:142
+#: syncapp/templates/syncapp/base.html:145
 #: syncapp/templates/syncapp/dt_dashboard.html:398
 #: syncapp/templates/syncapp/login.html:4
 #: syncapp/templates/syncapp/login.html:84
@@ -137,17 +137,17 @@ msgstr "लॉग आउट करा"
 msgid "Login"
 msgstr "लॉगिन करा"
 
-#: syncapp/templates/syncapp/base.html:159
+#: syncapp/templates/syncapp/base.html:162
 #: syncapp/templates/syncapp/landingpage.html:198
 msgid "Change"
 msgstr "बदल"
 
-#: syncapp/templates/syncapp/base.html:187
+#: syncapp/templates/syncapp/base.html:190
 #: syncapp/templates/syncapp/landingpage.html:278
 msgid "This is a trial version and the platform is not fully operational yet."
 msgstr "ही एक चाचणी आवृत्ती आहे आणि प्लॅटफॉर्म अद्याप पूर्णपणे कार्यरत नाही."
 
-#: syncapp/templates/syncapp/base.html:189
+#: syncapp/templates/syncapp/base.html:192
 #: syncapp/templates/syncapp/landingpage.html:280
 msgid "2025 MandiGo | 'सही दाम, किसान सम्मान'"
 msgstr "२०२५ मँडिगो | 'योग्य किंमत, शेतकऱ्यांचा आदर'"
@@ -365,6 +365,10 @@ msgstr "यूजरनाम"
 msgid "Password"
 msgstr "पासवर्ड"
 
+#: syncapp/templates/syncapp/login.html:103
+msgid "New user?"
+msgstr "नवीन वापरकर्ता?"
+
 #: syncapp/templates/syncapp/login.html:104
 msgid "Register here"
 msgstr "येथे नोंदणी करा"
@@ -375,12 +379,10 @@ msgstr "तुमचा पासवर्ड विसरलात?"
 
 #: syncapp/templates/syncapp/register.html:4
 #: syncapp/templates/syncapp/register.html:140
-
 msgid "Register"
 msgstr "येथे नोंदणी करा"
 
 #: syncapp/templates/syncapp/register.html:83
-
 msgid "Register for MandiGo"
 msgstr "मंडीगोसाठी नोंदणी करा"
 
@@ -401,10 +403,9 @@ msgid "Retailer"
 msgstr "किरकोळ विक्रेता"
 
 #: syncapp/templates/syncapp/register.html:128
-
-
 msgid "Confirm Password"
 msgstr "पासवर्डची पुष्टी करा"
+
 #: syncapp/templates/syncapp/register.html:133
 msgid "Passwords do not match."
 msgstr "पासवर्ड जुळत नाहीत."
@@ -422,11 +423,11 @@ msgstr "स्वागत आहे %(username)s!"
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
 
-msgid "Local"
-msgstr "स्थानिक"
+#~ msgid "Local"
+#~ msgstr "स्थानिक"
 
-msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
-msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
+#~ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
+#~ msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
 
-msgid "TXT_QUANTITY_SALE"
-msgstr "विक्रीसाठी प्रमाण"
+#~ msgid "TXT_QUANTITY_SALE"
+#~ msgstr "विक्रीसाठी प्रमाण"
