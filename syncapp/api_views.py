@@ -507,6 +507,11 @@ def user_profile(request, username):
         return Response({
             "id": user.id,
             "username": user.username,
+            "name" :user.name,
+            "job": user.job,
+            "date_joined":user.date_joined,
+            "last_login":user.last_login,
+            
             "email": user.email,
             "mobile": getattr(user, "mobile", None),
             "job": getattr(user, "job", None),
