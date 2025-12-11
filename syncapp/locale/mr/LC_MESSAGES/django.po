@@ -364,3 +364,9 @@ msgstr "अवैध क्रेडेन्शियल"
 
 #~ msgid "TXT_QUANTITY_SALE"
 #~ msgstr "विक्रीसाठी प्रमाण"
+
+msgid "Tender Coconut"
+msgstr "हरा नारियल"
+
+msgid "tender coconut"
+msgstr "हरा नारियल"

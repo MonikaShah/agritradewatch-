@@ -542,6 +542,9 @@ msgstr "मेथी पत्ती"
 msgid "Garlic"
 msgstr "लहसुन"
 
+msgid "garlic"
+msgstr "लहसुन"
+
 msgid "Lemon"
 msgstr "नींबू"
 
