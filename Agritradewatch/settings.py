@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2acdn_!1^g!f^3w4mwn04y^w7i0vk19*_ox5ewc+^y^2vgvkz+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2'), config('ALLOWED_HOST_3'),'localhost',
     '127.0.0.1']
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'syncapp.middleware.MaintenanceMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
