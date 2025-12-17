@@ -42,6 +42,13 @@ from .serializers import (
 
 from django.utils.translation import gettext as _
 
+from .models import MobileOTP
+from syncapp.utils.otp import generate_otp
+from syncapp.utils.sms import send_fast2sms_otp
+
+from django.db import DatabaseError
+
+
 logger = logging.getLogger(__name__)
 
 def landingpage(request):
@@ -222,6 +229,10 @@ def map_chart(request):
     grouped_commodities = {}
 
     for c in commodities:
+        translated_name = _(c.name)
+
+        print("DB name:", c.name, "| Translated:", translated_name)
+        
         has_valid_data = Consumer1.objects.filter(
             Q(commodity__iexact=c.name),  # case-insensitive match
             latitude__isnull=False,
@@ -231,6 +242,7 @@ def map_chart(request):
 
         grouped_commodities.setdefault(c.type, []).append({
             "name": c.name,
+            "label": _(c.name), 
             "disabled": not has_valid_data
         })
 
@@ -594,4 +606,96 @@ def update_user_location(request):
         return JsonResponse({"status":"success"})
     return JsonResponse({"status":"error"}, status=400)
 
+
+@csrf_exempt
+def send_otp(request):
+    """
+    Accepts POST with JSON body:
+    {
+        "mobile": "9414285894",
+        "purpose": "register"  # or "login", "forgot_password"
+    }
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    mobile = data.get("mobile")
+    purpose = data.get("purpose")
+
+    if not mobile or not purpose:
+        return JsonResponse({"error": "Missing mobile or purpose"}, status=400)
+
+    # Generate OTP
+    otp = generate_otp()
+
+    # Save to DB with error handling
+    try:
+        MobileOTP.objects.create(
+            mobile=mobile,
+            otp=otp,
+            purpose=purpose,
+            created_at=timezone.now()
+        )
+    except Exception as e:
+        return JsonResponse({"error": f"Database error: {e}"}, status=500)
+
+    # Send SMS with error handling
+    try:
+        sms_result = send_fast2sms_otp(mobile, otp)
+        if sms_result.get("return"):
+            return JsonResponse({"status": "sent"})
+        else:
+            return JsonResponse({"error": "SMS sending failed"}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": f"SMS service error: {e}"}, status=500)
+
+def verify_otp(request):
+    mobile = request.POST.get("mobile")
+    otp_input = request.POST.get("otp")
+    purpose = request.POST.get("purpose")
+
+    try:
+        otp_obj = MobileOTP.objects.filter(
+            mobile=mobile,
+            purpose=purpose
+        ).latest("created_at")
+    except MobileOTP.DoesNotExist:
+        return JsonResponse({"status": "invalid"})
+
+    if otp_obj.is_expired():
+        return JsonResponse({"status": "expired"})
+
+    if otp_obj.attempts >= 3:
+        return JsonResponse({"status": "blocked"})
+
+    if otp_obj.otp != otp_input:
+        otp_obj.attempts += 1
+        otp_obj.save()
+        return JsonResponse({"status": "wrong"})
+
+    # ✅ OTP verified
+    otp_obj.delete()
+
+    if purpose == "login":
+        return login_user_by_mobile(request, mobile)
+
+    if purpose == "forgot_password":
+        return JsonResponse({"status": "verified", "action": "reset_password"})
+
+    return JsonResponse({"status": "success"})
+
+
+def login_user_by_mobile(request, mobile):
+    try:
+        user = User1.objects.get(username=mobile)
+    except User1.DoesNotExist:
+        return JsonResponse({"status": "no_user"})
+
+    login(request, user)
+    return JsonResponse({"status": "logged_in"})
 
