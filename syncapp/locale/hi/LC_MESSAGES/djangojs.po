@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-08 12:58+0000\n"
+"POT-Creation-Date: 2025-12-15 07:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,9 +25,17 @@ msgstr "न्यूनतम कीमत"
 #: syncapp/static/syncapp/js/price_chart.js:2
 msgid "Modal"
 msgstr "मॉडल कीमत"
-
+msgid "Modal Price (₹/Quintal)"
+msgstr "मॉडल कीमत (₹ प्रति क्विंटल)"
 #: syncapp/static/syncapp/js/price_chart.js:3
 msgid "Max"
+msgstr "अधिकतम कीमत"
+
+msgid "Min Price"
+msgstr "न्यूनतम कीमत"
+msgid "Modal Price"
+msgstr "मॉडल कीमत"
+msgid "Max Price"
 msgstr "अधिकतम कीमत"
 
 #: syncapp/static/syncapp/js/price_chart.js:4
@@ -619,3 +627,12 @@ msgstr "हरा नारियल"
 
 msgid "tender coconut"
 msgstr "हरा नारियल"
+
+msgid "Consumer vs Farmer Prices for"
+msgstr "उपभोक्ता और किसान(रिपोर्ट किया गया मूल्य):"
+
+msgid "Consumer Buying Price (₹)"
+msgstr "उपभोक्ता क्रय मूल्य (₹)"
+
+msgid "Farmer's Selling Price (₹)"
+msgstr "किसान द्वारा बेचा गया मूल्य (₹)"

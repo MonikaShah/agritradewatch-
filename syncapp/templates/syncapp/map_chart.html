@@ -1,10 +1,12 @@
 {% extends 'syncapp/base.html' %}
 {% load static %}
 {% load i18n %}
-{% block title %}Consumers Map{% endblock %}
+{% block title %}{% trans "Price Watch Dashboard" %}{% endblock %}
 
 {% block extra_head %}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{% url 'javascript-catalog' %}"></script>
+
 
 <link
   rel="stylesheet"
@@ -152,11 +154,11 @@
 <!-- Login Modal -->
 <div id="loginModal" style="display:block; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
   <div style="background:white; padding:20px; margin:100px auto; width:300px; border-radius:5px;">
-    <h3>Login</h3>
+    <h3>{% trans "Login" %}</h3>
     <form id="loginForm">
       <input type="text" id="username" placeholder="Username" required style="width:100%; margin-bottom:10px;">
       <input type="password" id="password" placeholder="Password" required style="width:100%; margin-bottom:10px;">
-      <button type="submit" style="width:100%;">Login</button>
+      <button type="submit" style="width:100%;">{% trans "Login" %}</button>
     </form>
     <div id="loginMessage" style="margin-top:10px; color:red;"></div>
   </div>
@@ -169,53 +171,53 @@
     
     <!-- Commodity -->
     <!-- <div class="fi"> -->
-        <label><b>Commodity</b></label>
+        <label><b>{% trans "Commodity" %}</b></label>
         <select id="commoditySelect">
             {% for type, items in grouped_commodities.items %}
             <optgroup label="{{ type }}">
                 {% for item in items %}
-                <option value="{{ item.name }}"
-                  {% if item.name == "Onion" %}selected{% endif %} 
-                  {% if item.disabled %}disabled{% endif %}>
-                  {{ item.name }}
-                </option>
-                {% endfor %}
-            </optgroup>
-            {% endfor %}
-        </select>
-    <!-- </div> -->
+                  <option value="{{ item.name }}"
+                    {% if item.name == "Onion" %}selected{% endif %} 
+                    {% if item.disabled %}disabled{% endif %}>
+                    {{ item.label }}
+                  </option>
+                  {% endfor %}
+              </optgroup>
+              {% endfor %}
+          </select>
+      <!-- </div> -->
 
     <!-- Start Date -->
     <!-- <div class="fi"> -->
-        <label>Start Date</label>
+        <label>{% trans "Start Date" %}</label>
         <input type="date" id="startDate">
     <!-- </div> -->
 
     <!-- End Date -->
     <!-- <div class="fi"> -->
-        <label>End Date</label>
+        <label>{% trans "End Date" %}</label>
         <input type="date" id="endDate">
     <!-- </div> -->
 
     <!-- Filter Button -->
     <!-- <div class="filter-btn"> -->
         <label>&nbsp;</label>
-        <button id="filterByDateBtn" class="btn btn-primary btn-sm">Filter</button>
+        <button id="filterByDateBtn" class="btn btn-primary btn-sm">{% trans "Filter" %}</button>
     <!-- </div> -->
 
     <!-- Radius Slider -->
     <div class="radius-container">
-        <label>Radius: <span id="radiusValue">8 Km</span></label>
+        <label>{% trans "Radius" %}: <span id="radiusValue">8 Km</span></label>
         <input type="range" id="radiusSlider" min="1" max="8" value="5" step="1">
     </div>
     <!-- Radius Stats -->
     <!-- <div class="stats-box" style="min-width: 200px;"> -->
         <!-- <label><b>Within Radius</b></label> -->
         <div id="radius-stats1" style="min-width: 200px;font-size: 0.85rem; line-height: 1.2; display:none;">
-            <strong>Stats Within Radius:</strong><br>
-            Average Price: <span id="avg-price-radius">--</span><br>
+            <strong>{% trans "Stats Within Radius" %}:</strong><br>
+            {% trans "Average Price" %}: <span id="avg-price-radius">--</span><br>
             <!-- Weighted: <span id="weighted-avg-radius">--</span><br> -->
-            Modal Price: <span id="modal-price-radius">--</span>
+            {% trans "Modal Price" %}: <span id="modal-price-radius">--</span>
         </div>
     <!-- </div> -->
 
@@ -223,7 +225,7 @@
     
         <label>&nbsp;</label>
         <button id="locateBtn" class="btn btn-light" style="border:1px solid #ccc;">
-            <i class="fas fa-crosshairs"></i> Locate Me
+            <i class="fas fa-crosshairs"></i>{% trans "Locate Me" %}
         </button>
     
 </div>
@@ -259,14 +261,14 @@
     </div> <!--# stats-container div close -->
     <!-- <hr> -->
     <div style="text-align: right; margin-bottom: 10px;">
-      <button id="openAllChartsBtn" class="btn btn-primary">↗️ Open Charts</button>
+      <button id="openAllChartsBtn" class="btn btn-primary">↗️ {% trans "Open Charts" %}</button>
     </div>
     
     
-    <h3><b>Consumer and Farmer Reported Price Trend : 
+    <h3><b>{% trans "Consumer and Farmer Reported Price Trend" %} : 
       <span id="selected-commodity"></span></b>
       <span id="consumerapan"></span>
-      <button class="toggle-chart-btn" data-target="consumersChart">Hide Chart</button>
+      <button class="toggle-chart-btn" data-target="consumersChart">{% trans "Hide Chart" %}</button>
       <!-- <button class="resize-chart-btn" data-target="consumersChart">Expand</button> -->
     </h3>
      
@@ -277,8 +279,8 @@
         <div id="dateRangeSlider"></div>
         
         <div class="d-flex justify-content-between mt-2 text-muted small">
-          <span id="sliderStartLabel">Start Date</span>
-          <span id="sliderEndLabel">End Date</span>
+          <span id="sliderStartLabel">{% trans "Start Date" %}</span>
+          <span id="sliderEndLabel">{% trans "End Date" %}</span>
         </div>
       </div>
       <br>
@@ -286,10 +288,10 @@
 
       <hr>
      
-    <h3><b>Agmarknet Price Trend :
+    <h3><b>{% trans "AgmarkNet Price Trend" %} :
       <span id="selected-commodity"></span></b>
       <span id="agmarknet"></span>
-      <button class="toggle-chart-btn" data-target="chartCanvas">Hide Chart</button>
+      <button class="toggle-chart-btn" data-target="chartCanvas">{% trans "Hide Chart" %}</button>
       <!-- <button class="resize-chart-btn" data-target="chartCanvas">Expand</button> -->
     </h3>
     
@@ -301,8 +303,8 @@
         <div id="dateRangeSlider1"></div>
         
         <div class="d-flex justify-content-between mt-2 text-muted small">
-          <span id="sliderStartLabel1">Start Date</span>
-          <span id="sliderEndLabel1">End Date</span>
+          <span id="sliderStartLabel1">{% trans "Start Date" %}</span>
+          <span id="sliderEndLabel1">{% trans "End Date" %}</span>
         </div>
       </div>
       <br>
@@ -571,7 +573,8 @@ const divider = document.getElementById("divider");
   async function initMap(){
       const commoditySelect = document.getElementById("commoditySelect");
       const selectedCommoditySpan = document.getElementById("selected-commodity");
-      selectedCommoditySpan.innerText = commoditySelect.value;
+      selectedCommoditySpan.textContent = gettext(commoditySelect.value);
+      // selectedCommoditySpan.innerText = commoditySelect.value;
 
       const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
@@ -988,13 +991,15 @@ const divider = document.getElementById("divider");
                     if(window.apmcTimelineChart instanceof Chart){
                         window.apmcTimelineChart.destroy();
                     }
-
+                    const minLabel = gettext("Min");
+                    const modalLabel = gettext("Modal");
+                    const maxLabel = gettext("Max");
                     window.apmcTimelineChart = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: 'Modal Price (₹/Quintal)',
+                                label: modalLabel,
                                 data: modalPrices,
                                 fill: false,
                                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -1046,6 +1051,7 @@ const divider = document.getElementById("divider");
             // const data = await fetch(url);
             const res = await fetch(url);
             const data = await res.json();
+            // alert(commodity)
 
             if (data.error) {
                 alert(data.error);
@@ -1074,9 +1080,9 @@ const divider = document.getElementById("divider");
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Min Price', data: minPrices, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12, },
-                        { label: 'Max Price', data: maxPrices, borderColor: 'red', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,},
-                        { label: 'Modal Price', data: modalPrices, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,}
+                        { label: gettext('Min Price'), data: minPrices, borderColor: 'green', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12, },
+                        { label: gettext('Max Price'), data: maxPrices, borderColor: 'red', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,},
+                        { label: gettext('Modal Price'), data: modalPrices, borderColor: 'blue', tension: 0.3,borderWidth: 1, pointRadius: 0, pointHoverRadius: 0,pointHitRadius: 12,}
                     ]
                 },
                 options: {
@@ -1084,7 +1090,9 @@ const divider = document.getElementById("divider");
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top' },
-                        title: { display: true, text: `${commodity} Price Trend per Qunital` },
+                        title: { display: true, 
+                        // text: `${commodity} Price Trend per Qunital` },
+                        text: `${gettext(commodity)} ${gettext("Price Trend per Quintal")}`},
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1217,6 +1225,7 @@ const commodityCount = document.getElementById("commodityCount");
 const initialCommodity = commoditySelect?.value?.trim();
 
 commoditySelect.addEventListener("change", () => {
+  
 // commoditySelect.addEventListener("change", async function () {
   const commodity = commoditySelect.value;
 //   await updateAgmarkControls(commodity);
@@ -1402,7 +1411,7 @@ async function fetchConsumersAndFarmersPrices() {
             data: {
                 datasets: [
                     {
-                        label: "Consumer Buying Price (₹)",
+                        label: gettext("Consumer Buying Price (₹)"),
                         data: consumerPrices,
                         borderColor: "rgba(54, 162, 235, 1)",
                         backgroundColor: "rgba(54, 162, 235, 0.2)",
@@ -1416,7 +1425,7 @@ async function fetchConsumersAndFarmersPrices() {
                         pointBorderColor: "rgba(0, 50, 160, 1)", 
                                     },
                     {
-                        label: "Farmer's Selling Price (₹)",
+                        label: gettext("Farmer's Selling Price (₹)"),
                         data: farmerPrices,
                         borderColor: "rgba(75, 192, 75, 1)",
                         backgroundColor: "rgba(75, 192, 75, 0.2)",
@@ -1437,7 +1446,7 @@ async function fetchConsumersAndFarmersPrices() {
                 plugins: {
                     title: {
                         display: true,
-                        text: `Consumer vs Farmer Prices for ${commodity}`,
+                        text: `${gettext("Consumer vs Farmer Prices for")} ${gettext(commodity)}`,
                     },
                     legend: { position: "top" },
 

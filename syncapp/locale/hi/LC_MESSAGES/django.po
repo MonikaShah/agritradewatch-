@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 08:07+0000\n"
+"POT-Creation-Date: 2025-12-15 08:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,18 +25,25 @@ msgstr "थोक बाज़ार कीमत"
 #: syncapp/templates/syncapp/apmcdata.html:225
 #: syncapp/templates/syncapp/dt_dashboard.html:910
 #: syncapp/templates/syncapp/dt_dashboard.html:1083
+#: syncapp/templates/syncapp/map_chart.html:174
 msgid "Commodity"
-msgstr "वस्तुएं"
+msgstr "कमोडिटी"
 
 #: syncapp/templates/syncapp/apmcdata.html:227
 msgid "All Commodities"
-msgstr "सभी वस्तुएं"
+msgstr "सभी कमोडिटी"
 
 #: syncapp/templates/syncapp/apmcdata.html:235
+#: syncapp/templates/syncapp/map_chart.html:192
+#: syncapp/templates/syncapp/map_chart.html:282
+#: syncapp/templates/syncapp/map_chart.html:306
 msgid "Start Date"
 msgstr "आरंभ तिथि"
 
 #: syncapp/templates/syncapp/apmcdata.html:241
+#: syncapp/templates/syncapp/map_chart.html:198
+#: syncapp/templates/syncapp/map_chart.html:283
+#: syncapp/templates/syncapp/map_chart.html:307
 msgid "End Date"
 msgstr "अंतिम तिथि"
 
@@ -56,6 +63,9 @@ msgstr "कीमतें दिखाएँ"
 msgid "AgmarkNet Prices Trend"
 msgstr "एगमार्कनेट कीमतों का रुझान"
 
+msgid "AgmarkNet Price Trend"
+msgstr "एगमार्कनेट कीमतों का रुझान"
+
 #: syncapp/templates/syncapp/apmcdata.html:273
 msgid "Download Chart"
 msgstr "चार्ट डाउनलोड करें"
@@ -72,14 +82,14 @@ msgid "Processing data, please wait..."
 msgstr "डेटा संसाधित किया जा रहा है, कृपया प्रतीक्षा करें..."
 
 #: syncapp/templates/syncapp/apmcdata.html:290
-#: syncapp/templates/syncapp/map_chart.html:276
-#: syncapp/templates/syncapp/map_chart.html:300
+#: syncapp/templates/syncapp/map_chart.html:278
+#: syncapp/templates/syncapp/map_chart.html:302
 msgid "Adjust Date Range"
 msgstr "दिनांक सीमा समायोजित करें"
 
 #: syncapp/templates/syncapp/apmcdata.html:301
-#: syncapp/templates/syncapp/map_chart.html:285
-#: syncapp/templates/syncapp/map_chart.html:309
+#: syncapp/templates/syncapp/map_chart.html:287
+#: syncapp/templates/syncapp/map_chart.html:311
 msgid "Tip: Scroll to zoom, drag (or Ctrl + drag) to pan."
 msgstr "टिप: ज़ूम करने के लिए स्क्रॉल करें, पैन करने के लिए खींचें (या Ctrl + खींचें)."
 
@@ -132,7 +142,9 @@ msgstr "लॉग आउट"
 #: syncapp/templates/syncapp/login.html:4
 #: syncapp/templates/syncapp/login.html:84
 #: syncapp/templates/syncapp/login.html:99
-#: syncapp/templates/syncapp/register.html:144
+#: syncapp/templates/syncapp/map_chart.html:157
+#: syncapp/templates/syncapp/map_chart.html:161
+#: syncapp/templates/syncapp/register.html:156
 msgid "Login"
 msgstr "लॉग इन करें"
 
@@ -174,7 +186,7 @@ msgstr "मानचित्र पर वर्तमान स्थान"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:420
 msgid "Commodities for Sale"
-msgstr "बिक्री हेतु वस्तुएं"
+msgstr "बिक्री हेतु कमोडिटी"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:442
 msgid "No items found."
@@ -187,7 +199,7 @@ msgstr "कोई अन्य वस्तु नहीं."
 #: syncapp/templates/syncapp/dt_dashboard.html:445
 #: syncapp/templates/syncapp/dt_dashboard.html:601
 msgid "Selected Commodity"
-msgstr "चयनित आइटम"
+msgstr "चयनित कमोडिटी"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:446
 #: syncapp/templates/syncapp/dt_dashboard.html:604
@@ -319,7 +331,7 @@ msgstr "के लिए प्रविष्टियाँ"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:1039
 msgid "No entries found for this commodity."
-msgstr "इस वस्तु के लिए कोई प्रविष्टि नहीं मिली."
+msgstr "इस कमोडिटी के लिए कोई प्रविष्टि नहीं मिली."
 
 #: syncapp/templates/syncapp/dt_dashboard.html:1085
 msgid "More Details"
@@ -338,6 +350,7 @@ msgid "Empowering Farmers, Consumers, and Markets with Data"
 msgstr "डेटा के साथ किसानों, उपभोक्ताओं और बाजारों को सशक्त बनाना"
 
 #: syncapp/templates/syncapp/landingpage.html:219
+#: syncapp/templates/syncapp/map_chart.html:4
 msgid "Price Watch Dashboard"
 msgstr "मूल्य निरीक्षण डैशबोर्ड"
 
@@ -349,7 +362,7 @@ msgstr "क्लिक करें"
 
 #: syncapp/templates/syncapp/landingpage.html:268
 msgid "My Commodities"
-msgstr "मेरी वस्तुएं"
+msgstr "मेरी कमोडिटी"
 
 #: syncapp/templates/syncapp/login.html:91
 #: syncapp/templates/syncapp/register.html:95
@@ -373,6 +386,50 @@ msgstr "यहां पंजीकरण करें"
 msgid "Forgot your password?"
 msgstr "अपना पासवर्ड भूल गए?"
 
+#: syncapp/templates/syncapp/map_chart.html:205
+msgid "Filter"
+msgstr "फ़िल्टर"
+
+#: syncapp/templates/syncapp/map_chart.html:210
+msgid "Radius"
+msgstr "त्रिज्या"
+
+#: syncapp/templates/syncapp/map_chart.html:217
+msgid "Stats Within Radius"
+msgstr "त्रिज्या के भीतर आँकड़े"
+
+#: syncapp/templates/syncapp/map_chart.html:218
+msgid "Average Price"
+msgstr "औसत मूल्य"
+
+#: syncapp/templates/syncapp/map_chart.html:220
+
+msgid "Modal Price"
+msgstr ""
+
+#: syncapp/templates/syncapp/map_chart.html:228
+msgid "Locate Me"
+msgstr "मानचित्र पर वर्तमान स्थान"
+
+#: syncapp/templates/syncapp/map_chart.html:264
+msgid "Open Charts"
+msgstr "चार्ट को नई विंडो में खोलें"
+
+#: syncapp/templates/syncapp/map_chart.html:268
+msgid "Consumer and Farmer Reported Price Trend"
+msgstr "उपभोक्ता और किसान द्वारा रिपोर्ट किया गया मूल्य"
+
+#: syncapp/templates/syncapp/map_chart.html:271
+#: syncapp/templates/syncapp/map_chart.html:294
+msgid "Hide Chart"
+msgstr "चार्ट बंद करें"
+
+#: syncapp/templates/syncapp/map_chart.html:291
+#, fuzzy
+#| msgid "AgmarkNet Prices Trend"
+msgid "Agmarknet Price Trend"
+msgstr "एगमार्कनेट कीमतों का रुझान"
+
 #: syncapp/templates/syncapp/register.html:4
 #: syncapp/templates/syncapp/register.html:140
 msgid "Register"
@@ -384,19 +441,19 @@ msgstr "यहां पंजीकरण करें"
 
 #: syncapp/templates/syncapp/register.html:89
 msgid "Name"
-msgstr ""
+msgstr "नाम"
 
 #: syncapp/templates/syncapp/register.html:114
 msgid "Consumer"
-msgstr ""
+msgstr "उपभोक्ता"
 
 #: syncapp/templates/syncapp/register.html:115
 msgid "Farmer"
-msgstr ""
+msgstr "किसान"
 
 #: syncapp/templates/syncapp/register.html:116
 msgid "Retailer"
-msgstr ""
+msgstr "खुदरा विक्रेता"
 
 #: syncapp/templates/syncapp/register.html:128
 msgid "Confirm Password"
@@ -404,9 +461,9 @@ msgstr "पासवर्ड की पुष्टि करें"
 
 #: syncapp/templates/syncapp/register.html:133
 msgid "Passwords do not match."
-msgstr ""
+msgstr "पासवर्ड मेल नहीं खाते."
 
-#: syncapp/templates/syncapp/register.html:144
+#: syncapp/templates/syncapp/register.html:156
 msgid "Already have an account?"
 msgstr "पहले से पंजीकृत हैं?"
 
@@ -430,3 +487,158 @@ msgstr "अवैध क्रेडेन्शियल"
 
 #~ msgid "Wholesale Market Price"
 #~ msgstr "थोक बाज़ार कीमत"
+
+msgid "Price Trend per Qunital"
+msgstr "प्रति क्विंटल मूल्य प्रवृत्ति"
+
+msgid "Tomato"
+msgstr "टमाटर"
+
+msgid "Onion"
+msgstr "प्याज"
+
+msgid "onion"
+msgstr "प्याज"
+
+msgid "Potato"
+msgstr "आलू"
+
+msgid "Ambat Chukka (Sorrel Leaves)"
+msgstr "चुक्का पत्ता"
+
+msgid "ambat chukka"
+msgstr "चुक्का पत्ता"
+
+msgid "Ginger"
+msgstr "अदरक"
+
+msgid "Cucumber"
+msgstr "खीरा"
+
+msgid "ginger"
+msgstr "अदरक"
+
+msgid "cucumber"
+msgstr "खीरा"
+
+msgid "Bitter Gourd"
+msgstr "करेला"
+
+msgid "Coriander Leaves"
+msgstr "धनिया पत्ती"
+
+msgid "Cabbage"
+msgstr "पत्ता गोभी"
+
+msgid "Cluster Beans (Gawar)"
+msgstr "ग्वार फली"
+
+msgid "Carrot"
+msgstr "गाजर"
+
+msgid "Cowpea (Chawli)"
+msgstr "लोबिया"
+
+msgid "Capsicum (Shimla Mirch)"
+msgstr "शिमला मिर्च"
+
+msgid "Bottle Gourd"
+msgstr "लौकी"
+
+msgid "Ridge Gourd (Dodka)"
+msgstr "तुरई"
+
+msgid "Spinach"
+msgstr "पालक"
+
+msgid "Cauliflower"
+msgstr "फूलगोभी"
+
+msgid "Beetroot"
+msgstr "चुकंदर"
+
+msgid "Ladies Finger (Okra)"
+msgstr "भिंडी"
+
+msgid "Pumpkin"
+msgstr "कद्दू"
+
+msgid "Radish"
+msgstr "मूली"
+
+msgid "Fenugreek Leaves"
+msgstr "मेथी पत्ती"
+
+msgid "Garlic"
+msgstr "लहसुन"
+
+msgid "garlic"
+msgstr "लहसुन"
+
+msgid "Lemon"
+msgstr "नींबू"
+
+msgid "Brinjal"
+msgstr "बैंगन"
+
+msgid "Drumstick (Moringa Pods)"
+msgstr "सहजन"
+msgid "Drumstick"
+msgstr "सहजन"
+
+msgid "Green Chilli"
+msgstr "हरी मिर्च"
+
+msgid "Pomegranate"
+msgstr "अनार"
+
+msgid "Custard Apple"
+msgstr "सीताफल"
+
+msgid "Dragon Fruit"
+msgstr "ड्रैगन फ्रूट"
+
+msgid "Grapes"
+msgstr "अंगूर"
+
+msgid "Guava"
+msgstr "अमरूद"
+
+msgid "Orange"
+msgstr "संतरा"
+
+msgid "Papaya"
+msgstr "पपीता"
+
+msgid "papaya"
+msgstr "पपीता"
+
+msgid "Sapota (Chikoo)"
+msgstr "चीकू"
+
+msgid "Sugarcane"
+msgstr "गन्ना"
+
+msgid "sugarcane"
+msgstr "ऊस"
+
+msgid "wheat"
+msgstr "गेहूँ"
+
+msgid "maize"
+msgstr "मक्का"
+
+msgid "honey"
+msgstr "शहद"
+
+msgid "ghee"
+msgstr "घी"
+
+msgid "kela"
+msgstr "केला"
+
+msgid "Tender Coconut"
+msgstr "हरा नारियल"
+
+msgid "tender coconut"
+msgstr "हरा नारियल"
