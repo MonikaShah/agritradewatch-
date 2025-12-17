@@ -34,6 +34,8 @@ SECRET_KEY = 'django-insecure-2acdn_!1^g!f^3w4mwn04y^w7i0vk19*_ox5ewc+^y^2vgvkz+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+# DEBUG = True
+
 
 ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2'), config('ALLOWED_HOST_3'),'localhost',
     '127.0.0.1']
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'syncapp',
+    
     'django.contrib.gis',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -58,7 +61,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'syncapp.middleware.MaintenanceMiddleware',
+    # 'syncapp.middleware.MaintenanceMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -200,7 +203,7 @@ EMAIL_HOST_USER = config('EMAIL_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_PASS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # 
-#FRONTEND_URL = 'http://127.0.0.1:8000'
+# FRONTEND_URL = 'http://127.0.0.1:8000'
 FRONTEND_URL= 'https://mandigo.in'
 
 
@@ -220,3 +223,8 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale')
     ]
 print(settings.LOCALE_PATHS)
+
+# settings.py
+FAST2SMS_API_KEY = "yxwor4WmJKG7IpFZcjtzV9gB56XRHA8l2TeCq1f3LEDUhadN0SlIPYjOmkGv6Kxea1UNoCucq0J7f483"
+OTP_EXPIRY_MINUTES = 5
+OTP_MAX_ATTEMPTS = 3
