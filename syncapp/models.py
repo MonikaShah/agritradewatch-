@@ -5,9 +5,9 @@ from django.contrib.gis.db import models
 from ckeditor.fields import RichTextField
 import uuid,os
 from django.utils import timezone
+from datetime import timedelta
 from django.core.exceptions import ValidationError
 from PIL import Image
-
 
 
 # class Consumer(models.Model):
@@ -97,6 +97,30 @@ from PIL import Image
 #         extra_fields.setdefault("is_staff", True)
 #         extra_fields.setdefault("is_superuser", True)
 #         return self.create_user(username, password=password, **extra_fields)
+from django.core.exceptions import ValidationError
+
+def validate_media_file(value):
+    allowed_types = ["image/jpeg", "image/png", "video/mp4", "video/quicktime", "video/webm"]
+    max_size_mb = 20
+
+    if value.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+    content_type = getattr(value.file, "content_type", "").lower()
+    if content_type not in allowed_types:
+        raise ValidationError(f"Unsupported file format. Allowed: {', '.join(allowed_types)}")
+
+def validate_audio_file(value):
+    allowed_types = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/wave", "audio/ogg", "audio/webm"]
+    max_size_mb = 20
+
+    if value.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"File too large! Maximum allowed size is {max_size_mb} MB.")
+
+    content_type = getattr(value.file, "content_type", "").lower()
+    if content_type not in allowed_types:
+        raise ValidationError(f"Unsupported file format. Allowed: {', '.join(allowed_types)}")
+
 
 
 class User1(AbstractUser):
@@ -435,10 +459,12 @@ class DtProduce(models.Model):
         upload_to='produce_media/',
         blank=True,
         null=True,
-        validators=[validate_file_type_and_size([
-            "image/jpeg", "image/png",
-            "video/mp4", "video/quicktime", "video/webm"
-        ])]
+        # validators=[validate_file_type_and_size([
+        # validators=[FileTypeAndSizeValidator([
+        #     "image/jpeg", "image/png",
+        #     "video/mp4", "video/quicktime", "video/webm"
+        # ])]
+        validators=[validate_media_file] 
     )
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
@@ -449,12 +475,14 @@ class DtProduce(models.Model):
         upload_to='produce_voice/',
         blank=True,
         null=True,
-        validators=[validate_file_type_and_size([
-            "audio/mpeg", "audio/mp3", "audio/wav",
-            "audio/x-wav", "audio/wave",
-            "audio/ogg", "audio/webm"
-        ])
-    ]
+        # validators=[validate_file_type_and_size([
+        # validators=[FileTypeAndSizeValidator([
+        #     "audio/mpeg", "audio/mp3", "audio/wav",
+        #     "audio/x-wav", "audio/wave",
+        #     "audio/ogg", "audio/webm"
+        # ])
+    # ]
+    validators=[validate_audio_file]
     )  # Voice input file (audio)
 
     def clean(self):
@@ -489,3 +517,14 @@ class DtProduce(models.Model):
     class Meta:
         db_table = 'dt_produce'
         
+class MobileOTP(models.Model):
+    mobile = models.CharField(max_length=15)
+    otp = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20)  
+    attempts = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=5)
+    class Meta:
+        db_table = "syncapp_mobileotp"
