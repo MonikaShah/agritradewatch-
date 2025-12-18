@@ -2,6 +2,7 @@ from django import forms
 from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCrop,DtProduce
 from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 
 UNIT_CHOICES = [
         ('2.5 Kg', '2.5 Kg'),
@@ -99,6 +100,10 @@ class DamageForm(forms.ModelForm):
             'remarks',
             'photo',          # ✅ new image upload field
         ]
+        labels = {
+            'damage': 'Damage Quantity',
+        }
+
 
         widgets = {
             'commodity': forms.TextInput(attrs={'class': 'form-control'}),
@@ -111,6 +116,9 @@ class DamageForm(forms.ModelForm):
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['report_date'].initial = now().date()
 
 def validate_file_type_and_size(allowed_types, max_size_mb=20):
     def validator(value):
