@@ -210,12 +210,22 @@
     <!-- Cards Section -->
     <div class="row g-4 justify-content-center w-100">
       
-      
+      <div class="col-12 col-sm-6 col-md-4">
+        <div class="card card-custom">
+          <div class="card-body">
+            <span class="emoji">🌾🛒</span>
+
+
+            <h5 class="card-title">{% trans "Digital Thela" %}</h5>
+            <a href="{% url 'dtDashboard' %}" class="btn btn-success w-100 ">{% trans "Open" %}</a>
+          </div>
+        </div>
+      </div>
 
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
-            <span class="emoji">👩‍💻</span>
+            <span class="emoji">🌾📈</span>
             <h5 class="card-title">{% trans "Price Watch Dashboard" %}</h5>
             <a href="{% url 'map_chart' %}" class="btn btn-primary w-100">{% trans "Open" %}</a>
           </div>
@@ -231,35 +241,28 @@
           </div>
         </div>
       </div> -->
-
+      <div></div>
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
-            <span class="emoji">🏬</span>
+            <span class="emoji">🌾🏪</span>
+
             <h5 class="card-title">{% trans "Wholesale Market Data" %}</h5>
             <a href="{% url 'apmc' %}" class="btn btn-info w-100">{% trans "Open" %}</a>
           </div>
         </div>
       </div>
 
+      
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
-            <span class="emoji">🗺</span>
-            <h5 class="card-title">{% trans "Digital Thela" %}</h5>
-            <a href="{% url 'dtDashboard' %}" class="btn btn-success w-100 ">{% trans "Open" %}</a>
+            <span class="emoji">🌾⚠️</span>
+            <h5 class="card-title">Report for Damage Crop</h5>
+            <a href="{% url 'api:damage_crop' %}" class="btn btn-danger w-100 disabled">{% trans "Open" %}</a>
           </div>
         </div>
       </div>
-      <!-- <div class="col-12 col-sm-6 col-md-4">
-        <div class="card card-custom">
-          <div class="card-body">
-            <span class="emoji">🛒</span>
-            <h5 class="card-title">Retailer Dashboard</h5>
-            <a href="/retailer-dashboard" class="btn btn-danger w-100 disabled">Coming Soon</a>
-          </div>
-        </div>
-      </div> -->
       {% if user.is_authenticated and user.is_superuser %}
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">

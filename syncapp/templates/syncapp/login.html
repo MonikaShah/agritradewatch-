@@ -5,26 +5,21 @@
 
 {% block content %}
 <style>
-    /* Hide header and nav */
-    header, nav {
-        display: block !important;
-    }
+    /* Hide header/navigation if needed */
+    /* header, nav {
+        display: none !important;
+    } */
 
-    body {
-        background: linear-gradient(135deg, #6c63ff, #00d4ff);
-        min-height: 100vh;
+    /* Page wrapper for full height */
+    .login-page {
+        min-height: 100vh; /* full viewport height */
         display: flex;
-        flex-direction: column;   /* vertical stacking */
+        flex-direction: column; /* vertical stacking */
+        justify-content: center; /* centers the card vertically */
         align-items: center;
-        justify-content: center;
-        padding: 1rem;
+        background: linear-gradient(135deg, #6c63ff, #00d4ff);
+        padding: 2rem 1rem;
     }
-    main {
-    flex: 1; /* pushes footer to bottom */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
     .login-card {
         border-radius: 12px;
@@ -33,6 +28,7 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         width: 100%;
         max-width: 450px;
+        margin: 0 auto;
     }
 
     .form-floating label {
@@ -63,15 +59,34 @@
         text-decoration: underline;
     }
 
+    /* Override base template container constraints */
+    #content,
+    .main-content,
+    .container,
+    .container-fluid {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    footer {
+        width: 100%; /* full width like register.html */
+        text-align: center;
+        padding: 1rem 0;
+        font-size: 0.9rem;
+        color: #fff;
+        background: rgba(0,0,0,0.1); /* semi-transparent */
+        margin-top: auto; /* pushes footer to bottom */
+    }
+
     @media (max-width: 576px) {
         .login-card {
             padding: 1.5rem;
         }
-
         h2 {
             font-size: 1.5rem;
         }
-
         .btn {
             font-size: 0.95rem;
             padding: 0.5rem 0;
@@ -79,34 +94,32 @@
     }
 </style>
 
-<div class="d-flex justify-content-center align-items-center w-100 py-5">
+<div class="login-page container-fluid d-flex flex-column">
     <div class="login-card">
         <h2 class="text-center mb-4">{% trans "Login" %}</h2>
         
         <form method="post">
             {% csrf_token %}
-
             <div class="form-floating mb-3">
                 <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
                 <label for="username">{% trans "Username" %}</label>
             </div>
-            <br>
+
             <div class="form-floating mb-4">
                 <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
                 <label for="password">{% trans "Password" %}</label>
             </div>
-            <br>
+
             <button type="submit" class="btn btn-primary w-100 py-2">{% trans "Login" %}</button>
         </form>
 
         <p class="text-center mt-3 mb-0">
-            {% trans "New user?" %} 
-            <a href="{% url 'register' %}">{% trans "Register here" %}</a>
+            {% trans "New user?" %} <a href="{% url 'register' %}">{% trans "Register here" %}</a>
         </p>
-        <p>
+        <p class="text-center mt-3 mb-0">
             <a href="{% url 'password_reset' %}">{% trans "Forgot your password?" %}</a>
         </p>
     </div>
-</div>
 
+</div>
 {% endblock %}
