@@ -11,7 +11,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="{% url 'javascript-catalog' %}"></script>
-<script src="{% static 'js/price_chart.js' %}"></script>
+<script src="{% static 'syncapp/js/price_chart.js' %}"></script>
 
 <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
@@ -224,7 +224,7 @@
     <div class="form-group">
       <label for="commoditySelect" class="form-label">{% trans "Commodity" %}</label>
       <select id="commoditySelect" class="form-select w-100">
-        <option value="">{% trans "All Commodities" %}</option>
+        <option value="">{% trans "Select Commodity" %}</option>
       {% for item in commodities %}
         <option value="{{ item }}">{{ item }}</option>
         {% endfor %}
@@ -310,15 +310,17 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  let districtCentroids = {};  // global variable
+  
   const commoditySelect = document.getElementById("commoditySelect");
       const options = commoditySelect.options;
 
-    for (let i = 0; i < options.length; i++) {
-      const opt = options[i];
-      if (opt.value) {
-        opt.textContent = gettext(opt.value);
+      for (let i = 0; i < options.length; i++) {
+        const opt = options[i];
+        if (opt.value) {
+          opt.textContent = gettext(opt.value);
+        }
       }
-    }
   const apmcSelect = document.getElementById("apmcSelect");
   const lineStartDate = document.getElementById("lineStartDate");
   const lineEndDate = document.getElementById("lineEndDate");
@@ -421,7 +423,7 @@ downloadPdfBtn.addEventListener("click", function() {
       // --- Load and render district boundaries ---
       const districtResponse = await fetch("{% static 'districts_rev21june23.geojson' %}");
       const districtData = await districtResponse.json();
-      districtCentroids = {};  // global variable
+      // let districtCentroids = {};  // global variable
 
       L.geoJSON(districtData, {
         style: { color: "#3388ff", weight: 2, fillOpacity: 0.1 },

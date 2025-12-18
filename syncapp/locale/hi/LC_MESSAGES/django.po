@@ -232,6 +232,9 @@ msgstr "कोई अन्य वस्तु नहीं."
 msgid "Job"
 msgstr "काम"
 
+msgid "Role"
+msgstr "भूमिका"
+
 #: syncapp/templates/syncapp/dt_dashboard.html:576
 #: syncapp/templates/syncapp/register.html:123
 msgid "Email"
