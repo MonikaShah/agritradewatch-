@@ -84,6 +84,9 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("api/debug-headers/", api_views.debug_headers),
 
+    path("send_otp/", views.send_otp,name='send_otp'),
+    path("verify_otp/", views.verify_otp,name='verify_otp'),
+
 ]
 
 if settings.DEBUG:
