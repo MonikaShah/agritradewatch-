@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-18 07:39+0000\n"
+"POT-Creation-Date: 2025-12-23 11:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,71 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: syncapp/templates/syncapp/apmcdata.html:219
-msgid "Wholesale Market Prices"
-msgstr "थोक बाज़ार कीमत"
-
-#: syncapp/templates/syncapp/apmcdata.html:225
+#: syncapp/forms.py:105 syncapp/templates/syncapp/apmcdata.html:225
 #: syncapp/templates/syncapp/dt_dashboard.html:910
 #: syncapp/templates/syncapp/dt_dashboard.html:1083
 #: syncapp/templates/syncapp/map_chart.html:174
 msgid "Commodity"
 msgstr "कमोडिटी"
 
+#: syncapp/forms.py:106
+msgid "Damage Quantity"
+msgstr "क्षति की मात्रा"
+
+#: syncapp/forms.py:107
+msgid "Unit"
+msgstr "इकाई"
+
+#: syncapp/forms.py:108
+msgid "Place of Damage"
+msgstr "क्षति का स्थान"
+
+#: syncapp/forms.py:109
+msgid "Damage Date"
+msgstr "क्षति की तिथि"
+
+#: syncapp/forms.py:110
+#, fuzzy
+#| msgid "Start Date"
+msgid "Report Date"
+msgstr "आरंभ तिथि"
+
+#: syncapp/forms.py:111
+msgid "Remarks"
+msgstr "टिप्पणियाँ"
+
+#: syncapp/forms.py:112
+msgid "Upload Photo"
+msgstr "फोटो अपलोड करें."
+
+#: syncapp/models.py:315
+msgid "On Field"
+msgstr "खेत पर"
+
+#: syncapp/models.py:316
+msgid "On Market"
+msgstr "बाजार में"
+
+#: syncapp/models.py:320
+msgid "Acres"
+msgstr "एकड़"
+
+#: syncapp/models.py:321
+msgid "Ton"
+msgstr "टन"
+
+#: syncapp/models.py:322
+msgid "Hectare"
+msgstr "हेक्टेयर"
+
+#: syncapp/templates/syncapp/apmcdata.html:219
+msgid "Wholesale Market Prices"
+msgstr "थोक बाज़ार कीमत"
+
 #: syncapp/templates/syncapp/apmcdata.html:227
-msgid "All Commodities"
-msgstr "सभी कमोडिटी"
+#: syncapp/templates/syncapp/dt_dashboard.html:376
+msgid "Select Commodity"
+msgstr "कमोडिटी का चयन करें"
 
 #: syncapp/templates/syncapp/apmcdata.html:235
 #: syncapp/templates/syncapp/map_chart.html:192
@@ -118,23 +169,28 @@ msgid "Wholesale Market Data"
 msgstr "थोक बाज़ार डेटा"
 
 #: syncapp/templates/syncapp/base.html:123
+#: syncapp/templates/syncapp/landingpage.html:261
+msgid "Report for Damage Crop"
+msgstr "क्षतिग्रस्त फसल की रिपोर्ट"
+
+#: syncapp/templates/syncapp/base.html:127
 msgid "About Us"
 msgstr "हमारे बारे में"
 
-#: syncapp/templates/syncapp/base.html:126
+#: syncapp/templates/syncapp/base.html:130
 msgid "App Vault"
 msgstr "ऐप वॉल्ट"
 
-#: syncapp/templates/syncapp/base.html:138
+#: syncapp/templates/syncapp/base.html:142
 msgid "Profile"
 msgstr "प्रोफ़ाइल"
 
-#: syncapp/templates/syncapp/base.html:140
+#: syncapp/templates/syncapp/base.html:144
 #: syncapp/templates/syncapp/landingpage.html:182
 msgid "Logout"
 msgstr "लॉग आउट"
 
-#: syncapp/templates/syncapp/base.html:145
+#: syncapp/templates/syncapp/base.html:149
 #: syncapp/templates/syncapp/dt_dashboard.html:398
 #: syncapp/templates/syncapp/login.html:4
 #: syncapp/templates/syncapp/login.html:99
@@ -145,24 +201,56 @@ msgstr "लॉग आउट"
 msgid "Login"
 msgstr "लॉग इन करें"
 
-#: syncapp/templates/syncapp/base.html:162
+#: syncapp/templates/syncapp/base.html:166
 #: syncapp/templates/syncapp/landingpage.html:198
 msgid "Change"
 msgstr "परिवर्तन"
 
-#: syncapp/templates/syncapp/base.html:190
+#: syncapp/templates/syncapp/base.html:194
 #: syncapp/templates/syncapp/landingpage.html:281
 msgid "This is a trial version and the platform is not fully operational yet."
 msgstr "यह एक परीक्षण संस्करण है और प्लेटफ़ॉर्म अभी पूरी तरह कार्यात्मक नहीं है।"
 
-#: syncapp/templates/syncapp/base.html:192
+#: syncapp/templates/syncapp/base.html:196
 #: syncapp/templates/syncapp/landingpage.html:283
 msgid "2025 MandiGo | 'सही दाम, किसान सम्मान'"
 msgstr "2025 मंडीगो | 'सही दाम, किसान सम्मान'"
 
-#: syncapp/templates/syncapp/dt_dashboard.html:376
-msgid "Select Commodity"
-msgstr "कमोडिटी का चयन करें"
+#: syncapp/templates/syncapp/damage_crop.html:5
+#, fuzzy
+#| msgid "Report for Damage Crop"
+msgid "Damage Crop"
+msgstr "क्षतिग्रस्त फसल की रिपोर्ट"
+
+#: syncapp/templates/syncapp/damage_crop.html:9
+msgid "Damage Crop Entry"
+msgstr "क्षतिग्रस्त फसल की रिपोर्ट"
+
+#: syncapp/templates/syncapp/damage_crop.html:68
+msgid "Submit"
+msgstr "सबमिट करें"
+
+#: syncapp/templates/syncapp/damage_crop.html:102
+msgid "Success!"
+msgstr "सफलता!"
+
+#: syncapp/templates/syncapp/damage_crop.html:103
+msgid "Thela entry submitted successfully!"
+msgstr "ठेला का आवेदन सफलतापूर्वक जमा हो गया!"
+
+#: syncapp/templates/syncapp/damage_crop.html:113
+msgid "Form Error"
+msgstr "फॉर्म त्रुटि"
+
+#: syncapp/templates/syncapp/damage_crop.html:121
+msgid "Error submitting form"
+msgstr "फॉर्म जमा करने में त्रुटि"
+
+#: syncapp/templates/syncapp/damage_crop.html:122
+#, fuzzy
+#| msgid "Please login to view Farmer details"
+msgid "Please check console for details."
+msgstr "कृपया किसान जानकारी देखने के लिए लॉगिन करें।"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:378
 #: syncapp/templates/syncapp/dt_dashboard.html:876
@@ -227,13 +315,9 @@ msgid "No selected items"
 msgstr "कोई अन्य वस्तु नहीं."
 
 #: syncapp/templates/syncapp/dt_dashboard.html:571
-#: syncapp/templates/syncapp/register.html:135
 #: syncapp/templates/syncapp/register.html:140
 msgid "Job"
 msgstr "काम"
-
-msgid "Role"
-msgstr "भूमिका"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:576
 #: syncapp/templates/syncapp/register.html:123
@@ -361,10 +445,6 @@ msgstr "क्लिक करें"
 msgid "Price Watch Dashboard"
 msgstr "मूल्य निरीक्षण डैशबोर्ड"
 
-#: syncapp/templates/syncapp/landingpage.html:261
-msgid "Report for Damage Crop"
-msgstr "क्षतिग्रस्त फसल की रिपोर्ट"
-
 #: syncapp/templates/syncapp/landingpage.html:271
 msgid "My Commodities"
 msgstr "मेरी कमोडिटी"
@@ -445,6 +525,10 @@ msgstr "यहां पंजीकरण करें"
 msgid "Name"
 msgstr "नाम"
 
+#: syncapp/templates/syncapp/register.html:135
+msgid "Role"
+msgstr "भूमिका"
+
 #: syncapp/templates/syncapp/register.html:136
 msgid "Consumer"
 msgstr "उपभोक्ता"
@@ -477,6 +561,9 @@ msgstr "स्वागत है %(username)s!"
 #: syncapp/views.py:302
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
+
+#~ msgid "All Commodities"
+#~ msgstr "सभी कमोडिटी"
 
 #, fuzzy
 #~| msgid "AgmarkNet Prices Trend"
