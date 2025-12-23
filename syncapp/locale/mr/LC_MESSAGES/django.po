@@ -44,10 +44,9 @@ msgid "Damage Date"
 msgstr "नुकसान तारीख"
 
 #: syncapp/forms.py:110
-#, fuzzy
-#| msgid "Start Date"
+
 msgid "Report Date"
-msgstr "प्रारंभ तारीख"
+msgstr "रिपोर्ट तारीख"
 
 #: syncapp/forms.py:111
 msgid "Remarks"
