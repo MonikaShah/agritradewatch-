@@ -107,7 +107,7 @@ msgstr "मंडीगो"
 #: syncapp/templates/syncapp/base.html:113
 #: syncapp/templates/syncapp/landingpage.html:219
 msgid "Digital Thela"
-msgstr "डिजिटल कार्ट"
+msgstr "डिजिटल ठेला"
 
 #: syncapp/templates/syncapp/base.html:116
 msgid "Dashboard"
