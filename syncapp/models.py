@@ -8,6 +8,8 @@ from django.utils import timezone
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 from PIL import Image
+from django.utils.translation import gettext_lazy as _
+
 
 
 # class Consumer(models.Model):
@@ -310,12 +312,14 @@ class APMC_Market_Prices(models.Model):
         return f"{self.market_name} - {self.report_date}"
 
 PLACE_DAMAGE_CHOICES = [
-    ('on_field', 'On Field'),
-    ('on_market', 'On Market'),
+    ('on_field', _('On Field')),
+    ('on_market', _('On Market')),
 ]
-DAMAGE_UNITS=[
-    ('ACRES','ACRES'),
-    ('TONN','TONN')
+
+DAMAGE_UNITS = [
+    ('ACRES', _('Acres')),
+    ('TON', _('Ton')),
+    ('HECTARE', _('Hectare')),
 ]
 class DamageCrop(models.Model):
     

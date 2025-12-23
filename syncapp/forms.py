@@ -3,6 +3,7 @@ from .models import Consumer1, Farmer1, Commodity, User1,  MahaVillage, DamageCr
 from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 UNIT_CHOICES = [
         ('2.5 Kg', '2.5 Kg'),
@@ -101,7 +102,14 @@ class DamageForm(forms.ModelForm):
             'photo',          # ✅ new image upload field
         ]
         labels = {
-            'damage': 'Damage Quantity',
+            'commodity': _("Commodity"),
+            'damage': _("Damage Quantity"),
+            'unit': _("Unit"),
+            'place_damage': _("Place of Damage"),
+            'damage_date': _("Damage Date"),
+            'report_date': _("Report Date"),
+            'remarks': _("Remarks"),
+            'photo': _("Upload Photo"),
         }
 
 

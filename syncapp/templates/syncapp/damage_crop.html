@@ -2,11 +2,11 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}Damage Crop{% endblock %}
+{% block title %}{% trans "Damage Crop" %}{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <h2 class="mb-4 text-center">Damage Crop Entry</h2>
+    <h2 class="mb-4 text-center"> {% trans "Damage Crop Entry" %}</h2>
 
     {% if messages %}
         <div class="mb-4">
@@ -65,7 +65,7 @@
         </div>
 
         <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+            <button type="submit" class="btn btn-primary btn-lg">{% trans "Submit" %}</button>
         </div>
     </form>
 </div>
@@ -99,8 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.success) {
                 Swal.fire({
                     icon: "success",
-                    title: "Success!",
-                    text: "Thela entry submitted successfully!",
+                    title: "{% trans 'Success!' %}",
+                    text: "{% trans 'Thela entry submitted successfully!' %}",
                     timer: 2000,
                     showConfirmButton: false
                 });
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Form errors:", data.errors);
                 Swal.fire({
                     icon: "error",
-                    title: "Form Error",
+                    title: "{% trans 'Form Error' %}",
                     html: `<pre style="text-align:left">${JSON.stringify(data.errors, null, 2)}</pre>`,
                 });
             }
@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error submitting form:", error);
             Swal.fire({
                 icon: "error",
-                title: "Error submitting form",
-                text: "Please check console for details.",
+                title: "{% trans 'Error submitting form' %}",
+                text: "{% trans 'Please check console for details.' %}",
             });
         }
     });
