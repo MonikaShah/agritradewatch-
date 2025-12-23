@@ -116,7 +116,7 @@ msgstr "डॅशबोर्ड"
 #: syncapp/templates/syncapp/base.html:119
 #: syncapp/templates/syncapp/landingpage.html:250
 msgid "Wholesale Market Data"
-msgstr "घाऊक बाजार डेटा"
+msgstr "घाऊक बाजार माहिती"
 
 #: syncapp/templates/syncapp/base.html:123
 msgid "About Us"
