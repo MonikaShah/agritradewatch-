@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-23 11:19+0000\n"
+"POT-Creation-Date: 2025-12-29 09:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,6 +22,7 @@ msgstr ""
 #: syncapp/templates/syncapp/dt_dashboard.html:910
 #: syncapp/templates/syncapp/dt_dashboard.html:1083
 #: syncapp/templates/syncapp/map_chart.html:174
+#: syncapp/templates/syncapp/profile.html:136
 msgid "Commodity"
 msgstr "कमोडिटी"
 
@@ -29,7 +30,7 @@ msgstr "कमोडिटी"
 msgid "Damage Quantity"
 msgstr "क्षति की मात्रा"
 
-#: syncapp/forms.py:107
+#: syncapp/forms.py:107 syncapp/templates/syncapp/profile.html:141
 msgid "Unit"
 msgstr "इकाई"
 
@@ -42,9 +43,6 @@ msgid "Damage Date"
 msgstr "क्षति की तिथि"
 
 #: syncapp/forms.py:110
-
-
-
 msgid "Report Date"
 msgstr "रिपोर्ट तिथि"
 
@@ -157,10 +155,12 @@ msgstr "मंडीगो"
 
 #: syncapp/templates/syncapp/base.html:113
 #: syncapp/templates/syncapp/landingpage.html:219
+#: syncapp/templates/syncapp/profile.html:82
 msgid "Digital Thela"
 msgstr "डिजिटल ठेला"
 
 #: syncapp/templates/syncapp/base.html:116
+#: syncapp/templates/syncapp/profile.html:80
 msgid "Dashboard"
 msgstr "डैशबोर्ड"
 
@@ -183,6 +183,7 @@ msgid "App Vault"
 msgstr "ऐप वॉल्ट"
 
 #: syncapp/templates/syncapp/base.html:142
+#: syncapp/templates/syncapp/profile.html:6
 msgid "Profile"
 msgstr "प्रोफ़ाइल"
 
@@ -321,11 +322,13 @@ msgid "Job"
 msgstr "काम"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:576
+#: syncapp/templates/syncapp/profile.html:71
 #: syncapp/templates/syncapp/register.html:123
 msgid "Email"
 msgstr "ईमेल"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:581
+#: syncapp/templates/syncapp/profile.html:72
 #: syncapp/templates/syncapp/register.html:129
 msgid "Mobile"
 msgstr "मोबाइल"
@@ -375,6 +378,7 @@ msgstr "सहेजें"
 #: syncapp/templates/syncapp/dt_dashboard.html:788
 #: syncapp/templates/syncapp/dt_dashboard.html:915
 #: syncapp/templates/syncapp/dt_dashboard.html:1088
+#: syncapp/templates/syncapp/profile.html:137
 msgid "Variety"
 msgstr "किस्म"
 
@@ -393,6 +397,7 @@ msgstr "प्रोफ़ाइल"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:911
 #: syncapp/templates/syncapp/dt_dashboard.html:1084
+#: syncapp/templates/syncapp/profile.html:140
 msgid "Price"
 msgstr "कीमत"
 
@@ -403,6 +408,7 @@ msgstr "अपडेट"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:918
 #: syncapp/templates/syncapp/dt_dashboard.html:1092
+#: syncapp/templates/syncapp/profile.html:139
 msgid "Quantity"
 msgstr "मात्रा"
 
@@ -513,6 +519,123 @@ msgstr "चार्ट बंद करें"
 msgid "AgmarkNet Price Trend"
 msgstr "एगमार्कनेट कीमतों का रुझान"
 
+#: syncapp/templates/syncapp/profile.html:61
+msgid "User Profile"
+msgstr "प्रोफ़ाइल"
+
+#: syncapp/templates/syncapp/profile.html:70
+#: syncapp/templates/syncapp/register.html:111
+msgid "Name"
+msgstr "नाम"
+
+#: syncapp/templates/syncapp/profile.html:77
+msgid "Home"
+msgstr "🚜 मुख्य पृष्ठ 🚜"
+
+#: syncapp/templates/syncapp/profile.html:87
+msgid "Update Farm Location"
+msgstr "खेत का स्थान अद्यतन/अपडेट करें"
+
+#: syncapp/templates/syncapp/profile.html:91
+msgid "Maharashtra"
+msgstr "महाराष्ट्र"
+
+#: syncapp/templates/syncapp/profile.html:96
+msgid "Select District"
+msgstr "जिला चुनें"
+
+#: syncapp/templates/syncapp/profile.html:101
+
+msgid "Select Tehsil"
+msgstr "तहसील चुनें"
+
+#: syncapp/templates/syncapp/profile.html:105
+
+msgid "Select on Map"
+msgstr "स्थान का चयन करें"
+
+#: syncapp/templates/syncapp/profile.html:115
+msgid "Farm Location"
+msgstr "खेत का स्थान"
+
+#: syncapp/templates/syncapp/profile.html:130
+
+msgid "Digital Thela Entries"
+msgstr "डिजिटल ठेला"
+
+#: syncapp/templates/syncapp/profile.html:138
+msgid "Level"
+msgstr "स्तर"
+
+#: syncapp/templates/syncapp/profile.html:142
+msgid "Photo"
+msgstr "फोटो"
+
+#: syncapp/templates/syncapp/profile.html:143
+
+msgid "Actions"
+msgstr "क्रिया"
+
+#: syncapp/templates/syncapp/profile.html:175
+msgid "Edit"
+msgstr "संपादित करें"
+
+#: syncapp/templates/syncapp/profile.html:176
+msgid "Delete"
+msgstr "हटाएँ"
+
+#: syncapp/templates/syncapp/profile.html:185
+msgid "No produce added yet."
+msgstr "अभी तक कोई उत्पाद नहीं जोड़ा गया है"
+
+#: syncapp/templates/syncapp/profile.html:228
+msgid "Enter a valid cost"
+msgstr "मान्य मूल्य दर्ज करें"
+
+#: syncapp/templates/syncapp/profile.html:229
+msgid "Enter a valid quantity"
+msgstr "मान्य मात्रा दर्ज करें"
+
+#: syncapp/templates/syncapp/profile.html:230
+msgid "Enter a valid unit"
+msgstr "मान्य इकाई दर्ज करें"
+
+#: syncapp/templates/syncapp/profile.html:237
+msgid "Are you sure you want to delete this produce?"
+msgstr "क्या आप वाकई इस फसल को हटाना चाहते हैं?"
+
+#: syncapp/templates/syncapp/profile.html:247
+msgid "Produce updated!"
+msgstr "कमोडिटी अपडेट हो गई!"
+
+#: syncapp/templates/syncapp/profile.html:247
+msgid "Produce deleted!"
+msgstr "कमोडिटी हटा दी गई!"
+
+#: syncapp/templates/syncapp/profile.html:251
+
+
+msgid "Error updating produce"
+msgstr "कमोडिटी अपडेट करने में त्रुटि"
+
+#: syncapp/templates/syncapp/profile.html:387
+msgid "Drag marker or click map to choose location"
+msgstr "स्थान चुनने के लिए मार्कर खींचें या मानचित्र पर क्लिक करें"
+
+
+#: syncapp/templates/syncapp/profile.html:437
+msgid "Update this location?"
+msgstr "इस स्थान को अपडेट करें?"
+
+#: syncapp/templates/syncapp/profile.html:452
+
+msgid "Location saved successfully"
+msgstr "स्थान सफलतापूर्वक सहेजा गया"
+
+#: syncapp/templates/syncapp/profile.html:455
+msgid "Error saving location"
+msgstr "स्थान सहेजने में त्रुटि"
+
 #: syncapp/templates/syncapp/register.html:4
 #: syncapp/templates/syncapp/register.html:162
 msgid "Register"
@@ -521,10 +644,6 @@ msgstr "यहां पंजीकरण करें"
 #: syncapp/templates/syncapp/register.html:105
 msgid "Register for MandiGo"
 msgstr "यहां पंजीकरण करें"
-
-#: syncapp/templates/syncapp/register.html:111
-msgid "Name"
-msgstr "नाम"
 
 #: syncapp/templates/syncapp/register.html:135
 msgid "Role"
@@ -563,178 +682,177 @@ msgstr "स्वागत है %(username)s!"
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
 
-#~ msgid "All Commodities"
-#~ msgstr "सभी कमोडिटी"
+msgid "All Commodities"
+msgstr "सभी कमोडिटी"
 
-#, fuzzy
-#~| msgid "AgmarkNet Prices Trend"
-#~ msgid "Agmarknet Price Trend"
-#~ msgstr "एगमार्कनेट कीमतों का रुझान"
 
-#~ msgid "Local"
-#~ msgstr "स्थानीय"
+msgid "Agmarknet Price Trend"
+msgstr "एगमार्कनेट कीमतों का रुझान"
 
-#~ msgid "Quantity for sale:"
-#~ msgstr "मात्रा"
+msgid "Local"
+msgstr "स्थानीय"
 
-#~ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
-#~ msgstr "2025 एग्रीट्रेड वॉच | बेहतर कृषि और बाज़ारों के लिए निर्मित"
+msgid "Quantity for sale:"
+msgstr "मात्रा"
 
-#~ msgid "Wholesale Market Price"
-#~ msgstr "थोक बाज़ार कीमत"
+msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
+msgstr "2025 एग्रीट्रेड वॉच | बेहतर कृषि और बाज़ारों के लिए निर्मित"
 
-#~ msgid "Price Trend per Qunital"
-#~ msgstr "प्रति क्विंटल मूल्य प्रवृत्ति"
+msgid "Wholesale Market Price"
+msgstr "थोक बाज़ार कीमत"
 
-#~ msgid "Tomato"
-#~ msgstr "टमाटर"
+msgid "Price Trend per Qunital"
+msgstr "प्रति क्विंटल मूल्य प्रवृत्ति"
 
-#~ msgid "Onion"
-#~ msgstr "प्याज"
+msgid "Tomato"
+msgstr "टमाटर"
 
-#~ msgid "onion"
-#~ msgstr "प्याज"
+msgid "Onion"
+msgstr "प्याज"
 
-#~ msgid "Potato"
-#~ msgstr "आलू"
+msgid "onion"
+msgstr "प्याज"
 
-#~ msgid "Ambat Chukka (Sorrel Leaves)"
-#~ msgstr "चुक्का पत्ता"
+msgid "Potato"
+msgstr "आलू"
 
-#~ msgid "ambat chukka"
-#~ msgstr "चुक्का पत्ता"
+msgid "Ambat Chukka (Sorrel Leaves)"
+msgstr "चुक्का पत्ता"
 
-#~ msgid "Ginger"
-#~ msgstr "अदरक"
+msgid "ambat chukka"
+msgstr "चुक्का पत्ता"
 
-#~ msgid "Cucumber"
-#~ msgstr "खीरा"
+msgid "Ginger"
+msgstr "अदरक"
 
-#~ msgid "ginger"
-#~ msgstr "अदरक"
+msgid "Cucumber"
+msgstr "खीरा"
 
-#~ msgid "cucumber"
-#~ msgstr "खीरा"
+msgid "ginger"
+msgstr "अदरक"
 
-#~ msgid "Bitter Gourd"
-#~ msgstr "करेला"
+msgid "cucumber"
+msgstr "खीरा"
 
-#~ msgid "Coriander Leaves"
-#~ msgstr "धनिया पत्ती"
+msgid "Bitter Gourd"
+msgstr "करेला"
 
-#~ msgid "Cabbage"
-#~ msgstr "पत्ता गोभी"
+msgid "Coriander Leaves"
+msgstr "धनिया पत्ती"
 
-#~ msgid "Cluster Beans (Gawar)"
-#~ msgstr "ग्वार फली"
+msgid "Cabbage"
+msgstr "पत्ता गोभी"
 
-#~ msgid "Carrot"
-#~ msgstr "गाजर"
+msgid "Cluster Beans (Gawar)"
+msgstr "ग्वार फली"
 
-#~ msgid "Cowpea (Chawli)"
-#~ msgstr "लोबिया"
+msgid "Carrot"
+msgstr "गाजर"
 
-#~ msgid "Capsicum (Shimla Mirch)"
-#~ msgstr "शिमला मिर्च"
+msgid "Cowpea (Chawli)"
+msgstr "लोबिया"
 
-#~ msgid "Bottle Gourd"
-#~ msgstr "लौकी"
+msgid "Capsicum (Shimla Mirch)"
+msgstr "शिमला मिर्च"
 
-#~ msgid "Ridge Gourd (Dodka)"
-#~ msgstr "तुरई"
+msgid "Bottle Gourd"
+msgstr "लौकी"
 
-#~ msgid "Spinach"
-#~ msgstr "पालक"
+msgid "Ridge Gourd (Dodka)"
+msgstr "तुरई"
 
-#~ msgid "Cauliflower"
-#~ msgstr "फूलगोभी"
+msgid "Spinach"
+msgstr "पालक"
 
-#~ msgid "Beetroot"
-#~ msgstr "चुकंदर"
+msgid "Cauliflower"
+msgstr "फूलगोभी"
 
-#~ msgid "Ladies Finger (Okra)"
-#~ msgstr "भिंडी"
+msgid "Beetroot"
+msgstr "चुकंदर"
 
-#~ msgid "Pumpkin"
-#~ msgstr "कद्दू"
+msgid "Ladies Finger (Okra)"
+msgstr "भिंडी"
 
-#~ msgid "Radish"
-#~ msgstr "मूली"
+msgid "Pumpkin"
+msgstr "कद्दू"
 
-#~ msgid "Fenugreek Leaves"
-#~ msgstr "मेथी पत्ती"
+msgid "Radish"
+msgstr "मूली"
 
-#~ msgid "Garlic"
-#~ msgstr "लहसुन"
+msgid "Fenugreek Leaves"
+msgstr "मेथी पत्ती"
 
-#~ msgid "garlic"
-#~ msgstr "लहसुन"
+msgid "Garlic"
+msgstr "लहसुन"
 
-#~ msgid "Lemon"
-#~ msgstr "नींबू"
+msgid "garlic"
+msgstr "लहसुन"
 
-#~ msgid "Brinjal"
-#~ msgstr "बैंगन"
+msgid "Lemon"
+msgstr "नींबू"
 
-#~ msgid "Drumstick (Moringa Pods)"
-#~ msgstr "सहजन"
+msgid "Brinjal"
+msgstr "बैंगन"
 
-#~ msgid "Drumstick"
-#~ msgstr "सहजन"
+msgid "Drumstick (Moringa Pods)"
+msgstr "सहजन"
 
-#~ msgid "Green Chilli"
-#~ msgstr "हरी मिर्च"
+msgid "Drumstick"
+msgstr "सहजन"
 
-#~ msgid "Pomegranate"
-#~ msgstr "अनार"
+msgid "Green Chilli"
+msgstr "हरी मिर्च"
 
-#~ msgid "Custard Apple"
-#~ msgstr "सीताफल"
+msgid "Pomegranate"
+msgstr "अनार"
 
-#~ msgid "Dragon Fruit"
-#~ msgstr "ड्रैगन फ्रूट"
+msgid "Custard Apple"
+msgstr "सीताफल"
 
-#~ msgid "Grapes"
-#~ msgstr "अंगूर"
+msgid "Dragon Fruit"
+msgstr "ड्रैगन फ्रूट"
 
-#~ msgid "Guava"
-#~ msgstr "अमरूद"
+msgid "Grapes"
+msgstr "अंगूर"
 
-#~ msgid "Orange"
-#~ msgstr "संतरा"
+msgid "Guava"
+msgstr "अमरूद"
 
-#~ msgid "Papaya"
-#~ msgstr "पपीता"
+msgid "Orange"
+msgstr "संतरा"
 
-#~ msgid "papaya"
-#~ msgstr "पपीता"
+msgid "Papaya"
+msgstr "पपीता"
 
-#~ msgid "Sapota (Chikoo)"
-#~ msgstr "चीकू"
+msgid "papaya"
+msgstr "पपीता"
 
-#~ msgid "Sugarcane"
-#~ msgstr "गन्ना"
+msgid "Sapota (Chikoo)"
+msgstr "चीकू"
 
-#~ msgid "sugarcane"
-#~ msgstr "ऊस"
+msgid "Sugarcane"
+msgstr "गन्ना"
 
-#~ msgid "wheat"
-#~ msgstr "गेहूँ"
+msgid "sugarcane"
+msgstr "ऊस"
 
-#~ msgid "maize"
-#~ msgstr "मक्का"
+msgid "wheat"
+msgstr "गेहूँ"
 
-#~ msgid "honey"
-#~ msgstr "शहद"
+msgid "maize"
+msgstr "मक्का"
 
-#~ msgid "ghee"
-#~ msgstr "घी"
+msgid "honey"
+msgstr "शहद"
 
-#~ msgid "kela"
-#~ msgstr "केला"
+msgid "ghee"
+msgstr "घी"
 
-#~ msgid "Tender Coconut"
-#~ msgstr "हरा नारियल"
+msgid "kela"
+msgstr "केला"
 
-#~ msgid "tender coconut"
-#~ msgstr "हरा नारियल"
+msgid "Tender Coconut"
+msgstr "हरा नारियल"
+
+msgid "tender coconut"
+msgstr "हरा नारियल"
