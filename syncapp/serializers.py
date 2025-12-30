@@ -1,5 +1,5 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import User1, Farmer1, Consumer1, WebData,Commodity,DtProduce
+from .models import User1, Farmer1, Consumer1, WebData,Commodity,DtProduce,DamageCrop
 from rest_framework import serializers   # <-- this import is required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -136,3 +136,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.save()
         return user
+    
+class DamageCropSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DamageCrop
+        fields = "__all__"
