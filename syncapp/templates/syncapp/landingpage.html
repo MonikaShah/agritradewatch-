@@ -193,20 +193,22 @@
     {% else %}
       <a href="{% url 'login' %}" class="login-link">{% trans "Login / Register" %}</a>
     {% endif %}
+
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <select name="language">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% for lang in LANGUAGES %}
+                <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ lang.1 }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="{% trans 'Change' %}">
+    </form>
   </div>
-  <form action="{% url 'set_language' %}" method="post">
-    {% csrf_token %}
-    <select name="language">
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% for lang in LANGUAGES %}
-            <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
-                {{ lang.1 }}
-            </option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="{% trans 'Change' %}">
-</form>
+  
 
 <main class="content">
   <div class="container">
