@@ -66,6 +66,10 @@
             }
         }
         /* Messages container */
+        #message-container {
+            z-index: 1500;           /* below navbar */
+            pointer-events: none;    /* does NOT block clicks */
+        }
         #message-container .alert {
             padding: 12px 20px;
             margin-bottom: 10px;
@@ -75,6 +79,8 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 500;
+            z-index: 1500;
+            pointer-events: auto;
         }
         #message-container .alert-danger {
             background-color: #dc3545 !important;
@@ -83,6 +89,30 @@
         #message-container .alert-success {
             background-color: #198754 !important;
             color: white;
+        }
+        header .navbar,
+        header .navbar a,
+        header .navbar .nav-link,
+        header .navbar .navbar-brand,
+        header .navbar .navbar-brand span,
+        header .navbar .dropdown-toggle {
+            color: #ffffff !important;
+        }
+        /* NAVBAR HOVER */
+        header .navbar > .container-fluid a.nav-link:hover,
+        header .navbar .dropdown-toggle:hover {
+            color: #e9ffe9 !important;
+        }
+
+        /* DROPDOWN MENU ITEMS → NORMAL DARK TEXT */
+        header .navbar .dropdown-menu .dropdown-item {
+            color: #212529 !important;
+        }
+
+        /* DROPDOWN MENU HOVER */
+        header .navbar .dropdown-menu .dropdown-item:hover {
+            background-color: #e9f7ef;
+            color: #155724 !important;
         }
 
     </style>
@@ -119,9 +149,34 @@
                             <a class="nav-link px-3" href="{% url 'apmc' %}">{% trans "Wholesale Market Data" %}</a>
                         </li>
 
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'api:damage_crop' %}">{% trans "Report for Damage Crop" %}</a>
-                        </li>
+                        </li> -->
+                        <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle px-3"
+       href="#"
+       id="damageCropDropdown"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+        {% trans "Damage Crop" %}
+    </a>
+
+    <ul class="dropdown-menu shadow-sm" aria-labelledby="damageCropDropdown">
+        <li>
+            <a class="dropdown-item" href="{% url 'api:damage_crop' %}">
+                🌾 {% trans "Report Damage Crop" %}
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="">
+                📋 {% trans "View All Damage Crop" %}
+            </a>
+        </li>
+    </ul>
+</li>
+
                         
                         <li class="nav-item">
                             <a class="nav-link px-3" href="{% url 'page_detail' slug='aboutus' %}">{% trans "About Us" %}</a>
@@ -173,7 +228,7 @@
     <!-- Main content -->
     <main class="py-3">
        {% if messages %}
-        <div id="message-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 9999;">
+        <div id="message-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; ">
             {% for message in messages %}
             <div class="alert 
                 {% if 'error' in message.tags %}alert-danger
