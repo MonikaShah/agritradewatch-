@@ -31,6 +31,7 @@ from .serializers import (
     WebDataSerializer,
     CommoditySerializer,
     DtProduceSerializer,
+    DamageCropSerializer
     
 )
 from django.contrib.auth.tokens import default_token_generator
@@ -1094,3 +1095,41 @@ def update_produce_location(request, produce_id):
 
     return JsonResponse({"status": "invalid request"})
 
+@api_view(["GET"])
+def damage_crop_detail_api(request, pk):
+    damage = get_object_or_404(DamageCrop, pk=pk)
+
+    data = {
+        "id": damage.id,
+        "commodity": damage.commodity,
+        "damage": damage.damage,
+        "unit": damage.unit,
+        "place_damage": damage.place_damage,
+        "damage_date": damage.damage_date,
+        "report_date": damage.report_date,
+        "remarks": damage.remarks,
+    }
+    return JsonResponse(data)
+
+
+    
+def damage_crop_list(request):
+    damages = DamageCrop.objects.all()
+
+    wants_json = (
+        request.headers.get("Accept") == "application/json"
+        or request.GET.get("format") == "json"
+    )
+
+    if wants_json:
+        data = list(damages.values(
+            "id", "commodity", "damage", "unit",
+            "place_damage", "damage_date", "report_date"
+        ))
+        return JsonResponse(data, safe=False)
+
+    return render(
+        request,
+        "syncapp/damage_list.html",
+        {"damages": damages}
+    )

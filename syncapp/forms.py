@@ -100,6 +100,7 @@ class DamageForm(forms.ModelForm):
             'report_date',
             'remarks',
             'photo',          # ✅ new image upload field
+            "latitude", "longitude", "location_accuracy",
         ]
         labels = {
             'commodity': _("Commodity"),
@@ -122,6 +123,11 @@ class DamageForm(forms.ModelForm):
             'report_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            
+            "latitude": forms.HiddenInput(),
+            "longitude": forms.HiddenInput(),
+            "location_accuracy": forms.HiddenInput(),
+        
         }
 
     def __init__(self, *args, **kwargs):

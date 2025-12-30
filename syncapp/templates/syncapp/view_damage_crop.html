@@ -1,0 +1,134 @@
+{% extends "syncapp/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "View Damage Crop Report" %}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Damage Crop Details" %}</h5>
+                </div>
+
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="40%">{% trans "Commodity" %}</th>
+                                <td>{{ damage.commodity }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Damage Quantity" %}</th>
+                                <td>{{ damage.damage }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Unit" %}</th>
+                                <td>{{ damage.unit }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Place of Damage" %}</th>
+                                <td>{{ damage.place_damage|title }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Damage Date" %}</th>
+                                <td>{{ damage.damage_date }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Report Date" %}</th>
+                                <td>{{ damage.report_date }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Remarks" %}</th>
+                                <td>
+                                    {% if damage.remarks %}
+                                        {{ damage.remarks }}
+                                    {% else %}
+                                        <span class="text-muted">{% trans "Not provided" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>{% trans "Uploaded Photo" %}</th>
+                                <td>
+                                    {% if damage.photo %}
+                                        <img src="{{ damage.photo.url }}" 
+                                             class="img-fluid rounded border"
+                                             style="max-height: 250px;">
+                                    {% else %}
+                                        <span class="text-muted">{% trans "No image uploaded" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% if damage.latitude and damage.longitude %}
+                            <tr>
+                                <th>{% trans "Location" %}</th>
+                                <td>
+                                    <div id="map" style="height: 300px; width: 100%; border: 1px solid #ccc;"></div>
+                                    <small class="text-muted">
+                                        Latitude: {{ damage.latitude }}, Longitude: {{ damage.longitude }}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'api:damage_list' %}" class="btn btn-secondary">
+                            {% trans "Back" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% if damage.latitude and damage.longitude %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Ensure coordinates are valid JavaScript numbers; fall back to 0 if missing.
+    var lat = parseFloat("{{ damage.latitude|default:'0' }}");
+    var lng = parseFloat("{{ damage.longitude|default:'0' }}");
+
+    var map = L.map('map').setView([lat, lng], 15);
+
+    L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+    ).addTo(map);
+    // ✅ Use precomputed popup HTML from Django
+    var popupContent = `{{ damage_popup|escapejs }}`;  
+
+    var marker = L.marker([lat, lng]).addTo(map);
+    // marker.bindPopup(popupContent).openPopup();
+});
+
+
+</script>
+{% endif %}
+
+{% endblock %}

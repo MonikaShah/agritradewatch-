@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.gis.geos import GEOSGeometry
-from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm
@@ -699,3 +699,17 @@ def login_user_by_mobile(request, mobile):
     login(request, user)
     return JsonResponse({"status": "logged_in"})
 
+def damage_crop_detail_view(request, pk):
+    damage = DamageCrop.objects.get(pk=pk)
+
+    if damage.photo:
+        damage_popup = f"<b>{damage.commodity}</b><br><img src='{damage.photo.url}' style='max-width:200px; max-height:150px; display:block; margin-top:5px;'>"
+    else:
+        damage_popup = f"<b>{damage.commodity}</b><br>No photo uploaded"
+
+    context = {
+        "damage": damage,
+        "damage_popup": damage_popup,  # ✅ precomputed HTML
+    }
+
+    return render(request, "syncapp/view_damage_crop.html", context)
