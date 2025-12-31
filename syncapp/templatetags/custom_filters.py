@@ -18,3 +18,6 @@ def produce_form(produce):
 @register.filter
 def split(value, sep=","):
     return value.split(sep)
+@register.filter(name='add_class')
+def add_class(field, css):
+    return field.as_widget(attrs={"class": css})
