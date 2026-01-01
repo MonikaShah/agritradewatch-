@@ -4,7 +4,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm
+from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm,DamageForm
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -576,7 +576,7 @@ class MyPasswordResetView(PasswordResetView):
     template_name = 'registration/password_reset_form.html'
     email_template_name = 'registration/password_reset_email.html'
     subject_template_name = 'registration/password_reset_subject.txt'
-    form_class = MyCustomPasswordResetForm   # 👈 Add this line'
+    form_class = MyCustomPasswordResetForm
 
     def get_users(self, email):
         """Return all active users matching the email."""
@@ -698,6 +698,24 @@ def login_user_by_mobile(request, mobile):
 
     login(request, user)
     return JsonResponse({"status": "logged_in"})
+def damage_crop_page(request):
+    # Check if user is authenticated and has proper role
+    if not request.user.is_authenticated or request.user.job not in ['farmer', 'retailer']:
+        messages.error(request, "You are not authorized to report for damage crop.")
+        return redirect('login')  # or any page you want to redirect unauthorized users
+
+    if request.method == 'POST':
+        form = DamageForm(request.POST)
+        if form.is_valid():
+            damage = form.save(commit=False)
+            damage.user = request.user  # if you track who submitted
+            damage.save()
+            messages.success(request, "Damage report submitted successfully!")
+            return redirect('damage_crop_page')  # or any success page
+    else:
+        form = DamageForm()
+    
+    return render(request, 'syncapp/damage_crop.html', {'form': form})
 
 def damage_crop_detail_view(request, pk):
     damage = DamageCrop.objects.get(pk=pk)

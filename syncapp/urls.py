@@ -76,7 +76,7 @@ urlpatterns = [
     path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
     path('dtDashboard/',views.dtDashboard,name='dtDashboard'),
     path("damage/<int:pk>/view/", views.damage_crop_detail_view, name="damage_detail_view"),
-
+    path('damage/crop/', views.damage_crop_page, name='damage_crop_page'),
     path('update_location',views.update_user_location,name='update_location'),
      # include DRF router URLs under /api/
     path('api/', include('syncapp.api_urls', namespace='api')),

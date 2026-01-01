@@ -727,41 +727,45 @@ def password_reset_confirm(request):
 def test_api(request):
     return JsonResponse({"ok": True})
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def damage_crop(request):
     if not request.user.is_authenticated or request.user.job not in ['farmer', 'retailer']:
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
-        messages.error(request, "You are not authorized to submit Damage Crop entries.")
-        return redirect('login')
+        return Response(
+            {
+                "success": False,
+                "error": "You are not authorized to submit Damage Crop entries"
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
 
-    if request.method == 'POST':
-        print("POST DATA:", request.POST)
-        print("FILES:", request.FILES)
-        form = DamageForm(request.POST, request.FILES)  # ✅ include files
 
-        print("FORM VALID?", form.is_valid())
-        print("FORM ERRORS:", form.errors)
+     # 🧾 Use Django Form (supports multipart)
+    form = DamageForm(request.data, request.FILES)
 
-        if form.is_valid():
-            damage = form.save(commit=False)
-            damage.userid = request.user
-            damage.save()
+    if not form.is_valid():
+        return Response(
+            {
+                "success": False,
+                "errors": form.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': 'Saved successfully!'})
+    # 💾 Save
+    damage = form.save(commit=False)
+    damage.userid = request.user
+    damage.save()
 
-            messages.success(request, "Damge Crop  entry submitted successfully!")
-            form = DamageForm()  # reset the form
-
-        else:
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'errors': form.errors})
-            messages.error(request, "❌ Please correct the errors below.")
-    else:
-        form = DamageForm()
-
-    return render(request, 'syncapp/damage_crop.html', {'form': form})
-
+    return Response(
+        {
+            "success": True,
+            "message": "Damage Crop entry saved successfully",
+            "damage_id": damage.id
+        },
+        status=status.HTTP_201_CREATED
+    )
 def get_tehsils(request):
     district = request.GET.get('district')
     tehsils = (
