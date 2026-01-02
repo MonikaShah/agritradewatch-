@@ -205,9 +205,9 @@ class Consumer1(models.Model):
 
 class Commodity(models.Model):
     TYPE_CHOICES = [
-        ('vegetable', 'Vegetable'),
-        ('fruit', 'Fruit'),
-        ('pulse', 'Pulse'),
+        ('vegetable',  _('Vegetable')),
+        ('fruit',  _('Fruit')),
+        ('pulse', _('Pulse')),
     ]
 
     name = models.CharField(max_length=255, unique=True)
@@ -340,6 +340,12 @@ class DamageCrop(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     location_accuracy = models.IntegerField(blank=True, null=True)
+    
+    def translated_name(self):
+        return _(self.commodity)
+
+    def __str__(self):
+        return self.translated_name()
     class Meta:
         managed = True
         db_table = 'damage_crop'

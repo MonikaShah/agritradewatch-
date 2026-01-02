@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
+from django.utils.translation import gettext
 from django.conf import settings
 from uuid import uuid4
 from django.utils import timezone
@@ -219,7 +219,11 @@ def aphmedapmc_market_view(request):
         'today': today,
     })
 
-
+TYPE_CHOICES = {
+    'pulse': _('Pulse'),
+    'vegetable': _('Vegetable'),
+    'fruit': _('Fruit'),
+}
 # @login_required
 @login_required(login_url='/login/')
 def map_chart(request):
@@ -240,11 +244,16 @@ def map_chart(request):
             date__isnull=False
         ).exists()
 
-        grouped_commodities.setdefault(c.type, []).append({
+        # ✅ Translate TYPE safely
+        # translated_type = TYPE_CHOICES.get(c.type, c.type)
+        translated_type = gettext(c.type.capitalize())
+
+        grouped_commodities.setdefault(translated_type, []).append({
             "name": c.name,
-            "label": _(c.name), 
+            "label":gettext(c.name), 
             "disabled": not has_valid_data
         })
+    print("RAW TYPE VALUE:", repr(c.type))
 
     return render(request, "syncapp/map_chart.html", {
         "grouped_commodities": grouped_commodities,
