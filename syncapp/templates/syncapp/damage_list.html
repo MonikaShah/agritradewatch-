@@ -8,7 +8,7 @@
 <div class="container my-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">{% trans "Damage Crop Reports" %}</h4>
+        <h4 class="mb-0">{% trans "Damage Crop Report" %}</h4>
         <a href="{% url 'damage_crop_page' %}" class="btn btn-primary">
             {% trans "Add Damage Report" %}
         </a>
@@ -24,7 +24,7 @@
                         <tr>
                            
                             <th>{% trans "Commodity" %}</th>
-                            <th>{% trans "Damage Qty" %}</th>
+                            <th>{% trans "Damage Quantity" %}</th>
                             
                             <th>{% trans "Place" %}</th>
                             <th>{% trans "Damage Date" %}</th>
@@ -48,7 +48,7 @@
 
                             </td>
                             
-                            <td>{{ damage.place_damage|title }}</td>
+                            <td>{{ damage.get_place_damage_display|title }}</td>
                             <td>{{ damage.damage_date }}</td>
                             <td>{{ damage.report_date }}</td>
                             <td class="text-center">
