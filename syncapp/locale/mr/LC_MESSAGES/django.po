@@ -303,8 +303,7 @@ msgstr "एंट्री यशस्वीरित्या सबमिट 
 
 #: syncapp/templates/syncapp/damage_crop.html:116
 msgid "Location permission denied"
-msgstr "स्थान/GPS
-परवानगी नाकारली"
+msgstr "स्थान/GPS परवानगी नाकारली"
 
 #: syncapp/templates/syncapp/damage_crop.html:150
 msgid "Success!"
@@ -794,8 +793,7 @@ msgstr "स्वागत आहे %(username)s!"
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
 
- msgid "Damage Quantity"
- msgstr "नुकसान रक्कम"
+
 
 
  msgid "Damage Crop Details"
