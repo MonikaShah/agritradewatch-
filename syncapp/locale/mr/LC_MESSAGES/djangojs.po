@@ -730,7 +730,7 @@ msgstr "चिंच"
 msgid "APMC"
 msgstr "एपीएमसी"
 
-msgid "Ahemdpur"
+msgid "Ahemadpur"
 msgstr "अहमदपूर"
 
 msgid "Aurad Shahajani"
@@ -745,11 +745,14 @@ msgstr "करंजा"
 msgid "Latur"
 msgstr "लातूर"
 
-msgid "Manglurpeer"
-msgstr "मंगलूरपीर"
+msgid "Mangrulpeer"
+msgstr "मंगरुळपीर"
 
 msgid "Murum"
 msgstr "मुरूम"
 
-msgid "Shehgaon"
+msgid "Shegaon"
 msgstr "शेगाव"
+
+msgid "Washim"
+msgstr "वाशिम"
