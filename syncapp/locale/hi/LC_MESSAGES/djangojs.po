@@ -91,14 +91,14 @@ msgstr "श्रीरामपूर"
 msgid "Vita"
 msgstr "विटा"
 
-msgid "Shirur"
-msgstr "शिरूर"
+    msgid "Shirur"
+    msgstr "शिरूर"
 
-msgid "Bhivandi"
-msgstr "भिवंडी"
+    msgid "Bhivandi"
+    msgstr "भिवंडी"
 
-msgid "Islampur"
-msgstr "इस्लामपूर"
+    msgid "Islampur"
+    msgstr "इस्लामपूर"
 
 msgid "Indapur"
 msgstr "इंदापूर"
@@ -468,6 +468,10 @@ msgstr "वैजपूर"
 
 msgid "All APMCs"
 msgstr "सभी एपीएमसी"
+
+msgid "APMC"
+msgstr "एपीएमसी"
+
 
 msgid "Data not available for selected Filter."
 msgstr "चयनित फ़िल्टर के लिए डेटा उपलब्ध नहीं है"

@@ -474,8 +474,21 @@ downloadPdfBtn.addEventListener("click", function() {
       apmcSelect.innerHTML = `<option value="">${gettext("All APMCs")}</option>`;
       uniqueApmcs.forEach(a=>{
         const opt = document.createElement("option");
+      //   opt.value = a;
+      //   opt.textContent = gettext(a);  // 🔹 translate dynamically
+      //   apmcSelect.appendChild(opt);
+      // });
+        let label = a;
+
+        if (a.endsWith(" APMC")) {
+          const base = a.replace(/ APMC$/, "");
+          label = `${gettext(base)} ${gettext("APMC")}`;
+        } else {
+          label = gettext(a);
+        }
+
         opt.value = a;
-        opt.textContent = gettext(a);  // 🔹 translate dynamically
+        opt.textContent = label;
         apmcSelect.appendChild(opt);
       });
       apmcSelect.disabled = uniqueApmcs.length === 0;

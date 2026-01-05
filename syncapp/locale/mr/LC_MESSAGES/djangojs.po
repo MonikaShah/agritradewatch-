@@ -726,3 +726,6 @@ msgstr "गोड भोपळा"
 
 msgid "Tamarind Fruit"
 msgstr "चिंच"
+
+msgid "APMC"
+msgstr "एपीएमसी"
