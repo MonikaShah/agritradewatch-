@@ -636,3 +636,93 @@ msgstr "उपभोक्ता क्रय मूल्य (₹)"
 
 msgid "Farmer's Selling Price (₹)"
 msgstr "किसान द्वारा बेचा गया मूल्य (₹)"
+
+msgid "Apple"
+msgstr "सेब"
+
+msgid "Banana - Green"
+msgstr "कच्चा केला"
+
+msgid "Beans"
+msgstr "फली"
+
+msgid "Bhindi(Ladies Finger)"
+msgstr "भिंडी"
+
+msgid "Bitter gourd"
+msgstr "करेला"
+
+msgid "Black Gram(Urd Beans)(Whole)"
+msgstr "उड़द दाल (साबुत)"
+
+msgid "Bottle gourd"
+msgstr "लौकी"
+
+msgid "Chikoos(Sapota)"
+msgstr "चीकू"
+
+msgid "Chilly Capsicum"
+msgstr "शिमला मिर्च"
+
+msgid "Coriander(Leaves)"
+msgstr "धनिया पत्ती"
+
+msgid "Cowpea(Lobia/Karamani)"
+msgstr "लोबिया"
+
+msgid "Cowpea (Lobia/Karamani)"
+msgstr "लोबिया"
+
+msgid "Cucumbar(Kheera)"
+msgstr "खीरा"
+
+msgid "Drumstick"
+msgstr "सहजन"
+
+msgid "French Beans(Frasbean)"
+msgstr "फ्रेंच बीन"
+
+msgid "Ginger(Green)"
+msgstr "हरा अदरक"
+
+msgid "Green Gram Dal(Moong Dal)"
+msgstr "हरी मूंग दाल"
+
+msgid "Green Gram(Moong)(Whole)"
+msgstr "मूंग"
+
+msgid "Green Peas"
+msgstr "हरे मटर"
+
+msgid "Little gourd(Kundru)"
+msgstr "कुंदरू"
+
+msgid "Little gourd (Kundru)"
+msgstr "कुंदरू"
+
+msgid "Methi(Leaves)"
+msgstr "मेथी"
+
+msgid "Onion Green"
+msgstr "हरी प्याज"
+
+msgid "Pointed gourd (Parval)"
+msgstr "परवल"
+
+msgid "Raddish"
+msgstr "मूली"
+
+msgid "Ragi(Finger Millet)"
+msgstr "रागी (फिंगर मिलेट)"
+
+msgid "Ridge gourd(Tori)"
+msgstr "तुरई (तोरी)"
+
+msgid "Sweet Potato"
+msgstr "चुकंदर"
+
+msgid "Sweet Pumpkin"
+msgstr "मीठा कद्दू"
+
+msgid "Tamarind Fruit"
+msgstr "इमली"

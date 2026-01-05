@@ -34,6 +34,7 @@ msgid "Min Price"
 msgstr "किमान किंमत"
 msgid "Modal Price"
 msgstr "मोडल किंमत"
+
 msgid "Max Price" 
 msgstr "कमाल किंमत"
 
@@ -632,3 +633,93 @@ msgstr "ग्राहक खरेदी किंमत (₹)"
 
 msgid "Farmer's Selling Price (₹)"
 msgstr "शेतकऱ्यांची विक्री किंमत (₹)"
+
+msgid "Apple"
+msgstr "सफरचंद"
+
+msgid "Banana - Green"
+msgstr "कच्ची केळी"
+
+msgid "Beans"
+msgstr "शेंग"
+
+msgid "Bhindi(Ladies Finger)"
+msgstr "भेंडी"
+
+msgid "Bitter gourd"
+msgstr "कारले"
+
+msgid "Black Gram(Urd Beans)(Whole)"
+msgstr "उडीद (संपूर्ण)"
+
+msgid "Bottle gourd"
+msgstr "दुधी भोपळा"
+
+msgid "Chikoos(Sapota)"
+msgstr "चिकू"
+
+msgid "Chilly Capsicum"
+msgstr "ढोबळी मिरची"
+
+msgid "Coriander(Leaves)"
+msgstr "कोथिंबीर"
+
+msgid "Cowpea(Lobia/Karamani)"
+msgstr "चवळी"
+
+msgid "Cowpea (Lobia/Karamani)"
+msgstr "चवळी"
+
+msgid "Cucumbar(Kheera)"
+msgstr "काकडी"
+
+msgid "Drumstick"
+msgstr "शेवग्याची शेंग"
+
+msgid "French Beans(Frasbean)"
+msgstr "फ्रेंच शेंग"
+
+msgid "Ginger(Green)"
+msgstr "हिरवे आले"
+
+msgid "Green Gram Dal(Moong Dal)"
+msgstr "मूग डाळ"
+
+msgid "Green Gram(Moong)(Whole)"
+msgstr "हिरवा मूग"
+
+msgid "Green Peas"
+msgstr "हिरवे वाटाणे"
+
+msgid "Little gourd(Kundru)"
+msgstr "तोंडली"
+
+msgid "Little gourd (Kundru)"
+msgstr "तोंडली"
+
+msgid "Methi(Leaves)"
+msgstr "मेथी"
+
+msgid "Onion Green"
+msgstr "कांद्याची पात"
+
+msgid "Pointed gourd (Parval)"
+msgstr "परवळ"
+
+msgid "Raddish"
+msgstr "मुळा"
+
+msgid "Ragi(Finger Millet)"
+msgstr "नाचणी"
+
+msgid "Ridge gourd(Tori)"
+msgstr "दोडका"
+
+msgid "Sweet Potato"
+msgstr "रताळे"
+
+msgid "Sweet Pumpkin"
+msgstr "गोड भोपळा"
+
+msgid "Tamarind Fruit"
+msgstr "चिंच"
