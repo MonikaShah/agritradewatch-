@@ -706,6 +706,9 @@ msgstr "कांद्याची पात"
 msgid "Pointed gourd (Parval)"
 msgstr "परवळ"
 
+msgid "Pointed gourd (Parval)"
+msgstr "परवळ"
+
 msgid "Raddish"
 msgstr "मुळा"
 

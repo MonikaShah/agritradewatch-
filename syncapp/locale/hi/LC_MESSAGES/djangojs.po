@@ -709,6 +709,9 @@ msgstr "हरी प्याज"
 msgid "Pointed gourd (Parval)"
 msgstr "परवल"
 
+msgid "Pointed gourd(Parval)"
+msgstr "परवल"
+
 msgid "Raddish"
 msgstr "मूली"
 
