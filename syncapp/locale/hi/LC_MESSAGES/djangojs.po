@@ -734,7 +734,7 @@ msgstr "मीठा कद्दू"
 msgid "Tamarind Fruit"
 msgstr "इमली"
 
-msgid "Ahemdpur"
+msgid "Ahmedpur"
 msgstr "अहमदपूर"
 
 msgid "Aurad Shahajani"

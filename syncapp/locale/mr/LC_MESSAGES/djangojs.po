@@ -730,7 +730,7 @@ msgstr "चिंच"
 msgid "APMC"
 msgstr "एपीएमसी"
 
-msgid "Ahemadpur"
+msgid "Ahmedpur"
 msgstr "अहमदपूर"
 
 msgid "Aurad Shahajani"
