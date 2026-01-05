@@ -733,3 +733,30 @@ msgstr "मीठा कद्दू"
 
 msgid "Tamarind Fruit"
 msgstr "इमली"
+
+msgid "Ahemdpur"
+msgstr "अहमदपूर"
+
+msgid "Aurad Shahajani"
+msgstr "औराद शाहाजानी"
+
+msgid "Dudhani"
+msgstr "दुधणी"
+
+msgid "Karanja"
+msgstr "करंजा" 
+
+msgid "Latur"
+msgstr "लातूर" 
+
+msgid "Manglurpeer"
+msgstr "मंगलूरपीर"  
+
+msgid "Murum"
+msgstr "मुरूम"
+
+msgid "Shehgaon"
+msgstr "शेगाव" 
+
+msgid "Washim"
+msgstr "वाशिम"
