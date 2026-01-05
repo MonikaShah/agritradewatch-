@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-02 07:05+0000\n"
+"POT-Creation-Date: 2026-01-05 10:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,28 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: syncapp/forms.py:9
+msgid "2.5 Kg"
+msgstr ""
+
+#: syncapp/forms.py:10 syncapp/templates/syncapp/dt_dashboard.html:760
+msgid "Kg"
+msgstr "किलो"
+
+
+msgid "Bundle"
+msgstr "बंडल"
+
+#: syncapp/forms.py:12
+
+msgid "Piece"
+msgstr "नंग"
+
+#: syncapp/forms.py:13
+
+msgid "Dozen"
+msgstr "डझन"
 
 #: syncapp/forms.py:106 syncapp/templates/syncapp/apmcdata.html:225
 #: syncapp/templates/syncapp/damage_list.html:26
@@ -60,15 +82,15 @@ msgstr "टिप्पण्या"
 msgid "Upload Photo"
 msgstr "फोटो अपलोड करा"
 
-#: syncapp/models.py:208
+#: syncapp/models.py:208 syncapp/views.py:224
 msgid "Vegetable"
 msgstr ""
 
-#: syncapp/models.py:209
+#: syncapp/models.py:209 syncapp/views.py:225
 msgid "Fruit"
 msgstr ""
 
-#: syncapp/models.py:210
+#: syncapp/models.py:210 syncapp/views.py:223
 msgid "Pulse"
 msgstr ""
 
@@ -201,14 +223,12 @@ msgid "Damage Crop"
 msgstr "नुकसान पिकाचा अहवाल"
 
 #: syncapp/templates/syncapp/base.html:168
-#, fuzzy
-#| msgid "Report for Damage Crop"
+
 msgid "Report Damage Crop"
 msgstr "पिकाचे नुकसान नोंदवा"
 
 #: syncapp/templates/syncapp/base.html:174
-#, fuzzy
-#| msgid "Damage Crop"
+
 msgid "View All Damage Crop"
 msgstr "नुकसान पिकाचा अहवाल"
 
@@ -262,11 +282,11 @@ msgstr "नुकसान पिकाचा अहवाल"
 
 #: syncapp/templates/syncapp/damage_crop.html:13
 msgid "List Damage Report"
-msgstr ""
+msgstr "नुकसान अहवालांची यादी"
 
 #: syncapp/templates/syncapp/damage_crop.html:77
 msgid "Fetching device location…"
-msgstr ""
+msgstr "डिव्हाइस स्थान मिळवत आहे..."
 
 #: syncapp/templates/syncapp/damage_crop.html:83
 msgid "Submit"
@@ -274,17 +294,17 @@ msgstr "सबमिट करा"
 
 #: syncapp/templates/syncapp/damage_crop.html:99
 msgid "Location not supported by this browser"
-msgstr ""
+msgstr "हे स्थान या ब्राउझरद्वारे समर्थित नाही."
 
 #: syncapp/templates/syncapp/damage_crop.html:113
-#, fuzzy
-#| msgid "Location saved successfully"
+
 msgid "Location captured successfully"
 msgstr "एंट्री यशस्वीरित्या सबमिट झाली!"
 
 #: syncapp/templates/syncapp/damage_crop.html:116
 msgid "Location permission denied"
-msgstr ""
+msgstr "स्थान/GPS
+परवानगी नाकारली"
 
 #: syncapp/templates/syncapp/damage_crop.html:150
 msgid "Success!"
@@ -308,8 +328,7 @@ msgstr "शेतकऱ्यांची माहिती पाहण्य�
 
 #: syncapp/templates/syncapp/damage_list.html:5
 #: syncapp/templates/syncapp/view_damage_crop.html:14
-#, fuzzy
-#| msgid "Damage Crop"
+
 msgid "Damage Crop List"
 msgstr "नुकसान पिकाचा अहवाल"
 
@@ -335,8 +354,7 @@ msgid "View"
 msgstr ""
 
 #: syncapp/templates/syncapp/damage_list.html:68
-#, fuzzy
-#| msgid "No items found."
+
 msgid "No damage reports found."
 msgstr "कोणतीही वस्तू आढळली नाही"
 
@@ -432,10 +450,6 @@ msgstr "रोख"
 #: syncapp/templates/syncapp/dt_dashboard.html:602
 msgid "Loading"
 msgstr "लोड करत आहे..."
-
-#: syncapp/templates/syncapp/dt_dashboard.html:760
-msgid "Kg"
-msgstr "किलो"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:761
 msgid "250 gm"
@@ -663,8 +677,7 @@ msgid "No produce added yet."
 msgstr "अद्याप कोणतेही उत्पादन जोडलेले नाही"
 
 #: syncapp/templates/syncapp/profile.html:228
-#, fuzzy
-#| msgid "Enter a valid price"
+
 msgid "Enter a valid cost"
 msgstr "वैध किंमत प्रविष्ट करा"
 
@@ -746,8 +759,7 @@ msgid "Already have an account?"
 msgstr "आधीच नोंदणीकृत आहात का?"
 
 #: syncapp/templates/syncapp/view_damage_crop.html:5
-#, fuzzy
-#| msgid "Damage Crop Entry"
+
 msgid "View Damage Crop Report"
 msgstr "नुकसान पिकाचा अहवाल"
 
@@ -756,8 +768,7 @@ msgid "Not provided"
 msgstr ""
 
 #: syncapp/templates/syncapp/view_damage_crop.html:62
-#, fuzzy
-#| msgid "Upload Photo"
+
 msgid "Uploaded Photo"
 msgstr "फोटो अपलोड करा"
 
@@ -766,8 +777,7 @@ msgid "No image uploaded"
 msgstr ""
 
 #: syncapp/templates/syncapp/view_damage_crop.html:76
-#, fuzzy
-#| msgid "Farm Location"
+
 msgid "Location"
 msgstr "शेतीचे स्थान"
 
@@ -775,189 +785,186 @@ msgstr "शेतीचे स्थान"
 msgid "Back"
 msgstr ""
 
-#: syncapp/views.py:299
+#: syncapp/views.py:308
 #, python-format
 msgid "Welcome %(username)s!"
 msgstr "स्वागत आहे %(username)s!"
 
-#: syncapp/views.py:302
+#: syncapp/views.py:311
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
 
-#, fuzzy
-#~| msgid "Damage Quantity"
-#~ msgid "Damage Qty"
-#~ msgstr "नुकसान रक्कम"
+ msgid "Damage Quantity"
+ msgstr "नुकसान रक्कम"
 
-#, fuzzy
-#~| msgid "Damage Crop"
-#~ msgid "Damage Crop Details"
-#~ msgstr "नुकसान पिकाचा अहवाल"
 
-#~ msgid "All Commodities"
-#~ msgstr "सर्व कमोडिटी"
+ msgid "Damage Crop Details"
+ msgstr "नुकसान पिकाचा अहवाल"
 
-#~ msgid "Agmarknet Price Trend"
-#~ msgstr "अ‍ॅगमार्कनेट किमतींचा ट्रेंड"
+ msgid "All Commodities"
+ msgstr "सर्व कमोडिटी"
 
-#~ msgid "Local"
-#~ msgstr "स्थानिक"
+ msgid "Agmarknet Price Trend"
+ msgstr "अ‍ॅगमार्कनेट किमतींचा ट्रेंड"
 
-#~ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
-#~ msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
+ msgid "Local"
+ msgstr "स्थानिक"
 
-#~ msgid "TXT_QUANTITY_SALE"
-#~ msgstr "विक्रीसाठी प्रमाण"
+ msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
+ msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
 
-#~ msgid "Price Trend per Qunital"
-#~ msgstr "प्रति क्विंटल किमतीचा कल"
+ msgid "TXT_QUANTITY_SALE"
+ msgstr "विक्रीसाठी प्रमाण"
 
-#~ msgid "Tomato"
-#~ msgstr "टोमॅटो"
+ msgid "Price Trend per Qunital"
+ msgstr "प्रति क्विंटल किमतीचा कल"
 
-#~ msgid "Onion"
-#~ msgstr "कांदा"
+ msgid "Tomato"
+ msgstr "टोमॅटो"
 
-#~ msgid "onion"
-#~ msgstr "कांदा"
+ msgid "Onion"
+ msgstr "कांदा"
 
-#~ msgid "Potato"
-#~ msgstr "बटाटा"
+ msgid "onion"
+ msgstr "कांदा"
 
-#~ msgid "Ambat Chukka (Sorrel Leaves)"
-#~ msgstr "आंबट चुक्का"
+ msgid "Potato"
+ msgstr "बटाटा"
 
-#~ msgid "Ambat Chukka"
-#~ msgstr "आंबट चुक्का"
+ msgid "Ambat Chukka (Sorrel Leaves)"
+ msgstr "आंबट चुक्का"
 
-#~ msgid "Ginger"
-#~ msgstr "आले"
+ msgid "Ambat Chukka"
+ msgstr "आंबट चुक्का"
 
-#~ msgid "ginger"
-#~ msgstr "आले"
+ msgid "Ginger"
+ msgstr "आले"
 
-#~ msgid "Cucumber"
-#~ msgstr "काकडी"
+ msgid "ginger"
+ msgstr "आले"
 
-#~ msgid "cucumber"
-#~ msgstr "काकडी"
+ msgid "Cucumber"
+ msgstr "काकडी"
 
-#~ msgid "Bitter Gourd"
-#~ msgstr "कारले"
+ msgid "cucumber"
+ msgstr "काकडी"
 
-#~ msgid "Coriander Leaves"
-#~ msgstr "कोथिंबीर"
+ msgid "Bitter Gourd"
+ msgstr "कारले"
 
-#~ msgid "Cabbage"
-#~ msgstr "कोबी"
+ msgid "Coriander Leaves"
+ msgstr "कोथिंबीर"
 
-#~ msgid "Cluster Beans (Gawar)"
-#~ msgstr "गवार"
+ msgid "Cabbage"
+ msgstr "कोबी"
 
-#~ msgid "Carrot"
-#~ msgstr "गाजर"
+ msgid "Cluster Beans (Gawar)"
+ msgstr "गवार"
 
-#~ msgid "Cowpea (Chawli)"
-#~ msgstr "चवळी"
+ msgid "Carrot"
+ msgstr "गाजर"
 
-#~ msgid "Capsicum (Shimla Mirch)"
-#~ msgstr "ढोबळी मिरची"
+ msgid "Cowpea (Chawli)"
+ msgstr "चवळी"
 
-#~ msgid "Bottle Gourd"
-#~ msgstr "दुधी भोपळा"
+ msgid "Capsicum (Shimla Mirch)"
+ msgstr "ढोबळी मिरची"
 
-#~ msgid "Ridge Gourd (Dodka)"
-#~ msgstr "दोडका"
+ msgid "Bottle Gourd"
+ msgstr "दुधी भोपळा"
 
-#~ msgid "Spinach"
-#~ msgstr "पालक"
+ msgid "Ridge Gourd (Dodka)"
+ msgstr "दोडका"
 
-#~ msgid "Cauliflower"
-#~ msgstr "फुलकोबी"
+ msgid "Spinach"
+ msgstr "पालक"
 
-#~ msgid "Beetroot"
-#~ msgstr "बीट"
+ msgid "Cauliflower"
+ msgstr "फुलकोबी"
 
-#~ msgid "Ladies Finger (Okra)"
-#~ msgstr "भेंडी"
+ msgid "Beetroot"
+ msgstr "बीट"
 
-#~ msgid "Pumpkin"
-#~ msgstr "भोपळा"
+ msgid "Ladies Finger (Okra)"
+ msgstr "भेंडी"
 
-#~ msgid "Radish"
-#~ msgstr "मूळा"
+ msgid "Pumpkin"
+ msgstr "भोपळा"
 
-#~ msgid "Fenugreek Leaves"
-#~ msgstr "मेथी"
+ msgid "Radish"
+ msgstr "मूळा"
 
-#~ msgid "Garlic"
-#~ msgstr "लसूण"
+ msgid "Fenugreek Leaves"
+ msgstr "मेथी"
 
-#~ msgid "garlic"
-#~ msgstr "लसूण"
+ msgid "Garlic"
+ msgstr "लसूण"
 
-#~ msgid "Lemon"
-#~ msgstr "लिंबू"
+ msgid "garlic"
+ msgstr "लसूण"
 
-#~ msgid "Brinjal"
-#~ msgstr "वांगी"
+ msgid "Lemon"
+ msgstr "लिंबू"
 
-#~ msgid "Drumstick (Moringa Pods)"
-#~ msgstr "शेवगा"
+ msgid "Brinjal"
+ msgstr "वांगी"
 
-#~ msgid "Drumstick"
-#~ msgstr "शेवगा"
+ msgid "Drumstick (Moringa Pods)"
+ msgstr "शेवगा"
 
-#~ msgid "Green Chilli"
-#~ msgstr "हिरवी मिरची"
+ msgid "Drumstick"
+ msgstr "शेवगा"
 
-#~ msgid "Pomegranate"
-#~ msgstr "डाळिंब"
+ msgid "Green Chilli"
+ msgstr "हिरवी मिरची"
 
-#~ msgid "Custard Apple"
-#~ msgstr "सीताफळ"
+ msgid "Pomegranate"
+ msgstr "डाळिंब"
 
-#~ msgid "Dragon Fruit"
-#~ msgstr "ड्रॅगन फळ"
+ msgid "Custard Apple"
+ msgstr "सीताफळ"
 
-#~ msgid "Grapes"
-#~ msgstr "द्राक्षे"
+ msgid "Dragon Fruit"
+ msgstr "ड्रॅगन फळ"
 
-#~ msgid "Guava"
-#~ msgstr "पेरू"
+ msgid "Grapes"
+ msgstr "द्राक्षे"
 
-#~ msgid "Orange"
-#~ msgstr "संत्रे"
+ msgid "Guava"
+ msgstr "पेरू"
 
-#~ msgid "Papaya"
-#~ msgstr "पपई"
+ msgid "Orange"
+ msgstr "संत्रे"
 
-#~ msgid "papaya"
-#~ msgstr "पपई"
+ msgid "Papaya"
+ msgstr "पपई"
 
-#~ msgid "Sapota (Chikoo)"
-#~ msgstr "चिकू"
+ msgid "papaya"
+ msgstr "पपई"
 
-#~ msgid "sugarcane"
-#~ msgstr "ऊस बेणे"
+ msgid "Sapota (Chikoo)"
+ msgstr "चिकू"
 
-#~ msgid "wheat"
-#~ msgstr "गहू"
+ msgid "sugarcane"
+ msgstr "ऊस बेणे"
 
-#~ msgid "maize"
-#~ msgstr "मका"
+ msgid "wheat"
+ msgstr "गहू"
 
-#~ msgid "honey"
-#~ msgstr "मध"
+ msgid "maize"
+ msgstr "मका"
 
-#~ msgid "ghee"
-#~ msgstr "साजूक तूप"
+ msgid "honey"
+ msgstr "मध"
 
-#~ msgid "kela"
-#~ msgstr "केळी"
+ msgid "ghee"
+ msgstr "साजूक तूप"
 
-#~ msgid "Tender Coconut"
-#~ msgstr "पाणी नारळ"
+ msgid "kela"
+ msgstr "केळी"
 
-#~ msgid "tender coconut"
-#~ msgstr "पाणी नारळ"
+ msgid "Tender Coconut"
+ msgstr "पाणी नारळ"
+
+ msgid "tender coconut"
+ msgstr "पाणी नारळ"

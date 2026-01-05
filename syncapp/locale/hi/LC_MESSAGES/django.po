@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-02 07:05+0000\n"
+"POT-Creation-Date: 2026-01-05 10:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,29 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: syncapp/forms.py:9
+msgid "2.5 Kg"
+msgstr "2.5 किलो"
+
+#: syncapp/forms.py:10 syncapp/templates/syncapp/dt_dashboard.html:760
+msgid "Kg"
+msgstr "किलो"
+
+#: syncapp/forms.py:11
+
+msgid "Bundle"
+msgstr "बंडल"
+
+#: syncapp/forms.py:12
+
+msgid "Piece"
+msgstr "नंग"
+
+#: syncapp/forms.py:13
+
+msgid "Dozen"
+msgstr "दर्जन"
 
 #: syncapp/forms.py:106 syncapp/templates/syncapp/apmcdata.html:225
 #: syncapp/templates/syncapp/damage_list.html:26
@@ -60,26 +83,15 @@ msgstr "टिप्पणियाँ"
 msgid "Upload Photo"
 msgstr "फोटो अपलोड करें."
 
-#: syncapp/models.py:208
-msgid "vegetable"
-msgstr "सब्जी"
-
-#: syncapp/models.py:209
-msgid "fruit"
-msgstr "फल"
-
-#: syncapp/models.py:210
-msgid "pulse"
-msgstr "दाल"
-
+#: syncapp/models.py:208 syncapp/views.py:224
 msgid "Vegetable"
 msgstr "सब्जी"
 
-#: syncapp/models.py:209
+#: syncapp/models.py:209 syncapp/views.py:225
 msgid "Fruit"
 msgstr "फल"
 
-#: syncapp/models.py:210
+#: syncapp/models.py:210 syncapp/views.py:223
 msgid "Pulse"
 msgstr "दाल"
 
@@ -268,11 +280,11 @@ msgstr "क्षतिग्रस्त फसल की रिपोर्ट
 
 #: syncapp/templates/syncapp/damage_crop.html:13
 msgid "List Damage Report"
-msgstr ""
+msgstr "क्षति रिपोर्ट सूची"
 
 #: syncapp/templates/syncapp/damage_crop.html:77
 msgid "Fetching device location…"
-msgstr ""
+msgstr "डिवाइस का स्थान प्राप्त किया जा रहा है…"
 
 #: syncapp/templates/syncapp/damage_crop.html:83
 msgid "Submit"
@@ -280,17 +292,16 @@ msgstr "सबमिट करें"
 
 #: syncapp/templates/syncapp/damage_crop.html:99
 msgid "Location not supported by this browser"
-msgstr ""
+msgstr "यह स्थान इस ब्राउज़र द्वारा समर्थित नहीं है"
 
 #: syncapp/templates/syncapp/damage_crop.html:113
-#, fuzzy
-#| msgid "Location saved successfully"
+
 msgid "Location captured successfully"
 msgstr "स्थान सफलतापूर्वक सहेजा गया"
 
 #: syncapp/templates/syncapp/damage_crop.html:116
 msgid "Location permission denied"
-msgstr ""
+msgstr "स्थान/जीपीएस की अनुमति नहीं दी गई"
 
 #: syncapp/templates/syncapp/damage_crop.html:150
 msgid "Success!"
@@ -309,8 +320,7 @@ msgid "Error submitting form"
 msgstr "फॉर्म जमा करने में त्रुटि"
 
 #: syncapp/templates/syncapp/damage_crop.html:170
-#, fuzzy
-#| msgid "Please login to view Farmer details"
+
 msgid "Please check console for details."
 msgstr "कृपया किसान जानकारी देखने के लिए लॉगिन करें।"
 
@@ -436,10 +446,6 @@ msgstr "नकद"
 #: syncapp/templates/syncapp/dt_dashboard.html:602
 msgid "Loading"
 msgstr "लोड हो रहा है..."
-
-#: syncapp/templates/syncapp/dt_dashboard.html:760
-msgid "Kg"
-msgstr "किलो"
 
 #: syncapp/templates/syncapp/dt_dashboard.html:761
 msgid "250 gm"
@@ -771,14 +777,23 @@ msgstr "खेत का स्थान"
 msgid "Back"
 msgstr "वापस"
 
-#: syncapp/views.py:299
+#: syncapp/views.py:308
 #, python-format
 msgid "Welcome %(username)s!"
 msgstr "स्वागत है %(username)s!"
 
-#: syncapp/views.py:302
+#: syncapp/views.py:311
 msgid "Invalid credentials"
 msgstr "अवैध क्रेडेन्शियल"
+
+msgid "vegetable"
+msgstr "सब्जी"
+
+msgid "fruit"
+msgstr "फल"
+
+msgid "pulse"
+msgstr "दाल"
 
 msgid "Damage Crop Details"
 msgstr "क्षतिग्रस्त फसल की रिपोर्ट"
