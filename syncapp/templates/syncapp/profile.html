@@ -149,21 +149,31 @@
                             <tr>
                                 {% csrf_token %}
                                 <input type="hidden" name="produce_id" value="{{ p.id }}">
-                                <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{{ p.sale_commodity }}"></td>
-                                <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{{ p.variety_name }}"></td>
+                                <td><input class="form-control form-control-sm" type="text" name="sale_commodity" value="{% trans p.sale_commodity  %}"></td>
+                                <td><input class="form-control form-control-sm" type="text" name="variety_name" value="{% trans p.variety_name %}"></td>
                                 <td><input class="form-control form-control-sm" type="text" name="level_of_produce" value="{{ p.level_of_produce }}"></td>
                                 <!-- <td><input class="form-control form-control-sm" type="date" name="sowing_date" value="{{ p.sowing_date|date:'Y-m-d' }}"></td>
                                 <td><input class="form-control form-control-sm" type="date" name="harvest_date" value="{{ p.harvest_date|date:'Y-m-d' }}"></td> -->
                                 <td><input class="form-control form-control-sm" type="number" step="0.50" id="edit_qty_{{p.id}}" value="{{ p.quantity_for_sale }}"></td>
                                 <td><input class="form-control form-control-sm" type="text" id="edit_cost_{{p.id}}" value="{{ p.cost }}" oninput='validateDecimal(this)'></td>
                                 {% with units_list="Kg,250 gm,bundle,piece,dozen" %}
-                                <td>
+                                <!-- <td>
                                     <select class="form-control form-control-sm" id="edit_unit_{{p.id}}">
                                         {% for u in units_list|split:"," %}
                                             <option value="{{ u }}" {% if p.unit == u %}selected{% endif %}>{{ u }}</option>
                                         {% endfor %}
                                     </select>
+                                </td> -->
+                                <td>
+                                    <select class="form-control form-control-sm" id="edit_unit_{{ p.id }}">
+                                        {% for value, label in p.UNIT_CHOICES %}
+                                            <option value="{{ value }}" {% if p.unit == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
                                 </td>
+
                                 {% endwith %}
                                 <td>
                                     {% if p.photo_or_video %}

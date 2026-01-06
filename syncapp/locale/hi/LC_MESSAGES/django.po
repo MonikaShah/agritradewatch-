@@ -804,8 +804,7 @@ msgstr "सभी कमोडिटी"
 msgid "Agmarknet Price Trend"
 msgstr "एगमार्कनेट कीमतों का रुझान"
 
-msgid "Local"
-msgstr "स्थानीय"
+
 
 msgid "Quantity for sale:"
 msgstr "मात्रा"
@@ -977,3 +976,15 @@ msgstr "सेब"
 
 msgid "Banana-Green"
 msgstr "हरा केला"
+
+msgid "local"
+msgstr "स्थानीय"
+
+msgid "Local"
+msgstr "स्थानीय"
+
+msgid "red"
+msgstr "लाल"
+
+msgid "wild"
+msgstr "जंगली"

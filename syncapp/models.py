@@ -446,6 +446,14 @@ def validate_file_type_and_size(allowed_types, max_size_mb=20):
 
 
 class DtProduce(models.Model):
+    UNIT_CHOICES = [
+        ('Kg', _('Kg')),
+        ('250 gm', _('250 gm')),
+        ('bundle', _('Bundle')),
+        ('piece', _('Piece')),
+        ('dozen', _('Dozen')),
+    ]
+    
     username = models.ForeignKey(
         'User1',
         to_field='username',  #   Tell Django to use username instead of id
@@ -454,22 +462,10 @@ class DtProduce(models.Model):
     )
     sale_commodity = models.CharField(max_length=100)
     variety_name = models.CharField(max_length=100)
-    # method = models.CharField(max_length=20, choices=[('organic', 'Organic'), ('inorganic', 'Inorganic')], blank=True,   # allows form submissions to leave it empty
-    # null=True )    # allows NULL value in database)
-    # level_of_produce = models.CharField(max_length=50, choices=[
-    #     ('selling surplus', 'Selling Surplus'),
-    #     ('selling surplus with value addition', 'Selling Surplus with Value Addition')
-    # ])
-    # sowing_date = models.DateField(blank=True, null=True)
-    # harvest_date = models.DateField(blank=True, null=True)
     quantity_for_sale = models.FloatField()
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    unit = models.CharField(max_length=20, choices=[
-        ('Kg', 'Kg'), ('250 gm', '250 gm'), ('bundle', 'Bundle'),
-        ('piece', 'Piece'), ('dozen', 'Dozen')
-    ])
-    # produce_expense = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
-    # profit_expectation = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    unit = models.CharField(max_length=20, choices=UNIT_CHOICES)
+   
     photo_or_video = models.FileField(
         upload_to='produce_media/',
         blank=True,

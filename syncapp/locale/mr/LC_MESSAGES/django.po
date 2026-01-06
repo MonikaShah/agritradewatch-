@@ -805,8 +805,7 @@ msgstr "अवैध क्रेडेन्शियल"
  msgid "Agmarknet Price Trend"
  msgstr "अ‍ॅगमार्कनेट किमतींचा ट्रेंड"
 
- msgid "Local"
- msgstr "स्थानिक"
+
 
  msgid "2025 Agritrade Watch | Built for smarter agriculture & markets"
  msgstr "२०२५ अ‍ॅग्रीट्रेड वॉच | स्मार्ट शेती आणि बाजारपेठांसाठी बनवलेले"
@@ -966,3 +965,15 @@ msgstr "अवैध क्रेडेन्शियल"
 
  msgid "tender coconut"
  msgstr "पाणी नारळ"
+
+msgid "local"
+msgstr "स्थानिक"
+
+msgid "Local"
+msgstr "स्थानिक"
+
+msgid "red"
+msgstr "लाल"
+
+msgid "wild"
+msgstr "जंगली"
