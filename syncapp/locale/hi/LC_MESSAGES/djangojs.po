@@ -760,3 +760,26 @@ msgstr "शेगाव"
 
 msgid "Washim"
 msgstr "वाशिम"
+
+#: syncapp/forms.py:9
+msgid "2.5 Kg"
+msgstr "2.5 किलो"
+
+#: syncapp/forms.py:10 syncapp/templates/syncapp/dt_dashboard.html:760
+msgid "Kg"
+msgstr "किलो"
+
+#: syncapp/forms.py:11
+
+msgid "Bundle"
+msgstr "बंडल"
+
+#: syncapp/forms.py:12
+
+msgid "Piece"
+msgstr "नंग"
+
+#: syncapp/forms.py:13
+
+msgid "Dozen"
+msgstr "दर्जन"

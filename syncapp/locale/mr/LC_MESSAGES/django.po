@@ -337,7 +337,7 @@ msgstr "नुकसान पिकाचा अहवाल"
 
 #: syncapp/templates/syncapp/damage_list.html:13
 msgid "Add Damage Report"
-msgstr ""
+msgstr "नुकसान अहवाल जोडा"
 
 #: syncapp/templates/syncapp/damage_list.html:29
 msgid "Place"

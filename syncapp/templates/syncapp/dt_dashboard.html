@@ -368,7 +368,6 @@
     100% { transform: rotate(360deg); }
 }
 </style>
-<script src="{% url 'javascript-catalog' %}"></script>
 
   <div id="dashboard-container">
     <div id="topPanel">
@@ -747,7 +746,7 @@ function renderCommodityRow(item, isSelected) {
             <span class="profile-value">
                 ₹ <input type="number" id="edit_cost_${item.id}" value="${item.cost}" min="1" 
                     style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
-                /<span class="profile-label">${item.unit}</span>
+                /<span class="profile-label">${gettext(item.unit)}</span>
             </span>
             <br>
             <span class="profile-label"><b>${TXT_QUANTITY_SALE}</b></span>

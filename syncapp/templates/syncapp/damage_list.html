@@ -36,7 +36,7 @@
                         {% for damage in damages %}
                         <tr>
                             
-                            <td>{{ damage.commodity }}</td>
+                            <td>{% trans damage.commodity %}</td>
                             <td>
                                 
                             {% if damage.damage|floatformat == "0" %}
@@ -44,7 +44,7 @@
                             {% else %}
                                 {{ damage.damage|floatformat:2 }} 
                             {% endif %}
-                            {{ damage.unit }}
+                            {{ damage.get_unit_display }}
 
                             </td>
                             
