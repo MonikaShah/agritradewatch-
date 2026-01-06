@@ -1,0 +1,1038 @@
+  {% extends "syncapp/base.html" %}
+  {% load static %}
+  {% block content %}
+
+  <style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  #dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+  }
+
+  /* Top Panel */
+  #topPanel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    z-index: 1000;
+  }
+
+  #topPanel label {
+    font-weight: bold;
+  }
+
+  #topPanel select,
+  #topPanel button {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  #topPanel button {
+    background-color: #198754;
+    color: white;
+    border: none;
+  }
+  #topPanel button:hover {
+    background-color: #157347;
+  }
+
+  /* Map + Right Panel Container */
+  #mapContainer {
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+    height: calc(100vh - 60px); /* topPanel height */
+    transition: all 0.4s ease;
+  }
+
+  /* Map */
+  #map {
+    flex: 1;
+    height: 100%;
+    transition: flex 0.4s ease;
+  }
+
+  /* Right Panel */
+  .rightPanelBase {
+  width: 0;
+  overflow-x: hidden;
+  transition: width 0.4s ease;
+  background: #ffffff;
+  border-left: 1px solid #ddd;
+  box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.rightPanelInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  gap: 15px;
+}
+
+/* Header & Close Button */
+#closeRightPanelBtn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+#closeRightPanelBtn:hover {
+  color: #e74c3c;
+}
+
+/* Profile Content */
+#profileContent h4 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #198754;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.profile-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.profile-value {
+  color: #222;
+  text-align: right;
+}
+
+/* Optional: profile image placeholder */
+#profileContent .profile-pic {
+  width: 80px;
+  height: 80px;
+  background: #ddd;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #aaa;
+}
+
+/* Scrollable content if too long */
+#profileContent {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+  /* Close Button */
+
+  /* Leaflet Legend */
+  .leaflet-control.legend {
+    background: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    font-size: 14px;
+    line-height: 1.4em;
+  }
+  .legend img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .legend i {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 6px;
+    border-radius: 50%;
+  }
+  /* Resizer between map and right panel */
+#resizer {
+  width: 6px;
+  cursor: ew-resize;
+  background-color: rgba(0,0,0,0.1);
+  z-index: 2500;
+  transition: background-color 0.2s ease;
+}
+#resizer:hover {
+  background-color: rgba(0,0,0,0.3);
+}
+/* Prevent popup content from expanding outside popup on mobile */
+.leaflet-popup-content {
+    max-width: 240px !important;
+    overflow-x: hidden;
+}
+
+.leaflet-popup-content-wrapper {
+    overflow: hidden !important;
+}
+.profile-row,
+.edit-row,
+.popup-edit-container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+@media(min-width: 769px) {
+  #rightPanel {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 0;   /* ❗ Hidden on load */
+    height: 100%;
+    border-left: 1px solid #ddd;
+    border-radius: 0 !important;
+    box-shadow: -3px 0 12px rgba(0,0,0,0.15);
+    transition: width 0.2s ease;
+  }
+   #rightPanel.open {
+    width: 35%; /* Open state */
+  }
+
+  #mapContainer {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 60px); /* adjust for top panel */
+  }
+  
+  #map {
+    flex-grow:1; flex-shrink:0;
+    height: 100%;
+  }
+
+  #resizer {
+    display: block;
+  }
+}
+  /* Mobile responsiveness */
+  @media(max-width: 768px){
+    #dashboard-container {
+    height: 100dvh; /* fixes mobile browser shrink issues */
+  }
+
+    #mapContainer {
+      position: relative;  /* needed for absolutely positioned panel */
+      flex-direction: column;
+      height: calc(100dvh - 60px); /* safe mobile height */
+    }
+    #map {
+      flex: 1 1 100%;
+      height: calc(100%); /* full height of container */
+      min-height: 300px; /* ensures map never collapses */
+    }
+    
+  #rightPanel {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    max-height: 70%;  /* prevents full screen block */
+    border-left: none;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
+    transition: bottom 0.2s ease;
+    z-index: 3000;
+  }
+
+  #rightPanel.open {
+    bottom: 0;
+  }
+
+  #resizer {
+    display: none; /* hide slider on mobile */
+  }
+}
+#mapLoading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 2000;
+  font-size: 16px;
+  color: #444;
+}
+
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #198754;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+  </style>
+
+  <div id="dashboard-container">
+    <div id="topPanel">
+      <div>
+        <label for="commoditySelect">Select Commodity:</label>
+        <select id="commoditySelect">
+          <option value="">-- Select --</option>
+        </select>
+      </div>  
+      <div id="loadingSpinner" style="display:none; margin-left:10px;">
+        <span>⏳ Loading...</span>
+      </div>
+      <span id="statusMsg"></span>
+      <div class="ms-auto">
+        <div class="dropdown">
+          <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            ⚙️ Action 
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
+            <!-- <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li> -->
+            {% if thela_username %}
+              <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ Add Produce</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <!-- <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li> -->
+            {% else %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 Login</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="mapContainer">
+      <div id="mapLoading">
+    <div class="spinner"></div>
+        <p>Locating you...</p>
+    </div>
+
+      <div id="map"></div>
+
+      <!-- Slider / resizer -->
+      <div id="resizer"></div>
+
+      <div id="rightPanel">
+        <div class="rightPanelInner">
+          <button id="closeRightPanelBtn">✖</button>
+          <div id="profileContent">
+            <h4>Commodities for Sale</h4>
+            <span id="profileUsername" style="display:none;"></span>
+            <div id="otherCommodities"></div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+  let map;
+  let userMarker = null;
+  let markers = [];
+  let currentCommodity = null;
+  const loggedInUser = "{{ thela_username }}";   // empty string if not logged in
+  let currentOpenMarker = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+  
+    map = L.map('map').setView([20.5937, 78.9629], 8);
+
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    })
+
+    var googleHybrid = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+    ).addTo(map);
+
+    var baseMaps = {
+        "OpenStreetMap": osmLayer,
+        "Google Hybrid": googleHybrid
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+
+    loadCommodities();
+    locateUser();
+  });
+
+  // Shrink map & show profile
+  function showProfileAboveLegend(profile, usernameIdFromPopup) {
+    const mapDiv = document.getElementById('map');
+    const rightPanel = document.getElementById('rightPanel');
+    const contentDiv = document.getElementById('profileContent');
+    
+    // contentDiv.innerHTML = `
+    //     <div class="profile-pic">👤</div>
+       // Build profile image
+    let profileImgHTML = `
+        <div class="profile-pic">👤</div>
+    `;
+
+    if (profile.profile_pic) {
+      // alert("image there")
+        profileImgHTML = `
+            <img src="${profile.profile_pic}" 
+                 class="profile-pic" 
+                 style="object-fit: cover; width:80px; height:80px; border-radius:50%;" />
+        `;
+    }
+
+    contentDiv.innerHTML = `
+        ${profileImgHTML}
+        <h4>${profile.username || profile.display_name || usernameIdFromPopup || 'Unknown'}</h4>
+
+        <div class="profile-row">
+            <span class="profile-label">Job:</span>
+            <span class="profile-value">${profile.job || 'N/A'}</span>
+        </div>
+
+        <div class="profile-row">
+            <span class="profile-label">Email:</span>
+            <span class="profile-value">${profile.email || 'N/A'}</span>
+        </div>
+
+        <div class="profile-row">
+            <span class="profile-label">Phone:</span>
+            <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
+        </div>
+        <div class="profile-row">
+            <span class="profile-label">Payment Option:</span>
+            <span class="profile-value">Cash</span>
+        </div>
+
+        <h4>Selected Commodity</h4>
+          <div id="selectedCommodity">Loading...</div>
+
+        <h4>Other Items For Sale</h4>
+        <div id="otherCommodities">Loading...</div>
+    `;
+
+    // Use the username id that we got from the marker popup first (guaranteed to match DtEntries.username_id)
+    // If it's not provided, fall back to possible names on the profile object.
+    const usernameToQuery = usernameIdFromPopup ||
+                            profile.username_id ||
+                            profile.username ||
+                            profile.user ||
+                            profile.user_name ||
+                            null;
+    
+        loadOtherCommodities(usernameToQuery, currentCommodity);
+        console.log("username for other commodity",usernameToQuery);
+    // OPEN PANEL
+    rightPanel.classList.add('open');
+    if(window.innerWidth > 768){
+        rightPanel.style.width = '45%';
+        mapDiv.style.flex = '0 0 55%';
+    }
+
+    document.getElementById('closeRightPanelBtn').onclick = () => {
+        rightPanel.classList.remove('open');
+        rightPanel.style.width = '0';
+        mapDiv.style.flex = '1';
+        setTimeout(()=>map.invalidateSize(), 300);
+    };
+
+    setTimeout(()=>map.invalidateSize(), 300);
+}
+
+//load other commodities
+async function loadOtherCommodities(username, selectedCommodityName = null) {
+    const selectedContainer = document.getElementById("selectedCommodity");
+    const otherContainer = document.getElementById("otherCommodities");
+
+    selectedContainer.innerHTML = `<p>Loading...</p>`;
+    otherContainer.innerHTML = `<p>Loading...</p>`;
+
+    try {
+        const res = await fetch(`/api/DtEntries/?username_id=${encodeURIComponent(username)}`);
+        const items = await res.json();
+
+        if (!items.length) {
+            selectedContainer.innerHTML = `<p>No items found.</p>`;
+            otherContainer.innerHTML = ``;
+            return;
+        }
+
+        // Split items: selected commodity goes in top, rest go below
+        let selectedItem = null;
+        const otherItems = [];
+
+        items.forEach(item => {
+            if (selectedCommodityName && item.sale_commodity === selectedCommodityName) {
+                selectedItem = item;
+            } else {
+                otherItems.push(item);
+            }
+        });
+
+        // Render selected commodity
+        if (selectedItem) {
+            selectedContainer.innerHTML = ""; // clear
+            selectedContainer.appendChild(renderCommodityRow(selectedItem, true));
+
+        } else {
+            selectedContainer.innerHTML = `<p>No selected commodity found.</p>`;
+        }
+
+        // Render other commodities
+        otherContainer.innerHTML = "";
+        if (otherItems.length) {
+            otherItems.forEach(item => {
+                otherContainer.appendChild(renderCommodityRow(item, false));
+            });
+        } else {
+            otherContainer.innerHTML = `<p>No other items.</p>`;
+        }
+
+    } catch (err) {
+        console.error("Error loading commodities:", err);
+        selectedContainer.innerHTML = `<p style="color:red;">Error loading data</p>`;
+        otherContainer.innerHTML = ``;
+    }
+}
+function renderCommodityRow(item, isSelected) {
+    const row = document.createElement("div");
+    row.classList.add("profile-row");
+    row.style.flexDirection = "column";
+    row.style.padding = "8px";
+    row.style.borderBottom = "1px solid #ddd";
+
+    const loggedInUser = "{{ thela_username }}";
+    const isOwner = loggedInUser && (loggedInUser === item.username_id);
+
+    const topLine = document.createElement("div");
+    topLine.style.display = "flex";
+    topLine.style.flexWrap = "wrap";
+    topLine.style.justifyContent = "space-between";
+    topLine.style.alignItems = "center";
+    topLine.style.gap = "5px";
+
+    if (isOwner) {
+        topLine.innerHTML = `
+            <span class="profile-label"><b>${item.sale_commodity}</b></span>
+            <span class="profile-value">
+                ₹ <input type="number" id="edit_cost_${item.id}" value="${item.cost}" min="1" 
+                    style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
+                /<span class="profile-label">${item.unit}</span>
+            </span>
+            <br>
+            <span class="profile-label"><b>Quantity For sale:</b></span>
+            <span class="profile-value">
+                <input type="number" id="edit_qty_${item.id}" value="${item.quantity_for_sale}" min="1" 
+                    style="width:70px; text-align:right; padding:2px; border:1px solid #ccc;">
+            </span>
+            <span class="profile-value">
+            <select id="edit_unit_${item.id}" style="width:100px; padding:2px; border:1px solid #ccc;">
+                <option value="Kg" ${item.unit === 'Kg' ? 'selected' : ''}>Kg</option>
+                <option value="250 gm" ${item.unit === '250 gm' ? 'selected' : ''}>250 gm</option>
+                <option value="bundle" ${item.unit === 'bundle' ? 'selected' : ''}>bundle</option>
+                <option value="piece" ${item.unit === 'piece' ? 'selected' : ''}>piece</option>
+                <option value="dozen" ${item.unit === 'dozen' ? 'selected' : ''}>dozen</option>
+            </select>
+                <button class="btn btn-sm btn-primary" style="margin-left:5px;padding:2px 6px;"
+                    onclick="updateProduce(${item.id})">
+                    Save
+                </button>
+            </span>
+        `;
+    } else {
+        topLine.innerHTML = `
+            <span class="profile-label">${item.sale_commodity}</span>
+            <span class="profile-value">₹${item.cost} / ${item.quantity_for_sale} ${item.unit}</span>
+        `;
+    }
+
+    row.appendChild(topLine);
+
+    // Details
+    const detailsDiv = document.createElement("div");
+    detailsDiv.style.marginTop = "6px";
+    detailsDiv.style.fontSize = "13px";
+    detailsDiv.style.color = "#555";
+    detailsDiv.innerHTML = `
+        <div><b>Variety:</b> ${item.variety_name || 'N/A'}</div>
+        
+        ${item.photo_or_video
+            ? (item.photo_or_video.endsWith('.mp4')
+                ? `<video src="/media/${item.photo_or_video}" controls width="200" style="margin-top:5px;"></video>`
+                : `<img src="/media/${item.photo_or_video}" width="200" style="margin-top:5px;" />`)
+            : ''}
+    `;
+    row.appendChild(detailsDiv);
+
+    if (isSelected) row.style.background = "#e6f4ea";
+
+    return row;
+}
+
+
+async function updateProduce(id) {
+// alert(id);
+    const cost = document.getElementById(`edit_cost_${id}`).value;
+    const qty = document.getElementById(`edit_qty_${id}`).value;
+    const unit = document.getElementById(`edit_unit_${id}`).value.trim();
+// alert(qty);
+    if (!cost || isNaN(cost) || cost < 1) {
+        alert("Enter a valid cost");
+        return;
+    }
+    if (!qty || isNaN(qty) || qty < 0) {
+        alert("Enter a valid quantity");
+        return;
+    }
+    if (!unit) {
+        alert("Enter a valid unit");
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/update_produce_cost/${id}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                cost: cost,
+                quantity_for_sale: qty,
+                unit: unit
+            })
+        });
+
+        if (!res.ok) throw new Error("Failed to update");
+
+        alert("Produce updated!");
+        // Refresh right panel and popup
+        const username = "{{ thela_username }}"; // or fetch actual viewed user
+        loadOtherCommodities(username, currentCommodity);
+        if (currentOpenMarker) refreshPopup(id, currentOpenMarker);
+
+    } catch (err) {
+        console.error(err);
+        alert("Error updating produce");
+    }
+}
+
+
+  // Load commodities from API
+  async function loadCommodities() {
+    try{
+      const res = await fetch('/api/DtEntries/');
+      const commodities = await res.json();
+      
+      const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
+
+      const select = document.getElementById('commoditySelect');
+      select.innerHTML = '<option value="">-- Select --</option>';
+      uniqueCommodities.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+
+    } catch(err){
+      console.error(err);
+    }
+  }
+  async function refreshPopup(entryId) {
+    try {
+        const marker = markers.find(m => m._entryId === entryId);
+        if (!marker) return;  // no marker to update
+
+        const res = await fetch(`/api/get_single_entry/${entryId}/`);
+        if (!res.ok) {
+            console.error("Failed to fetch entry:", res.status);
+            return;
+        }
+
+        const entry = await res.json();
+
+        const popupHTML = `
+          <div>
+            <a href="#" class="view-profile-link" data-username-id="${entry.username_id}"
+              style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+              👤 ${entry.username_id} - View Profile
+            </a>
+            <br><br>
+            <b>Commodity:</b> ${entry.sale_commodity}<br>
+            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
+            <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
+              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>Method:</b> ${entry.method}<br>
+              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              <b>Sowing Date:</b> ${entry.sowing_date}<br>
+              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              ${entry.photo_or_video
+                ? (entry.photo_or_video.endsWith('.mp4')
+                    ? `<video src="/media/${entry.photo_or_video}" controls width="300"></video>`
+                    : `<img src="/media/${entry.photo_or_video}" width="200">`)
+                : ''}
+            </div>
+          </div>
+        `;
+
+        marker.setPopupContent(popupHTML);
+
+        // Reattach popup events (toggle, profile link)
+        marker.on("popupopen", e => {
+            const popup = e.popup._contentNode;
+
+            // Toggle more details
+            const toggle = popup.querySelector('.toggle-details');
+            const details = popup.querySelector('.more-details');
+            if(toggle && details){
+                toggle.addEventListener('click', ev=>{
+                    ev.preventDefault();
+                    if(details.style.maxHeight && details.style.maxHeight !== '0px'){
+                        details.style.maxHeight='0';
+                        toggle.textContent='🔍 More Details';
+                    } else {
+                        details.style.maxHeight=details.scrollHeight+'px';
+                        toggle.textContent='🔽 Hide Details';
+                    }
+                });
+            }
+
+            // View profile
+            const profileLink = popup.querySelector('.view-profile-link');
+            if(profileLink){
+                profileLink.addEventListener('click', async ev => {
+                    ev.preventDefault();
+                    const usernameFromLink = profileLink.dataset.usernameId;
+                    if (!usernameFromLink) {
+                        alert("Username not available!");
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch(`/api/profile/${encodeURIComponent(usernameFromLink)}/`);
+                        if (!res.ok) throw new Error(res.statusText);
+                        const profile = await res.json();
+                        showProfileAboveLegend(profile, usernameFromLink);
+                    } catch(err) {
+                        console.error(err);
+                        alert("Could not load profile.");
+                    }
+                });
+            }
+        });
+
+    } catch (err) {
+        console.error("Popup refresh failed:", err);
+    }
+}
+
+
+  // Locate user
+  // function locateUser(){
+  //   if(!navigator.geolocation) return;
+  //   navigator.geolocation.getCurrentPosition(pos=>{
+  //     const lat=pos.coords.latitude;
+  //     const lng=pos.coords.longitude;
+  //     map.setView([lat,lng],10);
+
+  //     if(userMarker) map.removeLayer(userMarker);
+  //         userMarker = L.circleMarker([lat,lng],{
+  //             radius:8, color:"#007bff", fillColor:"#007bff", fillOpacity:0.5
+  //         }).addTo(map);
+  //       }, err=>{
+  //         console.warn("Geolocation failed, using default location.");
+  //       });
+  //     }
+  function locateUser() {
+    const loader = document.getElementById('mapLoading');
+
+    if (!navigator.geolocation) {
+        loader.style.display = "none";
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        map.setView([lat, lng], 16, { animate: true });
+
+        if (userMarker) map.removeLayer(userMarker);
+
+        userMarker = L.circleMarker([lat, lng], {
+            radius: 10,
+            color: "#ffffff",
+            weight:3,
+            fillColor: "#007bff",
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        // ⭐ Hide spinner AFTER map focuses
+        setTimeout(() => loader.style.display = "none", 500);
+
+    }, err => {
+        console.warn("Geolocation failed, using default.");
+        loader.style.display = "none";
+    });
+}
+
+
+  // Show markers
+  document.getElementById('commoditySelect').addEventListener('change', e=>{
+    showCommodityMarkers(e.target.value);
+  });
+
+  async function showCommodityMarkers(commodity){
+    if(!commodity) return;
+    currentCommodity = commodity;
+    const spinner = document.getElementById('loadingSpinner');
+    spinner.style.display = 'inline';  // show spinner
+
+    const res = await fetch(`/api/DtEntries/?sale_commodity=${commodity}`);
+    const data = await res.json();
+    console.log("All entries for", commodity, data);
+
+    markers.forEach(m=>map.removeLayer(m));
+    markers=[];
+
+    const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
+    const iconExists = await checkImageExists(iconPath);
+
+    data.forEach(entry=>{
+      if(entry.latitude && entry.longitude){
+        let marker;
+        if(iconExists){
+          const icon = L.icon({
+            iconUrl: iconPath,
+            iconSize: [28,28],
+            iconAnchor: [14,28],
+            popupAnchor: [0,-28]
+          });
+          marker = L.marker([entry.latitude,entry.longitude],{icon});
+        } else {
+          marker = L.circleMarker([entry.latitude, entry.longitude],{
+            radius:7,color:"#28a745",fillColor:"#28a745",fillOpacity:0.6
+          });
+        }
+
+        const popupHTML = `
+          <div>
+            <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
+              style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+              👤 ${entry.username_id} - View Profile
+            </a>
+            <br><br>
+            <b>Commodity:</b> ${entry.sale_commodity}<br>
+            <b>Price:</b> ${entry.cost} / ${entry.unit}<br><br>
+            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 More Details</a>
+            <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
+              <b>Updated on:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
+              <b>Variety:</b> ${entry.variety_name}<br>
+              <b>Method:</b> ${entry.method}<br>
+              <b>Production Level:</b> ${entry.level_of_produce}<br>
+              <b>Sowing Date:</b> ${entry.sowing_date}<br>
+              <b>Harvest Date:</b> ${entry.harvest_date}<br>
+              <b>Quantity:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
+              ${entry.photo_or_video
+                ? (entry.photo_or_video.endsWith('.mp4')
+                    ? `<video src="../${entry.photo_or_video}" controls width="300"></video>`
+                    : `<img src="../${entry.photo_or_video}" width="200">`)
+                : ''}
+            </div>
+          </div>
+        `;
+
+        marker.addTo(map).bindPopup(popupHTML);
+        
+        marker._entryId = entry.id;  // store for later
+
+        marker.on("popupopen", e=>{
+          currentOpenMarker = e.popup._source;  // store marker
+          const popup = e.popup._contentNode;
+          // More details toggle
+          const toggle = popup.querySelector('.toggle-details');
+          const details = popup.querySelector('.more-details');
+          if(toggle && details){
+            toggle.addEventListener('click', ev=>{
+              ev.preventDefault();
+              if(details.style.maxHeight && details.style.maxHeight !== '0px'){
+                details.style.maxHeight='0';
+                toggle.textContent='🔍 More Details';
+              } else {
+                details.style.maxHeight=details.scrollHeight+'px';
+                toggle.textContent='🔽 Hide Details';
+              }
+            });
+          }
+          
+          // View profile
+          const profileLink = popup.querySelector('.view-profile-link');
+          if(profileLink){
+            profileLink.addEventListener('click', async ev => {
+              ev.preventDefault();
+              // username from marker popup attribute (this is the DB username_id)
+              const usernameFromLink = profileLink.dataset.usernameId;
+              if (!usernameFromLink) {
+                alert("Username not available!");
+                return;
+              }
+
+              try {
+                const res = await fetch(`/api/profile/${encodeURIComponent(usernameFromLink)}/`);
+                const profile = await res.json();
+                console.log("Profile fetched:", profile);
+                // IMPORTANT: pass both profile object AND the original username id from the popup
+                showProfileAboveLegend(profile, usernameFromLink);
+              } catch(err) {
+                console.error(err);
+                alert("Could not load profile.");
+              } finally {
+                spinner.style.display = 'none';
+              }
+            });
+
+          }
+        });
+
+        markers.push(marker);
+      }
+      // ⭐ AUTO-FOCUS MAP TO ALL MARKERS FOR SELECTED COMMODITY
+if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), {
+        padding: [40, 40],
+        maxZoom: 15,
+        animate: true
+    });
+}
+
+// spinner.style.display = 'none';
+
+    });
+    
+        // ✅ Add legend after markers
+    updateLegend(commodity, data.length, iconExists, iconPath);
+
+
+    document.getElementById('statusMsg').textContent = data.length
+      ? `Showing ${data.length} entries for ${commodity}.`
+      : "No entries found for this commodity.";
+
+          spinner.style.display = 'none';
+  }
+
+  // Check image exists
+  async function checkImageExists(url){
+    try{
+      const res = await fetch(url,{method:'HEAD'});
+      return res.ok;
+    }catch{
+      return false;
+    }
+  }
+  let legendControl = null;
+
+function updateLegend(commodity, count, iconExists, iconPath){
+    // Remove old legend
+    if(legendControl) map.removeControl(legendControl);
+
+    legendControl = L.control({position: 'bottomright'});
+
+    legendControl.onAdd = function(map){
+        const div = L.DomUtil.create('div', 'leaflet-control legend');
+        div.innerHTML = `<b>${commodity}</b> - ${count} entries<br>`;
+
+        if(iconExists){
+            div.innerHTML += `<img src="${iconPath}" />`;
+        } else {
+            div.innerHTML += `<i style="background:#28a745"></i>`;
+        }
+
+        return div;
+    };
+
+    legendControl.addTo(map);
+}
+  if(window.innerWidth > 768){  // only for desktop
+  const mapDiv = document.getElementById('map');
+  const rightPanel = document.getElementById('rightPanel');
+  const resizer = document.getElementById('resizer');
+
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', e => {
+      isResizing = true;
+      document.body.style.cursor = 'ew-resize';
+  });
+
+  document.addEventListener('mousemove', e => {
+      if (!isResizing) return;
+      const containerOffsetLeft = mapDiv.parentElement.getBoundingClientRect().left;
+      const pointerRelativeX = e.clientX - containerOffsetLeft;
+      const containerWidth = mapDiv.parentElement.offsetWidth;
+
+      const minRightWidth = 250; // px
+      const maxRightWidth = containerWidth - 200; // map at least 200px
+
+      let newRightWidth = containerWidth - pointerRelativeX;
+      if (newRightWidth < minRightWidth) newRightWidth = minRightWidth;
+      if (newRightWidth > maxRightWidth) newRightWidth = maxRightWidth;
+
+      rightPanel.style.width = newRightWidth + 'px';
+      mapDiv.style.flex = '0 0 ' + (containerWidth - newRightWidth) + 'px';
+      map.invalidateSize();
+  });
+
+  document.addEventListener('mouseup', e => {
+      if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = 'default';
+      }
+  });
+}
+
+  </script>
+
+  {% endblock %}
