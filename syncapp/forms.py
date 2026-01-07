@@ -6,12 +6,12 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 UNIT_CHOICES = [
-        ('2.5 Kg', '2.5 Kg'),
-        ('Kg', 'Kg'),
-        ('Bundle', 'Bundle'),
-        ('Piece', 'Piece'),
-        ('Dozen', 'Dozen'),
-    ]
+    ('2.5 Kg', _('2.5 Kg')),
+    ('Kg', _('Kg')),
+    ('Bundle', _('Bundle')),
+    ('Piece', _('Piece')),
+    ('Dozen', _('Dozen')),
+]
 class ConsumerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
@@ -86,36 +86,27 @@ class MyCustomPasswordResetForm(PasswordResetForm):
             raise forms.ValidationError("No active user found with this email address.")
         return email
     
-
-
 class DamageForm(forms.ModelForm):
+    commodity = forms.ChoiceField(
+        choices=[],   # will be filled dynamically
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     class Meta:
         model = DamageCrop
         fields = [
             'commodity',
             'damage',
             'unit',
-            'place_damage',   # ✅ new dropdown
+            'place_damage',
             'damage_date',
             'report_date',
             'remarks',
-            'photo',          # ✅ new image upload field
-            "latitude", "longitude", "location_accuracy",
+            'photo',
+            'latitude', 'longitude', 'location_accuracy',
         ]
-        labels = {
-            'commodity': _("Commodity"),
-            'damage': _("Damage Quantity"),
-            'unit': _("Unit"),
-            'place_damage': _("Place of Damage"),
-            'damage_date': _("Damage Date"),
-            'report_date': _("Report Date"),
-            'remarks': _("Remarks"),
-            'photo': _("Upload Photo"),
-        }
-
 
         widgets = {
-            'commodity': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'commodity': forms.Select(attrs={'class': 'form-select'}),
             'damage': forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'}),
             'unit': forms.Select(attrs={'class': 'form-select'}),
             'place_damage': forms.Select(attrs={'class': 'form-select'}),
@@ -132,8 +123,70 @@ class DamageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields['report_date'].initial = now().date()
 
+        # ✅ Build choices from Commodity table
+        commodities = Commodity.objects.order_by('name')
+
+        self.fields['commodity'].choices = [
+            (c.name, _(c.name)) for c in commodities
+        ]
+
+
+# class DamageForm(forms.ModelForm):
+#     class Meta:
+#         model = DamageCrop
+#         fields = [
+#             'commodity',
+#             'damage',
+#             'unit',
+#             'place_damage',   # ✅ new dropdown
+#             'damage_date',
+#             'report_date',
+#             'remarks',
+#             'photo',          # ✅ new image upload field
+#             "latitude", "longitude", "location_accuracy",
+#         ]
+#         labels = {
+#             'commodity': _("Commodity"),
+#             'damage': _("Damage Quantity"),
+#             'unit': _("Unit"),
+#             'place_damage': _("Place of Damage"),
+#             'damage_date': _("Damage Date"),
+#             'report_date': _("Report Date"),
+#             'remarks': _("Remarks"),
+#             'photo': _("Upload Photo"),
+#         }
+
+
+#         widgets = {
+#             'commodity': forms.Select(attrs={'class': 'form-select'}),
+#             'damage': forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'}),
+#             'unit': forms.Select(attrs={'class': 'form-select'}),
+#             'place_damage': forms.Select(attrs={'class': 'form-select'}),
+#             'damage_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+#             'report_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+#             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            
+#             "latitude": forms.HiddenInput(),
+#             "longitude": forms.HiddenInput(),
+#             "location_accuracy": forms.HiddenInput(),
+        
+#         }
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         # default report date
+#         self.fields['report_date'].initial = now().date()
+#          # ascending commodity list
+#             # ✅ Build choices from Commodity table
+#         commodities = Commodity.objects.order_by('name')
+
+#         self.fields['commodity'].choices = [
+#             (c.name, c.name) for c in commodities
+#         ]
 def validate_file_type_and_size(allowed_types, max_size_mb=20):
     def validator(value):
         if value.size > max_size_mb * 1024 * 1024:
