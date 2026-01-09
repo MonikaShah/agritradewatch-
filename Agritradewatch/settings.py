@@ -14,16 +14,27 @@ from pathlib import Path
 from decouple import config
 import os
 from datetime import timedelta
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),'USER_ID_FIELD': 'id',        # ← use your CharField PK
-    'USER_ID_CLAIM': 'user_id',   # ← the claim name in the JWT payload
-}
 from django.utils.translation import gettext_lazy as _
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+GA_CREDENTIALS_FILE = os.path.join(
+    BASE_DIR, "credentials/ga-service-account.json"
+)
+
+GA4_PROPERTY_ID = "519107243"  # numbers only
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),'USER_ID_FIELD': 'id',        # ← use your CharField PK
+    'USER_ID_CLAIM': 'user_id',   # ← the claim name in the JWT payload
+}
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,8 +44,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2acdn_!1^g!f^3w4mwn04y^w7i0vk19*_ox5ewc+^y^2vgvkz+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = True
+DEBUG = False
+# DEBUG = True
 
 
 ALLOWED_HOSTS = [config('ALLOWED_HOST_1'), config('ALLOWED_HOST_2'), config('ALLOWED_HOST_3'),'localhost',
@@ -105,6 +116,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "Agritradewatch.context_processors.analytics_context",
                 
             ],
         },
@@ -228,3 +240,7 @@ print(settings.LOCALE_PATHS)
 FAST2SMS_API_KEY = "yxwor4WmJKG7IpFZcjtzV9gB56XRHA8l2TeCq1f3LEDUhadN0SlIPYjOmkGv6Kxea1UNoCucq0J7f483"
 OTP_EXPIRY_MINUTES = 5
 OTP_MAX_ATTEMPTS = 3
+
+
+print("TEMPLATE DIRS =>", TEMPLATES[0]["DIRS"])
+print("BASE_DIR =>", BASE_DIR)
