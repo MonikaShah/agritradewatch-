@@ -22,7 +22,7 @@ def get_total_users():
     request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
         date_ranges=[DateRange(start_date="2021-01-01", end_date="today")],
-        metrics=[Metric(name="activeUsers")],
+        metrics=[Metric(name="totalUsers")],
     )
 
     response = client.run_report(request)
