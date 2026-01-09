@@ -15,14 +15,6 @@ logger = logging.getLogger(__name__)
 #     return {"TOTAL_VISITORS": visitors}
 
 def analytics_context(request):
-    visitors = cache.get("ga4_total_users")
-
-    if visitors is None:
-        try:
-            visitors = get_total_users()
-            cache.set("ga4_total_users", visitors, 60 * 60)  # 1 hour cache
-        except Exception as e:
-            print("GA4 ERROR:", e)
-            visitors = 0
-
-    return {"TOTAL_VISITORS": visitors}
+    return {
+        "TOTAL_VISITORS": cache.get("ga4_total_users", 0)
+    }
