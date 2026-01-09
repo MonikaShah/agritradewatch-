@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 # Safe import of GA function
 try:
-    from .utils.ga4 import get_total_users
+    from .ga4 import get_total_users
 except ImportError:
     # fallback if ga4.py is missing
     get_total_users = lambda: 0
