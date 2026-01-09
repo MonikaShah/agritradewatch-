@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 GA_CREDENTIALS = "/home/agritradewatch/Agritradewatch/credentials/ga-service-account.json"
 
 # ⚠️ GA4 PROPERTY ID (numbers only)
-GA4_PROPERTY_ID = "379951112"
+GA4_PROPERTY_ID = "519107243"
 
 credentials = service_account.Credentials.from_service_account_file(
     GA_CREDENTIALS
