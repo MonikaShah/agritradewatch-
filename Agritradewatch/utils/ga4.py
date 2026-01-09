@@ -1,0 +1,29 @@
+from google.analytics.data_v1beta import BetaAnalyticsDataClient
+from google.analytics.data_v1beta.types import DateRange, Metric, RunReportRequest
+from google.oauth2 import service_account
+
+# ✅ ABSOLUTE PATH (Apache safe)
+GA_CREDENTIALS = "/home/agritradewatch/Agritradewatch/credentials/ga-service-account.json"
+
+# ⚠️ GA4 PROPERTY ID (numbers only)
+GA4_PROPERTY_ID = "379951112"
+
+credentials = service_account.Credentials.from_service_account_file(
+    GA_CREDENTIALS
+)
+
+client = BetaAnalyticsDataClient(credentials=credentials)
+
+
+def get_total_users():
+    """
+    Returns total active users from GA4
+    """
+    request = RunReportRequest(
+        property=f"properties/{GA4_PROPERTY_ID}",
+        date_ranges=[DateRange(start_date="2021-01-01", end_date="today")],
+        metrics=[Metric(name="activeUsers")],
+    )
+
+    response = client.run_report(request)
+    return int(response.rows[0].metric_values[0].value)
