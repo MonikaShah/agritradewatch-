@@ -23,4 +23,6 @@ def analytics_context(request):
             print("GA fetch failed:", e)
             total = 0  # fallback if GA API fails
         cache.set("total_visitors", total, 300)  # cache 5 minutes
+    print("DEBUG: get_total_users output =", total)
+    
     return {"total_visitors": total}
