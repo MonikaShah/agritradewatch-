@@ -10,6 +10,7 @@ except ImportError:
     print("GA4 import failed: using dummy get_total_users function")
 
 def analytics_context(request):
+    print("DEBUG: analytics_context running")
     """
     Adds GA total users to template context for footer.
     Cached for 5 minutes.
