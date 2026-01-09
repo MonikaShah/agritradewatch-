@@ -4,7 +4,7 @@ from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import DateRange, Metric, RunReportRequest
 from google.oauth2 import service_account
 
-GA_CREDENTIALS = os.path.join(settings.BASE_DIR, "credentials/ga-service-account.json")
+GA_CREDENTIALS = os.path.join(settings.BASE_DIR, "Agritradewatch/credentials/ga-service-account.json")
 GA4_PROPERTY_ID = "519107243"
 
 credentials = service_account.Credentials.from_service_account_file(GA_CREDENTIALS)
