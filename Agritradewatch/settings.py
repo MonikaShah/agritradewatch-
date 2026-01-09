@@ -21,9 +21,8 @@ from django.utils.translation import gettext_lazy as _
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-GA_CREDENTIALS_FILE = os.path.join(
-    BASE_DIR, "credentials/ga-service-account.json"
-)
+
+GA_CREDENTIALS_FILE = os.path.join(BASE_DIR, "Agritradewatch", "credentials", "ga-service-account.json")
 
 GA4_PROPERTY_ID = "519107243"  # numbers only
 
