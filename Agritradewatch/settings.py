@@ -235,6 +235,14 @@ LOCALE_PATHS = [
     ]
 print(settings.LOCALE_PATHS)
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+    }
+}
+
+
 # settings.py
 FAST2SMS_API_KEY = "yxwor4WmJKG7IpFZcjtzV9gB56XRHA8l2TeCq1f3LEDUhadN0SlIPYjOmkGv6Kxea1UNoCucq0J7f483"
 OTP_EXPIRY_MINUTES = 5
