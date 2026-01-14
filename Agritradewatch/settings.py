@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'ckeditor',
     'django_extensions',
+    'analytics'
 ]
 
 MIDDLEWARE = [
