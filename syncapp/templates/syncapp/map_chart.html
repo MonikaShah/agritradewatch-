@@ -636,7 +636,7 @@ const divider = document.getElementById("divider");
                     7: 100000,
                     8: 500000
         };
-
+        
       function drawCircle(radius){
           if(!userLocation) return;
           if(radiusCircle) map.removeLayer(radiusCircle);
@@ -720,46 +720,144 @@ const divider = document.getElementById("divider");
          
 
           const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
-          geojsonLayer = L.geoJSON(filteredGeoJSON, {
-              pointToLayer:(f,latlng)=>{
-                  let color="red";
-                  if(userLocation && userLocation.distanceTo(latlng)<=scale[radiusSlider.value]) color="green";
-                  return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
-              },
-              onEachFeature:(f,layer)=>{
-                  const p=f.properties;
-                  // layer.bindPopup(`<strong>Consumer Name:</strong>${p.username || "Unknown"}<br><strong>Commodity Purchaed:</strong>${p.commodity || "Unknown"}<br>Purchase Date: </strong>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price:</strong> ${p.buyingprice||'NA'}<br>Quantity Bought:</strong> ${p.quantitybought||'-'} ${p.unit||''}<br>`);
-                  // Build table HTML
-                  const table = `
-                      <table style="border-collapse: collapse; width: 100%;">
+          // geojsonLayer = L.geoJSON(filteredGeoJSON, {
+          //     pointToLayer:(f,latlng)=>{
+          //         let color="red";
+          //         if(userLocation && userLocation.distanceTo(latlng)<=scale[radiusSlider.value]) color="green";
+          //         return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
+          //     },
+          //     onEachFeature:(f,layer)=>{
+          //         const p=f.properties;
+          //         // layer.bindPopup(`<strong>Consumer Name:</strong>${p.username || "Unknown"}<br><strong>Commodity Purchaed:</strong>${p.commodity || "Unknown"}<br>Purchase Date: </strong>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price:</strong> ${p.buyingprice||'NA'}<br>Quantity Bought:</strong> ${p.quantitybought||'-'} ${p.unit||''}<br>`);
+          //         // Build table HTML
+          //         const table = `
+          //             <table style="border-collapse: collapse; width: 100%;">
                           
-                          <tr>
-                              <td style="border: 1px solid #999; padding: 4px;">Consumer Name</td>
-                              <td style="border: 1px solid #999; padding: 4px;">${p.username || "Unknown"}</td>
-                          </tr>
-                          <tr>
-                              <td style="border: 1px solid #999; padding: 4px;">Commodity Purchased</td>
-                              <td style="border: 1px solid #999; padding: 4px;">${p.commodity || "Unknown"}</td>
-                          </tr>
-                          <tr>
-                              <td style="border: 1px solid #999; padding: 4px;">Purchase Date</td>
-                              <td style="border: 1px solid #999; padding: 4px;">${p.date ? new Date(p.date).toLocaleDateString('en-GB') : "-"}</td>
-                          </tr>
-                          <tr>
-                              <td style="border: 1px solid #999; padding: 4px;">Buying Price</td>
-                              <td style="border: 1px solid #999; padding: 4px;">${p.buyingprice || 'NA'}</td>
-                          </tr>
-                          <tr>
-                              <td style="border: 1px solid #999; padding: 4px;">Quantity Bought</td>
-                              <td style="border: 1px solid #999; padding: 4px;">${p.quantitybought || '-'} ${p.unit || ''}</td>
-                          </tr>
-                      </table>
-                  `;
+          //                 <tr>
+          //                     <td style="border: 1px solid #999; padding: 4px;">Consumer Name</td>
+          //                     <td style="border: 1px solid #999; padding: 4px;">${p.username || "Unknown"}</td>
+          //                 </tr>
+          //                 <tr>
+          //                     <td style="border: 1px solid #999; padding: 4px;">Commodity Purchased</td>
+          //                     <td style="border: 1px solid #999; padding: 4px;">${p.commodity || "Unknown"}</td>
+          //                 </tr>
+          //                 <tr>
+          //                     <td style="border: 1px solid #999; padding: 4px;">Purchase Date</td>
+          //                     <td style="border: 1px solid #999; padding: 4px;">${p.date ? new Date(p.date).toLocaleDateString('en-GB') : "-"}</td>
+          //                 </tr>
+          //                 <tr>
+          //                     <td style="border: 1px solid #999; padding: 4px;">Buying Price</td>
+          //                     <td style="border: 1px solid #999; padding: 4px;">${p.buyingprice || 'NA'}</td>
+          //                 </tr>
+          //                 <tr>
+          //                     <td style="border: 1px solid #999; padding: 4px;">Quantity Bought</td>
+          //                     <td style="border: 1px solid #999; padding: 4px;">${p.quantitybought || '-'} ${p.unit || ''}</td>
+          //                 </tr>
+          //             </table>
+          //         `;
 
-                  layer.bindPopup(table);
-              }
-          });
-          markers.addLayer(geojsonLayer); map.addLayer(markers);
+          //         layer.bindPopup(table);
+          //     }
+          // });
+          // markers.addLayer(geojsonLayer); map.addLayer(markers);
+            filteredFeatures.forEach(f => {
+                const lat = f.geometry.coordinates[1];
+                const lon = f.geometry.coordinates[0];
+
+                const marker = L.circleMarker([lat, lon], {
+                    radius: 7,
+                    color: "#000",
+                    weight: 1,
+                    fillOpacity: 0.8,
+                    fillColor: (
+                        userLocation &&
+                        userLocation.distanceTo([lat, lon]) <= scale[radiusSlider.value]
+                    ) ? "green" : "red"
+                });
+
+                // 🔑 attach full feature to marker
+                marker.featureData = f;
+
+                // keep your existing popup
+                const p = f.properties;
+                marker.bindPopup(`
+                    <table style="border-collapse: collapse; width: 100%;">
+                      <tr><td>Consumer</td><td>${p.username || "Unknown"}</td></tr>
+                      <tr><td>Commodity</td><td>${p.commodity}</td></tr>
+                      <tr><td>Date</td><td>${p.date ? new Date(p.date).toLocaleDateString('en-GB') : "-"}</td></tr>
+                      <tr><td>Price</td><td>${p.buyingprice || "NA"}</td></tr>
+                      <tr><td>Qty</td><td>${p.quantitybought || "-"} ${p.unit || ""}</td></tr>
+                    </table>
+                `);
+
+                markers.addLayer(marker);
+            });
+
+            map.addLayer(markers);
+            markers.on("clusterclick", function (e) {
+                L.DomEvent.stop(e);   // ⛔ prevent zoom
+
+                const rows = e.layer
+                    .getAllChildMarkers()
+                    .map(m => m.featureData)
+                    .filter(f => f?.properties?.date && f?.properties?.buyingprice != null);
+
+                if (rows.length < 2) {
+                    alert("Not enough data for time series");
+                    return;
+                }
+
+                rows.sort(
+                    (a, b) =>
+                        new Date(a.properties.date) -
+                        new Date(b.properties.date)
+                );
+
+                openClusterTimeline(e.latlng, rows);
+            });
+            function openClusterTimeline(latlng, rows) {
+                const id = "chart-" + Date.now();
+
+                const html = `
+                  <div style="width:360px;height:220px">
+                    <canvas id="${id}"></canvas>
+                  </div>
+                `;
+
+                L.popup({ maxWidth: 400 })
+                    .setLatLng(latlng)
+                    .setContent(html)
+                    .openOn(map);
+
+                setTimeout(() => {
+                    const ctx = document.getElementById(id).getContext("2d");
+
+                    new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: rows.map(r =>
+                                new Date(r.properties.date).toLocaleDateString("en-GB")
+                            ),
+                            datasets: [{
+                                label: "Price",
+                                data: rows.map(r => r.properties.buyingprice),
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { title: { display: true, text: "Date" } },
+                                y: { title: { display: true, text: "Price (₹)" } }
+                            }
+                        }
+                    });
+                }, 150);
+            }
+
 
           if(zoomToBounds && (filteredFeatures.length>0 || userLocation)){
               let bounds = markers.getBounds();
@@ -1419,9 +1517,9 @@ async function fetchConsumersAndFarmersPrices() {
                         showLine: false, 
                         tension: 0.3,
                         pointBorderWidth: 3,                    // bold circle border
-                        pointRadius: 6,                         // bigger point
+                        pointRadius: 3,                         // bigger point
                         pointHoverRadius: 10,                   // bigger on hover
-                        pointBackgroundColor: "rgba(0, 90, 255, 1)",   // very dark blue
+                        pointBackgroundColor: "transparent",   //rgba(0, 90, 255, 1) very dark blue
                         pointBorderColor: "rgba(0, 50, 160, 1)", 
                                     },
                     {
@@ -1429,12 +1527,12 @@ async function fetchConsumersAndFarmersPrices() {
                         data: farmerPrices,
                         borderColor: "rgba(75, 192, 75, 1)",
                         backgroundColor: "rgba(75, 192, 75, 0.2)",
-                        borderWidth: 0,
+                        borderWidth:3,
                         showLine: false, 
                         tension: 0.3,pointBorderWidth: 3,                    // bold circle border
-                        pointRadius: 6,                         // bigger point
+                        pointRadius: 3,                         // bigger point
                         pointHoverRadius: 10,
-                        pointBackgroundColor: "rgba(0, 180, 50, 1)",   // dark green
+                        pointBackgroundColor: "transparent",   // rgba(0, 180, 50, 1) dark green
                         pointBorderColor: "rgba(0, 120, 30, 1)",       // darker border
                     }
                 ]
@@ -1468,6 +1566,7 @@ async function fetchConsumersAndFarmersPrices() {
                 scales: {
                     x: {
                         type: "time",
+                        offset: true,
                         time: {
                             unit: "day",
                             tooltipFormat: "dd/MM/yyyy",
