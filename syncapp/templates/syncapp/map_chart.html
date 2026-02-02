@@ -756,13 +756,15 @@ const divider = document.getElementById("divider");
                 `);
 
                 markers.addLayer(marker);
+                markers._zoomOrSpiderfy = function () {
+                    // do nothing
+                };
             });
 
             map.addLayer(markers);
             markers.on("clusterclick", function (e) {
                 L.DomEvent.stop(e);   // ⛔ prevent zoom
-                markers._spiderfy = function () {};
-                markers._unspiderfy = function () {};
+                
 
                 const rows = e.layer
                     .getAllChildMarkers()
