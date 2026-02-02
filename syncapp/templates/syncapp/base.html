@@ -114,6 +114,22 @@
             background-color: #e9f7ef;
             color: #155724 !important;
         }
+        /* FIX: Dropdown background + visible text */
+        header .navbar .dropdown-menu {
+            background-color: #ffffff !important;
+            border: 1px solid #dee2e6;
+            min-width: 180px;
+        }
+
+        header .navbar .dropdown-menu .dropdown-item {
+            color: #212529 !important;
+        }
+
+        header .navbar .dropdown-menu .dropdown-item:hover {
+            background-color: #e9f7ef !important;
+            color: #155724 !important;
+        }
+
 
     </style>
 
@@ -133,15 +149,19 @@
   gtag('config', 'G-3VC5VSVQPV');
 </script>
 
-<body>
-    <!-- Header -->
+<body class="d-flex flex-column min-vh-100">
+        <!-- Header -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm py-2">
             <div class="container-fluid">
                 <!-- Logo / Title -->
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'landingpage' %}">
-                    🌾 <span class="ms-2">{% trans "MandiGo" %}</span>
-                </a>
+                 <img src="{% static 'logo1.jpg' %}" 
+         alt="MandiGo Logo"
+         style="height:40px;"
+         class="me-2">
+                    <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'landingpage' %}">
+                        <span class="ms-2">{% trans "MandiGo" %}</span>
+                    </a>
 
                 <!-- Hamburger for mobile -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -238,9 +258,9 @@
     </header>
 
     <!-- Main content -->
-    <main class="py-3">
+    <main class="flex-grow-1 py-3">
        {% if messages %}
-        <div id="message-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; ">
+        <div id="message-container" style="position: fixed;   top: var(--navbar-height); left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; ">
             {% for message in messages %}
             <div class="alert 
                 {% if 'error' in message.tags %}alert-danger
@@ -257,7 +277,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center border-top footer-custom">
+    <footer class="text-center border-top footer-custom mt-auto">
         <p style="color: red;">{% trans "This is a trial version and the platform is not fully operational yet." %}</p>
 
         &copy; {% trans "2025 MandiGo | 'सही दाम, किसान सम्मान'" %}
