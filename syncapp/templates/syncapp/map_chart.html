@@ -177,6 +177,7 @@
             <optgroup label="{{ type }}">
                 {% for item in items %}
                   <option value="{{ item.name }}"
+                    title="{{ item.title }}"
                     {% if item.name == "Onion" %}selected{% endif %} 
                     {% if item.disabled %}disabled{% endif %}>
                     {{ item.label }}
@@ -266,7 +267,8 @@
     
     
     <h3><b>{% trans "Consumer and Farmer Reported Price Trend" %} : 
-      <span id="selected-commodity"></span></b>
+      <span id="selected-commodity"></span>
+    <span id="title"></span></b>
       <span id="consumerapan"></span>
       <button class="toggle-chart-btn" data-target="consumersChart">{% trans "Hide Chart" %}</button>
       <!-- <button class="resize-chart-btn" data-target="consumersChart">Expand</button> -->
@@ -575,6 +577,7 @@ const divider = document.getElementById("divider");
       const selectedCommoditySpan = document.getElementById("selected-commodity");
       selectedCommoditySpan.textContent = gettext(commoditySelect.value);
       // selectedCommoditySpan.innerText = commoditySelect.value;
+      const titleSpan = document.getElementById("title");
 
       const map = L.map('map',{ zoomControl: false }).setView([19.2, 73.0], 7);
 
@@ -965,6 +968,20 @@ const divider = document.getElementById("divider");
         console.error("Error loading GeoJSON:", err);
     }
 
+    function updateTitle() {
+        const selectedOption = commoditySelect.options[commoditySelect.selectedIndex];
+
+        selectedCommoditySpan.textContent = selectedOption.text;
+        titleSpan.textContent = selectedOption.title
+          ? " (" + selectedOption.title + ")"
+          : "";
+      }
+
+      // initial load
+      updateTitle();
+
+      // on change
+      commoditySelect.addEventListener("change", updateTitle);
 
       commoditySelect.addEventListener("change", function(){
           selectedCommoditySpan.innerText=this.value;
@@ -1361,51 +1378,43 @@ let consumersChart = null;
    Plugin: Draw separate c/f counts under x-axis
 ---------------------------------------- */
 const pointCountPlugin = {
-    id: 'pointCountPlugin',
-    afterDatasetsDraw(chart, args, options) {
-        const { ctx } = chart;
-        const counts = options.counts || {};
+  id: 'pointCountPlugin',
+  afterDatasetsDraw(chart, args, options) {
+    const { ctx, chartArea } = chart;
+    const counts = options.counts || {};
 
-        // Get all unique dates from all datasets
-        const allDates = chart.data.datasets
-            .flatMap(ds => ds.data.map(d => d.x.toISOString().split("T")[0]));
-        const uniqueDates = [...new Set(allDates)];
+    const datasetIndex = 0; // anchor to first dataset
+    const dataset = chart.data.datasets[datasetIndex];
+    const meta = chart.getDatasetMeta(datasetIndex);
 
-        uniqueDates.forEach(dateKey => {
-            // For each dataset
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-                const entry = counts[dateKey] || { c: 0, f: 0 };
-                const nValue = datasetIndex === 0 ? entry.c : entry.f;
+    dataset.data.forEach((point, i) => {
+      const dateKey = point.x.toISOString().split("T")[0];
+      const entry = counts[dateKey];
+      if (!entry) return;
 
-                // Find the first point in this dataset matching the date
-                const point = dataset.data.find(d => d.x.toISOString().split("T")[0] === dateKey);
-                if (!point) return;
+      const chartPoint = meta.data[i];
+      if (!chartPoint) return;
 
-                const meta = chart.getDatasetMeta(datasetIndex);
-                // const chartPoint = meta.data.find(p => p.x === chart.scales.x.getPixelForValue(point.x));
-                
-                // const x = chart.scales.x.getPixelForValue(point.x);
-                // const y = chartPoint ? chartPoint.y + (datasetIndex === 0 ? 20 : 36) : 0;
-                // get correct X,Y directly from meta for this point index
-              const pointIndex = dataset.data.indexOf(point);
-              if (pointIndex === -1) return;
+      const x = chartPoint.x;
 
-              const chartPoint = meta.data[pointIndex];
-              if (!chartPoint) return;
+      // Preferred position: above point
+      let y = chartPoint.y - 12;
 
-              const x = chartPoint.x;
-              const y = chartPoint.y + (datasetIndex === 0 ? 20 : 36);
+      // 🔒 Prevent overlap with X-axis labels
+      const minY = chartArea.top + 10;
+      const maxY = chartArea.bottom - 25; // buffer for dates
 
+      if (y < minY) y = chartPoint.y + 16; // flip below
+      if (y > maxY) y = maxY;
 
-                ctx.save();
-                ctx.font = "12px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillStyle = dataset.borderColor || "black";
-                ctx.fillText(`n=${nValue}`, x, y);
-                ctx.restore();
-            });
-        });
-    }
+      ctx.save();
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#2e7d32";
+      ctx.fillText(`n=${entry.c + entry.f}`, x, y);
+      ctx.restore();
+    });
+  }
 };
 
 
