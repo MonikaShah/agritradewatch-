@@ -573,6 +573,7 @@ const divider = document.getElementById("divider");
   // Map initialization
   // --------------------------
   async function initMap(){
+      
       const commoditySelect = document.getElementById("commoditySelect");
       const selectedCommoditySpan = document.getElementById("selected-commodity");
       selectedCommoditySpan.textContent = gettext(commoditySelect.value);
@@ -723,46 +724,7 @@ const divider = document.getElementById("divider");
          
 
           const filteredGeoJSON = { type:"FeatureCollection", features: filteredFeatures };
-          // geojsonLayer = L.geoJSON(filteredGeoJSON, {
-          //     pointToLayer:(f,latlng)=>{
-          //         let color="red";
-          //         if(userLocation && userLocation.distanceTo(latlng)<=scale[radiusSlider.value]) color="green";
-          //         return L.circleMarker(latlng,{radius:8, fillColor:color, color:"#000", weight:1, opacity:1, fillOpacity:0.8});
-          //     },
-          //     onEachFeature:(f,layer)=>{
-          //         const p=f.properties;
-          //         // layer.bindPopup(`<strong>Consumer Name:</strong>${p.username || "Unknown"}<br><strong>Commodity Purchaed:</strong>${p.commodity || "Unknown"}<br>Purchase Date: </strong>${p.date? `<em>${new Date(p.date).toLocaleDateString('en-GB')}</em><br>`:""}Consumer Buying Price:</strong> ${p.buyingprice||'NA'}<br>Quantity Bought:</strong> ${p.quantitybought||'-'} ${p.unit||''}<br>`);
-          //         // Build table HTML
-          //         const table = `
-          //             <table style="border-collapse: collapse; width: 100%;">
-                          
-          //                 <tr>
-          //                     <td style="border: 1px solid #999; padding: 4px;">Consumer Name</td>
-          //                     <td style="border: 1px solid #999; padding: 4px;">${p.username || "Unknown"}</td>
-          //                 </tr>
-          //                 <tr>
-          //                     <td style="border: 1px solid #999; padding: 4px;">Commodity Purchased</td>
-          //                     <td style="border: 1px solid #999; padding: 4px;">${p.commodity || "Unknown"}</td>
-          //                 </tr>
-          //                 <tr>
-          //                     <td style="border: 1px solid #999; padding: 4px;">Purchase Date</td>
-          //                     <td style="border: 1px solid #999; padding: 4px;">${p.date ? new Date(p.date).toLocaleDateString('en-GB') : "-"}</td>
-          //                 </tr>
-          //                 <tr>
-          //                     <td style="border: 1px solid #999; padding: 4px;">Buying Price</td>
-          //                     <td style="border: 1px solid #999; padding: 4px;">${p.buyingprice || 'NA'}</td>
-          //                 </tr>
-          //                 <tr>
-          //                     <td style="border: 1px solid #999; padding: 4px;">Quantity Bought</td>
-          //                     <td style="border: 1px solid #999; padding: 4px;">${p.quantitybought || '-'} ${p.unit || ''}</td>
-          //                 </tr>
-          //             </table>
-          //         `;
-
-          //         layer.bindPopup(table);
-          //     }
-          // });
-          // markers.addLayer(geojsonLayer); map.addLayer(markers);
+          
             filteredFeatures.forEach(f => {
                 const lat = f.geometry.coordinates[1];
                 const lon = f.geometry.coordinates[0];
@@ -799,6 +761,8 @@ const divider = document.getElementById("divider");
             map.addLayer(markers);
             markers.on("clusterclick", function (e) {
                 L.DomEvent.stop(e);   // ⛔ prevent zoom
+                markers._spiderfy = function () {};
+                markers._unspiderfy = function () {};
 
                 const rows = e.layer
                     .getAllChildMarkers()
