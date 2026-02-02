@@ -1382,6 +1382,7 @@ const pointCountPlugin = {
   afterDatasetsDraw(chart, args, options) {
     const { ctx, chartArea } = chart;
     const counts = options.counts || {};
+    const drawnDates = new Set(); // 🔑 KEY
 
     const datasetIndex = 0; // anchor to first dataset
     const dataset = chart.data.datasets[datasetIndex];
@@ -1389,30 +1390,36 @@ const pointCountPlugin = {
 
     dataset.data.forEach((point, i) => {
       const dateKey = point.x.toISOString().split("T")[0];
+
+      // ❌ already printed for this date
+      if (drawnDates.has(dateKey)) return;
+
       const entry = counts[dateKey];
       if (!entry) return;
+
+      const n = (+entry.c || 0) + (+entry.f || 0);
+      if (n < 1) return;
 
       const chartPoint = meta.data[i];
       if (!chartPoint) return;
 
-      const x = chartPoint.x;
-
-      // Preferred position: above point
+      let x = chartPoint.x;
       let y = chartPoint.y - 12;
 
-      // 🔒 Prevent overlap with X-axis labels
-      const minY = chartArea.top + 10;
-      const maxY = chartArea.bottom - 25; // buffer for dates
-
-      if (y < minY) y = chartPoint.y + 16; // flip below
+      // keep inside chart
+      const maxY = chartArea.bottom - 25;
       if (y > maxY) y = maxY;
+      if (y < chartArea.top + 10) y = chartPoint.y + 16;
 
       ctx.save();
       ctx.font = "11px sans-serif";
       ctx.textAlign = "center";
       ctx.fillStyle = "#2e7d32";
-      ctx.fillText(`n=${entry.c + entry.f}`, x, y);
+      ctx.fillText(`n=${n}`, x, y);
       ctx.restore();
+
+      // ✅ mark date as handled
+      drawnDates.add(dateKey);
     });
   }
 };
