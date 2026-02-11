@@ -12,6 +12,35 @@ UNIT_CHOICES = [
     ('Piece', _('Piece')),
     ('Dozen', _('Dozen')),
 ]
+# class ConsumerForm(forms.ModelForm):
+#     commodity = forms.ModelChoiceField(
+#         queryset=Commodity.objects.all(),
+#         to_field_name="name",
+#         empty_label="Select Commodity",
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+#     unit = forms.ChoiceField(
+#         choices=UNIT_CHOICES,
+#         widget=forms.Select(attrs={'class': 'form-select'}),
+#         required=True
+#     )
+
+#     class Meta:
+#         model = Consumer1
+#         fields = ["commodity", "buyingprice", "quantitybought", "unit", "image"]
+#         widgets = {
+#             'latitude': forms.HiddenInput(),
+#             'longitude': forms.HiddenInput(),
+#             'buyingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter buying price'}),
+#             'quantitybought': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+#             'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Unit (e.g., Kg, litre)'}),
+#             # 'date': forms.TextInput(attrs={
+#             #     'class': 'form-control datetimepicker',
+#             #     'placeholder': 'Select date & time',
+#             #     'autocomplete': 'off'
+#             # }),
+#         }
+
 class ConsumerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
@@ -19,6 +48,7 @@ class ConsumerForm(forms.ModelForm):
         empty_label="Select Commodity",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
     unit = forms.ChoiceField(
         choices=UNIT_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -28,24 +58,50 @@ class ConsumerForm(forms.ModelForm):
     class Meta:
         model = Consumer1
         fields = ["commodity", "buyingprice", "quantitybought", "unit", "image"]
-        widgets = {
-            'latitude': forms.HiddenInput(),
-            'longitude': forms.HiddenInput(),
-            'buyingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter buying price'}),
-            'quantitybought': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
-            'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Unit (e.g., Kg, litre)'}),
-            # 'date': forms.TextInput(attrs={
-            #     'class': 'form-control datetimepicker',
-            #     'placeholder': 'Select date & time',
-            #     'autocomplete': 'off'
-            # }),
-        }
+        exclude = ["latitude", "longitude", "date", "userid", "role"]
 
-
-class FarmerForm(forms.ModelForm):
+        model = Consumer1
+        fields = [
+            "commodity",
+            "buyingprice",
+            "quantitybought",
+            "unit",
+            "image",
+            "latitude",
+            "longitude",
+        ]
+# class FarmerForm(forms.ModelForm):
     
 
-    # Define commodity as before
+#     # Define commodity as before
+#     commodity = forms.ModelChoiceField(
+#         queryset=Commodity.objects.all(),
+#         to_field_name="name",
+#         empty_label="Select Commodity",
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+
+#     # Define unit as a ChoiceField (not in widgets)
+#     unit = forms.ChoiceField(
+#         choices=UNIT_CHOICES,
+#         widget=forms.Select(attrs={'class': 'form-select'}),
+#         required=True
+#     )
+
+#     class Meta:
+#         model = Farmer1
+#         fields = ["commodity", "sellingprice", "quantitysold", "unit",  "image"]
+#         widgets = {
+#             'sellingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter selling price'}),
+#             'quantitysold': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+#             # 'date': forms.TextInput(attrs={
+#             #     'class': 'form-control datetimepicker',
+#             #     'placeholder': 'Select date & time',
+#             #     'autocomplete': 'off'
+#             # }),
+#             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+#         }
+class FarmerForm(forms.ModelForm):
     commodity = forms.ModelChoiceField(
         queryset=Commodity.objects.all(),
         to_field_name="name",
@@ -53,7 +109,6 @@ class FarmerForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    # Define unit as a ChoiceField (not in widgets)
     unit = forms.ChoiceField(
         choices=UNIT_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -62,17 +117,9 @@ class FarmerForm(forms.ModelForm):
 
     class Meta:
         model = Farmer1
-        fields = ["commodity", "sellingprice", "quantitysold", "unit",  "image"]
-        widgets = {
-            'sellingprice': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter selling price'}),
-            'quantitysold': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
-            # 'date': forms.TextInput(attrs={
-            #     'class': 'form-control datetimepicker',
-            #     'placeholder': 'Select date & time',
-            #     'autocomplete': 'off'
-            # }),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-        }
+        fields = ["commodity", "sellingprice", "quantitysold", "unit", "image"]
+        exclude = ["latitude", "longitude", "date", "userid", "role"]
+
 
 class MyCustomPasswordResetForm(PasswordResetForm):
     def get_users(self, email):
@@ -285,3 +332,41 @@ class UserProfilePhotoForm(forms.ModelForm):
     class Meta:
         model = User1
         fields = ["profile_pic"]
+
+class SoldForm(forms.ModelForm):
+    UNIT_CHOICES = [
+        ('kg', 'Kg'),
+        ('g', 'Gram'),
+        ('quintal', 'Quintal'),
+        ('ton', 'Ton'),
+        ('litre', 'Litre'),
+        ('pcs', 'Pieces'),
+    ]
+
+    unit = forms.ChoiceField(
+        choices=UNIT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    class Meta:
+        model = Farmer1
+        fields = ['commodity', 'quantitysold', 'unit', 'sellingprice', 'date']
+        widgets = {
+            'commodity': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'date': forms.DateTimeInput(attrs={'readonly': 'readonly', 'type': 'text'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Make commodity & date readonly
+        self.fields['commodity'].disabled = True
+        self.fields['date'].disabled = True
+
+class BoughtForm(forms.ModelForm):
+    class Meta:
+        model = Consumer1
+        fields = ['commodity', 'quantitybought', 'unit', 'buyingprice', 'date']
+        widgets = {
+            'commodity': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'date': forms.DateTimeInput(attrs={'readonly': 'readonly', 'type': 'text'}),
+        }
