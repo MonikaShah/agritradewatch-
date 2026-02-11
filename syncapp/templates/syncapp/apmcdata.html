@@ -309,6 +309,19 @@
 
 {% block extra_js %}
 <script>
+let apmcMarkers = {};
+
+function normalizeApmc(name) {
+  if (!name) return "";
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ')        // multiple spaces → single space
+        .replace(/\s*-\s*/g, '-')    // spaces around hyphens → single hyphen
+        .replace(/ apmc$/i, '')       // remove trailing 'APMC' (case-insensitive)
+        .replace(/\s+$/,'');          // trim trailing spaces again
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   let districtCentroids = {};  // global variable
   
@@ -440,7 +453,7 @@ downloadPdfBtn.addEventListener("click", function() {
       markerLayer = L.layerGroup().addTo(map);
     }
 
-  initMap();
+  // initMap();fe
 
   // --- Alert Helper ---
   function showAlert(msg, type="warning", dur=4000){
@@ -469,29 +482,51 @@ downloadPdfBtn.addEventListener("click", function() {
     try{
       const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&start_date=${startDate}&end_date=${endDate}`);
       const dataList = await res.json();
+      const maharashtraApmcs = dataList.filter(d => {
+        return d.lat >= 15.6 && d.lat <= 22.0 && d.lon >= 72.6 && d.lon <= 80.9;
+      });
+      // const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
+      
+      const apmcMap = new Map();
+      
 
-      const uniqueApmcs = [...new Set(dataList.map(d => d.apmc))].sort();
-      apmcSelect.innerHTML = `<option value="">${gettext("All APMCs")}</option>`;
-      uniqueApmcs.forEach(a=>{
-        const opt = document.createElement("option");
-      //   opt.value = a;
-      //   opt.textContent = gettext(a);  // 🔹 translate dynamically
-      //   apmcSelect.appendChild(opt);
-      // });
-        let label = a;
-
-        if (a.endsWith(" APMC")) {
-          const base = a.replace(/ APMC$/, "");
-          label = `${gettext(base)} ${gettext("APMC")}`;
-        } else {
-          label = gettext(a);
+      dataList.forEach(d => {
+        const key = normalizeApmc(d.apmc);
+        
+        const raw = d.apmc; // 🔥 EXACT DB VALUE
+        
+        // Prefer APMC version for RAW if duplicates exist
+        if (!apmcMap.has(key) || /apmc$/i.test(raw)) {
+          apmcMap.set(key, raw);
         }
 
-        opt.value = a;
+      });
+
+      const uniqueApmcs = [...apmcMap.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1]));
+
+      apmcSelect.innerHTML = `<option value="">${gettext("All APMCs")}</option>`;
+
+      uniqueApmcs.forEach(([key, raw]) => {
+        const opt = document.createElement("option");
+
+        const label = raw.endsWith(" APMC")
+          ? `${gettext(raw.replace(" APMC", ""))} ${gettext("APMC")}`
+          : gettext(raw);
+        
+        opt.value = raw;        // ✅ normalized
+        opt.dataset.raw = raw;      // raw DB value (backend)
         opt.textContent = label;
         apmcSelect.appendChild(opt);
+        
+        console.log(
+            [...apmcSelect.options].map(o => o.value)
+        );
+
       });
+
       apmcSelect.disabled = uniqueApmcs.length === 0;
+
       
       // Example: detect which district this APMC belongs to (you can pass from backend or infer)
       const selectedDistrict = dataList.length > 0 ? dataList[0].district : "ahmednagar";
@@ -526,7 +561,9 @@ downloadPdfBtn.addEventListener("click", function() {
       }
       markerLayer.clearLayers();
       dataList.forEach(d=>{
-        if (d.lat && d.lon) {
+        if (d.lat && d.lon &&
+      d.lat >= 15.6 && d.lat <= 22.0 &&
+      d.lon >= 72.6 && d.lon <= 80.9) {
           L.circleMarker([d.lat, d.lon], {
             radius: 8,
             color: '#007bff',
@@ -537,7 +574,12 @@ downloadPdfBtn.addEventListener("click", function() {
             .bindPopup(`<b>${d.apmc}</b><br>${d.commodity}<br>₹${d.modalprice}`);
         }
       });
-      await loadAhmednagarAPMCs("Ahmednagar", commodity, startDate, endDate);
+      const selectedOption = apmcSelect.selectedOptions[0];
+      const rawApmc = selectedOption?.dataset.raw || "";
+
+      console.log("✅ Initial load RAW APMC:", rawApmc);
+
+      await loadAhmednagarAPMCs(rawApmc, commodity, startDate, endDate);
     }catch(err){
       console.error(err);
       apmcSelect.disabled = true;
@@ -612,42 +654,121 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     console.warn("Map not ready yet — markerLayer is undefined.");
     return;
   }
-    markerLayer.clearLayers();
+    // markerLayer.clearLayers();
 
-    // Add markers for APMC locations
+    // // Add markers for APMC locations
+    // data.locations.forEach(loc => {
+    //   const isMaharashtra = loc.lat >= 15.6 && loc.lat <= 22.0 && loc.lon >= 72.6 && loc.lon <= 80.9;
+    //   if (!isMaharashtra) return;  // skip markers outside Maharashtra
+
+    //   const isSelected = selectedApmc && normalizeApmc(loc.apmc_name) === selectedApmc;
+    //   const marker = L.circleMarker([loc.lat, loc.lon], {
+    //     radius: 8,
+    //     color: isSelected ? "red" : "blue",
+    //     fillColor: isSelected ? "#ff3333" : "#3399ff",
+    //     fillOpacity: 0.6,
+    //     weight: 2
+    //   }).bindPopup(`<b>${loc.apmc_name}</b>`)
+    //   .bindTooltip(`${loc.apmc_name}`, {      // hover tooltip
+    //     permanent: false,                     // tooltip disappears when not hovering
+    //     direction: 'top',
+    //     offset: [0, -10],
+    //     opacity: 0.9,
+    //     className: 'apmc-tooltip'            // optional: for custom styling
+    //   });
+    markerLayer.clearLayers();
+    apmcMarkers = {};
+    let selectedLatLng = null;
+
+    const selectedKey = selectedApmc
+      ? normalizeApmc(selectedApmc)
+      : null;
+
+    console.log("🎯 Selected APMC (normalized):", selectedKey);
+
     data.locations.forEach(loc => {
-      const isSelected = selectedApmc && loc.apmc_name === selectedApmc;
+      
+
+      const isMaharashtra =
+        loc.lat >= 15.6 && loc.lat <= 22.0 &&
+        loc.lon >= 72.6 && loc.lon <= 80.9;
+
+      if (!isMaharashtra) return;
+
+      const locKey = normalizeApmc(loc.apmc_name);
+      const isSelected = selectedKey && locKey === selectedKey;
+
+      console.log("📍 Marker:", locKey, "selected?", isSelected);
+
       const marker = L.circleMarker([loc.lat, loc.lon], {
-        radius: 8,
+        radius: isSelected ? 12 : 8,
         color: isSelected ? "red" : "blue",
         fillColor: isSelected ? "#ff3333" : "#3399ff",
-        fillOpacity: 0.6,
-        weight: 2
-      }).bindPopup(`<b>${loc.apmc_name}</b>`)
-      .bindTooltip(`${loc.apmc_name}`, {      // hover tooltip
-        permanent: false,                     // tooltip disappears when not hovering
-        direction: 'top',
-        offset: [0, -10],
-        opacity: 0.9,
-        className: 'apmc-tooltip'            // optional: for custom styling
-      });
-     
+        fillOpacity: isSelected ? 0.9 : 0.6,
+        weight: isSelected ? 3 : 2
+      })
+        .bindPopup(`<b>${loc.apmc_name}</b>`)
+        .bindTooltip(loc.apmc_name, {
+          permanent: false,
+          direction: "top",
+          offset: [0, -10],
+          opacity: 0.9,
+          className: "apmc-tooltip"
+        })
+        .addTo(markerLayer);
 
-      // On click: select and reload chart
+      // ✅ store reference
+      apmcMarkers[locKey] = marker;
+
+      // ✅ highlight selected
+      if (isSelected) {
+        selectedLatLng = [loc.lat, loc.lon]; 
+        marker.openPopup();
+        marker.bringToFront();
+      }
+
+
+      // ✅ CLICK HANDLER — MUST BE HERE
       marker.on("click", () => {
         const apmcSelect = document.getElementById("apmcSelect");
-        apmcSelect.value = loc.apmc_name;
-        marker.closePopup();
-        updateApmcLabel();   // <-- ADD THIS
+
+        [...apmcSelect.options].forEach(opt => {
+          if (normalizeApmc(opt.dataset.raw) === locKey) {
+            opt.selected = true;
+          }
+        });
+
+        updateApmcLabel();
         fetchLineChart();
       });
-
-      marker.addTo(markerLayer);
     });
+
+    // ✅ ZOOM AFTER LOOP
+    if (selectedLatLng) {
+      map.setView(selectedLatLng, 12, {
+        animate: true,
+        duration: 0.6
+      });
+    } else if (data.locations.length > 0) {
+      map.fitBounds(
+        [
+          [15.6, 72.6],
+          [22.0, 80.9]
+        ],
+        { padding: [30, 30] }
+      );
+    }
+     
+    
 
     // Zoom to APMC markers
     if (data.locations.length > 0) {
-      map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
+      // map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
+      map.fitBounds([
+    [15.6, 72.6],  // SW corner
+    [22.0, 80.9]   // NE corner
+], { padding: [30, 30] });
+
       document.getElementById("mapOverlay").style.display = "none";
     }
 
@@ -664,67 +785,132 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 
   // --- Fetch Chart ---
   async function fetchLineChart() {
-  updateApmcLabel();
+      updateApmcLabel();
 
-  const ctx = document.getElementById("agmarkLineChart").getContext("2d");
-  const spinner = document.getElementById("loading-spinner");
-  const chartContainer = document.getElementById("chartContainer");
+      const ctx = document.getElementById("agmarkLineChart").getContext("2d");
+      const spinner = document.getElementById("loading-spinner");
+      const chartContainer = document.getElementById("chartContainer");
 
-  if (agmarkLineChart) agmarkLineChart.destroy();
+      if (agmarkLineChart) agmarkLineChart.destroy();
 
-  const commodity = commoditySelect.value;
-  const apmc = apmcSelect.value;
-  const startDate = lineStartDate.value;
-  const endDate = lineEndDate.value;
+      const commodity = commoditySelect.value;
+      // const apmc = apmcSelect.value;
+      
+      const startDate = lineStartDate.value;
+      const endDate = lineEndDate.value;
 
-  if (!commodity || !startDate || !endDate) {
-    showAlert(gettext("Please select commodity and date range first"));
-    return;
+      if (!commodity || !startDate || !endDate) {
+        showAlert(gettext("Please select commodity and date range first"));
+        return;
+      }
+
+      try {
+        // 🔹 Show spinner
+        spinner.style.display = "block";
+        chartContainer.style.opacity = "0.4";
+
+        let url = `/api/webdata_prices_public/?source=agmark&commodity=${encodeURIComponent(commodity)}`;
+        // if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+
+        const res = await fetch(url);
+        const dataList = await res.json();
+
+        if (!Array.isArray(dataList) || dataList.length === 0) {
+          Swal.fire({
+            icon: "warning",
+            title: "No Data Found",
+            text: "No records available for the selected APMC and date range. Checking nearby (±15 days)...",
+            confirmButtonColor: "#d33"
+          });
+
+          // ✅ Still attempt to load APMC markers with fallback logic
+          // await loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
+          const selectedOption = apmcSelect.selectedOptions[0];
+          const rawApmc = selectedOption?.dataset.raw || "";
+
+          console.log("OPTION DEBUG", {
+            value: selectedOption?.value,
+            raw: selectedOption?.dataset.raw,
+            text: selectedOption?.textContent,
+          });
+          
+          if (selectedOption && !selectedOption.dataset.raw && apmcSelect.value) {
+            console.warn("APMC selected but raw missing:", apmcSelect.value);
+            return;
+          }
+
+          loadAhmednagarAPMCs(
+            rawApmc,
+            commodity,
+            lineStartDate.value,
+            lineEndDate.value
+          );
+
+        return;
   }
-
-  try {
-    // 🔹 Show spinner
-    spinner.style.display = "block";
-    chartContainer.style.opacity = "0.4";
-
-    let url = `/api/webdata_prices_public/?source=agmark&commodity=${encodeURIComponent(commodity)}`;
-    if (apmc) url += `&apmc=${encodeURIComponent(apmc)}`;
-    url += `&start_date=${startDate}&end_date=${endDate}`;
-
-    const res = await fetch(url);
-    const dataList = await res.json();
-
-    if (!Array.isArray(dataList) || dataList.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "No Data Found",
-        text: "No records available for the selected APMC and date range. Checking nearby (±15 days)...",
-        confirmButtonColor: "#d33"
-      });
-
-      // ✅ Still attempt to load APMC markers with fallback logic
-      await loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
-    return;
-  }
-
-
     const grouped = {};
+    const selectedOption = apmcSelect.selectedOptions[0];
+    const rawApmc = selectedOption?.dataset.raw || null;
+    const normalizedSelected = normalizeApmc(rawApmc);
+    const selectedKey = rawApmc ? normalizeApmc(rawApmc) : null;
+
+    console.log("Selected APMC (dropdown):", selectedKey);
+        console.log(
+      "Chart filter:",
+      rawApmc,
+      "→ normalized:",
+      normalizeApmc(rawApmc)
+    );
+
     dataList.forEach(d => {
+        if (
+          rawApmc &&
+          normalizeApmc(d.apmc) !== normalizeApmc(rawApmc)
+        ) return;
+
+      console.log("Comparing:", normalizeApmc(d.apmc), "vs", normalizedSelected);
       const dateStr = d.date.split("T")[0];
-      if (!grouped[dateStr]) grouped[dateStr] = { min: [], modal: [], max: [] };
+
+      if (!grouped[dateStr]) {
+        grouped[dateStr] = { min: [], modal: [], max: [] };
+      }
+
       grouped[dateStr].min.push(d.minprice || 0);
       grouped[dateStr].modal.push(d.modalprice || 0);
       grouped[dateStr].max.push(d.maxprice || 0);
     });
 
+    console.log("Grouped data for chart:", grouped);
     const labels = Object.keys(grouped).sort();
-    const minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
-    const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
-    const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
+    // const minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
+    // const modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
+    // const maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
 
     const minLabel = gettext("Min");
     const modalLabel = gettext("Modal");
     const maxLabel = gettext("Max");
+
+    // If there is only on e data point 
+    if (labels.length === 0) {
+      console.warn("No data to display on chart");
+      showAlert(gettext("No records available for the selected APMC and date range."));
+      return;
+    }
+
+    let minData = labels.map(dt => grouped[dt].min.reduce((a,b)=>a+b,0)/grouped[dt].min.length);
+    let modalData = labels.map(dt => grouped[dt].modal.reduce((a,b)=>a+b,0)/grouped[dt].modal.length);
+    let maxData = labels.map(dt => grouped[dt].max.reduce((a,b)=>a+b,0)/grouped[dt].max.length);
+
+    // --- Handle single-point chart gracefully ---
+    if (labels.length === 1) {
+      // Duplicate the single point so Chart.js can draw a line
+      labels.push(labels[0]);
+      minData.push(minData[0]);
+      modalData.push(modalData[0]);
+      maxData.push(maxData[0]);
+    }
+
     agmarkLineChart = new Chart(ctx, {
       type: "line",
       data: {
@@ -788,7 +974,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
         slider.noUiSlider.destroy();
     }
 
-    if (labels.length > 0) {
+    if (labels.length > 1) {
         // Create new slider instance
         noUiSlider.create(slider, {
             start: [0, labels.length - 1],   // handles at start and end
@@ -827,7 +1013,9 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     spinner.style.display = "none";
     chartContainer.style.opacity = "1";
   }
-  loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
+  const selectedOption = apmcSelect.selectedOptions[0];
+  const rawApmc = selectedOption?.dataset.raw || "";
+  loadAhmednagarAPMCs(rawApmc, commodity, lineStartDate.value, lineEndDate.value);
 }
 
 
@@ -837,45 +1025,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
   lineEndDate.addEventListener("change", populateApmc);
   submitBtn.addEventListener("click", fetchLineChart);
 
-  // --- Zoom Buttons ---
-// document.getElementById("zoomInBtn").addEventListener("click", () => {
-//     if (agmarkLineChart) agmarkLineChart.zoom(1.1);
-// });
-// document.getElementById("zoomOutBtn").addEventListener("click", () => {
-//     if (agmarkLineChart) agmarkLineChart.zoom(0.9);
-// });
-// document.getElementById("resetZoomBtn").addEventListener("click", () => {
-//     if (agmarkLineChart) agmarkLineChart.resetZoom();
-// });
-
-// --- Slider Control ---
-// const slider = document.getElementById("chartSlider");
-// slider.addEventListener("input", function() {
-//     if (!agmarkLineChart) return;
-//     const scale = this.value / 100;  // value between 0-1
-//     const xScale = agmarkLineChart.scales.x;
-//     const totalLabels = xScale.max - xScale.min;
-//     const newMax = xScale.min + totalLabels * scale;
-//     xScale.options.min = xScale.min;
-//     xScale.options.max = newMax;
-//     agmarkLineChart.update("none");
-// });
-// window.addEventListener("load", async function() {
-//     const defaultApmc = "Ahmednagar";   // 🔹 Default APMC
-//     const defaultCommodity = commoditySelect.value || "Tomato";  // pick a sensible default
-//     const startDate = lineStartDate.value;
-//     const endDate = lineEndDate.value;
-
-//     const displayApmc = gettext(defaultApmc);
-//     // Set dropdowns
-//     apmcSelect.innerHTML = `<option value="${defaultApmc}" selected>${displayApmc}</option>`;
-//     apmcSelect.disabled = false;
-
-//     // Fetch and render data
-//     await fetchLineChart();   // draw chart
-//     await loadAhmednagarAPMCs(defaultApmc, defaultCommodity, startDate, endDate); // load map markers
-// });
-// });
+  
 window.addEventListener("load", async function() {
     const defaultApmc = "Ahmednagar";
     const defaultCommodity = commoditySelect.value || "Tomato";
@@ -886,7 +1036,8 @@ window.addEventListener("load", async function() {
     await initMap();
 
     const displayApmc = gettext(defaultApmc);
-    apmcSelect.innerHTML = `<option value="${defaultApmc}" selected>${displayApmc}</option>`;
+    apmcSelect.innerHTML = `<option value="${defaultApmc}" data-raw="${defaultApmc}" selected>
+  ${displayApmc}</option>`;
     apmcSelect.disabled = false;
 
     // ✅ Now everything else
@@ -909,13 +1060,19 @@ apmcSelect.addEventListener("change", () => {
     updateApmcLabel();
 });
 function updateApmcLabel() {
-    const apmc = apmcSelect.value;
+  const selectedOption = apmcSelect.selectedOptions[0];
+  const rawApmc = selectedOption?.dataset.raw || "";
 
-    if (!apmc) {
-        selectedApmcLabel.textContent = "- ALL APMCs";  // show nothing
-    } else {
-        selectedApmcLabel.textContent = ` — ${apmc}`;
-    }
+  if (!rawApmc) {
+    selectedApmcLabel.textContent = " — ALL APMCs";
+    return;
+  }
+
+  // Normalize display but keep meaning intact
+  const base = rawApmc.replace(/\s*apmc$/i, "");
+
+  selectedApmcLabel.textContent =
+    ` — ${gettext(base)} ${gettext("APMC")}`;
 }
 
 
