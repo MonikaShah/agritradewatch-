@@ -4,7 +4,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm,DamageForm
+from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm,DamageForm,SoldForm,BoughtForm
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -12,6 +12,8 @@ from rest_framework.decorators import api_view
 from django.utils.translation import gettext
 from django.conf import settings
 from uuid import uuid4
+import traceback
+from django.db import transaction
 from django.utils import timezone
 import html, uuid
 # from .serializers import ConsumerGeoSerializer
@@ -159,8 +161,8 @@ def ahmedapmc(request):
     # --- Fetch all APMC locations ---
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT apmc_name, latitude, longitude
-            FROM apmc_master
+            SELECT apmc_clean_name, latitude, longitude
+            FROM apmc_master_all
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL
             ORDER BY apmc_name;
         """)
@@ -251,9 +253,10 @@ def map_chart(request):
         grouped_commodities.setdefault(translated_type, []).append({
             "name": c.name,
             "label":gettext(c.name), 
+            "title": gettext(c.title) if c.title else "",
             "disabled": not has_valid_data
         })
-    print("RAW TYPE VALUE:", repr(c.type))
+    print("RAW TYPE VALUE:", repr(c.title))
 
     return render(request, "syncapp/map_chart.html", {
         "grouped_commodities": grouped_commodities,
@@ -431,116 +434,290 @@ def web_register(request):
             return redirect("register")
         
     return render(request, "syncapp/register.html")
+@login_required
+def list_commodities(request):
+    try:
+        user_id = str(request.user.id)  # Make sure this matches your userid in models
+        # Set default tab
+        if request.user.job == "consumer":
+            default_tab = "bought"
+        else:
+            default_tab = "sold"
+        # Fetch sold and bought commodities
+        sold = Farmer1.objects.filter(userid=user_id).order_by('-date')
+        bought = Consumer1.objects.filter(userid=user_id).order_by('-date')
 
+        context = {
+            'sold': sold,
+            'bought': bought,
+            "user_role": request.user.job,
+            "default_tab": default_tab,
+        }
+        return render(request, 'syncapp/list_commodities.html', context)
+    except Exception as e:
+        print("Error in list_commodities view:", str(e))
+        return render(request, "syncapp/list_commodities.html", {
+            "sold": [],
+            "bought": [],
+            "user_role": request.user.job,
+            "default_tab": "sold",
+            "error": str(e)
+        })
+@login_required
+def delete_sold(request, pk):
+    item = get_object_or_404(Farmer1, pk=pk, userid=request.user.id)
+    if request.method == "POST":
+        item.delete()
+    return redirect("list_commodities")
+
+@login_required
+def add_crop_website(request):
+    user = request.user
+    view_type = request.GET.get("view", "add")  # ✅ DEFAULT
+
+    if request.method == "POST":
+
+        # ---------- FARMER ----------
+        if user.job == "farmer":
+            form = FarmerForm(request.POST, request.FILES)
+            if form.is_valid():
+                obj = form.save(commit=False)
+                obj.userid = user.id
+                obj.role = "farmer"
+                obj.save()
+                return redirect("success_page")
+
+        # ---------- CONSUMER ----------
+        elif user.job == "consumer":
+            form = ConsumerForm(request.POST, request.FILES)
+            if form.is_valid():
+                obj = form.save(commit=False)
+                obj.userid = user.id
+                obj.role = "consumer"
+                obj.save()
+                return redirect("success_page")
+
+        # ---------- RETAILER ----------
+        elif user.job == "retailer":
+
+            seller_form = FarmerForm(request.POST, request.FILES, prefix="seller")
+            buyer_form = ConsumerForm(request.POST, request.FILES, prefix="buyer")
+
+            if seller_form.is_valid() and buyer_form.is_valid():
+
+                # SELLER ENTRY
+                seller = seller_form.save(commit=False)
+                seller.userid = str(user.id)
+
+                seller.role = "retailer"
+                seller.latitude = request.POST.get("seller_latitude", 0)
+                seller.longitude = request.POST.get("seller_longitude", 0)
+                seller.save()
+
+                # BUYER ENTRY
+                buyer = buyer_form.save(commit=False)
+                buyer.userid = str(user.id)
+
+                buyer.role = "retailer"
+                buyer.latitude = request.POST.get("buyer_latitude", 0)
+                buyer.longitude = request.POST.get("buyer_longitude", 0)
+                buyer.save()
+
+                return JsonResponse({
+                    "success": True,
+                    "created_entries": ["seller", "buyer"]
+                })
+            else:
+                # Return form errors as JSON
+                errors = {
+                    "seller_form": seller_form.errors,
+                    "buyer_form": buyer_form.errors
+                }
+                return JsonResponse({"success": False, "errors": errors}, status=400)
+
+
+    else:
+        if user.job == "farmer":
+            form = FarmerForm()
+        elif user.job == "consumer":
+            form = ConsumerForm()
+        else:
+            seller_form = FarmerForm(prefix="seller")
+            buyer_form = ConsumerForm(prefix="buyer")
+
+    return render(
+        request,
+        "syncapp/add_crop.html",
+        {
+            "view_type": view_type,
+            "form": form if user.job != "retailer" else None,
+            "seller_form": seller_form if user.job == "retailer" else None,
+            "buyer_form": buyer_form if user.job == "retailer" else None,
+            "user": user,
+        },
+    )
 
 @login_required
 def crops_list(request):
+    print("🔥 CROPS_LIST VIEW HIT 🔥")
+
     user = request.user
-    sort = request.GET.get("sort", "")
-    selected_commodities = request.GET.getlist("commodity[]") or request.GET.getlist("commodity")
-    edit_id = request.GET.get("edit")
-    is_edit = False
+    userid = str(user.id)
+    view_type = request.GET.get("view", "all")
 
-    # ---------- Determine User Role ----------
+    sold_qs = Farmer1.objects.filter(userid=userid)
+    bought_qs = Consumer1.objects.filter(userid=userid)
+
+    # ---- ROLE BASED VISIBILITY ----
     if user.job == "farmer":
-        crops = Farmer1.objects.filter(userid=user.id)
-        form_class = FarmerForm
-        qty_field = "quantitysold"
-        price_field = "sellingprice"
+        view_type = "sold"
+        crops = sold_qs
+
+    elif user.job == "consumer":
+        view_type = "bought"
+        crops = bought_qs
+
+    else:  # retailer
+        if view_type == "sold":
+            crops = sold_qs
+        elif view_type == "bought":
+            crops = bought_qs
+        else:  # all
+            crops = list(chain(sold_qs, bought_qs))
+
+    # ---- COMMODITIES (SAFE) ----
+    if isinstance(crops, list):
+        commodities = sorted({c.commodity for c in crops})
     else:
-        crops = Consumer1.objects.filter(userid=user.id)
-        form_class = ConsumerForm
-        qty_field = "quantitybought"
-        price_field = "buyingprice"
-
-    # ---------- Distinct commodities from user's crops ----------
-    commodities = list(crops.values_list("commodity", flat=True).distinct().order_by("commodity"))
-
-    # If no specific commodity selected, select all
-    if not selected_commodities:
-        selected_commodities = commodities.copy()
-
-    # ---------- Commodity Filter ----------
-    if selected_commodities and "All" not in selected_commodities:
-        crops = crops.filter(commodity__in=selected_commodities)
-
-    # ---------- Sorting ----------
-    sort_map = {
-        "date_asc": "date",
-        "date_desc": "-date",
-        "qty_asc": qty_field,
-        "qty_desc": f"-{qty_field}",
-        "price_asc": price_field,
-        "price_desc": f"-{price_field}",
-    }
-    if sort in sort_map:
-        crops = crops.order_by(sort_map[sort])
-
-    # ---------- Add/Edit Form ----------
-    if edit_id:
-        crop_to_edit = get_object_or_404(crops.model, id=edit_id, userid=user.id)
-        form = form_class(request.POST or None, request.FILES or None, instance=crop_to_edit)
-        is_edit = True
-    else:
-        form = form_class(request.POST or None, request.FILES or None)
-
-    if request.method == "POST" and form.is_valid():
-        entry = form.save(commit=False)
-        if not edit_id:
-            entry.id = str(uuid4())
-            entry.userid = user.id
-            entry.date = timezone.now()
-            entry.latitude = user.latitude
-            entry.longitude = user.longitude
-        entry.save()
-        return redirect("crops_list")
-
-    # ---------- Prepare JSON for map ----------
-    crops_json = [
-        {
-            "lat": c.latitude,
-            "lng": c.longitude,
-            "commodity": c.commodity,
-            "price": getattr(c, price_field, None),
-            "quantity": getattr(c, qty_field, None),
-            "unit": c.unit,
-            "date": c.date.strftime("%Y-%m-%d %H:%M") if c.date else "",
-            "image_url": c.image.url if c.image else ""
-        }
-        for c in crops
-    ]
-
-    # ---------- AJAX Partial Response ----------
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        html = render_to_string(
-            "syncapp/partials/_crop_table.html",
-            {
-                "crops": crops,
-                "selected_commodities": selected_commodities,
-                "user": user,
-                "sort": sort,
-                "commodities": commodities,
-            },
+        commodities = list(
+            crops.values_list("commodity", flat=True).distinct()
         )
-        return JsonResponse({"html": html})
 
-    has_crops = crops.exists()
+    selected_commodities = request.GET.getlist("commodities") or commodities
+
+    # ---- DEBUG ----
+    print("DEBUG user:", user.job)
+    print("DEBUG view_type:", view_type)
+    print("DEBUG crops count:", len(crops) if isinstance(crops, list) else crops.count())
 
     return render(
         request,
         "syncapp/crops_list.html",
         {
-            "form": form,
             "crops": crops,
-            "user": user,
-            "is_edit": is_edit,
-            "has_crops": has_crops,
             "commodities": commodities,
             "selected_commodities": selected_commodities,
-            "sort": sort,
-            "crops_json": json.dumps(crops_json),
+            "view_type": view_type,
         },
     )
+
+# def crops_list(request):
+#     user = request.user
+#     sort = request.GET.get("sort", "")
+#     selected_commodities = request.GET.getlist("commodity[]") or request.GET.getlist("commodity")
+#     edit_id = request.GET.get("edit")
+#     is_edit = False
+
+#     # ---------- Determine User Role ----------
+#     if user.job == "farmer":
+#         crops = Farmer1.objects.filter(userid=user.id)
+#         form_class = FarmerForm
+#         qty_field = "quantitysold"
+#         price_field = "sellingprice"
+#     else:
+#         crops = Consumer1.objects.filter(userid=user.id)
+#         form_class = ConsumerForm
+#         qty_field = "quantitybought"
+#         price_field = "buyingprice"
+
+#     # ---------- Distinct commodities from user's crops ----------
+#     commodities = list(crops.values_list("commodity", flat=True).distinct().order_by("commodity"))
+
+#     # If no specific commodity selected, select all
+#     if not selected_commodities:
+#         selected_commodities = commodities.copy()
+
+#     # ---------- Commodity Filter ----------
+#     if selected_commodities and "All" not in selected_commodities:
+#         crops = crops.filter(commodity__in=selected_commodities)
+
+#     # ---------- Sorting ----------
+#     sort_map = {
+#         "date_asc": "date",
+#         "date_desc": "-date",
+#         "qty_asc": qty_field,
+#         "qty_desc": f"-{qty_field}",
+#         "price_asc": price_field,
+#         "price_desc": f"-{price_field}",
+#     }
+#     if sort in sort_map:
+#         crops = crops.order_by(sort_map[sort])
+
+#     # ---------- Add/Edit Form ----------
+#     if edit_id:
+#         crop_to_edit = get_object_or_404(crops.model, id=edit_id, userid=user.id)
+#         form = form_class(request.POST or None, request.FILES or None, instance=crop_to_edit)
+#         is_edit = True
+#     else:
+#         form = form_class(request.POST or None, request.FILES or None)
+
+#     if request.method == "POST" and form.is_valid():
+#         entry = form.save(commit=False)
+#         if not edit_id:
+#             entry.id = str(uuid4())
+#             entry.userid = user.id
+#             entry.date = timezone.now()
+#             entry.latitude = user.latitude
+#             entry.longitude = user.longitude
+#         entry.save()
+#         return redirect("crops_list")
+
+#     # ---------- Prepare JSON for map ----------
+#     crops_json = [
+#         {
+#             "lat": c.latitude,
+#             "lng": c.longitude,
+#             "commodity": c.commodity,
+#             "price": getattr(c, price_field, None),
+#             "quantity": getattr(c, qty_field, None),
+#             "unit": c.unit,
+#             "date": c.date.strftime("%Y-%m-%d %H:%M") if c.date else "",
+#             "image_url": c.image.url if c.image else ""
+#         }
+#         for c in crops
+#     ]
+
+#     # ---------- AJAX Partial Response ----------
+#     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#         html = render_to_string(
+#             "syncapp/partials/_crop_table.html",
+#             {
+#                 "crops": crops,
+#                 "selected_commodities": selected_commodities,
+#                 "user": user,
+#                 "sort": sort,
+#                 "commodities": commodities,
+#             },
+#         )
+#         return JsonResponse({"html": html})
+
+#     has_crops = crops.exists()
+
+#     return render(
+#         request,
+#         "syncapp/crops_list.html",
+#         {
+#             "form": form,
+#             "crops": crops,
+#             "user": user,
+#             "is_edit": is_edit,
+#             "has_crops": has_crops,
+#             "commodities": commodities,
+#             "selected_commodities": selected_commodities,
+#             "sort": sort,
+#             "crops_json": json.dumps(crops_json),
+#         },
+#     )
 
 
 @api_view(['PATCH', 'PUT'])
@@ -740,3 +917,72 @@ def damage_crop_detail_view(request, pk):
     }
 
     return render(request, "syncapp/view_damage_crop.html", context)
+
+# -----------------------
+# SOLD COMMODITY VIEWS
+# -----------------------
+
+def edit_sold(request, pk):
+    item = get_object_or_404(Farmer1, pk=pk)
+
+    if request.method == 'POST':
+        form = SoldForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('list_commodities')
+    else:
+        # 👇 THIS is what loads old values
+        form = SoldForm(instance=item)
+
+    return render(request, 'syncapp/edit_sold.html', {
+        'form': form
+    })
+
+def delete_sold(request, pk):
+    item = get_object_or_404(
+        Farmer1,
+        pk=pk,
+        userid=request.user.id   # 🔒 ownership check
+    )
+
+    item.delete()
+    messages.success(request, "Sold commodity deleted successfully.")
+    return redirect('list_commodities')
+
+
+# -----------------------
+# BOUGHT COMMODITY VIEWS
+# -----------------------
+
+def edit_bought(request, pk):
+    item = get_object_or_404(Farmer1, pk=pk)
+    if request.method == 'POST':
+        form = BoughtForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Bought commodity updated successfully.")
+            return redirect('list_commodities')
+    else:
+        form = BoughtForm(instance=item)
+    return render(request, 'syncapp/edit_bought.html', {'form': form, 'item': item})
+
+def delete_bought(request, pk):
+    item = get_object_or_404(
+        Consumer1,
+        pk=pk,
+        userid=request.user.id   # 🔒 ensure ownership
+    )
+
+    item.delete()
+    messages.success(request, "Bought commodity deleted successfully.")
+    return redirect('list_commodities')
+
+
+# -----------------------
+# VIEW ON MAP
+# -----------------------
+
+def view_on_map(request):
+    # Assuming Farmer1 has latitude and longitude fields
+    commodities = Farmer1.objects.all()
+    return render(request, 'syncapp/map.html', {'commodities': commodities})
