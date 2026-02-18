@@ -162,6 +162,71 @@
     background: #bb2d3b;
     transform: scale(1.05);
   }
+  #mandigoBot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2c7a2c;
+    color: white;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 52px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 9999;
+  }
+  .hidden {
+    display: none;
+  }
+  .bot-window {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 300px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  font-size: 14px;
+  z-index: 9999;
+}
+
+.bot-header {
+  background: #2c7a2c;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bot-body {
+  padding: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.bot-msg.bot {
+  background: #f1f9f1;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.bot-options button {
+  width: 100%;
+  margin-top: 5px;
+  padding: 6px;
+  border: none;
+  background: #e6f4e6;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+
+
 
   /* Optional: Mobile adjustments */
   @media (max-width: 576px) {
@@ -277,29 +342,107 @@
           </div>
         </div>
       </div>
-      {% if user.is_authenticated and user.is_superuser %}
+      {% if user.is_authenticated %}
       <div class="col-12 col-sm-6 col-md-4">
         <div class="card card-custom">
           <div class="card-body">
             <span class="emoji">🌱</span>
             <h5 class="card-title">{% trans "My Commodities"%}</h5>
-            <a href="{% url 'crops_list' %}" class="btn btn-danger w-100">Open</a>
+            <a href="{% url 'list_commodities' %}" class="btn btn-danger w-100">Open</a>
           </div>
         </div>
       </div>
       {% endif %}
     </div>
     </div>
+    <div id="mandigoBot" onclick="openBot()">💬</div>
+    <!-- Chat window -->
+   <div id="botWindow" class="bot-window" style="display:none;">
+  <div class="bot-header">
+    🤖 MandiGo Assistant
+    <span onclick="closeBot()">✖</span>
+  </div>
+
+  <div id="botBody" class="bot-body">
+    <div class="bot-msg bot">
+      👋 नमस्कार! मी MandiGo सहाय्यक आहे.<br>
+      How can I help you today?
+    </div>
+
+    <div class="bot-options">
+      <button onclick="selectIntent('best_market')">🏆 Best market today</button>
+      <button onclick="selectIntent('price')">💰 Today’s price</button>
+      <button onclick="selectIntent('help')">❓ Help</button>
+    </div>
+  </div>
+</div>
+
    </main>
   
   
   <!-- Footer -->
   <footer>
-    <p style="color: red;">{% trans "This is a trial version and the platform is not fully operational yet." %}</p>
-
+    <p style="color: red;">{% trans "This is a trial version and the platform is not fully operational yet."%}</p>
+      <p style="color: red;"><a href="{% url 'data_policy' %}"  class="text-warning">Data Policy</a></p>
+      
     &copy; {% trans "2025 MandiGo | 'सही दाम, किसान सम्मान'" %}
   </footer>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+<script>
+function openBot() {
+  const bot = document.getElementById("botWindow");
+  if (bot) {
+    bot.style.display = "block";
+  }
+}
+
+function closeBot() {
+  const bot = document.getElementById("botWindow");
+  if (bot) {
+    bot.style.display = "none";
+  }
+}
+
+function selectIntent(intent) {
+  const body = document.getElementById("botBody");
+
+  if (!body) return;
+
+  if (intent === "best_market") {
+    body.innerHTML += `
+      <div class="bot-msg user">🏆 Best market today</div>
+      <div class="bot-msg bot">
+        Please select commodity and district 👇
+      </div>
+
+      <select id="botCommodity" class="form-select mt-2">
+        <option value="">Commodity</option>
+        <option value="Onion">Onion</option>
+        <option value="Tomato">Tomato</option>
+        <option value="Apple">Apple</option>
+      </select>
+
+      <select id="botDistrict" class="form-select mt-2">
+        <option value="">District</option>
+        <option value="nashik">Nashik</option>
+        <option value="pune">Pune</option>
+      </select>
+
+      <button class="btn btn-success btn-sm mt-2" onclick="botFindBest()">Find</button>
+    `;
+  }
+}
+
+function botFindBest() {
+  const body = document.getElementById("botBody");
+  body.innerHTML += `
+    <div class="bot-msg bot">
+      📊 Feature coming soon. This is demo UI.
+    </div>
+  `;
+}
+</script>

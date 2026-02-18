@@ -74,6 +74,17 @@ urlpatterns = [
     path('apmc/<str:apmc_name>/timeline-ajax/', api_views.apmc_timeline_ajax, name='apmc_timeline_ajax'),
     path('ahmedapmc/',views.ahmedapmc,name='ahmedapmc'),
     path('aphmedapmc_market_view/', views.aphmedapmc_market_view, name='aphmedapmc_market_view'),
+    path("crop/add/", views.add_crop_website, name="add_crop"),
+    
+    path('list/', views.list_commodities, name='list_commodities'),
+    path("sold/<str:pk>/edit/", views.edit_sold, name="edit_sold"),
+    path("sold/<str:pk>/delete/", views.delete_sold, name="delete_sold"),
+
+    path("bought/<str:pk>/edit/", views.edit_bought, name="edit_bought"),
+    path("bought/<str:pk>/delete/", views.delete_bought, name="delete_bought"),
+
+    # path('map/', views.view_on_map, name='view_on_map'),
+    
     path('dtDashboard/',views.dtDashboard,name='dtDashboard'),
     path("damage/<int:pk>/view/", views.damage_crop_detail_view, name="damage_detail_view"),
     path('damage/crop/', views.damage_crop_page, name='damage_crop_page'),
@@ -88,6 +99,9 @@ urlpatterns = [
 
     path("send_otp/", views.send_otp,name='send_otp'),
     path("verify_otp/", views.verify_otp,name='verify_otp'),
+
+    path("data-policy/", views.data_policy, name="data_policy"),
+
 
 ]
 

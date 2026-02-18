@@ -986,3 +986,6 @@ def view_on_map(request):
     # Assuming Farmer1 has latitude and longitude fields
     commodities = Farmer1.objects.all()
     return render(request, 'syncapp/map.html', {'commodities': commodities})
+
+def data_policy(request):
+    return render(request, "syncapp/datapolicy.html")
