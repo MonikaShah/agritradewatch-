@@ -1,0 +1,130 @@
+{% extends "syncapp/base.html" %}
+{% load static %}
+
+{% block title %}Data Policy | MandiGo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm p-4">
+        <h1 class="mb-4 text-center">MandiGo (draft) Data Policy</h1>
+
+        <p class="text-muted text-center">
+            Last Updated: {% now "F Y" %}
+        </p>
+
+        <hr>
+
+        <!-- 1. Purpose -->
+        <h4>1. Purpose of Data Collection</h4>
+        <p>
+            MandiGo collects, stores, and displays price submissions from users to improve market transparency.
+            The goal is to help farmers, consumers, and traders view real-time prices for vegetables and crops
+            across various locations. Data is used for public display, analytics, and service improvement.
+        </p>
+
+        <!-- 2. Types of Data -->
+        <h4>2. Types of Data Collected</h4>
+
+        <h5>a) User-Submitted Price Data</h5>
+        <ul>
+            <li>Commodity or vegetable name</li>
+            <li>Quantity and unit</li>
+            <li>Price entered by the user</li>
+            <li>Location</li>
+            <li>Date and time of submission</li>
+            <li>Image of the crop (optional)</li>
+            <li>Optional remarks or quality details</li>
+        </ul>
+
+        <h5>b) User Information</h5>
+        <ul>
+            <li>Username or alias</li>
+            <li>Email or mobile number (for registration and verification)</li>
+            <li>Device or technical information (IP address, timestamp, browser type)</li>
+        </ul>
+
+        <!-- 3. How Data is Used -->
+        <h4>3. How the Data is Used</h4>
+        <ul>
+            <li>Display aggregated price data publicly to all users.</li>
+            <li>Use submissions for analytics, trend tracking, and reporting.</li>
+            <li>Detect and prevent fake or duplicate entries.</li>
+            <li>Communicate updates, notifications, or insights to registered users.</li>
+            <li>Share anonymised and aggregated data with partners for research or policy purposes.</li>
+        </ul>
+
+        <!-- 4. Data Display -->
+        <h4>4. Data Display and Sharing</h4>
+        <ul>
+            <li>Price data entered by users is visible to everyone on the platform, with anonymity maintained.</li>
+            <li>User names, mobile numbers, or emails are not publicly shown.</li>
+            <li>Aggregated or averaged data (e.g., “Average tomato price in Nagpur”) may be displayed publicly.</li>
+            <li>No personal information will be sold or shared with third parties.</li>
+            <li>Data shared with partners will be anonymised and used only for legitimate research or improvement purposes.</li>
+        </ul>
+
+        <!-- 5. User Responsibilities -->
+        <h4>5. User Responsibilities</h4>
+        <ul>
+            <li>Users must submit genuine and accurate data.</li>
+            <li>Users must not post false or misleading information to manipulate market prices.</li>
+            <li>Users must not share personal information of others without their consent.</li>
+            <li>Repeated misuse or false submissions may lead to account suspension.</li>
+        </ul>
+
+        <!-- 6. Data Retention -->
+        <h4>6. Data Retention and Deletion</h4>
+        <ul>
+            <li>Data will be retained as long as required for service operation and analysis.</li>
+            <li>Users may request deletion of their personal information by emailing the support team.</li>
+            <li>Aggregated and anonymised data may continue to be used for analytics and reporting even after account deletion.</li>
+        </ul>
+
+        <!-- 7. Privacy -->
+        <h4>7. Privacy and Security</h4>
+        <ul>
+            <li>Personal data is stored securely with encryption and restricted access.</li>
+            <li>MandiGo uses security measures to prevent unauthorised access, loss, or misuse of data.</li>
+            <li>In the event of a data breach, affected users will be notified in accordance with applicable laws.</li>
+        </ul>
+
+        <!-- 8. Consent -->
+        <h4>8. Consent</h4>
+        <p>
+            By using the MandiGo platform and submitting data, users consent to the collection,
+            use, and display of information as described in this policy.
+            Users can withdraw consent by deactivating their account.
+        </p>
+
+        <!-- 9. Third-Party Usage -->
+        <h4>9. Third-Party Data Usage</h4>
+        <p>
+            MandiGo may use third-party tools (e.g., analytics, map services) that process limited technical data.
+            All partners comply with applicable data protection standards.
+        </p>
+        <p>
+            Aggregated and anonymised data may be shared with government bodies or research organisations
+            to promote transparency.
+        </p>
+
+        <!-- 10. Changes -->
+        <h4>10. Changes to This Policy</h4>
+        <p>
+            This Data Policy may be updated periodically. Major updates will be communicated via
+            the platform or email. Continued use of MandiGo after updates indicates acceptance
+            of the revised terms and conditions.
+        </p>
+
+        <!-- 11. Contact -->
+        <h4>11. Contact Us</h4>
+        <p>
+            For questions, data deletion requests, or concerns about this policy, please contact:
+        </p>
+        <ul>
+            <li>Email: <a href="mailto:info@mandigo.in">info@mandigo.in</a></li>
+            <li>Address: Prof. Parmeshwar Udmale, CTARA, IIT-B, Powai, Mumbai, India</li>
+        </ul>
+
+    </div>
+</div>
+{% endblock %}
