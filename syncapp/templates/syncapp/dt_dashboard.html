@@ -3,6 +3,7 @@
   {% load i18n %}
   {% block content %}
 
+  
   <style>
   body, html {
     margin: 0;
@@ -51,6 +52,23 @@
   #topPanel button:hover {
     background-color: #157347;
   }
+  #message-container {
+  position: fixed;
+  top: 70px;            /* below #topPanel */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5000;        /* higher than topPanel (1000) */
+  max-width: 90%;
+}
+
+#message-container .alert {
+  background-color: #dc3545;   /* error */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
 
   /* Map + Right Panel Container */
   #mapContainer {
@@ -874,10 +892,20 @@ async function updateProduce(id) {
 
       const select = document.getElementById('commoditySelect');
       select.innerHTML = '<option value="">-- {% trans "Select" %} --</option>';
+      // uniqueCommodities.forEach(item => {
+      //   const opt = document.createElement('option');
+      //   opt.value = item;
+      //   opt.textContent = gettext(item);
+      //   select.appendChild(opt);
+      // });
+      function toTitleCase(str) {
+        return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+      }
+
       uniqueCommodities.forEach(item => {
         const opt = document.createElement('option');
         opt.value = item;
-        opt.textContent = gettext(item);
+        opt.textContent = toTitleCase(gettext(item));
         select.appendChild(opt);
       });
 
