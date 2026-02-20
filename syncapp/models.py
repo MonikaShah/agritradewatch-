@@ -179,6 +179,11 @@ class Farmer1(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     userid=models.CharField(max_length=100)
+    ROLE_CHOICES = (
+        ("farmer", "Farmer"),
+        ("retailer", "Retailer"),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="farmer")
 
     class Meta:
         db_table = 'syncapp_farmers1'
@@ -198,6 +203,11 @@ class Consumer1(models.Model):
     longitude = models.FloatField(blank=True, null=True)
     userid=models.CharField(max_length=100)
     image = models.ImageField(upload_to="consumer_images/", blank=True, null=True)  
+    ROLE_CHOICES = (
+        ("consumer", "Consumer"),
+        ("retailer", "Retailer"),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="consumer")
 
     class Meta:
         db_table = 'syncapp_consumers1'
@@ -213,7 +223,8 @@ class Commodity(models.Model):
     name = models.CharField(max_length=255, unique=True)
     alias_marathi = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-
+    com_group = models.CharField(max_length=100, blank=True, null=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         return self.name
     class Meta:
@@ -278,7 +289,7 @@ class APMC_Master(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     class Meta:
-        db_table = "apmc_master"
+        db_table = "apmc_master_all"
         verbose_name = "APMC Master"
         verbose_name_plural = "APMC Masters"
 
