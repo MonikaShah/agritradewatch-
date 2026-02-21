@@ -1,0 +1,109 @@
+{% extends "syncapp/base.html" %}
+{% load static %}
+
+{% block title %}Disclaimer | MandiGo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm p-4">
+        <h1 class="mb-4 text-center">MandiGo Disclaimer</h1>
+
+        <p class="text-muted text-center">
+            Last Updated: {% now "F Y" %}
+        </p>
+
+        <hr>
+
+        <!-- 1. General Information -->
+        <h4>1. General Information</h4>
+        <p>
+            The information provided on MandiGo is for general informational and transparency purposes only.
+            While we strive to ensure the accuracy of the data displayed on the platform, we make no guarantees
+            regarding completeness, reliability, or real-time accuracy.
+        </p>
+
+        <!-- 2. Market & Price Data -->
+        <h4>2. Market and Price Data Disclaimer</h4>
+        <ul>
+            <li>Price and crop data may be user-submitted or collected from publicly available sources.</li>
+            <li>MandiGo does not verify every submission individually.</li>
+            <li>Displayed prices may vary from actual market transaction prices.</li>
+            <li>Users are advised to independently verify prices before making trading decisions.</li>
+        </ul>
+
+        <!-- 3. No Professional Advice -->
+        <h4>3. No Professional or Financial Advice</h4>
+        <p>
+            The platform does not provide agricultural, financial, investment, or legal advice.
+            Any decisions made based on the information available on MandiGo are strictly at the user's own risk.
+        </p>
+
+        <!-- 4. User Responsibility -->
+        <h4>4. User Responsibility</h4>
+        <ul>
+            <li>Users are responsible for the accuracy of the data they submit.</li>
+            <li>MandiGo is not liable for losses caused by incorrect or misleading submissions.</li>
+            <li>Misuse of the platform or intentional manipulation of data may lead to account suspension.</li>
+        </ul>
+
+        <!-- 5. Limitation of Liability -->
+        <h4>5. Limitation of Liability</h4>
+        <p>
+            Under no circumstances shall MandiGo, its owners, administrators, or affiliates be liable
+            for any direct, indirect, incidental, consequential, or special damages arising from:
+        </p>
+        <ul>
+            <li>Use or inability to use the platform.</li>
+            <li>Reliance on displayed data.</li>
+            <li>Errors, omissions, or delays in information updates.</li>
+        </ul>
+
+        <!-- 6. External Links -->
+        <h4>6. External Links</h4>
+        <p>
+            The platform may contain links to external websites or third-party services.
+            MandiGo does not control and is not responsible for the content, accuracy,
+            or policies of any third-party websites.
+        </p>
+
+        <!-- 7. Service Availability -->
+        <h4>7. Service Availability</h4>
+        <ul>
+            <li>We do not guarantee uninterrupted or error-free service.</li>
+            <li>The platform may be temporarily unavailable due to maintenance or technical issues.</li>
+            <li>MandiGo reserves the right to modify, suspend, or discontinue any part of the service at any time.</li>
+        </ul>
+
+        <!-- 8. Changes to Disclaimer -->
+        <h4>8. Changes to This Disclaimer</h4>
+        <p>
+            This Disclaimer may be updated periodically. Continued use of the platform
+            after updates indicates acceptance of the revised terms.
+        </p>
+
+        <!-- 9. Contact -->
+        <h4>9. Contact Us</h4>
+        <p>
+            For questions regarding this Disclaimer, please contact:
+        </p>
+        <ul>
+            <li>Email: <a href="mailto:info@mandigo.in">info@mandigo.in</a></li>
+            <li>Address: Prof. Parmeshwar Udmale, CTARA, IIT-B, Powai, Mumbai, India</li>
+        </ul>
+        <!-- Consent Disclaimer Box -->
+<div class="alert alert-light border rounded p-4 mt-4" style="background-color:#f8f9fa;">
+    <h5 class="fw-bold">
+        Disclaimer: The crop data inputted in the app will be displayed on the public dashboard.
+        By entering data on the app, you consent to use the data for the dashboard.
+    </h5>
+
+    <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" id="consentCheck" required>
+        <label class="form-check-label fw-semibold" for="consentCheck">
+            I agree to the terms above
+        </label>
+    </div>
+</div>
+    </div>
+</div>
+{% endblock %}
