@@ -161,8 +161,8 @@ def ahmedapmc(request):
     # --- Fetch all APMC locations ---
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT apmc_clean_name, latitude, longitude
-            FROM apmc_master_all
+            SELECT apmc_name, latitude, longitude
+            FROM apmc_master
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL
             ORDER BY apmc_name;
         """)
@@ -989,3 +989,5 @@ def view_on_map(request):
 
 def data_policy(request):
     return render(request, "syncapp/datapolicy.html")
+def disclaimer(request):
+    return render(request, "syncapp/disclaimer.html")

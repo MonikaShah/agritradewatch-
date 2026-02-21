@@ -101,6 +101,8 @@ urlpatterns = [
     path("verify_otp/", views.verify_otp,name='verify_otp'),
 
     path("data-policy/", views.data_policy, name="data_policy"),
+    path("disclaimer/", views.disclaimer, name="disclaimer"),
+
 
 
 ]
