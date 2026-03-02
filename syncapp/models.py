@@ -169,6 +169,12 @@ class User1(AbstractUser):
 # -------------------------------
 class Farmer1(models.Model):
     id = models.CharField(primary_key=True, max_length=100)
+    userid = models.ForeignKey(
+        'User1',
+        to_field='id',              # reference User1.id
+        on_delete=models.CASCADE,   # delete farmer entries if user deleted
+        db_column='userid'          # keeps column name same in DB
+    )
     commodity = models.CharField(max_length=100)
     sellingprice = models.IntegerField(blank=True, null=True)
     receipt = models.TextField(blank=True, null=True)
@@ -194,6 +200,12 @@ class Farmer1(models.Model):
 # -------------------------------
 class Consumer1(models.Model):
     id = models.CharField(primary_key=True, max_length=100)
+    userid = models.ForeignKey(
+        'User1',
+        to_field='id',              # reference User1.id
+        on_delete=models.CASCADE,   # delete farmer entries if user deleted
+        db_column='userid'          # keeps column name same in DB
+    )
     commodity = models.CharField(max_length=100)
     buyingprice = models.IntegerField(blank=True, null=True)
     quantitybought = models.FloatField(blank=True, null=True)
