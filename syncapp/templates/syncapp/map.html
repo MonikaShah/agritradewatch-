@@ -1,152 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Consumers Map</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- For marker clusters -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-  
+{% extends "syncapp/base.html" %}
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+{% block content %}
 
-    #map {
-      width: 100vw;   /* Full viewport width */
-      height: 100vh;  /* Full viewport height */
-      margin: 0;
-      padding: 0;
-      display: block;
-    }
+<div class="container-fluid py-4">
+    <div class="row">
 
-    .popup-image {
-      max-width: 300px;
-      max-height: 200px;
-      width: 100%;
-      height: auto;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      display: block;
-      margin-top: 5px;
-    }
+        <!-- SIDEBAR -->
+        <div class="col-md-3 col-lg-2 bg-white border-end min-vh-100 p-3">
+            {% include "syncapp/partials/_sidebar.html" %}
+        </div>
 
-    /* For smaller screens */
-    @media (max-width: 480px) {
-      .popup-image {
-        max-width: 90vw;  /* 90% of viewport width */
-        max-height: 150px;
-      }
-    }
+        <!-- MAIN CONTENT -->
+        <div class="col-md-9 col-lg-10 p-4">
 
-    /* Leaflet popup container fixes */
-    .leaflet-popup-content-wrapper {
-      max-width: 90vw !important;
-      overflow-wrap: break-word;
-      box-sizing: border-box;
-    }
+            <div id="map" style="height:500px;"></div>
 
-    .leaflet-popup-content {
-      overflow: hidden;
-      max-width: 90vw !important;
-      max-height: 50vh;
-      word-wrap: break-word;
-      box-sizing: border-box;
-    }
+        </div>
 
-  </style>
-</head>
-<body>
-  <h2>Consumers Map</h2>
-  <div id="map"></div>
+    </div>
+</div>
 
-  <script>
-    const map = L.map('map').setView([19.2, 73.0], 7);
+{% endblock %}
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-// Create a marker cluster group
-const markers = L.markerClusterGroup();
+    const mapContainer = document.getElementById("map");
+    if (!mapContainer) return;
 
-fetch("/consumers-geojson/")
-  .then(res => res.json())
-  .then(data => {
-    const indiaBounds = L.latLngBounds([6.5, 68.0], [35.5, 97.5]);
+    var map = L.map('map').setView([20.5937, 78.9629], 5);
 
-    const filteredFeatures = data.features.filter(feature => {
-      const coords = feature.geometry.coordinates;
-      // coords is [lon, lat]
-      const latlng = L.latLng(coords[1], coords[0]);
-      return indiaBounds.contains(latlng);
-    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-// Then create a new GeoJSON object with filtered features
-    const filteredGeoJSON = {
-      type: "FeatureCollection",
-      features: filteredFeatures
-    };
+    var markers = [];
 
+    {% for crop in crops %}
+        {% if crop.latitude and crop.longitude %}
+            var lat = parseFloat("{{ crop.latitude }}");
+            var lng = parseFloat("{{ crop.longitude }}");
 
-    // const geojsonLayer = L.geoJSON(data, {
-    const geojsonLayer = L.geoJSON(filteredGeoJSON, {
-      onEachFeature: function (feature, layer) {
-        if (feature.properties && feature.properties.name) {
-          let popupContent = `<strong>Name:</strong> ${feature.properties.name}<br>`;
-          if (feature.properties.data) {
-            const data = feature.properties.data;
-            console.log(data);
-            if (data.date) {
-                popupContent += `<strong>Date:</strong> ${new Date(data.date).toLocaleString()}<br>`;
+            if (!isNaN(lat) && !isNaN(lng)) {
+
+                var marker = L.marker([lat, lng]).addTo(map);
+
+                marker.bindPopup(
+                    "<strong>{{ crop.commodity|escapejs }}</strong><br>" +
+                    "Type: {{ crop.type|escapejs }}<br>" +
+                    "Quantity: {{ crop.quantity }}"
+                );
+
+                markers.push(marker);
             }
-            if (data.pricePerUnit) {
-                popupContent += `<strong>Price per Unit:</strong> ${data.pricePerUnit}<br>`;
-            }
-            if (data.quantity) {
-                popupContent += `<strong>Quantity:</strong> ${data.quantity}<br>`;
-            }
-            if (data.image) {
-                popupContent += `<strong>Photo:</strong><br><img src="${data.image}" alt="Photo" class="popup-image"/>`;            }
-            // Add more fields as needed
-        }
-        layer.bindPopup(popupContent, {
-          maxWidth: window.innerWidth * 0.9,
-          minWidth: 150,
-          maxHeight: window.innerHeight * 0.5,
-          autoPan: true,
-          keepInView: true
-        });
-        }
-      },
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, {
-          radius: 8,
-          fillColor: "#ff7800",
-          color: "#000",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.8
-        });
-      }
-    });
-    
-    markers.addLayer(geojsonLayer); // Add GeoJSON layer to cluster group
-    map.addLayer(markers);          // Add cluster group to map
+        {% endif %}
+    {% endfor %}
 
-    map.fitBounds(markers.getBounds()); // Zoom to cluster bounds
-  })
-  .catch(err => console.error("Error loading GeoJSON:", err));
+    if (markers.length > 0) {
+        var group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+    }
 
-  </script>
-</body>
-</html>
+});
+</script>
+{% endblock %}

@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 from django.utils.translation import gettext
 from django.conf import settings
 from uuid import uuid4
+from itertools import chain
 import traceback
 from django.db import transaction
 from django.utils import timezone
@@ -474,7 +475,9 @@ def delete_sold(request, pk):
 def add_crop_website(request):
     user = request.user
     view_type = request.GET.get("view", "add")  # ✅ DEFAULT
-
+    form = None
+    seller_form = None
+    buyer_form = None
     if request.method == "POST":
 
         # ---------- FARMER ----------
@@ -482,7 +485,7 @@ def add_crop_website(request):
             form = FarmerForm(request.POST, request.FILES)
             if form.is_valid():
                 obj = form.save(commit=False)
-                obj.userid = user.id
+                obj.userid = str(user.id)
                 obj.role = "farmer"
                 obj.save()
                 return redirect("success_page")
@@ -492,7 +495,7 @@ def add_crop_website(request):
             form = ConsumerForm(request.POST, request.FILES)
             if form.is_valid():
                 obj = form.save(commit=False)
-                obj.userid = user.id
+                obj.userid = str(user.id)
                 obj.role = "consumer"
                 obj.save()
                 return redirect("success_page")
@@ -523,10 +526,11 @@ def add_crop_website(request):
                 buyer.longitude = request.POST.get("buyer_longitude", 0)
                 buyer.save()
 
-                return JsonResponse({
-                    "success": True,
-                    "created_entries": ["seller", "buyer"]
-                })
+                # return JsonResponse({
+                #     "success": True,
+                #     "created_entries": ["seller", "buyer"]
+                # })
+                return redirect("success_page")
             else:
                 # Return form errors as JSON
                 errors = {
@@ -559,46 +563,44 @@ def add_crop_website(request):
 
 @login_required
 def crops_list(request):
-    print("🔥 CROPS_LIST VIEW HIT 🔥")
-
     user = request.user
     userid = str(user.id)
     view_type = request.GET.get("view", "all")
 
     sold_qs = Farmer1.objects.filter(userid=userid)
     bought_qs = Consumer1.objects.filter(userid=userid)
+    
+    # Convert to list so we can attach attribute
+    sold_list = list(sold_qs)
+    bought_list = list(bought_qs)
 
-    # ---- ROLE BASED VISIBILITY ----
+    # Attach type
+    for obj in sold_list:
+        obj.type = "Sold"
+
+    for obj in bought_list:
+        obj.type = "Bought"
+
+    # ROLE BASED LOGIC
     if user.job == "farmer":
         view_type = "sold"
-        crops = sold_qs
+        crops = sold_list
 
     elif user.job == "consumer":
         view_type = "bought"
-        crops = bought_qs
+        crops = bought_list
 
     else:  # retailer
         if view_type == "sold":
-            crops = sold_qs
+            crops = sold_list
         elif view_type == "bought":
-            crops = bought_qs
-        else:  # all
-            crops = list(chain(sold_qs, bought_qs))
+            crops = bought_list
+        else:
+            crops = sold_list + bought_list
 
-    # ---- COMMODITIES (SAFE) ----
-    if isinstance(crops, list):
-        commodities = sorted({c.commodity for c in crops})
-    else:
-        commodities = list(
-            crops.values_list("commodity", flat=True).distinct()
-        )
-
+    # Commodities list
+    commodities = sorted({c.commodity for c in crops})
     selected_commodities = request.GET.getlist("commodities") or commodities
-
-    # ---- DEBUG ----
-    print("DEBUG user:", user.job)
-    print("DEBUG view_type:", view_type)
-    print("DEBUG crops count:", len(crops) if isinstance(crops, list) else crops.count())
 
     return render(
         request,
@@ -983,9 +985,35 @@ def delete_bought(request, pk):
 # -----------------------
 
 def view_on_map(request):
-    # Assuming Farmer1 has latitude and longitude fields
-    commodities = Farmer1.objects.all()
-    return render(request, 'syncapp/map.html', {'commodities': commodities})
+    user = request.user
+    userid = str(user.id)
+
+    sold = Farmer1.objects.filter(userid=userid)
+    bought = Consumer1.objects.filter(userid=userid)
+
+    crops = []
+
+    # Normalize Sold
+    for obj in sold:
+        crops.append({
+            "commodity": obj.commodity,
+            "quantity": obj.quantitysold,
+            "latitude": obj.latitude,
+            "longitude": obj.longitude,
+            "type": "Sold",
+        })
+
+    # Normalize Bought
+    for obj in bought:
+        crops.append({
+            "commodity": obj.commodity,
+            "quantity": obj.quantitybought,
+            "latitude": obj.latitude,
+            "longitude": obj.longitude,
+            "type": "Bought",
+        })
+
+    return render(request, "syncapp/map.html", {"crops": crops})
 
 def data_policy(request):
     return render(request, "syncapp/datapolicy.html")

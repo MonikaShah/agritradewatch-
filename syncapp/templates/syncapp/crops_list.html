@@ -1,256 +1,50 @@
 {% extends "syncapp/base.html" %}
-{% load static %}
 
 {% block content %}
-<div class="container-fluid my-4">
-  <div class="row">
+<div class="container-fluid px-2">
+  <div class="row min-vh-100">
 
-    <!-- Sidebar Tabs -->
-    <nav class="col-md-3 col-lg-2 mb-3 mb-md-0 d-md-block bg-light sidebar shadow-sm rounded p-3">
-      <h5 class="text-center mb-3">
-        <img src="{% static 'logo1.jpg' %}" alt="Logo" style="height:3em; max-height:50px; width:auto; margin-right:0.5em;">
-        Commodity History
-      </h5>
-      <ul class="nav flex-column nav-pills gap-2" id="cropsMenu">
-        <li class="nav-item">
-          <a class="nav-link {% if has_crops and not is_edit %}active{% endif %}" href="#listCrops" data-bs-toggle="tab">
-            {% if user.is_authenticated and user.job == 'farmer' %}
-              🛒 Sold Commodities
-            {% else %}
-              🌾 Purchased Commodities
-            {% endif %}
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if not has_crops or is_edit %}active{% endif %}" href="#formCrops" data-bs-toggle="tab">➕ Add Crop</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#mapCrops" data-bs-toggle="tab">🗺️ View on Map</a>
-        </li>
-      </ul>
-    </nav>
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2 bg-light border-end p-4">
+      {% include "syncapp/partials/_sidebar.html" %}
+    </div>
 
-    <!-- Right Content -->
-    <main class="col-md-9 col-lg-10">
-      <div class="tab-content w-100 mx-auto" style="max-width: 1000px; border:1px solid #ddd; border-radius:10px; padding:20px; background:#fff;">
+    <!-- Main Content -->
+    <div class="col-md-9 col-lg-10 p-5">
 
-        <!-- Purchased Commodity -->
-        <div class="tab-pane fade {% if has_crops and not is_edit %}show active{% endif %}" id="listCrops">
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white text-center">
-              {% if user.is_authenticated and user.job == 'farmer' %}
-                🛒 Sold Commodities
-              {% else %}
-                🌾 Purchased Commodities
-              {% endif %}
-            </div>
-
-          
-
-            <!-- Table Section -->
-            <div id="cropTableContainer">
-              {% include "syncapp/partials/_crop_table.html" %}
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Add / Update Crop Form -->
-        <div class="tab-pane fade {% if not has_crops or is_edit %}show active{% endif %}" id="formCrops">
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-success text-white" id="formHeader">
-              {% if is_edit %}✏️ Update Crop{% else %}➕ Add Crop{% endif %}
-            </div>
-            <div class="card-body">
-              <form id="cropForm" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="row g-3">
-                  {% for field in form %}
-                    <div class="col-12 col-md-6">
-                      <div class="form-group">
-                        {{ field.label_tag }} {{ field }}
-                        {% if field.errors %}
-                          <div class="text-danger small">{{ field.errors|join:", " }}</div>
-                        {% endif %}
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-                <div class="mt-3 d-flex gap-2 flex-wrap">
-                  <button type="submit" class="btn btn-success" id="submitBtn">{% if is_edit %}Update{% else %}Add{% endif %}</button>
-                  {% if is_edit %}
-                    <a href="{% url 'crops_list' %}" class="btn btn-secondary">Cancel</a>
-                  {% endif %}
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Map Section -->
-        <div class="tab-pane fade" id="mapCrops">
-          <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">🗺️ Crops Map</div>
-            <div class="card-body p-0">
-              <div id="map" class="w-100 h-100"></div>
-            </div>
-          </div>
-        
+      <div class="mb-4">
+        <h3 class="fw-bold">Crop History</h3>
       </div>
 
+      <!-- Filter Buttons -->
+      <div class="mb-4">
+        <a href="?view=sold"
+           class="btn btn-sm btn-primary {% if view_type == 'sold' %}active{% endif %}">
+           Sold
+        </a>
+        <a href="?view=bought"
+           class="btn btn-sm btn-success {% if view_type == 'bought' %}active{% endif %}">
+           Bought
+        </a>
+        <a href="?view=all"
+           class="btn btn-sm btn-outline-dark {% if view_type == 'all' %}active{% endif %}">
+           All
+        </a>
       </div>
-    </main>
+
+      <!-- Table Card -->
+      <div class="card shadow-sm w-100">
+        <div class="card-body">
+
+          <div class="table-responsive">
+            {% include "syncapp/partials/_crop_table.html" %}
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </div>
-<!-- CSS for responsiveness -->
-<style>
-  #mapCrops .card {
-    height: 70vh; /* 70% of viewport height on mobile */
-  }
-  @media (min-width: 768px) {
-    #mapCrops .card {
-      height: 500px; /* tablets */
-    }
-  }
-  @media (min-width: 1200px) {
-    #mapCrops .card {
-      height: 600px; /* desktop */
-    }
-  }
-  #map {
-    width: 100%;
-    height: 100%;
-  }
-</style>
-
-<!-- JS -->
-<!-- JS and Leaflet -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-  
-    const cropsData = {{ crops_json|safe }};
-  
-    // Initialize map
-    const map = L.map("map").setView([20.0, 78.0], 5);
-
-    // Add satellite tiles
-    L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", 
-      {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        maxZoom: 19
-      }
-    ).addTo(map);
-
-    // Set initial map view to India bounds
-      const indiaBounds = [[6.7, 68.0], [35.5, 97.5]];
-      map.fitBounds(indiaBounds);
-
-    // Group crops by lat/lng
-    const locations = {};
-    cropsData.forEach(crop => {
-      if (crop.lat && crop.lng) {
-        const key = `${crop.lat},${crop.lng}`;
-        if (!locations[key]) locations[key] = [];
-        locations[key].push(crop);
-      }
-    });
-
-    const markers = [];
-    Object.keys(locations).forEach(key => {
-      const [lat, lng] = key.split(",").map(Number);
-      const cropsAtLoc = locations[key];
-
-      // Build popup HTML with scrollable container
-      let popupHTML = `<div style="max-height:200px; overflow-y:auto;">`;
-      popupHTML += "<strong>Commodities at this location:</strong><br><ul>";
-      cropsAtLoc.forEach(c => {
-        popupHTML += `<li>
-          <strong>${c.commodity}</strong> - ${c.date}<br>
-          Price: ₹${c.price}, Quantity: ${c.quantity} ${c.unit}<br>
-          ${c.image_url ? '<img src="' + c.image_url + '" style="width:100px;height:auto;"><br>' : ''}
-        </li>`;
-      });
-      popupHTML += "</ul></div>";
-
-      const marker = L.marker([lat, lng])
-        .bindPopup(popupHTML)
-        .addTo(map);
-
-      markers.push(marker);
-    });
-
-
-    // Fit map to markers
-    if (markers.length === 1) {
-      map.setView(markers[0].getLatLng(), 15);
-    } else if (markers.length > 1) {
-      const group = L.featureGroup(markers);
-      map.fitBounds(group.getBounds().pad(0.2));
-    } else {
-      map.setView([20.0, 78.0], 5); // fallback
-    }
-
-    // Leaflet map resize fix when tab shown
-    const mapTab = document.querySelector('a[href="#mapCrops"]');
-    mapTab.addEventListener("shown.bs.tab", function () {
-      map.invalidateSize();
-    });
-
-    // Toggle dropdown & close on outside click
-    document.addEventListener("click", function(e) {
-      const filterToggle = e.target.closest("#commodityFilterToggle");
-      const filterDropdown = document.querySelector("#commodityFilterDropdown");
-  
-      if (filterToggle) {
-        e.preventDefault();
-        filterDropdown.style.display =
-          filterDropdown.style.display === "block" ? "none" : "block";
-        return;
-      }
-  
-      if (filterDropdown && !filterDropdown.contains(e.target)) {
-        filterDropdown.style.display = "none";
-      }
-    });
-  
-    // Delegate checkbox changes for AJAX updates
-    document.body.addEventListener("change", function(e) {
-      if (e.target.matches(".commodity-filter, #selectAllCommodities")) {
-        const form = document.getElementById("filterForm");
-        const params = new URLSearchParams();
-  
-        // Handle select all checkbox
-        if (e.target.id === "selectAllCommodities") {
-          const allChecked = e.target.checked;
-          document.querySelectorAll(".commodity-filter").forEach(cb => cb.checked = allChecked);
-        } else {
-          // Update select all state
-          const allChecked = Array.from(document.querySelectorAll(".commodity-filter")).every(cb => cb.checked);
-          document.getElementById("selectAllCommodities").checked = allChecked;
-        }
-  
-        // Add selected commodities to URL params
-        form.querySelectorAll(".commodity-filter:checked").forEach(cb => params.append("commodity[]", cb.value));
-  
-        // AJAX fetch
-        fetch("?" + params.toString(), {
-          headers: { "X-Requested-With": "XMLHttpRequest" }
-        })
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("cropTableContainer").innerHTML = data.html;
-        })
-        .catch(err => console.error(err));
-      }
-    });
-  
-  });
-  </script>
-  
 {% endblock %}

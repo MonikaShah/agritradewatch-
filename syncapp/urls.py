@@ -83,7 +83,7 @@ urlpatterns = [
     path("bought/<str:pk>/edit/", views.edit_bought, name="edit_bought"),
     path("bought/<str:pk>/delete/", views.delete_bought, name="delete_bought"),
 
-    # path('map/', views.view_on_map, name='view_on_map'),
+    path('map/', views.view_on_map, name='view_on_map'),
     
     path('dtDashboard/',views.dtDashboard,name='dtDashboard'),
     path("damage/<int:pk>/view/", views.damage_crop_detail_view, name="damage_detail_view"),

@@ -1,94 +1,130 @@
-{% if crops %}
-<div class="table-responsive w-100">
-  <table class="table table-bordered table-hover align-middle mb-0">
-    <thead class="table-primary text-center">
-      <tr>
-        <th>#</th>  
-        <th>
-          Date
-          <a href="?sort=date_asc">⬆️</a>
-          <a href="?sort=date_desc">⬇️</a>
-        </th>
-        <th>Image</th>
-        <th class="position-relative">
-          Commodity
-          <a href="#" id="commodityFilterToggle" class="text-dark ms-1">
-            <i class="bi bi-funnel"></i>
-          </a>
+<!-- DEBUG TEMPLATE OUTPUT -->
+<!-- <div class="alert alert-info">
+  <strong>DEBUG:</strong><br>
+  Number of crops: {{ crops|length }}<br>
+  Commodities: {{ commodities|join:", "|default:"" }}<br>
+  Selected commodities: {{ selected_commodities|join:", " }}
+</div> -->
 
-          <!-- Dropdown with checkboxes -->
-          <div id="commodityFilterDropdown"
-               class="dropdown-menu p-2 shadow-sm"
-               style="max-height:250px; overflow-y:auto; position:absolute; top:100%; left:0; display:none; z-index:1000;">
-            <form id="filterForm">
-              <div class="form-check border-bottom mb-1 pb-1">
-                <!-- Select All -->
-              <input class="form-check-input" type="checkbox" id="selectAllCommodities"
-              {% if selected_commodities|length == commodities|length %}checked{% endif %}>
-              <label class="form-check-label fw-bold" for="selectAllCommodities">Select All</label>
-              {% for c in commodities %}
-              <div class="form-check">
-              <input class="form-check-input commodity-filter"
-                type="checkbox"
-                name="commodity"
-                value="{{ c }}"
-                id="commodity_{{ forloop.counter }}"
-                {% if c in selected_commodities %}checked{% endif %}>
-              <label class="form-check-label" for="commodity_{{ forloop.counter }}">{{ c }}</label>
-              </div>
-              {% endfor %}
 
-            </form>
+<div class="table-responsive">
+<table class="table table-striped table-bordered align-middle">
+
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>
+        Commodities
+        <a href="#" class="commodity-filter-toggle ms-1">▼</a>
+
+        <!-- Dropdown for commodity filtering -->
+        <div class="commodity-filter-dropdown dropdown-menu p-2 shadow"
+             style="display:none; min-width:200px;">
+
+          <!-- Select All -->
+          <div class="form-check">
+            <input type="checkbox" id="selectAllCommodities"
+                   class="form-check-input"
+                   {% if commodities|length == selected_commodities|length %}
+                   checked
+                   {% endif %}>
+            <label class="form-check-label">Select All</label>
           </div>
-        </th>
-        <th>
-          Selling Price
-          <a href="?sort=price_asc" data-sort="price_asc">⬆️</a>
-          <a href="?sort=price_desc" data-sort="price_desc">⬇️</a>
-        </th>
-        <th>
-          Quantity Sold
-          <a href="?sort=qty_asc" data-sort="qty_asc">⬆️</a>
-          <a href="?sort=qty_desc" data-sort="qty_desc">⬇️</a>
-        </th>
-        <th>Unit</th>
-        <th>Actions</th>
-        <!-- Date column sortable -->
-        
-      </tr>
-    </thead>
-    <tbody>
-      {% for crop in crops %}
-      <tr>
-        <td class="text-center">{{ forloop.counter }}</td>  <!-- Serial number -->
-        <td>{{ crop.date|date:"d M Y" }}</td>
-        <td class="text-center">
-          {% if crop.image %}
-            <img src="{{ crop.image.url }}" alt="{{ crop.commodity }}" class="img-thumbnail" style="width: 80px; height: 80px;">
-          {% else %}
-            <span class="text-muted">No image</span>
-          {% endif %}
-        </td>
-        <td>{{ crop.commodity }}</td>
-        {% if user.job == "farmer" %}
-          <td>₹{{ crop.sellingprice }}</td>
-          <td>{{ crop.quantitysold }}</td>
+
+          <hr class="my-1">
+
+          <!-- List unique commodities -->
+          {% for c in commodities %}
+          <div class="form-check">
+            <input type="checkbox"
+                   class="form-check-input commodity-filter"
+                   value="{{ c }}"
+                   {% if c in selected_commodities %}checked{% endif %}>
+            <label class="form-check-label">{{ c }}</label>
+          </div>
+          {% empty %}
+          <div class="text-muted">No commodities found</div>
+          {% endfor %}
+        </div>
+      </th>
+      
+      <th>Quantity</th>
+      <th>Unit</th>
+      <th>Price</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for crop in crops %}
+    <tr class="crop-row" data-commodity="{{ crop.commodity }}">
+      <!-- Type Badge -->
+      <td>
+        {% if crop.type == "Sold" %}
+          <span class="badge bg-primary">Sold</span>
         {% else %}
-          <td>₹{{ crop.buyingprice }}</td>
-          <td>{{ crop.quantitybought }}</td>
+          <span class="badge bg-success">Bought</span>
         {% endif %}
-        <td>{{ crop.unit }}</td>
-        <td>
-          <a href="?edit={{ crop.id }}" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
-          <a href="{% url 'delete_crop' crop.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </td>
+      <td>{{ crop.commodity }}</td>
+      <td>{% if crop.quantitysold %}
+          {{ crop.quantitysold }}
+      {% elif crop.quantitybought %}
+          {{ crop.quantitybought }}
+      {% endif %}
+      </td>
+      <td>{{ crop.unit }}</td>
+      <td>
+        {% if crop.sellingprice %}
+            {{ crop.sellingprice }}
+        {% elif crop.buyingprice %}
+            {{ crop.buyingprice }}
+        {% endif %}
+      </td>
+      <td>{{ crop.date|date:"Y-m-d H:i" }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5" class="text-center text-muted">
+        No crops found
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 </div>
-{% else %}
-<div class="alert alert-warning text-center m-2">
-  No crops found for the selected filters.
-</div>
-{% endif %}
+<!-- JS for filtering -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toggle = document.querySelector(".commodity-filter-toggle");
+    const dropdown = document.querySelector(".commodity-filter-dropdown");
+    const selectAll = document.getElementById("selectAllCommodities");
+    const checkboxes = document.querySelectorAll(".commodity-filter");
+
+    toggle.addEventListener("click", e => {
+        e.preventDefault();
+        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    });
+
+    // Select / deselect all
+    selectAll.addEventListener("change", function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        filterRows();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener("change", filterRows);
+    });
+
+    function filterRows() {
+        const selected = Array.from(checkboxes)
+                              .filter(cb => cb.checked)
+                              .map(cb => cb.value);
+
+        document.querySelectorAll(".crop-row").forEach(row => {
+            const commodity = row.dataset.commodity;
+            row.style.display = selected.length === 0 || selected.includes(commodity) ? "" : "none";
+        });
+    }
+});
+</script>

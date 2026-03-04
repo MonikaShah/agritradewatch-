@@ -1,0 +1,27 @@
+<form id="cropForm" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if form %}
+        {{ form.as_p }}
+    {% endif %}
+
+    {% if seller_form %}
+        <h5>Seller Entry</h5>
+        {{ seller_form.as_p }}
+    {% endif %}
+
+    {% if buyer_form %}
+        <h5>Buyer Entry</h5>
+        {{ buyer_form.as_p }}
+    {% endif %}
+
+    <!-- Hidden latitude/longitude -->
+    <input type="hidden" name="latitude" id="id_latitude">
+    <input type="hidden" name="longitude" id="id_longitude">
+
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-success">
+            Submit
+        </button>
+    </div>
+</form>
