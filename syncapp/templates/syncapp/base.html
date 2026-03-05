@@ -228,6 +228,12 @@
                             <ul class="dropdown-menu shadow-sm" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="{% url 'simple_profile' %}">{% trans "Profile" %}</a></li>
                                 <li><hr class="dropdown-divider"></li>
+                                <!-- Delete Account -->
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'delete_account' %}">
+                                        🗑️ {% trans "Delete My Account" %}
+                                    </a>
+                                </li>
                                 <li><a class="dropdown-item" href="{% url 'web_logout' %}">{% trans "Logout" %}</a></li>
                             </ul>
                         </li>

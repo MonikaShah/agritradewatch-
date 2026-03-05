@@ -1,0 +1,36 @@
+{% extends "syncapp/base.html" %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+    <h2 class="text-center text-danger mb-4">Delete Account</h2>
+    <p class="text-center text-muted">
+        This action cannot be undone. All your data, images, and media will be permanently deleted.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Highlighted Checkbox Box -->
+        <div class="p-3 border border-danger rounded bg-danger-subtle d-flex align-items-start gap-2">
+            <input class="form-check-input mt-1" type="checkbox" id="confirmDelete" name="confirmDelete" style="flex-shrink:0;">
+            <label class="form-check-label fw-bold text-danger" for="confirmDelete" style="font-size: 1.1rem;">
+                I understand that this action cannot be undone and all my data will be permanently deleted.
+            </label>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <a href="{% url 'simple_profile' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger fw-bold" id="deleteBtn" disabled>Delete My Account</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const checkbox = document.getElementById('confirmDelete');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    checkbox.addEventListener('change', function() {
+        deleteBtn.disabled = !this.checked;
+    });
+</script>
+{% endblock %}

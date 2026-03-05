@@ -1019,3 +1019,43 @@ def data_policy(request):
     return render(request, "syncapp/datapolicy.html")
 def disclaimer(request):
     return render(request, "syncapp/disclaimer.html")
+@login_required
+def delete_account(request):
+    user = request.user  # current logged-in user
+
+    if request.method == "POST":
+        # -----------------------
+        # Delete related models
+        # -----------------------
+        # Farmer and Consumer entries will be deleted automatically via CASCADE
+        # But DtProduce and DamageCrop have FK to User1 with on_delete=models.CASCADE
+        # So all related data will go automatically
+
+        # Optional: If you want to manually delete media files
+        for produce in DtProduce.objects.filter(username=user):
+            if produce.photo_or_video:
+                produce.photo_or_video.delete(save=False)
+            if produce.description_voice:
+                produce.description_voice.delete(save=False)
+
+        for damage in DamageCrop.objects.filter(userid=user):
+            if damage.photo:
+                damage.photo.delete(save=False)
+
+        for farmer in Farmer1.objects.filter(userid=user):
+            if farmer.image:
+                farmer.image.delete(save=False)
+
+        for consumer in Consumer1.objects.filter(userid=user):
+            if consumer.image:
+                consumer.image.delete(save=False)
+
+        # -----------------------
+        # Finally delete user
+        # -----------------------
+        user.delete()
+
+        messages.success(request, "Your account and all related data have been deleted permanently.")
+        return redirect("landingpage")  # Or login page
+
+    return render(request, "syncapp/delete_account.html")

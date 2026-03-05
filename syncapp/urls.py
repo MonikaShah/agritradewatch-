@@ -103,6 +103,8 @@ urlpatterns = [
     path("data-policy/", views.data_policy, name="data_policy"),
     path("disclaimer/", views.disclaimer, name="disclaimer"),
 
+    path("delete-account/", views.delete_account, name="delete_account"),
+
 
 
 ]
