@@ -19,7 +19,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.decorators import method_decorator
 from django.db.models import Max, Q
 from django.contrib import messages
-
+from django.db import transaction
 from .forms import DamageForm,DtProduceForm,UserProfilePhotoForm
 
 from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce
@@ -546,70 +546,210 @@ def is_consumer(user):
 def is_farmer(user):
     return user.job == 'farmer'
 
+def is_retailer(user):
+    return user.job == 'retailer'
+
 # List crops
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_user_crops(request):
     user = request.user
-    if is_consumer(user):
+
+    if user.job == "consumer":
         crops = Consumer1.objects.filter(userid=user.id)
         serializer = ConsumerSerializer(crops, many=True)
-    elif is_farmer(user):
-        crops = Farmer1.objects.filter(id=user.id)
-        serializer = FarmerSerializer(crops, many=True)
-    else:
-        return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer.data)
 
-# Add crop
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-# def add_user_crop(request):
+    elif user.job == "farmer":
+        crops = Farmer1.objects.filter(userid=user.id)
+        serializer = FarmerSerializer(crops, many=True)
+
+    elif user.job == "retailer":
+        farmer_crops = Farmer1.objects.filter(userid=user.id, role="retailer")
+        consumer_crops = Consumer1.objects.filter(userid=user.id, role="retailer")
+
+        data = (
+            FarmerSerializer(farmer_crops, many=True).data +
+            ConsumerSerializer(consumer_crops, many=True).data
+        )
+        return Response(data)
+
+    else:
+        return Response(
+            {"error": "User type unknown"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    return Response(serializer.data)
+# def list_user_crops(request):
 #     user = request.user
 #     if is_consumer(user):
-#         serializer = ConsumerSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(userid=user.id)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         crops = Consumer1.objects.filter(userid=user.id)
+#         serializer = ConsumerSerializer(crops, many=True)
 #     elif is_farmer(user):
-#         serializer = FarmerSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(id=user.id)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         crops = Farmer1.objects.filter(id=user.id)
+#         serializer = FarmerSerializer(crops, many=True)
 #     else:
 #         return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
-    
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     return Response(serializer.data)
+
+# Add crop
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_user_crop(request):
     user = request.user
+    data = request.data.copy()
 
-    data = request.data.copy()  # make mutable copy
+    # Common defaults
+    data["userid"] = str(user.id)
+    data.setdefault("date", timezone.now())
+    data.setdefault("latitude", 0.0)
+    data.setdefault("longitude", 0.0)
 
-    # Add user id automatically
-    data['userid'] = str(user.id)
-
-    # Set default date if not provided
-    if not data.get('date'):
-        data['date'] = timezone.now()
-    # Set latitude/longitude if not provided (fallback to 0.0)
-    if not data.get('latitude'):
-        data['latitude'] = 0.0
-    if not data.get('longitude'):
-        data['longitude'] = 0.0
-
-    if is_consumer(user):
-        serializer = ConsumerSerializer(data=data)
-    elif is_farmer(user):
+    # -------------------------
+    # FARMER
+    # -------------------------
+    if user.job == "farmer":
         serializer = FarmerSerializer(data=data)
-    else:
-        return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.save(id=str(uuid.uuid4()), role="farmer")
+            return Response({"success": True, "id": serializer.data.get("id")}, status=201)
+        return Response({"success": False, "errors": serializer.errors}, status=400)
 
-    if serializer.is_valid():
-        serializer.save(id=str(uuid.uuid4()))
-        # serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # -------------------------
+    # CONSUMER
+    # -------------------------
+    if user.job == "consumer":
+        serializer = ConsumerSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(id=str(uuid.uuid4()), role="consumer")
+            return Response({"success": True, "id": serializer.data.get("id")}, status=201)
+        return Response({"success": False, "errors": serializer.errors}, status=400)
+
+    # -------------------------
+    # RETAILER (dual entry)
+    # -------------------------
+    if user.job == "retailer":
+        created_entries = []
+
+        lat = data.get("latitude")
+        lon = data.get("longitude")
+        if not lat or not lon:
+            return Response(
+                {"success": False, "error": "Latitude/Longitude missing"},
+                status=400
+            )
+
+        lat = float(lat)
+        lon = float(lon)
+        try:
+            with transaction.atomic():
+
+            # --------------------------------
+            # MOBILE SELLER
+            # --------------------------------
+                if "sellingprice" in data:
+
+                    seller_data = {
+                        "commodity": data.get("commodity"),
+                        "quantitysold": data.get("quantitysold"),
+                        "sellingprice": data.get("sellingprice"),
+                        "unit": data.get("unit"),
+                        "userid": str(user.id),
+                        "date": timezone.now(),
+                        "latitude": lat,
+                        "longitude": lon,
+                    }
+
+                    serializer = FarmerSerializer(data=seller_data)
+
+                    if serializer.is_valid():
+                        obj = serializer.save(
+                            id=str(uuid.uuid4()),
+                            role="retailer"
+                        )
+                        created_entries.append({"entry": "seller", "id": obj.id})
+                    else:
+                        return Response(serializer.errors, status=400)
+
+                # --------------------------------
+                # MOBILE BUYER
+                # --------------------------------
+                if "buyingprice" in data:
+
+                    buyer_data = {
+                        "commodity": data.get("commodity"),
+                        "quantitybought": data.get("quantitybought"),
+                        "buyingprice": data.get("buyingprice"),
+                        "unit": data.get("unit"),
+                        "userid": str(user.id),
+                        "date": timezone.now(),
+                        "latitude": lat,
+                        "longitude": lon,
+                    }
+
+                    serializer = ConsumerSerializer(data=buyer_data)
+
+                    if serializer.is_valid():
+                        obj = serializer.save(
+                            id=str(uuid.uuid4()),
+                            role="retailer"
+                        )
+                        created_entries.append({"entry": "buyer", "id": obj.id})
+                    else:
+                        return Response(serializer.errors, status=400)
+
+            return Response(
+                {"success": True, "created_entries": created_entries},
+                status=201
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+        print("LAT:", request.data.get("latitude"))
+        print("LON:", request.data.get("longitude"))
+        print("REQUEST DATA:", request.data)
+
+        return Response(
+            {"success": True, "created_entries": created_entries},
+            status=201
+        )
+
+# def add_user_crop(request):
+#     user = request.user
+
+#     data = request.data.copy()  # make mutable copy
+
+#     # Add user id automatically
+#     data['userid'] = str(user.id)
+
+#     # Set default date if not provided
+#     if not data.get('date'):
+#         data['date'] = timezone.now()
+#     # Set latitude/longitude if not provided (fallback to 0.0)
+#     if not data.get('latitude'):
+#         data['latitude'] = 0.0
+#     if not data.get('longitude'):
+#         data['longitude'] = 0.0
+
+#     if is_consumer(user):
+#         serializer = ConsumerSerializer(data=data)
+#     elif is_farmer(user):
+#         serializer = FarmerSerializer(data=data)
+#     else:
+#         return Response({"error": "User type unknown"}, status=status.HTTP_400_BAD_REQUEST)
+
+#     if serializer.is_valid():
+#         serializer.save(id=str(uuid.uuid4()))
+#         # serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         #  obj = serializer.save(id=uuid.uuid4())
+#         #  print("SAVED OBJECT PK:", obj.pk)
+#         #  return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # Update crop
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
