@@ -165,6 +165,7 @@ def profile(request):
     return Response({
         "message": "Authenticated successfully",
         "username": request.user.username,
+        "role": request.user.job,
     })
 
 
