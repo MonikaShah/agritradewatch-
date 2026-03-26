@@ -92,23 +92,8 @@
     z-index: 500;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     pointer-events: none; /* allows map panning/zooming */
-  }.map-chart-row {
-  display: flex;
-  gap: 1rem;
-  align-items: stretch;
-}
-.map-chart-row {
-  display: flex;
-  gap: 1rem;
-  align-items: stretch;
-}
+  }
 
-.map-panel {
-  flex: 0 0 30%;
-  height: 700px; /* 🔹 increase total map+chart panel height */
-  border-radius: 15px;
-  overflow: hidden;
-}
 .map-chart-row {
   display: flex;
   justify-content: space-between;
@@ -310,7 +295,7 @@
 {% block extra_js %}
 <script>
 let apmcMarkers = {};
-
+let mapReady = false;
 function normalizeApmc(name) {
   if (!name) return "";
     return name
@@ -405,8 +390,7 @@ downloadPdfBtn.addEventListener("click", function() {
 
 
 
-  Chart.register(ChartZoom);  // make sure this is done once
-
+Chart.register(window['ChartZoom']);
   // --- Initialize Leaflet map ---
   async function initMap() {
       // Initialize map centered on Maharashtra
@@ -415,18 +399,17 @@ downloadPdfBtn.addEventListener("click", function() {
       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
-      }).addTo(map);
-
-      const googleSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '&copy; Esri, HERE, Garmin, © OpenStreetMap contributors'
       });
 
-      const googleSat1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        attribution: ''
-      });
-
-      const satelliteWithBoundaries = L.layerGroup([googleSat, googleSat1]);
+      var googleHybrid = L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            maxZoom: 20,
+            attribution: "&copy; Google"
+        }
+    ).addTo(map);
+      mapReady = true;   // ✅ ADD THIS
+      const satelliteWithBoundaries = L.layerGroup([googleHybrid]);
       const baseMaps = {
         "OpenStreetMap": osm,
         "Google Satellite": satelliteWithBoundaries
@@ -478,7 +461,10 @@ downloadPdfBtn.addEventListener("click", function() {
       apmcSelect.disabled = true; 
       return; 
     }
-
+    if (!mapReady) {
+      console.warn("Map not ready yet");
+      return;
+    }
     try{
       const res = await fetch(`/api/webdata_prices_public/?commodity=${encodeURIComponent(commodity)}&start_date=${startDate}&end_date=${endDate}`);
       const dataList = await res.json();
@@ -547,7 +533,7 @@ downloadPdfBtn.addEventListener("click", function() {
 
         if (matchedKey && districtCentroids[matchedKey]) {
           const { lat, lng } = districtCentroids[matchedKey];
-          map.setView([lat, lng], 9);
+          map.setView([lat, lng], 7);
           console.log("✅ Zoomed to district:", matchedKey);
         } else {
           console.warn("⚠️ Centroid not found for", selectedDistrict);
@@ -560,26 +546,37 @@ downloadPdfBtn.addEventListener("click", function() {
         return;
       }
       markerLayer.clearLayers();
-      dataList.forEach(d=>{
-        if (d.lat && d.lon &&
-      d.lat >= 15.6 && d.lat <= 22.0 &&
-      d.lon >= 72.6 && d.lon <= 80.9) {
+      const filteredData = dataList.filter(d => {
+        const recordDate = d.date ? d.date.split("T")[0] : null;
+        return (
+          d.commodity === commodity && 
+          recordDate &&
+          recordDate >= startDate &&
+          recordDate <= endDate &&  // ✅ KEY FIX
+          d.lat && d.lon &&
+          d.lat >= 15.6 && d.lat <= 22.0 &&
+          d.lon >= 72.6 && d.lon <= 80.9
+        );
+      });
+          markerLayer.clearLayers();
+
+        filteredData.forEach(d => {
           L.circleMarker([d.lat, d.lon], {
             radius: 8,
             color: '#007bff',
             fillColor: '#00b4d8',
             fillOpacity: 0.5,
             weight: 2
-          }).addTo(markerLayer)
-            .bindPopup(`<b>${d.apmc}</b><br>${d.commodity}<br>₹${d.modalprice}`);
-        }
-      });
+          })
+          .addTo(markerLayer)
+          .bindPopup(`<b>${d.apmc}</b><br>${d.commodity}<br>₹${d.modalprice}`);
+        });
       const selectedOption = apmcSelect.selectedOptions[0];
       const rawApmc = selectedOption?.dataset.raw || "";
 
       console.log("✅ Initial load RAW APMC:", rawApmc);
 
-      await loadAhmednagarAPMCs(rawApmc, commodity, startDate, endDate);
+      
     }catch(err){
       console.error(err);
       apmcSelect.disabled = true;
@@ -676,7 +673,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     //     opacity: 0.9,
     //     className: 'apmc-tooltip'            // optional: for custom styling
     //   });
-    markerLayer.clearLayers();
+    
     apmcMarkers = {};
     let selectedLatLng = null;
 
@@ -696,7 +693,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
       if (!isMaharashtra) return;
 
       const locKey = normalizeApmc(loc.apmc_name);
-      const isSelected = selectedKey && locKey === selectedKey;
+      const isSelected = selectedKey && normalizeApmc(loc.apmc_name) === selectedKey;
 
       console.log("📍 Marker:", locKey, "selected?", isSelected);
 
@@ -731,13 +728,20 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
       // ✅ CLICK HANDLER — MUST BE HERE
       marker.on("click", () => {
         const apmcSelect = document.getElementById("apmcSelect");
+        let selectedValue = null; 
 
         [...apmcSelect.options].forEach(opt => {
           if (normalizeApmc(opt.dataset.raw) === locKey) {
             opt.selected = true;
+            selectedValue = opt.value;
           }
         });
+          if (selectedValue) {
+            apmcSelect.value = selectedValue;   // ✅ properly set dropdown
 
+            // ✅ trigger change event (VERY IMPORTANT)
+            apmcSelect.dispatchEvent(new Event("change"));
+          }
         updateApmcLabel();
         fetchLineChart();
       });
@@ -745,10 +749,14 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 
     // ✅ ZOOM AFTER LOOP
     if (selectedLatLng) {
-      map.setView(selectedLatLng, 12, {
+      map.flyTo(selectedLatLng, 10, {
         animate: true,
-        duration: 0.6
+        duration: 0.8
       });
+      // ✅ Ensure marker is EXACTLY centered visually
+      setTimeout(() => {
+        map.panTo(selectedLatLng);
+      }, 300);
     } else if (data.locations.length > 0) {
       map.fitBounds(
         [
@@ -758,18 +766,15 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
         { padding: [30, 30] }
       );
     }
-     
-    
-
-    // Zoom to APMC markers
+         // Zoom to APMC markers
     if (data.locations.length > 0) {
       // map.fitBounds(L.latLngBounds(data.locations.map(l => [l.lat, l.lon])), { padding: [30, 30] });
-      map.fitBounds([
-    [15.6, 72.6],  // SW corner
-    [22.0, 80.9]   // NE corner
-], { padding: [30, 30] });
+        //   map.fitBounds([
+        // [15.6, 72.6],  // SW corner
+        // [22.0, 80.9]   // NE corner
+        // ], { padding: [30, 30] });
 
-      document.getElementById("mapOverlay").style.display = "none";
+          document.getElementById("mapOverlay").style.display = "none";
     }
 
   } catch (error) {
@@ -815,20 +820,29 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
 
         const res = await fetch(url);
         const dataList = await res.json();
-
+        const selectedOption = apmcSelect.selectedOptions[0];
+        const rawApmc = selectedOption?.dataset?.raw || selectedOption?.value || "";        
         if (!Array.isArray(dataList) || dataList.length === 0) {
           Swal.fire({
-            icon: "warning",
+            icon: "info",
             title: "No Data Found",
             text: "No records available for the selected APMC and date range. Checking nearby (±15 days)...",
             confirmButtonColor: "#d33"
           });
+          
+          // Try fallback
+          await loadAhmednagarAPMCs(
+              rawApmc,
+              commodity,
+              lineStartDate.value,
+              lineEndDate.value
+            );
 
+            return;
+        }
           // ✅ Still attempt to load APMC markers with fallback logic
           // await loadAhmednagarAPMCs(apmcSelect.value, commodity, lineStartDate.value, lineEndDate.value);
-          const selectedOption = apmcSelect.selectedOptions[0];
-          const rawApmc = selectedOption?.dataset.raw || "";
-
+          
           console.log("OPTION DEBUG", {
             value: selectedOption?.value,
             raw: selectedOption?.dataset.raw,
@@ -840,18 +854,9 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
             return;
           }
 
-          loadAhmednagarAPMCs(
-            rawApmc,
-            commodity,
-            lineStartDate.value,
-            lineEndDate.value
-          );
-
-        return;
-  }
-    const grouped = {};
-    const selectedOption = apmcSelect.selectedOptions[0];
-    const rawApmc = selectedOption?.dataset.raw || null;
+                 
+      const grouped = {};
+    
     const normalizedSelected = normalizeApmc(rawApmc);
     const selectedKey = rawApmc ? normalizeApmc(rawApmc) : null;
 
@@ -1014,8 +1019,7 @@ async function loadAhmednagarAPMCs(selectedApmc, commodity, startDate, endDate) 
     chartContainer.style.opacity = "1";
   }
   const selectedOption = apmcSelect.selectedOptions[0];
-  const rawApmc = selectedOption?.dataset.raw || "";
-  loadAhmednagarAPMCs(rawApmc, commodity, lineStartDate.value, lineEndDate.value);
+  const rawApmc = selectedOption?.dataset?.raw || selectedOption?.value || "";  loadAhmednagarAPMCs(rawApmc, commodity, lineStartDate.value, lineEndDate.value);
 }
 
 
@@ -1048,7 +1052,7 @@ window.addEventListener("load", async function() {
     const districtKey = "ahmednagar"; // lowercase match
     if (districtCentroids[districtKey]) {
         const { lat, lng } = districtCentroids[districtKey];
-        map.setView([lat, lng], 9);
+        map.setView([lat, lng], 7);
         console.log("✅ Map zoomed to Ahmednagar:", [lat, lng]);
     } else {
         console.warn("⚠️ Ahmednagar centroid not found:", Object.keys(districtCentroids));
@@ -1061,8 +1065,7 @@ apmcSelect.addEventListener("change", () => {
 });
 function updateApmcLabel() {
   const selectedOption = apmcSelect.selectedOptions[0];
-  const rawApmc = selectedOption?.dataset.raw || "";
-
+  const rawApmc = selectedOption?.dataset?.raw || selectedOption?.value || "";
   if (!rawApmc) {
     selectedApmcLabel.textContent = " — ALL APMCs";
     return;
