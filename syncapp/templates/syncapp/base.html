@@ -58,7 +58,17 @@
             position: absolute;
             z-index: 3000 !important;
         }
-
+        .footer-custom {
+            background-color: #f8f9fa;
+            color: #212529;
+            font-size: 0.85rem;
+            
+            padding: 6px 0;        /* 🔥 reduced height */
+            line-height: 1.2;      /* tighter text spacing */
+        }
+        .footer-custom p {
+            margin: 2px 0;         /* 🔥 remove big gaps */
+        }
         @media (max-width: 576px) {
             .footer-custom {
                 padding: 4px 0;
@@ -284,12 +294,24 @@
 
     <!-- Footer -->
     <footer class="text-center border-top footer-custom mt-auto">
-        <p style="color: red;">{% trans "This is a trial version and the platform is not fully operational yet." %}</p>
-        <p><a href="{% url 'data_policy' %}" style="color: red;">Data Policy</a> &nbsp;|&nbsp; <a href="{% url 'disclaimer' %}" style="color: red;">Disclaimer</a></p>
-        &copy; {% trans "2025 MandiGo | 'सही दाम, किसान सम्मान'" %}
 
-        <p>Total Visitors: <strong>{{ total_visitors }}</strong></p>
-    </footer>
+    <p style="color: red; margin-bottom: 2px;">
+        {% trans "This is a trial version and the platform is not fully operational yet." %}
+    </p>
+
+    <p style="margin-bottom: 2px;">
+        <a href="{% url 'data_policy' %}" style="color: red;">Data Policy</a> 
+        | 
+        <a href="{% url 'disclaimer' %}" style="color: red;">Disclaimer</a>
+    </p>
+
+    <small>
+        &copy; {% trans "2025 MandiGo | 'सही दाम, किसान सम्मान'" %}
+        &nbsp; | &nbsp;
+        Total Visitors: <strong>{{ total_visitors }}</strong>
+    </small>
+
+</footer>
 
     <!-- JS Libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
