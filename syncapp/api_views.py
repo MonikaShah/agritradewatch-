@@ -21,7 +21,7 @@ from django.db.models import Max, Q
 from django.contrib import messages
 from django.db import transaction
 from .forms import DamageForm,DtProduceForm,UserProfilePhotoForm
-
+from django.db.models import OuterRef, Subquery
 from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce
 from .serializers import (
     RegisterSerializer,
@@ -150,6 +150,7 @@ def api_login(request):
         "message": "Login successful",
         "user_id": user.id,
         "username": user.username,
+        "role": user.job,
         "access": str(refresh.access_token),
         "refresh": str(refresh),
     })
@@ -1099,8 +1100,16 @@ def get_DtCommodities(request):
     # If 'commodity' is a CharField, we can get distinct values
     commodity = request.GET.get('sale_commodity')
     username_id = request.GET.get('username_id')  # <-- NEW
+
+    # 🔥 Subquery to get type
+    commodity_type_subquery = Commodity.objects.filter(
+        name__iexact=OuterRef('sale_commodity')   # case-insensitive match
+    ).values('type')[:1]
+
+
     entries = (
         DtProduce.objects
+        .annotate(commodity_type=Subquery(commodity_type_subquery))
         .values(
             'id',
             'username_id',
