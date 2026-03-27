@@ -163,7 +163,7 @@ def ahmedapmc(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT apmc_name, latitude, longitude
-            FROM apmc_master
+            FROM apmc_master_new
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL
             ORDER BY apmc_name;
         """)
