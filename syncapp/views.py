@@ -67,12 +67,29 @@ def apmc(request):
 
     # Case 1: Initial page load → render template
     if not commodity or not date_str:
+        from collections import defaultdict
+        commodity_groups = defaultdict(list)
         with connection.cursor() as cursor:
             # fetch all commodities
-            cursor.execute("SELECT DISTINCT commodity FROM webdata ORDER BY commodity;")
-            all_commodities = [row[0] for row in cursor.fetchall()]
+            # cursor.execute("SELECT DISTINCT commodity FROM webdata ORDER BY commodity;")
+            # all_commodities = [row[0] for row in cursor.fetchall()]
+        
+            cursor.execute("""
+                SELECT DISTINCT c.type, w.commodity
+                FROM webdata w
+                LEFT JOIN commodity c ON w.commodity = c.name
+                ORDER BY c.type, w.commodity;
+            """)
+            rows = cursor.fetchall()
 
-            # latest available date per commodity
+        # Group commodities by type
+
+            for ctype, commodity in rows:
+                ctype = ctype or "Others"  # fallback if type is NULL
+                commodity_groups[ctype].append(commodity)
+
+
+        # latest available date per commodity
             cursor.execute("""
                 SELECT commodity, MAX(date)
                 FROM webdata
@@ -94,8 +111,9 @@ def apmc(request):
             fallback_date = today
 
         return render(request, "syncapp/apmcdata.html", {
-            "commodities": all_commodities,
-            "available_commodities": available_today,
+            # "commodities": all_commodities,
+            # "available_commodities": available_today,
+            "commodity_groups": dict(commodity_groups),
             "apmcs": apmcs,
             "today": fallback_date,
             "fallback_notice": fallback_notice,

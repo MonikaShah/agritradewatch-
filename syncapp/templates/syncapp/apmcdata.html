@@ -210,10 +210,19 @@
       <label for="commoditySelect" class="form-label">{% trans "Commodity" %}</label>
       <select id="commoditySelect" class="form-select w-100">
         <option value="">{% trans "Select Commodity" %}</option>
-      {% for item in commodities %}
+      <!-- {% for item in commodities %}
         <option value="{{ item }}">{{ item }}</option>
         {% endfor %}
-      </select>
+      </select> -->
+      {% for type, items in commodity_groups.items %}
+        <optgroup label="{{ type }}">
+          {% for item in items %}
+            <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+        </optgroup>
+      {% endfor %}
+
+    </select>
     </div>
 
     <div class="form-group">
