@@ -9,9 +9,84 @@ from deep_translator import GoogleTranslator
 
 from collections import Counter
 from email.utils import parsedate_to_datetime
-from datetime import datetime, timezone
+from datetime import datetime, timezone,timedelta
+from collections import defaultdict
 
+def build_timeline(articles):
+    timeline = defaultdict(int)
 
+    for a in articles:
+        date_str = a.get("published")   # FIX HERE
+
+        if date_str:
+            try:
+                dt = parsedate_to_datetime(date_str)
+                day = dt.strftime("%Y-%m-%d")
+                timeline[day] += 1
+            except:
+                pass
+
+    sorted_data = sorted(timeline.items())
+
+    labels = [x[0] for x in sorted_data]
+    values = [x[1] for x in sorted_data]
+
+    return labels, values
+
+def generate_ai_insights(articles):
+    insights = []
+
+    if not articles:
+        return ["No data available for analysis"]
+
+    # ----------------------------
+    # 1. Keyword dominance
+    # ----------------------------
+    keywords = [a.get("keyword") for a in articles if a.get("keyword")]
+    keyword_counts = Counter(keywords)
+
+    top_keyword = keyword_counts.most_common(1)[0]
+
+    insights.append(
+        f"🔥 Dominant topic: '{top_keyword[0]}' appears {top_keyword[1]} times"
+    )
+
+    # ----------------------------
+    # 2. Source concentration
+    # ----------------------------
+    sources = [a.get("source") for a in articles if a.get("source")]
+    source_counts = Counter(sources)
+
+    top_source = source_counts.most_common(1)[0]
+
+    insights.append(
+        f"📰 Most active source: {top_source[0]} ({top_source[1]} articles)"
+    )
+
+    # ----------------------------
+    # 3. Freshness (last 24h spike proxy)
+    # ----------------------------
+    now = datetime.now()
+    last_24h = [
+        a for a in articles
+        if a.get("published_date")
+        and (now - a["published_date"]).days <= 1
+    ]
+
+    if len(last_24h) > len(articles) * 0.5:
+        insights.append("⚠️ High activity spike in last 24 hours")
+
+    # ----------------------------
+    # 4. Repetition signal (possible event cluster)
+    # ----------------------------
+    repeated = [k for k, v in keyword_counts.items() if v >= 3]
+
+    if repeated:
+        insights.append(
+            f"📌 Repeating clusters detected: {', '.join(repeated)}"
+        )
+
+    return insights
 LANGUAGE_CONFIG = {
 
     "en": {
@@ -131,46 +206,46 @@ def dashboard(request):
                 selected_language
             )
 
-        for search_term in search_terms:
+            for search_term in search_terms:
 
-            for lang_code in languages:
+                for lang_code in languages:
 
-                lang = LANGUAGE_CONFIG[lang_code]
+                    lang = LANGUAGE_CONFIG[lang_code]
 
-                rss_url = (
-                    "https://news.google.com/rss/search?"
-                    f"q={urllib.parse.quote(search_term)}"
-                    f"&hl={lang['hl']}"
-                    "&gl=IN"
-                    f"&ceid={lang['ceid']}"
-                )
+                    rss_url = (
+                        "https://news.google.com/rss/search?"
+                        f"q={urllib.parse.quote(search_term)}"
+                        f"&hl={lang['hl']}"
+                        "&gl=IN"
+                        f"&ceid={lang['ceid']}"
+                    )
 
-                print("=" * 60)
-                print("Original Keyword:", keyword)
-                print("Search Term:", search_term)
-                print("Language:", lang_code)
-                print(rss_url)
+                    print("=" * 60)
+                    print("Original Keyword:", keyword)
+                    print("Search Term:", search_term)
+                    print("Language:", lang_code)
+                    print(rss_url)
 
-                feed = feedparser.parse(rss_url)
+                    feed = feedparser.parse(rss_url)
 
-                for entry in feed.entries:
+                    for entry in feed.entries:
 
-                    source = ""
+                        source = ""
 
-                    try:
-                        source = entry.source.title
-                    except:
-                        pass
+                        try:
+                            source = entry.source.title
+                        except:
+                            pass
 
-                    articles.append({
-                        "keyword": keyword,
-                        "language": lang_code,
-                        "title": entry.get("title", ""),
-                        "url": entry.get("link", ""),
-                        "published": entry.get("published", ""),
-                        "summary": entry.get("summary", ""),
-                        "source": source
-                    })
+                        articles.append({
+                            "keyword": keyword,
+                            "language": lang_code,
+                            "title": entry.get("title", ""),
+                            "url": entry.get("link", ""),
+                            "published": entry.get("published", ""),
+                            "summary": entry.get("summary", ""),
+                            "source": source
+                        })
 
     # Remove duplicates
 
@@ -259,10 +334,16 @@ def dashboard(request):
             for a in articles
             if a["keyword"] == keyword
         )
-
+    insights = generate_ai_insights(articles)
+    labels, values = build_timeline(articles)
     context = {
 
         "articles": articles,
+
+        "insights": insights,
+
+        "timeline_labels_json": json.dumps(labels),
+        "timeline_values_json": json.dumps(values),
 
         "total_articles": total_articles,
 
@@ -281,6 +362,7 @@ def dashboard(request):
         "chart_values_json":
             json.dumps(chart_values),
 
+        
     }
 
     return render(

@@ -203,6 +203,7 @@ body{
 </div>
     </div>
 
+
     <!-- SEARCH + CHART -->
 
     <div class="row g-4 mt-2">
@@ -297,6 +298,8 @@ body{
                     </button>
 
                 </form>
+                
+                    
 
                 {% if articles %}
 
@@ -310,24 +313,60 @@ body{
 
                 {% endif %}
 
+                            <div class="container-fluid mt-4">
+
+                <div class="row g-4">
+                    <hr>
+                    <!-- AI INSIGHTS -->
+                    <div class="col-lg-12">
+                        <div class="card-box">
+
+                            <h5 class="section-title">🧠 AI Insights</h5>
+
+                            <ul class="mb-0">
+                                {% for i in insights %}
+                                    <li class="mb-2">{{ i }}</li>
+                                {% endfor %}
+                            </ul>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
             </div>
 
         </div>
 
         <div class="col-lg-8">
 
+    <div class="row g-4">
+
+        <div class="col-12">
             <div class="card-box">
-
-                <h5 class="section-title">
-                    📊
-                    Source Distribution
-                </h5>
-
+                <h5 class="section-title">📊 Source Distribution</h5>
                 <div class="chart-container">
                     <canvas id="sourceChart"></canvas>
                 </div>
-
             </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card-box">
+                <h5 class="section-title">📈 News Volume Timeline</h5>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+            
 
         </div>
 
@@ -456,7 +495,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
     });
-    
+const timelineLabels = JSON.parse('{{ timeline_labels_json|escapejs }}');
+const timelineValues = JSON.parse('{{ timeline_values_json|escapejs }}');
+if (timelineLabels && timelineLabels.length > 0) {
+
+    new Chart(document.getElementById('timelineChart'), {
+        type: 'line',
+        data: {
+            labels: timelineLabels,
+            datasets: [{
+                label: 'Articles per Day',
+                data: timelineValues,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
 
 });
 
