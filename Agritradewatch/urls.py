@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.conf.urls.i18n import i18n_patterns
+from django.views.i18n import JavaScriptCatalog
 
 # urlpatterns = [
 #     path('admin/', admin.site.urls),
@@ -30,5 +31,10 @@ urlpatterns = [
     path('', include('syncapp.urls')),        # front-end pages
     path('api/', include('syncapp.api_urls')), # all API endpoints start with /api/
     # path('api/webdata_prices/', api_views.webdata_prices, name='webdata_prices'),
-
+    path('news-monitor/',include('news_monitor.urls')
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += [
+    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+]
