@@ -913,57 +913,159 @@ async function updateProduce(id) {
   //     console.error(err);
   //   }
   // }
-  async function loadCommodities() {
+//   async function loadCommodities() {
+//   try {
+//     // 1️⃣ Fetch DtEntries
+//     const resEntries = await fetch('/api/DtEntries/');
+//     const entries = await resEntries.json();
+
+//     const uniqueCommodities = [
+//       ...new Set(entries.map(e => e.sale_commodity).filter(Boolean))
+//     ];
+
+//     const uniqueLower = uniqueCommodities.map(x => x.toLowerCase());
+
+//     // 2️⃣ Fetch Commodity master (FIXED URL)
+//     const resMaster = await fetch('/api/commodities/');
+//     const masterData = await resMaster.json();
+
+//     // 3️⃣ Group by type
+//     const grouped = {};
+//     masterData.forEach(item => {
+//       const type = item.type || "Other";
+//       if (!grouped[type]) grouped[type] = [];
+//       grouped[type].push(item.name);
+//     });
+
+//     const select = document.getElementById('commoditySelect');
+//     select.innerHTML = '<option value="">-- Select --</option>';
+
+//     // 4️⃣ Build dropdown
+//     Object.keys(grouped).forEach(type => {
+//       const optgroup = document.createElement('optgroup');
+//       optgroup.label = type;
+
+//       grouped[type].forEach(name => {
+//         if (uniqueLower.includes(name.toLowerCase())) {
+//           const opt = document.createElement('option');
+//           opt.value = name;
+//           opt.textContent = name;
+//           optgroup.appendChild(opt);
+//         }
+//       });
+
+//       if (optgroup.children.length > 0) {
+//         select.appendChild(optgroup);
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error("Error loading commodities:", err);
+//   }
+// }
+async function loadCommodities() {
   try {
-    // 1️⃣ Fetch DtEntries
+
+    // 1️⃣ Fetch actual commodities from DtEntries
     const resEntries = await fetch('/api/DtEntries/');
     const entries = await resEntries.json();
 
     const uniqueCommodities = [
-      ...new Set(entries.map(e => e.sale_commodity).filter(Boolean))
+      ...new Set(
+        entries
+          .map(e => e.sale_commodity)
+          .filter(Boolean)
+          .map(x => x.trim())
+      )
     ];
 
-    const uniqueLower = uniqueCommodities.map(x => x.toLowerCase());
 
-    // 2️⃣ Fetch Commodity master (FIXED URL)
+    // 2️⃣ Fetch Commodity master
     const resMaster = await fetch('/api/commodities/');
     const masterData = await resMaster.json();
 
-    // 3️⃣ Group by type
-    const grouped = {};
+
+    // 3️⃣ Create master lookup
+    // Used only to get the commodity TYPE
+    const masterLookup = {};
+
     masterData.forEach(item => {
-      const type = item.type || "Other";
-      if (!grouped[type]) grouped[type] = [];
-      grouped[type].push(item.name);
-    });
-
-    const select = document.getElementById('commoditySelect');
-    select.innerHTML = '<option value="">-- Select --</option>';
-
-    // 4️⃣ Build dropdown
-    Object.keys(grouped).forEach(type => {
-      const optgroup = document.createElement('optgroup');
-      optgroup.label = type;
-
-      grouped[type].forEach(name => {
-        if (uniqueLower.includes(name.toLowerCase())) {
-          const opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          optgroup.appendChild(opt);
-        }
-      });
-
-      if (optgroup.children.length > 0) {
-        select.appendChild(optgroup);
+      if (item.name) {
+        masterLookup[item.name.trim().toLowerCase()] = {
+          name: item.name.trim(),
+          type: item.type || "Other"
+        };
       }
     });
 
+
+    // 4️⃣ Group ACTUAL DtEntries commodities
+    const grouped = {};
+
+    uniqueCommodities.forEach(commodity => {
+
+      const key = commodity.toLowerCase();
+
+      // If commodity exists in master, use its type
+      // Otherwise put it under "Other"
+      const type = masterLookup[key]
+        ? masterLookup[key].type
+        : "Other";
+
+      if (!grouped[type]) {
+        grouped[type] = [];
+      }
+
+      grouped[type].push(commodity);
+    });
+
+
+    // 5️⃣ Build dropdown
+    const select = document.getElementById('commoditySelect');
+
+    select.innerHTML =
+      '<option value="">-- Select --</option>';
+
+
+    Object.keys(grouped)
+      .sort()
+      .forEach(type => {
+
+        const optgroup = document.createElement('optgroup');
+
+        optgroup.label = type;
+
+
+        grouped[type]
+          .sort((a, b) => a.localeCompare(b))
+          .forEach(commodity => {
+
+            const opt = document.createElement('option');
+
+            // IMPORTANT:
+            // Use the EXACT value from DtEntries
+            opt.value = commodity;
+
+            opt.textContent = gettext(commodity);
+
+            optgroup.appendChild(opt);
+          });
+
+
+        if (optgroup.children.length > 0) {
+          select.appendChild(optgroup);
+        }
+
+      });
+
   } catch (err) {
+
     console.error("Error loading commodities:", err);
+
   }
 }
-  async function refreshPopup(entryId) {
+
+async function refreshPopup(entryId) {
     try {
         const marker = markers.find(m => m._entryId === entryId);
         if (!marker) return;  // no marker to update
