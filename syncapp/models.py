@@ -230,12 +230,14 @@ class Commodity(models.Model):
         ('vegetable',  _('Vegetable')),
         ('fruit',  _('Fruit')),
         ('pulse', _('Pulse')),
+        ('fodder', _('Fodder Crop')),
     ]
 
     name = models.CharField(max_length=255, unique=True)
     alias_marathi = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     com_group = models.CharField(max_length=100, blank=True, null=True)
+    commodity_id = models.IntegerField(blank=True, null=True)
     title = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         return self.name
@@ -562,3 +564,150 @@ class MobileOTP(models.Model):
         return timezone.now() > self.created_at + timedelta(minutes=5)
     class Meta:
         db_table = "syncapp_mobileotp"
+
+
+class FodderListing(models.Model):
+    """
+    A fodder or sugarcane listing created by a farmer or retailer.
+    Database table: dt_fodder_cart
+    """
+
+    id = models.BigAutoField(primary_key=True)
+
+    seller_id = models.CharField(max_length=255, db_index=True)
+    crop_name = models.CharField(max_length=150)
+    variety = models.CharField(max_length=150, blank=True)
+
+    # Where the fodder/crop is available
+    available_at = models.CharField(
+        max_length=20,
+        choices=[
+            ("farm", "At farm"),
+            ("home", "At home"),
+        ],
+        default="farm",
+    )
+
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    tehsil = models.CharField(max_length=100)
+    village = models.CharField(max_length=150)
+
+    latitude = models.DecimalField(max_digits=10, decimal_places=7)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+
+    sugarcane_area_acres = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    expected_tonnes = models.DecimalField(
+        max_digits=10, decimal_places=2
+    )
+
+    plantation_month = models.PositiveSmallIntegerField(
+        null=True, blank=True
+    )
+    plantation_year = models.PositiveSmallIntegerField(
+        null=True, blank=True
+    )
+    expected_harvest_date = models.DateField(null=True, blank=True)
+
+    # Price may be specified per tonne or per acre
+    price_basis = models.CharField(
+        max_length=10,
+        choices=[
+            ("tonne", "Per tonne"),
+            ("acre", "Per acre"),
+        ],
+        default="tonne",
+    )
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    harvesting_included = models.BooleanField(default=False)
+    harvesting_cost = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    transportation_needed = models.BooleanField(default=False)
+    transportation_charge_per_km = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "dt_fodder_cart"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.crop_name} - {self.village} - {self.expected_tonnes} tonnes"
+
+
+class FodderOrder(models.Model):
+    """
+    An order placed against a fodder listing.
+    Database table: dt_fodder_orders
+    """
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+
+    listing = models.ForeignKey(
+        FodderListing,
+        on_delete=models.PROTECT,
+        related_name="orders",
+    )
+
+    # Store legacy user IDs as text; these match syncapp_users1.id.
+    buyer_id = models.CharField(max_length=255, db_index=True)
+    buyer_name = models.CharField(max_length=150)
+    buyer_email = models.EmailField()
+    buyer_phone = models.CharField(max_length=30)
+
+    destination_state = models.CharField(max_length=100)
+    destination_district = models.CharField(max_length=100)
+    destination_tehsil = models.CharField(max_length=100)
+    destination_village = models.CharField(max_length=150)
+
+    destination_latitude = models.DecimalField(
+        max_digits=10, decimal_places=7
+    )
+    destination_longitude = models.DecimalField(
+        max_digits=10, decimal_places=7
+    )
+
+    requested_tonnes = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    requested_acres = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+
+    harvesting_required = models.BooleanField(default=False)
+    transportation_required = models.BooleanField(default=False)
+    buyer_message = models.TextField(blank=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "dt_fodder_orders"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Order #{self.pk} for listing #{self.listing_id}"
