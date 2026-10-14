@@ -230,7 +230,7 @@ class Commodity(models.Model):
         ('vegetable',  _('Vegetable')),
         ('fruit',  _('Fruit')),
         ('pulse', _('Pulse')),
-        ('fodder', _('Fodder Crop')),
+        ('fodder', _('Fodder Crops')),
     ]
 
     name = models.CharField(max_length=255, unique=True)
