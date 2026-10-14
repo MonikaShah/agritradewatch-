@@ -390,12 +390,20 @@
 
   <div id="dashboard-container">
     <div id="topPanel">
-      <div>
-        <label for="commoditySelect">{% trans "Select Commodity" %}:</label>
-        <select id="commoditySelect">
-          <option value="">-- {% trans "Select" %} --</option>
-        </select>
-      </div>  
+      <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+  <div>
+    <label for="commoditySelect">{% trans "Select Commodity" %}:</label>
+      <select id="commoditySelect">
+        <option value="">-- {% trans "Select" %} --</option>
+      </select>
+    </div>
+
+    <a href="/fodder/add"
+      class="btn btn-success"
+      style="white-space: nowrap; text-decoration: none;">
+      ➕ {% trans "Add fodder crop" %}
+    </a>
+  </div>
       <div id="loadingSpinner" style="display:none; margin-left:10px;">
         <span>⏳ {% trans "Loading..." %}</span>
       </div>
@@ -1034,7 +1042,6 @@ async function loadCommodities() {
         const optgroup = document.createElement('optgroup');
 
         optgroup.label = type;
-
 
         grouped[type]
           .sort((a, b) => a.localeCompare(b))
