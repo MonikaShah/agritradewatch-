@@ -1,0 +1,90 @@
+{% extends "../base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Fodder & Sugarcane Marketplace</h2>
+    <p>Find fodder and sugarcane listings from farmers and retailers.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if user.job == "farmer" or user.job == "retailer" %}
+        <p>
+            <a href="{% url 'fodder_add_listing' %}" class="btn btn-success">
+                + Add a Listing
+            </a>
+        </p>
+    {% endif %}
+
+    <div class="row">
+        {% for item in listings %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.crop_name }}</h5>
+
+                        {% if item.variety %}
+                            <p><strong>Variety:</strong> {{ item.variety }}</p>
+                        {% endif %}
+
+                        <p>
+                            <strong>Location:</strong><br>
+                            {{ item.village }}, {{ item.tehsil }},
+                            {{ item.district }}, {{ item.state }}
+                        </p>
+
+                        <p>
+                            <strong>Available quantity:</strong>
+                            {{ item.expected_tonnes }} tonnes
+                        </p>
+
+                        {% if item.sugarcane_area_acres %}
+                            <p>
+                                <strong>Area:</strong>
+                                {{ item.sugarcane_area_acres }} acres
+                            </p>
+                        {% endif %}
+
+                        <p>
+                            <strong>Price:</strong>
+                            ₹{{ item.price }}
+                            {% if item.price_basis == "acre" %}
+                                per acre
+                            {% else %}
+                                per tonne
+                            {% endif %}
+                        </p>
+
+                        {% if item.expected_harvest_date %}
+                            <p>
+                                <strong>Expected harvest:</strong>
+                                {{ item.expected_harvest_date }}
+                            </p>
+                        {% endif %}
+
+                        {% if item.description %}
+                            <p>{{ item.description|linebreaksbr }}</p>
+                        {% endif %}
+
+                        <a
+                            href="{% url 'fodder_place_order' item.id %}"
+                            class="btn btn-primary"
+                        >
+                            Place Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>No active fodder listings are available yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

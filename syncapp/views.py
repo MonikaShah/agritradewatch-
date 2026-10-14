@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout,get_user_model
 from django.contrib.gis.geos import GEOSGeometry
 from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
@@ -1077,3 +1077,167 @@ def delete_account(request):
         return redirect("landingpage")  # Or login page
 
     return render(request, "syncapp/delete_account.html")
+
+
+from .forms import FodderListingForm, FodderOrderForm
+from .models import FodderListing
+
+
+User = get_user_model()
+
+
+def _user_job(user):
+    return (getattr(user, "job", "") or "").strip().lower()
+
+
+@login_required
+def fodder_listings(request):
+    listings = FodderListing.objects.filter(is_active=True)
+    return render(
+        request,
+        "syncapp/fodder/listings.html",
+        {"listings": listings},
+    )
+
+
+@login_required
+def fodder_add_listing(request):
+    # Only farmers and retailers may sell.
+    if _user_job(request.user) not in {"farmer", "retailer"}:
+        messages.error(
+            request,
+            "Only registered farmers and retailers can add fodder listings.",
+        )
+        return redirect("fodder_listings")
+
+    if request.method == "POST":
+        form = FodderListingForm(request.POST)
+
+        if form.is_valid():
+            listing = form.save(commit=False)
+            listing.seller_id = str(request.user.pk)
+            listing.save()
+
+            messages.success(request, "Your fodder listing was published.")
+            return redirect("fodder_listings")
+    else:
+        form = FodderListingForm()
+
+    return render(
+        request,
+        "syncapp/fodder/add_listing.html",
+        {"form": form},
+    )
+
+
+@login_required
+def fodder_place_order(request, listing_id):
+    listing = get_object_or_404(
+        FodderListing,
+        pk=listing_id,
+        is_active=True,
+    )
+
+    if request.method == "POST":
+        form = FodderOrderForm(request.POST)
+
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.listing = listing
+            order.buyer_id = str(request.user.pk)
+
+            # Use the authenticated account's details, not a buyer ID
+            # supplied through the browser.
+            order.buyer_name = (
+                getattr(request.user, "name", "")
+                or request.user.get_full_name()
+                or request.user.get_username()
+            )
+            order.buyer_email = request.user.email or form.cleaned_data["buyer_email"]
+
+            # Keep the submitted phone number, but require one.
+            order.buyer_phone = form.cleaned_data["buyer_phone"]
+            order.save()
+
+            # Find the seller's registered account using its stored ID.
+            seller = User.objects.filter(pk=listing.seller_id).first()
+
+            if seller and seller.email:
+                subject = f"MandiGo: New order for {listing.crop_name}"
+
+                email_body = f"""
+A new order has been placed for your MandiGo listing.
+
+ORDER
+Order ID: {order.pk}
+Listing ID: {listing.pk}
+Crop: {listing.crop_name}
+Variety: {listing.variety or "Not specified"}
+
+BUYER
+Name: {order.buyer_name}
+User ID: {order.buyer_id}
+Email: {order.buyer_email}
+Phone: {order.buyer_phone}
+
+DELIVERY LOCATION
+State: {order.destination_state}
+District: {order.destination_district}
+Tehsil: {order.destination_tehsil}
+Village: {order.destination_village}
+Latitude: {order.destination_latitude}
+Longitude: {order.destination_longitude}
+
+ORDER REQUIREMENTS
+Requested tonnes: {order.requested_tonnes or "Not specified"}
+Requested acres: {order.requested_acres or "Not specified"}
+Harvesting required: {"Yes" if order.harvesting_required else "No"}
+Transportation required: {"Yes" if order.transportation_required else "No"}
+Buyer message: {order.buyer_message or "None"}
+
+Please sign in to MandiGo to follow up with the buyer.
+"""
+
+                try:
+                    send_mail(
+                        subject,
+                        email_body,
+                        getattr(settings, "DEFAULT_FROM_EMAIL", None),
+                        [seller.email],
+                        fail_silently=False,
+                    )
+                    messages.success(
+                        request,
+                        "Your order has been placed. The seller has been emailed.",
+                    )
+                except Exception:
+                    # The order is saved even if email delivery fails.
+                    messages.warning(
+                        request,
+                        "Your order was saved, but the seller notification "
+                        "email could not be sent. Please contact the site administrator.",
+                    )
+            else:
+                messages.warning(
+                    request,
+                    "Your order was saved, but the seller's registered email "
+                    "address could not be found.",
+                )
+
+            return redirect("fodder_listings")
+    else:
+        initial = {
+            "buyer_name": (
+                getattr(request.user, "name", "")
+                or request.user.get_full_name()
+                or request.user.get_username()
+            ),
+            "buyer_email": request.user.email,
+        }
+        form = FodderOrderForm(initial=initial)
+
+    return render(
+        request,
+        "syncapp/fodder/place_order.html",
+        {"form": form, "listing": listing},
+    )

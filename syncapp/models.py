@@ -239,6 +239,7 @@ class Commodity(models.Model):
     com_group = models.CharField(max_length=100, blank=True, null=True)
     commodity_id = models.IntegerField(blank=True, null=True)
     title = models.CharField(max_length=255, blank=True, null=True)
+    crop_type = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         return self.name
     class Meta:

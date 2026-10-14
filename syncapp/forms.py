@@ -370,3 +370,159 @@ class BoughtForm(forms.ModelForm):
             'commodity': forms.TextInput(attrs={'readonly': 'readonly'}),
             'date': forms.DateTimeInput(attrs={'readonly': 'readonly', 'type': 'text'}),
         }
+
+from .models import FodderListing, FodderOrder
+from datetime import date
+
+
+class FodderListingForm(forms.ModelForm):
+    crop_name = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label="Crop Name"
+    )
+    plantation_month = forms.ChoiceField(
+        choices=[
+            ("", "Select month"),
+            ("1", "January"),
+            ("2", "February"),
+            ("3", "March"),
+            ("4", "April"),
+            ("5", "May"),
+            ("6", "June"),
+            ("7", "July"),
+            ("8", "August"),
+            ("9", "September"),
+            ("10", "October"),
+            ("11", "November"),
+            ("12", "December"),
+        ],
+        required=True,
+        label="Plantation Month",
+    )
+
+    current_year = date.today().year
+
+    plantation_year = forms.ChoiceField(
+         choices=[
+            ("", "Select year"),
+            (str(current_year - 1), str(current_year - 1)),
+            (str(current_year), str(current_year)),
+        ],
+        required=True,
+        label="Plantation Year",
+    )
+    harvesting_included = forms.TypedChoiceField(
+                choices=[
+                    ("True", "Yes"),
+                    ("False", "No"),
+                ],
+                coerce=lambda value: value == "True",
+                widget=forms.RadioSelect,
+                required=True,
+                label="Harvesting Included?",
+            )
+
+    transportation_needed = forms.TypedChoiceField(
+                choices=[
+                    ("True", "Yes"),
+                    ("False", "No"),
+                ],
+                coerce=lambda value: value == "True",
+                widget=forms.RadioSelect,
+                required=True,
+                label="Transportation Needed?",
+            )
+
+    class Meta:
+        model = FodderListing
+        fields = [
+            "crop_name",
+            "variety",
+            "available_at",
+           
+            "latitude",
+            "longitude",
+            "sugarcane_area_acres",
+            "expected_tonnes",
+            "plantation_month",
+            "plantation_year",
+            "expected_harvest_date",
+            "price_basis",
+            "price",
+            "harvesting_included",
+            "harvesting_cost",
+            "transportation_needed",
+            "transportation_charge_per_km",
+            "description",
+        ]
+
+        widgets = {
+            "expected_harvest_date": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+            "description": forms.Textarea(attrs={"rows": 3}),
+            "latitude": forms.HiddenInput(),
+            "longitude": forms.HiddenInput(),
+            
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Fetch only fodder crops from the separate commodity table.
+        fodder_crops = Commodity.objects.filter(
+            crop_type="4"
+        ).order_by("name")
+
+        # Populate the dropdown with commodity names.
+        self.fields["crop_name"].choices = [
+            ("", "Select fodder crop")
+        ] + [
+            (crop.name, crop.name)
+            for crop in fodder_crops
+        ]
+
+        # Preserve existing form styling.
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.HiddenInput):
+                field.widget.attrs.setdefault("class", "form-control")
+
+    
+
+class FodderOrderForm(forms.ModelForm):
+    class Meta:
+        model = FodderOrder
+        fields = [
+            "buyer_name",
+            "buyer_email",
+            "buyer_phone",
+            "destination_state",
+            "destination_district",
+            "destination_tehsil",
+            "destination_village",
+            "destination_latitude",
+            "destination_longitude",
+            "requested_tonnes",
+            "requested_acres",
+            "harvesting_required",
+            "transportation_required",
+            "buyer_message",
+        ]
+
+        widgets = {
+            "destination_latitude": forms.HiddenInput(),
+            "destination_longitude": forms.HiddenInput(),
+            "buyer_message": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.HiddenInput):
+                field.widget.attrs.setdefault("class", "form-control")

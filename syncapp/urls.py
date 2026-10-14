@@ -106,6 +106,22 @@ urlpatterns = [
     path("delete-account/", views.delete_account, name="delete_account"),
 
 
+    path(
+        "fodder/",
+        views.fodder_listings,
+        name="fodder_listings",
+    ),
+    path(
+        "fodder/add/",
+        views.fodder_add_listing,
+        name="fodder_add_listing",
+    ),
+    path(
+        "fodder/order/<int:listing_id>/",
+        views.fodder_place_order,
+        name="fodder_place_order",
+    ),
+
 
 ]
 
