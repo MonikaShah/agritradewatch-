@@ -122,7 +122,16 @@ urlpatterns = [
         name="fodder_place_order",
     ),
 
-
+    path(
+        "api/mh-village-dropdowns/",
+        views.mh_village_dropdown_api,
+        name="mh_village_dropdown_api",
+    ),
+    path(
+        "api/mh-village-geometry/",
+        views.mh_village_geometry_api,
+        name="mh_village_geometry_api",
+    ),
 ]
 
 if settings.DEBUG:

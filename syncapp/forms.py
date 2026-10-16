@@ -493,36 +493,82 @@ class FodderListingForm(forms.ModelForm):
                 field.widget.attrs.setdefault("class", "form-control")
 
     
-
+        
 class FodderOrderForm(forms.ModelForm):
+
     class Meta:
         model = FodderOrder
+
         fields = [
             "buyer_name",
             "buyer_email",
             "buyer_phone",
-            "destination_state",
-            "destination_district",
-            "destination_tehsil",
-            "destination_village",
-            "destination_latitude",
-            "destination_longitude",
             "requested_tonnes",
             "requested_acres",
             "harvesting_required",
             "transportation_required",
             "buyer_message",
+            "destination_latitude",
+            "destination_longitude",
         ]
 
         widgets = {
-            "destination_latitude": forms.HiddenInput(),
-            "destination_longitude": forms.HiddenInput(),
-            "buyer_message": forms.Textarea(attrs={"rows": 3}),
+            "destination_latitude": forms.HiddenInput(
+                attrs={"id": "id_destination_latitude"}
+            ),
+            "destination_longitude": forms.HiddenInput(
+                attrs={"id": "id_destination_longitude"}
+            ),
+            "buyer_message": forms.Textarea(
+                attrs={"rows": 3}
+            ),
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("buyer_user", None)
+
         super().__init__(*args, **kwargs)
 
         for field in self.fields.values():
             if not isinstance(field.widget, forms.HiddenInput):
-                field.widget.attrs.setdefault("class", "form-control")
+                field.widget.attrs.setdefault(
+                    "class", "form-control"
+                )
+
+        # Populate buyer details for a new order.
+        if user and not self.instance.pk:
+            self.fields["buyer_name"].initial = (
+                getattr(user, "name", "")
+                or user.get_full_name()
+            )
+
+            self.fields["buyer_email"].initial = user.email
+
+            self.fields["buyer_phone"].initial = (
+                getattr(user, "mobile", "")
+            )
+    def clean(self):
+        cleaned_data = super().clean()
+
+        listing = self.initial.get("listing")
+
+        if listing:
+            if listing.price_basis == "tonne":
+                cleaned_data["requested_acres"] = None
+
+                if not cleaned_data.get("requested_tonnes"):
+                    self.add_error(
+                        "requested_tonnes",
+                        "Please enter the requested tonnes."
+                    )
+
+            elif listing.price_basis == "acre":
+                cleaned_data["requested_tonnes"] = None
+
+                if not cleaned_data.get("requested_acres"):
+                    self.add_error(
+                        "requested_acres",
+                        "Please enter the requested acres."
+                    )
+
+        return cleaned_data

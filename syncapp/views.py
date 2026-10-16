@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout,get_user_model
 from django.contrib.gis.geos import GEOSGeometry
+from django.views.decorators.http import require_GET
 from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
@@ -13,7 +14,8 @@ from django.utils.translation import gettext
 from django.conf import settings
 from uuid import uuid4
 from itertools import chain
-import traceback
+import traceback 
+from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 import html, uuid
@@ -1139,7 +1141,11 @@ def fodder_place_order(request, listing_id):
     )
 
     if request.method == "POST":
-        form = FodderOrderForm(request.POST)
+        form = FodderOrderForm(
+            request.POST,
+            buyer_user=request.user,
+            initial={"listing": listing},
+        )
 
         if form.is_valid():
             order = form.save(commit=False)
@@ -1156,7 +1162,7 @@ def fodder_place_order(request, listing_id):
             order.buyer_email = request.user.email or form.cleaned_data["buyer_email"]
 
             # Keep the submitted phone number, but require one.
-            order.buyer_phone = form.cleaned_data["buyer_phone"]
+            order.buyer_phone = request.user.mobile or form.cleaned_data["buyer_phone"]
             order.save()
 
             # Find the seller's registered account using its stored ID.
@@ -1226,18 +1232,273 @@ Please sign in to MandiGo to follow up with the buyer.
 
             return redirect("fodder_listings")
     else:
+        form = FodderOrderForm(
+            buyer_user=request.user,
+            initial={"listing": listing},
+        )
         initial = {
             "buyer_name": (
                 getattr(request.user, "name", "")
                 or request.user.get_full_name()
                 or request.user.get_username()
             ),
-            "buyer_email": request.user.email,
+            "buyer_email": request.user.email or "",
+            "buyer_phone": getattr(request.user, "mobile", "") or "",
         }
-        form = FodderOrderForm(initial=initial)
 
+        form = FodderOrderForm(
+            initial=initial,
+            buyer_user=request.user,
+        )
     return render(
         request,
         "syncapp/fodder/place_order.html",
         {"form": form, "listing": listing},
     )
+
+
+# GeoServer configuration for the Maharashtra village layer.
+MH_VILLAGE_WFS_URL = (
+    "https://geonode.communitygis.in/geoserver/ows"
+)
+MH_VILLAGE_LAYER = "geonode:mh_village"
+
+MH_VILLAGE_FIELDS = [
+    "state_ut",
+    "state_lgd",
+    "district",
+    "dist_lgd",
+    "sub_dist",
+    "subdis_lgd",
+    "vill_name",
+    "vill_lgd",
+]
+
+
+def _mh_village_cql_value(value):
+    """
+    Escape a string for use as a CQL string literal.
+    """
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def _mh_village_wfs(params):
+    """
+    Request GeoJSON from the mh_village WFS layer.
+    """
+    request_params = {
+        "service": "WFS",
+        "version": "2.0.0",
+        "request": "GetCapabilities",
+        "typeNames": MH_VILLAGE_LAYER,
+        "outputFormat": "application/json",
+        "srsName": "EPSG:4326",
+    }
+
+    request_params.update(params)
+
+    response = requests.get(
+        MH_VILLAGE_WFS_URL,
+        params=request_params,
+        timeout=60,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+
+    if "features" not in data:
+        raise ValueError("GeoServer did not return a GeoJSON FeatureCollection.")
+
+    return data
+
+
+def _mh_village_get_features():
+    """
+    Fetch and cache village attributes without geometries.
+
+    The cache avoids downloading the complete village list for every
+    dropdown selection.
+    """
+    cache_key = "mandigo_mh_village_attributes_v1"
+
+    cached_features = cache.get(cache_key)
+
+    if cached_features is not None:
+        return cached_features
+
+    data = _mh_village_wfs({
+        "propertyName": ",".join(MH_VILLAGE_FIELDS),
+        "count": 50000,
+    })
+
+    features = []
+
+    for feature in data.get("features", []):
+        properties = feature.get("properties") or {}
+
+        features.append({
+            field: properties.get(field)
+            for field in MH_VILLAGE_FIELDS
+        })
+
+    cache.set(cache_key, features, 60 * 60)
+
+    return features
+
+
+@require_GET
+def mh_village_dropdown_api(request):
+    """
+    Return state, district, tehsil or village choices from mh_village.
+
+    Examples:
+        ?level=states
+        ?level=districts&state=MAHARASHTRA
+        ?level=tehsils&state=MAHARASHTRA&district=PARBHANI
+        ?level=villages&state=MAHARASHTRA&district=PARBHANI&tehsil=MANWATH
+    """
+    level = request.GET.get("level", "").strip().lower()
+
+    state = request.GET.get("state", "").strip()
+    district = request.GET.get("district", "").strip()
+    tehsil = request.GET.get("tehsil", "").strip()
+
+    try:
+        features = _mh_village_get_features()
+
+        # Filter progressively by the selected administrative areas.
+        if state:
+            features = [
+                row for row in features
+                if str(row.get("state_ut") or "").strip().casefold()
+                == state.casefold()
+            ]
+
+        if district:
+            features = [
+                row for row in features
+                if str(row.get("district") or "").strip().casefold()
+                == district.casefold()
+            ]
+
+        if tehsil:
+            features = [
+                row for row in features
+                if str(row.get("sub_dist") or "").strip().casefold()
+                == tehsil.casefold()
+            ]
+
+        if level == "states":
+            field = "state_ut"
+            code_field = "state_lgd"
+
+        elif level == "districts":
+            if not state:
+                return JsonResponse(
+                    {"error": "Select a state first."},
+                    status=400,
+                )
+
+            field = "district"
+            code_field = "dist_lgd"
+
+        elif level == "tehsils":
+            if not state or not district:
+                return JsonResponse(
+                    {"error": "Select a state and district first."},
+                    status=400,
+                )
+
+            field = "sub_dist"
+            code_field = "subdis_lgd"
+
+        elif level == "villages":
+            if not state or not district or not tehsil:
+                return JsonResponse(
+                    {"error": "Select a state, district and tehsil first."},
+                    status=400,
+                )
+
+            field = "vill_name"
+            code_field = "vill_lgd"
+
+        else:
+            return JsonResponse(
+                {"error": "Invalid dropdown level."},
+                status=400,
+            )
+
+        # Deduplicate choices while retaining their administrative codes.
+        unique = {}
+
+        for row in features:
+            name = str(row.get(field) or "").strip()
+            code = row.get(code_field)
+
+            if not name:
+                continue
+
+            key = name.casefold()
+
+            if key not in unique:
+                unique[key] = {
+                    "name": name,
+                    "code": code,
+                }
+
+        results = sorted(
+            unique.values(),
+            key=lambda item: item["name"].casefold(),
+        )
+
+        return JsonResponse({"results": results})
+
+    except (requests.RequestException, ValueError) as exc:
+        return JsonResponse(
+            {
+                "error": "Could not retrieve village data from GeoNode.",
+                "details": str(exc),
+            },
+            status=502,
+        )
+
+
+@require_GET
+def mh_village_geometry_api(request):
+    """
+    Return the selected village's GeoJSON geometry.
+    """
+    village_code = request.GET.get("vill_lgd", "").strip()
+
+    if not village_code.isdigit():
+        return JsonResponse(
+            {"error": "A valid village LGD code is required."},
+            status=400,
+        )
+
+    try:
+        data = _mh_village_wfs({
+            "CQL_FILTER": "vill_lgd=" + village_code,
+            "propertyName": ",".join(MH_VILLAGE_FIELDS),
+        })
+
+        # The WFS response includes geometry because propertyName
+        # does not request its exclusion.
+        features = data.get("features", [])
+
+        if not features:
+            return JsonResponse(
+                {"error": "Village not found."},
+                status=404,
+            )
+
+        return JsonResponse(features[0])
+
+    except (requests.RequestException, ValueError) as exc:
+        return JsonResponse(
+            {
+                "error": "Could not retrieve village geometry.",
+                "details": str(exc),
+            },
+            status=502,
+        )

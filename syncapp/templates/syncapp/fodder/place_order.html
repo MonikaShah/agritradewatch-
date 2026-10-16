@@ -1,22 +1,46 @@
 {% extends "../base.html" %}
 
 {% block content %}
+
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
+<style>
+    #buyer-map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        z-index: 1;
+    }
+
+    .delivery-info {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+    }
+</style>
+
 <div class="container py-4">
+
     <h2>Place Fodder Order</h2>
 
+    <!-- Seller listing details -->
     <div class="card mb-4">
         <div class="card-body">
+
             <h5>{{ listing.crop_name }}</h5>
 
             <p>
                 <strong>Seller location:</strong>
-                {{ listing.village }}, {{ listing.tehsil }},
-                {{ listing.district }}, {{ listing.state }}
+                {{ listing.village }},
+                {{ listing.tehsil }},
+                {{ listing.district }},
+                {{ listing.state }}
             </p>
 
             <p>
@@ -27,15 +51,18 @@
             <p>
                 <strong>Price:</strong>
                 ₹{{ listing.price }}
+
                 {% if listing.price_basis == "acre" %}
                     per acre
                 {% else %}
                     per tonne
                 {% endif %}
             </p>
+
         </div>
     </div>
 
+    <!-- Django messages -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags|default:'info' }}">
@@ -44,19 +71,28 @@
         {% endfor %}
     {% endif %}
 
-    <form method="post">
+    <form method="post" id="fodder-order-form">
+
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
         {% endif %}
 
+        <!-- Buyer details -->
         <h5>Buyer details</h5>
 
         <div class="row">
+
+            <!-- Display ordinary buyer fields, excluding both quantities -->
             {% for field in form %}
-                {% if field.name not in "destination_latitude destination_longitude" %}
+
+                {% if field.name == "buyer_name" or field.name == "buyer_email" or field.name == "buyer_phone" or field.name == "harvesting_required" or field.name == "transportation_required" or field.name == "buyer_message" %}
+
                     <div class="col-md-6 mb-3">
+
                         <label for="{{ field.id_for_label }}" class="form-label">
                             {{ field.label }}
                         </label>
@@ -64,25 +100,91 @@
                         {{ field }}
 
                         {% for error in field.errors %}
-                            <div class="text-danger">{{ error }}</div>
+                            <div class="text-danger">
+                                {{ error }}
+                            </div>
                         {% endfor %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
 
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            <!-- Display ONLY the quantity matching the seller's price basis -->
+
+            {% if listing.price_basis == "tonne" %}
+
+                <div class="col-md-6 mb-3">
+
+                    <label for="{{ form.requested_tonnes.id_for_label }}"
+                        class="form-label">
+                        Requested Tonnes
+                    </label>
+
+                    {{ form.requested_tonnes }}
+
+                    {% for error in form.requested_tonnes.errors %}
+                        <div class="text-danger">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% elif listing.price_basis == "acre" %}
+
+                <div class="col-md-6 mb-3">
+
+                    <label for="{{ form.requested_acres.id_for_label }}"
+                        class="form-label">
+                        Requested Acres
+                    </label>
+
+                    {{ form.requested_acres }}
+
+                    {% for error in form.requested_acres.errors %}
+                        <div class="text-danger">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        Invalid price basis for this listing:
+                        {{ listing.price_basis }}
+                    </div>
+                </div>
+
+            {% endif %}
+
+        </div>
+               
+
+        <!-- Delivery location -->
         <h5 class="mt-3">Delivery location</h5>
 
         <p>
-            Click the map to select the delivery point. You can drag the marker
-            to refine the location.
+            The map opens at your registered location when available.
+            Drag the marker or click anywhere on the map to set the
+            delivery point.
         </p>
 
-        <div id="buyer-map"
-             style="height: 400px; width: 100%; margin-bottom: 15px;"></div>
+        <div class="delivery-info">
+            <strong>Selected delivery coordinates</strong>
+            <p id="buyer-coordinates" class="mb-0">
+                Loading map location...
+            </p>
+        </div>
 
-        <p id="buyer-coordinates">Select the delivery location on the map.</p>
+        <div id="buyer-map"></div>
 
+        <!-- Hidden latitude and longitude fields -->
         {{ form.destination_latitude }}
         {{ form.destination_longitude }}
 
@@ -90,61 +192,244 @@
             Submit Order
         </button>
 
-        <a href="{% url 'fodder_listings' %}" class="btn btn-secondary">
+        <a
+            href="{% url 'fodder_listings' %}"
+            class="btn btn-secondary"
+        >
             Cancel
         </a>
+
     </form>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const latInput = document.getElementById("id_destination_latitude");
-    const lonInput = document.getElementById("id_destination_longitude");
-    const coordinates = document.getElementById("buyer-coordinates");
 
-    const map = L.map("buyer-map").setView([19.7515, 75.7139], 7);
+    const latInput = document.getElementById(
+        "id_destination_latitude"
+    );
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19
-    }).addTo(map);
+    const lonInput = document.getElementById(
+        "id_destination_longitude"
+    );
+
+    const coordinates = document.getElementById(
+        "buyer-coordinates"
+    );
+
+    const form = document.getElementById(
+        "fodder-order-form"
+    );
+
+    if (!latInput || !lonInput) {
+        console.error(
+            "Destination latitude/longitude form fields were not found."
+        );
+
+        coordinates.textContent =
+            "Unable to initialize location fields.";
+
+        return;
+    }
+
+    /*
+     * Buyer's registered coordinates.
+     */
+    const registeredLat = parseFloat(
+        "{{ request.user.latitude|default:''|escapejs }}"
+    );
+
+    const registeredLon = parseFloat(
+        "{{ request.user.longitude|default:''|escapejs }}"
+    );
+
+    const hasRegisteredLocation =
+        Number.isFinite(registeredLat) &&
+        Number.isFinite(registeredLon) &&
+        registeredLat >= -90 &&
+        registeredLat <= 90 &&
+        registeredLon >= -180 &&
+        registeredLon <= 180;
+
+    /*
+     * Default location: Maharashtra.
+     */
+    const initialLat = hasRegisteredLocation
+        ? registeredLat
+        : 19.7515;
+
+    const initialLon = hasRegisteredLocation
+        ? registeredLon
+        : 75.7139;
+
+    const initialZoom = hasRegisteredLocation
+        ? 15
+        : 7;
+
+    /*
+     * Initialize map.
+     */
+    const map = L.map("buyer-map").setView(
+        [initialLat, initialLon],
+        initialZoom
+    );
+
+    /*
+     * Satellite imagery.
+     */
+    L.tileLayer(
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        {
+            attribution: "Google Satellite",
+            maxZoom: 20
+        }
+    ).addTo(map);
+
+    /*
+     * Explicitly configure Leaflet's default marker icons.
+     * This helps when the default icon asset paths are unavailable.
+     */
+    const markerIcon = L.icon({
+        iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+
+        iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+
+        shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
 
     let marker = null;
 
+    /*
+     * Update marker and hidden coordinate fields.
+     */
     function updateMarker(lat, lon) {
-        latInput.value = Number(lat).toFixed(7);
-        lonInput.value = Number(lon).toFixed(7);
+
+        lat = Number(lat);
+        lon = Number(lon);
+
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lon) ||
+            lat < -90 ||
+            lat > 90 ||
+            lon < -180 ||
+            lon > 180
+        ) {
+            console.error("Invalid coordinates:", lat, lon);
+            return;
+        }
+
+        latInput.value = lat.toFixed(7);
+        lonInput.value = lon.toFixed(7);
 
         if (!marker) {
-            marker = L.marker([lat, lon], {
-                draggable: true
-            }).addTo(map);
+
+            marker = L.marker(
+                [lat, lon],
+                {
+                    draggable: true,
+                    icon: markerIcon,
+                    autoPan: true
+                }
+            ).addTo(map);
+
+            marker.bindPopup(
+                "<strong>Delivery location</strong><br>" +
+                "Drag this marker to adjust the location."
+            );
 
             marker.on("dragend", function () {
-                const p = marker.getLatLng();
-                updateMarker(p.lat, p.lng);
+
+                const point = marker.getLatLng();
+
+                updateMarker(
+                    point.lat,
+                    point.lng
+                );
+
             });
+
         } else {
+
             marker.setLatLng([lat, lon]);
+
         }
 
         coordinates.textContent =
-            "Latitude: " + Number(lat).toFixed(7) +
-            " | Longitude: " + Number(lon).toFixed(7);
+            "Latitude: " + lat.toFixed(7) +
+            " | Longitude: " + lon.toFixed(7);
+
+        marker.setZIndexOffset(1000);
     }
 
+    /*
+     * Add the marker immediately when the map loads.
+     * This fixes the missing initial marker.
+     */
+    updateMarker(initialLat, initialLon);
+
+    marker.openPopup();
+
+    /*
+     * Click anywhere on the map to move the marker.
+     */
     map.on("click", function (event) {
-        updateMarker(event.latlng.lat, event.latlng.lng);
+
+        updateMarker(
+            event.latlng.lat,
+            event.latlng.lng
+        );
+
     });
 
-    document.querySelector("form").addEventListener("submit", function (event) {
-        if (!latInput.value || !lonInput.value) {
+    /*
+     * Ensure Leaflet renders correctly inside the page layout.
+     */
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 300);
+
+    /*
+     * Validate delivery coordinates before submitting.
+     */
+    form.addEventListener("submit", function (event) {
+
+        const lat = parseFloat(latInput.value);
+        const lon = parseFloat(lonInput.value);
+
+        const validCoordinates =
+            Number.isFinite(lat) &&
+            Number.isFinite(lon) &&
+            lat >= -90 &&
+            lat <= 90 &&
+            lon >= -180 &&
+            lon <= 180;
+
+        if (!validCoordinates) {
+
             event.preventDefault();
-            alert("Please select the delivery location on the map.");
+
+            alert(
+                "Please select a valid delivery location on the map."
+            );
+
+            return;
         }
+
     });
+
 });
 </script>
+
 {% endblock %}
