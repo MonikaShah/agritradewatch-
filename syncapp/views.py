@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout,get_user_model
 from django.contrib.gis.geos import GEOSGeometry
 from django.views.decorators.http import require_GET
-from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop # or Farmer, UserData if they have geometry
+from .models import Consumer1,Page,Commodity,User1,Farmer1,WebData,DtProduce,DamageCrop , FodderListing # or Farmer, UserData if they have geometry
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm,DamageForm,SoldForm,BoughtForm
+from .forms import ConsumerForm, FarmerForm,MyCustomPasswordResetForm,DamageForm,SoldForm,BoughtForm,FodderListingForm, FodderOrderForm
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -52,6 +52,15 @@ from syncapp.utils.otp import generate_otp
 from syncapp.utils.sms import send_fast2sms_otp
 
 from django.db import DatabaseError
+import math
+from decimal import Decimal
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 
 logger = logging.getLogger(__name__)
@@ -1081,9 +1090,6 @@ def delete_account(request):
     return render(request, "syncapp/delete_account.html")
 
 
-from .forms import FodderListingForm, FodderOrderForm
-from .models import FodderListing
-
 
 User = get_user_model()
 
@@ -1122,6 +1128,9 @@ def fodder_add_listing(request):
 
             messages.success(request, "Your fodder listing was published.")
             return redirect("fodder_listings")
+        else:
+            print("FODDER FORM ERRORS:", form.errors)
+            print("FODDER NON-FIELD ERRORS:", form.non_field_errors())
     else:
         form = FodderListingForm()
 
@@ -1129,6 +1138,171 @@ def fodder_add_listing(request):
         request,
         "syncapp/fodder/add_listing.html",
         {"form": form},
+    )
+
+
+# @login_required
+# def fodder_place_order(request, listing_id):
+#     listing = get_object_or_404(
+#         FodderListing,
+#         pk=listing_id,
+#         is_active=True,
+#     )
+
+#     initial = {
+#         "buyer_name": (
+#             getattr(request.user, "name", "")
+#             or request.user.get_full_name()
+#             or request.user.get_username()
+#         ),
+#         "buyer_email": request.user.email or "",
+#         "buyer_phone": getattr(request.user, "mobile", "") or "",
+#     }
+
+#     if request.method == "POST":
+#         form = FodderOrderForm(
+#             request.POST,
+#             buyer_user=request.user,
+#             listing=listing,
+#         )
+
+#         if form.is_valid():
+#             # Keep your existing order-saving and email code here.
+#             order = form.save(commit=False)
+#             order.listing = listing
+#             order.buyer_id = str(request.user.pk)
+
+#             order.buyer_name = (
+#                 getattr(request.user, "name", "")
+#                 or request.user.get_full_name()
+#                 or request.user.get_username()
+#             )
+
+#             order.buyer_email = (
+#                 request.user.email
+#                 or form.cleaned_data["buyer_email"]
+#             )
+
+#             order.buyer_phone = (
+#                 getattr(request.user, "mobile", "")
+#                 or form.cleaned_data["buyer_phone"]
+#             )
+
+#             order.save()
+
+#             # Find the seller's registered account using its stored ID.
+#             seller = User.objects.filter(pk=listing.seller_id).first()
+
+#             if seller and seller.email:
+#                 subject = f"MandiGo: New order for {listing.crop_name}"
+
+#                 email_body = f"""
+# A new order has been placed for your MandiGo listing.
+
+# ORDER
+# Order ID: {order.pk}
+# Listing ID: {listing.pk}
+# Crop: {listing.crop_name}
+# Variety: {listing.variety or "Not specified"}
+
+# BUYER
+# Name: {order.buyer_name}
+# User ID: {order.buyer_id}
+# Email: {order.buyer_email}
+# Phone: {order.buyer_phone}
+
+# DELIVERY LOCATION
+# State: {order.destination_state}
+# District: {order.destination_district}
+# Tehsil: {order.destination_tehsil}
+# Village: {order.destination_village}
+# Latitude: {order.destination_latitude}
+# Longitude: {order.destination_longitude}
+
+# ORDER REQUIREMENTS
+# Requested tonnes: {order.requested_tonnes or "Not specified"}
+# Requested acres: {order.requested_acres or "Not specified"}
+# Harvesting required: {"Yes" if order.harvesting_required else "No"}
+# Transportation required: {"Yes" if order.transportation_required else "No"}
+# Buyer message: {order.buyer_message or "None"}
+
+# Please sign in to MandiGo to follow up with the buyer.
+# """
+
+#                 try:
+#                     send_mail(
+#                         subject,
+#                         email_body,
+#                         getattr(settings, "DEFAULT_FROM_EMAIL", None),
+#                         [seller.email],
+#                         fail_silently=False,
+#                     )
+#                     messages.success(
+#                         request,
+#                         "Your order has been placed. The seller has been emailed.",
+#                     )
+#                 except Exception:
+#                     # The order is saved even if email delivery fails.
+#                     messages.warning(
+#                         request,
+#                         "Your order was saved, but the seller notification "
+#                         "email could not be sent. Please contact the site administrator.",
+#                     )
+#             else:
+#                 messages.warning(
+#                     request,
+#                     "Your order was saved, but the seller's registered email "
+#                     "address could not be found.",
+#                 )
+
+#             return redirect("fodder_listings")
+#     else:
+#         form = FodderOrderForm(
+#             initial=initial,
+#             buyer_user=request.user,
+#             listing=listing,
+#         )
+
+#     return render(
+#         request,
+#         "syncapp/fodder/place_order.html",
+#         {
+#             "form": form,
+#             "listing": listing,
+#         },
+#     )
+
+
+
+
+
+
+def calculate_distance_km(lat1, lon1, lat2, lon2):
+    """
+    Calculate straight-line distance between two coordinates.
+    Returns distance in kilometres.
+    """
+    lat1 = math.radians(float(lat1))
+    lon1 = math.radians(float(lon1))
+    lat2 = math.radians(float(lat2))
+    lon2 = math.radians(float(lon2))
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(lat1)
+        * math.cos(lat2)
+        * math.sin(dlon / 2) ** 2
+    )
+
+    # Protect against floating-point rounding errors.
+    a = max(0.0, min(1.0, a))
+
+    return 6371.0 * 2 * math.atan2(
+        math.sqrt(a),
+        math.sqrt(1 - a),
     )
 
 
@@ -1140,122 +1314,303 @@ def fodder_place_order(request, listing_id):
         is_active=True,
     )
 
-    if request.method == "POST":
-        form = FodderOrderForm(
-            request.POST,
-            buyer_user=request.user,
-            initial={"listing": listing},
+    form = FodderOrderForm(
+        request.POST or None,
+        buyer_user=request.user,
+        listing=listing,
+    )
+
+    if request.method == "POST" and form.is_valid():
+
+        # -------------------------------------------------
+        # 1. Get the requested quantity according to price basis
+        # -------------------------------------------------
+
+        if listing.price_basis == "acre":
+            quantity = form.cleaned_data.get("requested_acres")
+
+            if quantity is None or quantity <= 0:
+                form.add_error(
+                    "requested_acres",
+                    "Enter a valid number of acres.",
+                )
+
+        elif listing.price_basis == "tonne":
+            quantity = form.cleaned_data.get("requested_tonnes")
+
+            if quantity is None or quantity <= 0:
+                form.add_error(
+                    "requested_tonnes",
+                    "Enter a valid quantity in tonnes.",
+                )
+
+        else:
+            quantity = None
+            form.add_error(
+                None,
+                "This listing has an invalid price basis.",
+            )
+
+        # Stop if the quantity or price basis is invalid.
+        if form.errors:
+            return render(
+                request,
+                "syncapp/fodder/place_order.html",
+                {
+                    "listing": listing,
+                    "form": form,
+                },
+            )
+
+        quantity = Decimal(str(quantity))
+        price = Decimal(str(listing.price or 0))
+        harvesting_rate = Decimal(
+            str(listing.harvesting_cost or 0)
         )
 
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.listing = listing
-            order.buyer_id = str(request.user.pk)
+        # -------------------------------------------------
+        # 2. Calculate produce cost
+        # -------------------------------------------------
 
-            # Use the authenticated account's details, not a buyer ID
-            # supplied through the browser.
-            order.buyer_name = (
-                getattr(request.user, "name", "")
-                or request.user.get_full_name()
-                or request.user.get_username()
+        produce_cost = quantity * price
+
+        # -------------------------------------------------
+        # 3. Calculate harvesting cost
+        #
+        # Add harvesting charges only when:
+        # seller has NOT included harvesting, AND
+        # buyer has requested harvesting.
+        # -------------------------------------------------
+
+        harvesting_required = (
+            form.cleaned_data.get("harvesting_required")
+        )
+
+        if (
+            not listing.harvesting_included
+            and harvesting_required is True
+        ):
+            harvesting_cost = quantity * harvesting_rate
+        else:
+            harvesting_cost = Decimal("0")
+
+        # -------------------------------------------------
+        # 4. Calculate net cost
+        # -------------------------------------------------
+
+        net_cost = produce_cost + harvesting_cost
+
+        # -------------------------------------------------
+        # 5. Calculate travel cost
+        # -------------------------------------------------
+
+        transportation_required = (
+            form.cleaned_data.get("transportation_required")
+        )
+
+        destination_lat = form.cleaned_data.get(
+            "destination_latitude"
+        )
+        destination_lon = form.cleaned_data.get(
+            "destination_longitude"
+        )
+
+        seller_lat = listing.latitude
+        seller_lon = listing.longitude
+
+        distance_km = None
+        travel_cost = Decimal("0")
+
+        if transportation_required is True:
+
+            coordinates_available = all(
+                value is not None
+                for value in (
+                    seller_lat,
+                    seller_lon,
+                    destination_lat,
+                    destination_lon,
+                )
             )
-            order.buyer_email = request.user.email or form.cleaned_data["buyer_email"]
 
-            # Keep the submitted phone number, but require one.
-            order.buyer_phone = request.user.mobile or form.cleaned_data["buyer_phone"]
-            order.save()
+            if coordinates_available:
+                distance_km = calculate_distance_km(
+                    seller_lat,
+                    seller_lon,
+                    destination_lat,
+                    destination_lon,
+                )
 
-            # Find the seller's registered account using its stored ID.
-            seller = User.objects.filter(pk=listing.seller_id).first()
+                transport_rate = Decimal(
+                    str(
+                        listing.transportation_charge_per_km
+                        or 0
+                    )
+                )
 
-            if seller and seller.email:
-                subject = f"MandiGo: New order for {listing.crop_name}"
+                travel_cost = (
+                    Decimal(str(distance_km))
+                    * transport_rate
+                )
 
-                email_body = f"""
-A new order has been placed for your MandiGo listing.
+        # -------------------------------------------------
+        # 6. Calculate total cost
+        # -------------------------------------------------
 
-ORDER
+        total_cost = net_cost + travel_cost
+
+        # -------------------------------------------------
+        # 7. Save order
+        # -------------------------------------------------
+
+        order = form.save(commit=False)
+
+        order.listing = listing
+        order.buyer_id = str(request.user.pk)
+
+        order.buyer_name = (
+            getattr(request.user, "name", "")
+            or request.user.get_full_name()
+            or request.user.get_username()
+        )
+
+        order.buyer_email = (
+            getattr(request.user, "email", "")
+            or form.cleaned_data.get("buyer_email", "")
+        )
+
+        order.buyer_phone = (
+            getattr(request.user, "mobile", "")
+            or form.cleaned_data.get("buyer_phone", "")
+        )
+
+        order.save()
+
+        # -------------------------------------------------
+        # 8. Notify seller by email
+        # -------------------------------------------------
+
+        seller = User.objects.filter(
+            pk=listing.seller_id
+        ).first()
+
+        if seller and seller.email:
+
+            quantity_unit = (
+                "acre"
+                if listing.price_basis == "acre"
+                else "tonne"
+            )
+
+            distance_text = (
+                f"{distance_km:.2f} km"
+                if distance_km is not None
+                else "Unavailable"
+            )
+
+            email_subject = (
+                f"MandiGo: New order for {listing.crop_name}"
+            )
+
+            email_body = f"""
+A new fodder order has been placed.
+
+ORDER DETAILS
+-------------
 Order ID: {order.pk}
-Listing ID: {listing.pk}
 Crop: {listing.crop_name}
 Variety: {listing.variety or "Not specified"}
 
-BUYER
+QUANTITY
+--------
+Requested quantity: {quantity} {quantity_unit}
+Price: Rs. {price} per {quantity_unit}
+
+BUYER DETAILS
+-------------
 Name: {order.buyer_name}
-User ID: {order.buyer_id}
+Buyer ID: {order.buyer_id}
 Email: {order.buyer_email}
 Phone: {order.buyer_phone}
 
+HARVESTING
+----------
+Seller includes harvesting: {
+    "Yes" if listing.harvesting_included else "No"
+}
+Buyer requests harvesting: {
+    "Yes" if harvesting_required else "No"
+}
+Harvesting cost: Rs. {harvesting_cost:.2f}
+
+TRANSPORTATION
+--------------
+Transportation requested: {
+    "Yes" if transportation_required else "No"
+}
+Estimated straight-line distance: {distance_text}
+Transportation rate: Rs. {
+    Decimal(str(listing.transportation_charge_per_km or 0))
+} per km
+Travel cost: Rs. {travel_cost:.2f}
+
+COST SUMMARY
+------------
+Produce cost: Rs. {produce_cost:.2f}
+Harvesting cost: Rs. {harvesting_cost:.2f}
+Net cost: Rs. {net_cost:.2f}
+Travel cost: Rs. {travel_cost:.2f}
+TOTAL COST: Rs. {total_cost:.2f}
+
 DELIVERY LOCATION
-State: {order.destination_state}
-District: {order.destination_district}
-Tehsil: {order.destination_tehsil}
-Village: {order.destination_village}
-Latitude: {order.destination_latitude}
-Longitude: {order.destination_longitude}
+-----------------
+Latitude: {destination_lat}
+Longitude: {destination_lon}
 
-ORDER REQUIREMENTS
-Requested tonnes: {order.requested_tonnes or "Not specified"}
-Requested acres: {order.requested_acres or "Not specified"}
-Harvesting required: {"Yes" if order.harvesting_required else "No"}
-Transportation required: {"Yes" if order.transportation_required else "No"}
-Buyer message: {order.buyer_message or "None"}
+Buyer message:
+{form.cleaned_data.get("buyer_message") or "None"}
 
-Please sign in to MandiGo to follow up with the buyer.
+Note: Travel cost uses straight-line distance, not road distance.
 """
 
-                try:
-                    send_mail(
-                        subject,
-                        email_body,
-                        getattr(settings, "DEFAULT_FROM_EMAIL", None),
-                        [seller.email],
-                        fail_silently=False,
-                    )
-                    messages.success(
-                        request,
-                        "Your order has been placed. The seller has been emailed.",
-                    )
-                except Exception:
-                    # The order is saved even if email delivery fails.
-                    messages.warning(
-                        request,
-                        "Your order was saved, but the seller notification "
-                        "email could not be sent. Please contact the site administrator.",
-                    )
-            else:
-                messages.warning(
-                    request,
-                    "Your order was saved, but the seller's registered email "
-                    "address could not be found.",
+            try:
+                send_mail(
+                    subject=email_subject,
+                    message=email_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[seller.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                # The order has already been saved.
+                # An email failure should not undo the order.
+                import logging
+
+                logging.getLogger(__name__).exception(
+                    "Failed to email seller for fodder order %s",
+                    order.pk,
                 )
 
-            return redirect("fodder_listings")
-    else:
-        form = FodderOrderForm(
-            buyer_user=request.user,
-            initial={"listing": listing},
-        )
-        initial = {
-            "buyer_name": (
-                getattr(request.user, "name", "")
-                or request.user.get_full_name()
-                or request.user.get_username()
+        messages.success(
+            request,
+            (
+                f"Order placed successfully. "
+                f"Net cost: ₹{net_cost:,.2f}; "
+                f"Travel cost: ₹{travel_cost:,.2f}; "
+                f"Total cost: ₹{total_cost:,.2f}."
             ),
-            "buyer_email": request.user.email or "",
-            "buyer_phone": getattr(request.user, "mobile", "") or "",
-        }
-
-        form = FodderOrderForm(
-            initial=initial,
-            buyer_user=request.user,
         )
+
+        return redirect("fodder_listings")
+
     return render(
         request,
         "syncapp/fodder/place_order.html",
-        {"form": form, "listing": listing},
+        {
+            "listing": listing,
+            "form": form,
+        },
     )
-
 
 # GeoServer configuration for the Maharashtra village layer.
 MH_VILLAGE_WFS_URL = (

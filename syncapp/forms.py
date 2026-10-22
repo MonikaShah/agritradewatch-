@@ -430,7 +430,7 @@ class FodderListingForm(forms.ModelForm):
                 ],
                 coerce=lambda value: value == "True",
                 widget=forms.RadioSelect,
-                required=True,
+                required=False,
                 label="Transportation Needed?",
             )
 
@@ -492,7 +492,30 @@ class FodderListingForm(forms.ModelForm):
             if not isinstance(field.widget, forms.HiddenInput):
                 field.widget.attrs.setdefault("class", "form-control")
 
-    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        harvesting_included = cleaned_data.get("harvesting_included")
+        harvesting_cost = cleaned_data.get("harvesting_cost")
+
+        # If harvesting is included, no separate cost is needed.
+        if harvesting_included is True:
+            cleaned_data["harvesting_cost"] = None
+
+        # If harvesting is not included, require a cost.
+        elif harvesting_included is False:
+            if harvesting_cost is None:
+                self.add_error(
+                    "harvesting_cost",
+                    "Please enter the harvesting cost because harvesting is not included."
+                )
+
+        # Transportation question is not displayed.
+        # Default to False when no value is submitted.
+        if not cleaned_data.get("transportation_needed"):
+            cleaned_data["transportation_needed"] = False
+
+        return cleaned_data
         
 class FodderOrderForm(forms.ModelForm):
 
@@ -522,12 +545,28 @@ class FodderOrderForm(forms.ModelForm):
             "buyer_message": forms.Textarea(
                 attrs={"rows": 3}
             ),
+            "transportation_required": forms.RadioSelect(
+                choices=[
+                    (True, "Yes"),
+                    (False, "No"),
+                ]
+            ),
         }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("buyer_user", None)
+        self.listing = kwargs.pop("listing", None)
+
 
         super().__init__(*args, **kwargs)
+
+        if self.listing and self.listing.sugarcane_area_acres is not None:
+            self.fields["requested_acres"].widget.attrs["max"] = (
+                self.listing.sugarcane_area_acres
+            )
+
+        self.fields["requested_acres"].widget.attrs["min"] = "0.01"
+        self.fields["requested_acres"].widget.attrs["step"] = "any"
 
         for field in self.fields.values():
             if not isinstance(field.widget, forms.HiddenInput):
@@ -547,6 +586,15 @@ class FodderOrderForm(forms.ModelForm):
             self.fields["buyer_phone"].initial = (
                 getattr(user, "mobile", "")
             )
+        # If the seller includes harvesting, the buyer does not
+        # need to choose whether harvesting is required.
+        if self.listing and self.listing.harvesting_included:
+            self.fields["harvesting_required"].required = False
+            self.fields["harvesting_required"].initial = True
+
+        # Transportation must be explicitly selected.
+        self.fields["transportation_required"].required = True
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -570,5 +618,37 @@ class FodderOrderForm(forms.ModelForm):
                         "requested_acres",
                         "Please enter the requested acres."
                     )
+        if self.listing and self.listing.harvesting_included:
+            cleaned_data["harvesting_required"] = True
+
+        
 
         return cleaned_data
+
+        def clean_requested_acres(self):
+            requested_acres = self.cleaned_data.get("requested_acres")
+
+            if requested_acres is None:
+                return requested_acres
+
+            if self.listing is None:
+                return requested_acres
+
+            total_acres = self.listing.sugarcane_area_acres
+
+            if total_acres is None:
+                raise forms.ValidationError(
+                    "The seller has not specified the total available acres."
+                )
+
+            if requested_acres <= 0:
+                raise forms.ValidationError(
+                    "Requested acres must be greater than zero."
+                )
+
+            if requested_acres > total_acres:
+                raise forms.ValidationError(
+                    f"You can request at most {total_acres} acres."
+                )
+
+        return requested_acres

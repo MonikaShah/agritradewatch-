@@ -45,20 +45,29 @@
 
         <div class="row">
             {% for field in form %}
-                {% if field.name != "latitude" and field.name != "longitude" %}
-                    <div class="col-md-6 mb-3">
+
+                {% if field.name != "latitude" and field.name != "longitude" and field.name != "transportation_needed" %}
+
+                    <div
+                        class="col-md-6 mb-3"
+                        {% if field.name == "harvesting_cost" %}
+                            id="harvesting-cost-container"
+                        {% endif %}
+                    >
+
                         <label for="{{ field.id_for_label }}" class="form-label">
                             {{ field.label }}
                         </label>
 
                         {% if field.name == "harvesting_included" %}
+
                             <div>
                                 <label class="form-check">
                                     <input
                                         type="radio"
                                         name="harvesting_included"
                                         value="True"
-                                        {% if field.value == True or field.value == "True" %}checked{% endif %}
+                                        {% if field.value == True or field.value == "True" or field.value == "True" %}checked{% endif %}
                                         required
                                     >
                                     Yes
@@ -69,32 +78,7 @@
                                         type="radio"
                                         name="harvesting_included"
                                         value="False"
-                                        {% if field.value == False or field.value == "False" %}checked{% endif %}
-                                        required
-                                    >
-                                    No
-                                </label>
-                            </div>
-
-                        {% elif field.name == "transportation_needed" %}
-                            <div>
-                                <label class="form-check">
-                                    <input
-                                        type="radio"
-                                        name="transportation_needed"
-                                        value="True"
-                                        {% if field.value == True or field.value == "True" %}checked{% endif %}
-                                        required
-                                    >
-                                    Yes
-                                </label>
-
-                                <label class="form-check">
-                                    <input
-                                        type="radio"
-                                        name="transportation_needed"
-                                        value="False"
-                                        {% if field.value == False or field.value == "False" %}checked{% endif %}
+                                        {% if field.value == False or field.value == "False" or field.value == "False" %}checked{% endif %}
                                         required
                                     >
                                     No
@@ -102,7 +86,9 @@
                             </div>
 
                         {% else %}
+
                             {{ field }}
+
                         {% endif %}
 
                         {% if field.help_text %}
@@ -114,8 +100,11 @@
                         {% for error in field.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
+
                     </div>
+
                 {% endif %}
+
             {% endfor %}
         </div>
 
@@ -154,7 +143,57 @@ document.addEventListener("DOMContentLoaded", function () {
     const latInput = document.getElementById("id_latitude");
     const lonInput = document.getElementById("id_longitude");
     const coordinates = document.getElementById("seller-coordinates");
+    const harvestingRadios = document.querySelectorAll(
+        'input[name="harvesting_included"]'
+    );
 
+    const harvestingCostContainer = document.getElementById(
+        "harvesting-cost-container"
+    );
+
+    const harvestingCostInput = document.getElementById(
+        "id_harvesting_cost"
+    );
+
+    function toggleHarvestingCost() {
+
+        const selected = document.querySelector(
+            'input[name="harvesting_included"]:checked'
+        );
+
+        if (!selected || !harvestingCostContainer) {
+            return;
+        }
+
+        if (selected.value === "True") {
+
+            // Harvesting cost is already included in the price.
+            harvestingCostContainer.style.display = "none";
+
+            if (harvestingCostInput) {
+                harvestingCostInput.value = "";
+                harvestingCostInput.required = false;
+            }
+
+        } else {
+
+            // Harvesting cost is not included; ask for the cost.
+            harvestingCostContainer.style.display = "";
+
+            if (harvestingCostInput) {
+                harvestingCostInput.required = true;
+            }
+
+        }
+    }
+
+    harvestingRadios.forEach(function (radio) {
+        radio.addEventListener("change", toggleHarvestingCost);
+    });
+
+    // Apply the correct visibility when the page initially loads.
+    toggleHarvestingCost();
+    
     if (!mapElement || !latInput || !lonInput) {
         console.error("Map element or latitude/longitude inputs not found.");
         return;
