@@ -807,12 +807,20 @@ def dtDashboard(request):
         username = request.user.username  # or request.user.get_full_name()
 
    
+   # Check the user's role.
+    user_role = str(
+        getattr(request.user, "job", "")
+    ).strip().lower()
+
+    can_add_fodder = user_role in ["farmer", "retailer"]
+
     context = {
         "thela_username": username,
+        "can_add_fodder": can_add_fodder,
     }
+
     return render(request, "syncapp/dt_dashboard.html", context)
-
-
+    
 @csrf_exempt
 def update_user_location(request):
     if request.method == "POST" and request.user.is_authenticated:

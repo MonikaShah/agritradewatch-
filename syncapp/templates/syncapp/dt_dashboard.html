@@ -3,374 +3,406 @@
   {% load i18n %}
   {% block content %}
 
-  
-  <style>
-  body, html {
+<style>
+/* =========================================
+   1. Global layout
+   ========================================= */
+
+html,
+body {
     margin: 0;
     padding: 0;
-    height: 100%;
     width: 100%;
-  }
+    height: 100%;
+}
 
-  #dashboard-container {
+#dashboard-container {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
     width: 100%;
-  }
+    height: 100dvh;
+}
 
-  /* Top Panel */
-  #topPanel {
+#topPanel {
     display: flex;
+    flex-direction: row;
+    align-items: flex-start;
     justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 1000;
+}
+
+#topPanel label {
+    font-weight: bold;
+}
+
+#topPanel select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+/* =========================================
+   2. Commodity toolbar
+   ========================================= */
+
+/* Left section containing tabs and crop buttons */
+#topPanel > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Category tabs */
+#topPanel .commodity-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+
+#topPanel .commodity-tab {
+    padding: 9px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#topPanel .commodity-tab:hover {
+    background: #f0fdf4;
+    border-color: #15803d;
+    color: #166534;
+}
+
+#topPanel .commodity-tab.active {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
+}
+
+/* Add-crop button and existing crops share a row */
+#topPanel .commodity-controls {
+    display: flex;
+    flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 10px 15px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-    z-index: 1000;
-  }
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+}
 
-  #topPanel label {
-    font-weight: bold;
-  }
+/* Wrapper for Add Fodder Crop */
+#topPanel .add-fodder-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    width: auto;
+    margin: 0;
+}
 
-  #topPanel select,
-  #topPanel button {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    flex-shrink: 1; /* allows shrinking on small screens */
-  }
-
-  #topPanel button {
-    background-color: #198754;
-    color: white;
+/* Add Fodder Crop button */
+#topPanel .add-fodder-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 36px;
+    padding: 8px 13px;
+    box-sizing: border-box;
     border: none;
-  }
-  #topPanel button:hover {
-    background-color: #157347;
-  }
-  #message-container {
-  position: fixed;
-  top: 70px;            /* below #topPanel */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5000;        /* higher than topPanel (1000) */
-  max-width: 90%;
+    border-radius: 7px;
+    background: #15803d;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#topPanel .add-fodder-btn:hover {
+    background: #166534;
+    color: #fff;
+}
+
+/* Existing commodity buttons */
+#topPanel .commodity-list {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#topPanel .commodity-item {
+    padding: 8px 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#topPanel .commodity-item:hover {
+    background: #f0fdf4;
+    border-color: #15803d;
+}
+
+#topPanel .commodity-item.selected {
+    background: #dcfce7;
+    border-color: #15803d;
+    color: #166534;
+}
+
+
+/* =========================================
+   3. Action dropdown
+   ========================================= */
+
+#topPanel .ms-auto {
+    flex: 0 0 auto;
+    margin-left: auto !important;
+}
+
+#topPanel #profileMenu {
+    padding: 8px 12px;
+    border-radius: 7px;
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   4. Status messages
+   ========================================= */
+
+#message-container {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5000;
+    max-width: 90%;
 }
 
 #message-container .alert {
-  background-color: #dc3545;   /* error */
-  color: white;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #dc3545;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-  /* Map + Right Panel Container */
-  #mapContainer {
+
+/* =========================================
+   5. Map layout
+   ========================================= */
+
+#mapContainer {
     display: flex;
-    flex-grow: 1;
+    flex: 1 1 auto;
+    flex-direction: row;
     width: 100%;
-    height: calc(100dvh - 60px); /* topPanel height */
+    min-height: 0;
+    height: calc(100dvh - 60px);
     transition: all 0.4s ease;
-  }
+}
 
-  /* Map */
-  #map {
-    flex: 1;
+#map {
+    flex: 1 1 0;
+    width: 100%;
     height: 100%;
-    min-height: 300px; /* ensures map never collapses */
+    min-width: 0;
+    min-height: 300px;
     transition: flex 0.4s ease;
-  }
+}
 
-/* Right Panel (desktop default) */
-  .rightPanelBase,#rightPanel {
-  /* width: 0; */
-  overflow-x: hidden;
-  transition: width 0.3s ease;
-  background: #ffffff;
-  border-left: 1px solid #ddd;
-  box-shadow: -3px 0 12px rgba(0,0,0,0.15);
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+
+/* =========================================
+   6. Right profile panel
+   ========================================= */
+
+.rightPanelBase,
+#rightPanel {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background: #fff;
+    color: #333;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    border-left: 1px solid #ddd;
+    box-shadow: -3px 0 12px rgba(0, 0, 0, 0.15);
+    transition: width 0.3s ease;
 }
 
 .rightPanelInner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  gap: 15px;
-  overflow-y: auto; /* scroll if content is long */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    gap: 15px;
+    overflow-y: auto;
 }
 
-/* Header & Close Button */
 #closeRightPanelBtn {
-  align-self: flex-end;
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: #888;
-  transition: color 0.2s ease;
-}
-#closeRightPanelBtn:hover {
-  color: #e74c3c;
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
-/* Profile Content */
+#closeRightPanelBtn:hover {
+    color: #e74c3c;
+}
+
+#profileContent {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
 #profileContent h4 {
-  margin: 0 0 10px 0;
-  font-size: 20px;
-  color: #198754;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 5px;
+    margin: 0 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    color: #198754;
+    font-size: 20px;
 }
 
 .profile-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
 }
 
 .profile-label {
-  font-weight: 600;
-  color: #555;
+    color: #555;
+    font-weight: 600;
 }
 
 .profile-value {
-  color: #222;
-  text-align: right;
-  flex-shrink: 0;
+    flex-shrink: 0;
+    color: #222;
+    text-align: right;
 }
 
-/* Optional: profile image placeholder */
 #profileContent .profile-pic {
-  width: 60%;
-  height: 60px;
-  background: #ddd;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #aaa;
+    font-size: 28px;
 }
 
-/* Scrollable content if too long */
-#profileContent {
-  overflow-y: auto;
-  flex-grow: 1;
-}
-/* Make images/videos responsive */
 .profile-row img,
 .profile-row video,
 #otherCommodities img,
 #otherCommodities video {
     max-width: 100%;
     height: auto;
-    border-radius: 6px;
     margin-top: 5px;
+    border-radius: 6px;
 }
-  /* Close Button */
 
-  /* Leaflet Legend */
-  .leaflet-control.legend {
-    background: white;
+
+/* =========================================
+   7. Map resizer
+   ========================================= */
+
+#resizer {
+    flex: 0 0 6px;
+    width: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    cursor: ew-resize;
+    z-index: 2500;
+    transition: background-color 0.2s ease;
+}
+
+#resizer:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+
+/* =========================================
+   8. Leaflet legend and popups
+   ========================================= */
+
+.leaflet-control.legend {
     padding: 10px 14px;
     border-radius: 6px;
-    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
     font-size: 14px;
     line-height: 1.4em;
-  }
-  .leaflet-control.legend img {
+}
+
+.leaflet-control.legend img {
     width: 18px;
     height: 18px;
-    vertical-align: middle;
     margin-right: 6px;
-  }
-  .leaflet-control.legend i {
+    vertical-align: middle;
+}
+
+.leaflet-control.legend i {
+    display: inline-block;
     width: 14px;
     height: 14px;
-    display: inline-block;
     margin-right: 6px;
     border-radius: 50%;
-  }
-  /* Resizer between map and right panel */
-#resizer {
-  width: 6px;
-  cursor: ew-resize;
-  background-color: rgba(0,0,0,0.1);
-  z-index: 2500;
-  transition: background-color 0.2s ease;
 }
-#resizer:hover {
-  background-color: rgba(0,0,0,0.3);
-}
-/* Leaflet popup responsiveness */
+
 .leaflet-popup-content,
 .profile-row,
 .edit-row,
 .popup-edit-container {
     max-width: 100%;
     overflow-x: hidden;
-    word-break: break-word;
-}
-/* ====== Media Queries ====== */
-
-/* Tablet / Desktop */
-@media(min-width: 769px){
-    #rightPanel {
-        position: relative;
-        bottom: auto;
-        left: auto;
-        width: 0;
-        height: 100%;
-        border-radius: 0 !important;
-        box-shadow: -3px 0 12px rgba(0,0,0,0.15);
-        transition: width 0.2s ease;
-    }
-    #rightPanel.open {
-        width: 35%;
-    }
-    #mapContainer {
-        flex-direction: row;
-        height: calc(100vh - 60px);
-    }
-    #map {
-        flex-grow:1; flex-shrink:0;
-        height: 100%;
-    }
-    #resizer {
-        display: block;
-    }
-}
-
-/* Mobile */
-/* Mobile adjustments */
-@media(max-width: 768px) {
-  #dashboard-container {
-    height: 100dvh;
-    flex-direction: column !important;
-  }
-
-  #mapContainer {
-    flex-direction: column;
-    height: calc(100dvh - 60px);
-  }
-
-  #map {
-    width: 100% !important;
-    height: auto !important;
-    /* flex: 1 1 100%; */
-    /* height: 100%; */
-    min-height: 300px;
-  }
-
-  #rightPanel {
-    position: fixed;
-    bottom: -100%;
-    left: 0;
-    width: 100%;
-    height: 60%;
-    max-height: 80%;
-    margin-left: 0 !important;
-    border-left: none;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    box-shadow: 0 -3px 15px rgba(0,0,0,0.25);
-    transition: bottom 0.3s ease;
-    z-index: 3000;
-    padding: 15px;
-  }
-
-  #rightPanel.open {
-    bottom: 0;
-  }
-
-  .rightPanelInner {
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .profile-row,
-  .edit-row,
-  .popup-edit-container {
-    flex-direction: column;
-    align-items: flex-start;
-    font-size: 14px;
-    /* overflow-x: hidden; */
-  }
-
-  .profile-row input,
-  .profile-row select {
-    width: 100% !important;
-    margin-top: 4px;
-  }
-
-  .profile-row img,
-  .profile-row video {
-    width: 100% !important;
-    max-width: 100%;
-    height: auto !important;
-  }
-  .profile-label {
-      width: 100%;
-      font-weight: 600;
-  }
-
-  .profile-value {
-      width: 100%;
-      display: block;
-      text-align: left !important;
-      margin-top: 2px;
-  }
-
-  #topPanel {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .leaflet-popup-content {
-    max-width: 90vw !important;
-    overflow-x: hidden;
-  }
-
-  .leaflet-popup-content img,
-  .leaflet-popup-content video {
-    max-width: 100%;
-    height: auto;
-  }
-
-  #resizer {
-    display: none;
-  }
+    overflow-wrap: anywhere;
 }
 
 
-/* ====== Loading Spinner ====== */
+/* =========================================
+   9. Map loading spinner
+   ========================================= */
+
 #mapLoading {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255,255,255,0.75);
-    display: flex; justify-content: center; align-items: center;
+    top: 0;
+    left: 0;
+    display: flex;
     flex-direction: column;
-    z-index: 2000;
-    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.75);
     color: #444;
+    font-size: 16px;
+    z-index: 2000;
 }
 
 .spinner {
@@ -383,50 +415,320 @@
 }
 
 @keyframes spin {
-    100% { transform: rotate(360deg); }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================
+   10. Desktop layout
+   ========================================= */
+
+@media (min-width: 769px) {
+    #rightPanel {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        width: 0;
+        height: 100%;
+        flex: 0 0 auto;
+        border-radius: 0;
+        transition: width 0.2s ease;
+    }
+
+    #rightPanel.open {
+        width: 35%;
+    }
+
+    #resizer {
+        display: block;
+    }
+}
+
+
+/* =========================================
+   11. Tablet and mobile layout
+   ========================================= */
+
+@media (max-width: 768px) {
+    #dashboard-container {
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #topPanel {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    #topPanel > div:first-child {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    #topPanel .commodity-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        gap: 6px;
+    }
+
+    #topPanel .commodity-tab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        padding: 10px 5px;
+        font-size: 13px;
+    }
+
+    #topPanel .commodity-controls {
+        flex-wrap: wrap;
+    }
+
+    #topPanel .add-fodder-btn {
+        width: auto;
+    }
+
+    #topPanel .commodity-list {
+        flex: 0 1 auto;
+        width: auto;
+        gap: 6px;
+    }
+
+    #topPanel .commodity-item {
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    #topPanel .ms-auto {
+        display: flex;
+        flex: 1 1 100%;
+        justify-content: flex-end;
+        margin-left: 0 !important;
+    }
+
+    #mapContainer {
+        flex: 1 1 auto;
+        flex-direction: column;
+        width: 100%;
+        min-height: 0;
+        height: auto;
+    }
+
+    #map {
+        flex: 1 1 auto;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 300px;
+    }
+
+    #rightPanel {
+        position: fixed;
+        bottom: -100%;
+        left: 0;
+        width: 100%;
+        height: 60%;
+        max-height: 80%;
+        margin-left: 0 !important;
+        padding: 15px;
+        border-left: none;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.25);
+        transition: bottom 0.3s ease;
+        z-index: 3000;
+    }
+
+    #rightPanel.open {
+        bottom: 0;
+    }
+
+    .rightPanelInner {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .profile-row,
+    .edit-row,
+    .popup-edit-container {
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 14px;
+    }
+
+    .profile-row input,
+    .profile-row select {
+        width: 100% !important;
+        margin-top: 4px;
+    }
+
+    .profile-row img,
+    .profile-row video {
+        width: 100% !important;
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    .profile-label {
+        width: 100%;
+        font-weight: 600;
+    }
+
+    .profile-value {
+        display: block;
+        width: 100%;
+        margin-top: 2px;
+        text-align: left !important;
+    }
+
+    .leaflet-popup-content {
+        max-width: 90vw !important;
+        overflow-x: hidden;
+    }
+
+    .leaflet-popup-content img,
+    .leaflet-popup-content video {
+        max-width: 100%;
+        height: auto;
+    }
+
+    #resizer {
+        display: none;
+    }
+}
+
+
+/* =========================================
+   12. Small mobile screens
+   ========================================= */
+
+@media (max-width: 420px) {
+    #topPanel {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    #topPanel .commodity-tab {
+        flex-direction: column;
+        gap: 4px;
+        padding: 9px 5px;
+        font-size: 12px;
+    }
+
+    #topPanel .commodity-controls {
+        gap: 6px;
+    }
+
+    #topPanel .commodity-item {
+        padding: 7px 9px;
+        overflow-wrap: anywhere;
+    }
 }
 </style>
 <script src="{% url 'javascript-catalog' %}"></script>
 
   <div id="dashboard-container">
-    <div id="topPanel">
-      <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
-  <div>
-    <label for="commoditySelect">{% trans "Select Commodity" %}:</label>
-      <select id="commoditySelect">
-        <option value="">-- {% trans "Select" %} --</option>
-      </select>
+   <div id="topPanel">
+
+    <!-- Left side: commodity categories and crop list -->
+    <div class="commodity-toolbar">
+
+        <!-- Category tabs -->
+        <div id="commodityTabs" class="commodity-tabs">
+
+            <button type="button"
+                    class="commodity-tab active"
+                    data-category="vegetable">
+                🥬 {% trans "Vegetables" %}
+            </button>
+
+            <button type="button"
+                    class="commodity-tab"
+                    data-category="fruit">
+                🍎 {% trans "Fruits" %}
+            </button>
+
+            <button type="button"
+                    class="commodity-tab"
+                    data-category="fodder">
+                🌾 {% trans "Fodder" %}
+            </button>
+
+        </div>
+
+       <div class="commodity-controls">
+          <div id="commodityList" class="commodity-list"></div>
+          {% if can_add_fodder %}
+          <div class="add-fodder-row">
+              <a href="/fodder/add"
+                id="addFodderButton"
+                class="add-fodder-btn"
+                style="display: none;">
+                  ➕ {% trans "Add fodder crop" %}
+              </a>
+          </div>
+          {% endif %}
+      </div>
+
+        <!-- Loading and status messages -->
+        <div id="loadingSpinner"
+             style="display:none; margin-top:5px;">
+            ⏳ {% trans "Loading..." %}
+        </div>
+
+        <span id="statusMsg"></span>
+
     </div>
 
-    <a href="/fodder/add"
-      class="btn btn-success"
-      style="white-space: nowrap; text-decoration: none;">
-      ➕ {% trans "Add fodder crop" %}
-    </a>
-  </div>
-      <div id="loadingSpinner" style="display:none; margin-left:10px;">
-        <span>⏳ {% trans "Loading..." %}</span>
-      </div>
-      <span id="statusMsg"></span>
-      <div class="ms-auto">
+    <!-- Right side: Action dropdown -->
+    <div class="dashboard-action">
         <div class="dropdown">
-          <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-            ⚙️ {% trans "Action" %} 
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-            <!-- <li><h6 class="dropdown-header">👤 {{ thela_username|default:"Guest"}}</h6></li> -->
-            {% if thela_username %}
-              <li><a class="dropdown-item" href="{% url 'api:create_produce' %}">➕ {% trans "Add Produce" %}</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <!-- <li><a class="dropdown-item text-danger" href="#">🚪 Logout</a></li> -->
-            {% else %}
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-success" href="{% url 'login' %}">🔑 {% trans "Login" %}</a></li>
-            {% endif %}
-          </ul>
+
+            <button class="btn btn-outline-primary dropdown-toggle"
+                    type="button"
+                    id="profileMenu"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                ⚙️ {% trans "Action" %}
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="profileMenu">
+
+                {% if thela_username %}
+
+                <li>
+                    <a class="dropdown-item"
+                       href="{% url 'api:create_produce' %}">
+                        ➕ {% trans "Add Produce" %}
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                {% else %}
+
+                <li>
+                    <a class="dropdown-item text-success"
+                       href="{% url 'login' %}">
+                        🔑 {% trans "Login" %}
+                    </a>
+                </li>
+
+                {% endif %}
+
+            </ul>
+
         </div>
-      </div>
     </div>
+
+  </div>
 
     <div id="mapContainer">
       <div id="mapLoading">
@@ -889,188 +1191,305 @@ async function updateProduce(id) {
     }
 }
 
-
-  // Load commodities from API
-  // async function loadCommodities() {
-  //   try{
-  //     const res = await fetch('/api/DtEntries/');
-  //     const commodities = await res.json();
-      
-  //     const uniqueCommodities = [...new Set(commodities.map(e => e.sale_commodity).filter(Boolean))];
-
-  //     const select = document.getElementById('commoditySelect');
-  //     select.innerHTML = '<option value="">-- {% trans "Select" %} --</option>';
-  //     // uniqueCommodities.forEach(item => {
-  //     //   const opt = document.createElement('option');
-  //     //   opt.value = item;
-  //     //   opt.textContent = gettext(item);
-  //     //   select.appendChild(opt);
-  //     // });
-  //     function toTitleCase(str) {
-  //       return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-  //     }
-
-  //     uniqueCommodities.forEach(item => {
-  //       const opt = document.createElement('option');
-  //       opt.value = item;
-  //       opt.textContent = toTitleCase(gettext(item));
-  //       select.appendChild(opt);
-  //     });
-
-  //   } catch(err){
-  //     console.error(err);
-  //   }
-  // }
-//   async function loadCommodities() {
+// async function loadCommodities() {
 //   try {
-//     // 1️⃣ Fetch DtEntries
+
+//     // 1️⃣ Fetch actual commodities from DtEntries
 //     const resEntries = await fetch('/api/DtEntries/');
 //     const entries = await resEntries.json();
 
 //     const uniqueCommodities = [
-//       ...new Set(entries.map(e => e.sale_commodity).filter(Boolean))
+//       ...new Set(
+//         entries
+//           .map(e => e.sale_commodity)
+//           .filter(Boolean)
+//           .map(x => x.trim())
+//       )
 //     ];
 
-//     const uniqueLower = uniqueCommodities.map(x => x.toLowerCase());
 
-//     // 2️⃣ Fetch Commodity master (FIXED URL)
+//     // 2️⃣ Fetch Commodity master
 //     const resMaster = await fetch('/api/commodities/');
 //     const masterData = await resMaster.json();
 
-//     // 3️⃣ Group by type
-//     const grouped = {};
+
+//     // 3️⃣ Create master lookup
+//     // Used only to get the commodity TYPE
+//     const masterLookup = {};
+
 //     masterData.forEach(item => {
-//       const type = item.type || "Other";
-//       if (!grouped[type]) grouped[type] = [];
-//       grouped[type].push(item.name);
-//     });
-
-//     const select = document.getElementById('commoditySelect');
-//     select.innerHTML = '<option value="">-- Select --</option>';
-
-//     // 4️⃣ Build dropdown
-//     Object.keys(grouped).forEach(type => {
-//       const optgroup = document.createElement('optgroup');
-//       optgroup.label = type;
-
-//       grouped[type].forEach(name => {
-//         if (uniqueLower.includes(name.toLowerCase())) {
-//           const opt = document.createElement('option');
-//           opt.value = name;
-//           opt.textContent = name;
-//           optgroup.appendChild(opt);
-//         }
-//       });
-
-//       if (optgroup.children.length > 0) {
-//         select.appendChild(optgroup);
+//       if (item.name) {
+//         masterLookup[item.name.trim().toLowerCase()] = {
+//           name: item.name.trim(),
+//           type: item.type || "Other"
+//         };
 //       }
 //     });
 
+
+//     // 4️⃣ Group ACTUAL DtEntries commodities
+//     const grouped = {};
+
+//     uniqueCommodities.forEach(commodity => {
+
+//       const key = commodity.toLowerCase();
+
+//       // If commodity exists in master, use its type
+//       // Otherwise put it under "Other"
+//       const type = masterLookup[key]
+//         ? masterLookup[key].type
+//         : "Other";
+
+//       if (!grouped[type]) {
+//         grouped[type] = [];
+//       }
+
+//       grouped[type].push(commodity);
+//     });
+
+
+//     // 5️⃣ Build dropdown
+//     const select = document.getElementById('commoditySelect');
+
+//     select.innerHTML =
+//       '<option value="">-- Select --</option>';
+
+
+//     Object.keys(grouped)
+//       .sort()
+//       .forEach(type => {
+
+//         const optgroup = document.createElement('optgroup');
+
+//         optgroup.label = type;
+
+//         grouped[type]
+//           .sort((a, b) => a.localeCompare(b))
+//           .forEach(commodity => {
+
+//             const opt = document.createElement('option');
+
+//             // IMPORTANT:
+//             // Use the EXACT value from DtEntries
+//             opt.value = commodity;
+
+//             opt.textContent = gettext(commodity);
+
+//             optgroup.appendChild(opt);
+//           });
+
+
+//         if (optgroup.children.length > 0) {
+//           select.appendChild(optgroup);
+//         }
+
+//       });
+
 //   } catch (err) {
+
 //     console.error("Error loading commodities:", err);
+
 //   }
 // }
+let groupedCommodities = {};
+let selectedCommodity = null;
+
+
+// Map master category names to the three tabs.
+function getTabCategory(type) {
+    const value = String(type || '').trim().toLowerCase();
+
+    if (value.includes('vegetable')) {
+        return 'vegetable';
+    }
+
+    if (value.includes('fruit')) {
+        return 'fruit';
+    }
+
+    if (value.includes('fodder')) {
+        return 'fodder';
+    }
+
+    return 'other';
+}
+
+
+// Load commodities from the existing APIs.
 async function loadCommodities() {
-  try {
+    const spinner = document.getElementById('loadingSpinner');
+    const list = document.getElementById('commodityList');
 
-    // 1️⃣ Fetch actual commodities from DtEntries
-    const resEntries = await fetch('/api/DtEntries/');
-    const entries = await resEntries.json();
-
-    const uniqueCommodities = [
-      ...new Set(
-        entries
-          .map(e => e.sale_commodity)
-          .filter(Boolean)
-          .map(x => x.trim())
-      )
-    ];
-
-
-    // 2️⃣ Fetch Commodity master
-    const resMaster = await fetch('/api/commodities/');
-    const masterData = await resMaster.json();
-
-
-    // 3️⃣ Create master lookup
-    // Used only to get the commodity TYPE
-    const masterLookup = {};
-
-    masterData.forEach(item => {
-      if (item.name) {
-        masterLookup[item.name.trim().toLowerCase()] = {
-          name: item.name.trim(),
-          type: item.type || "Other"
-        };
-      }
-    });
-
-
-    // 4️⃣ Group ACTUAL DtEntries commodities
-    const grouped = {};
-
-    uniqueCommodities.forEach(commodity => {
-
-      const key = commodity.toLowerCase();
-
-      // If commodity exists in master, use its type
-      // Otherwise put it under "Other"
-      const type = masterLookup[key]
-        ? masterLookup[key].type
-        : "Other";
-
-      if (!grouped[type]) {
-        grouped[type] = [];
-      }
-
-      grouped[type].push(commodity);
-    });
-
-
-    // 5️⃣ Build dropdown
-    const select = document.getElementById('commoditySelect');
-
-    select.innerHTML =
-      '<option value="">-- Select --</option>';
-
-
-    Object.keys(grouped)
-      .sort()
-      .forEach(type => {
-
-        const optgroup = document.createElement('optgroup');
-
-        optgroup.label = type;
-
-        grouped[type]
-          .sort((a, b) => a.localeCompare(b))
-          .forEach(commodity => {
-
-            const opt = document.createElement('option');
-
-            // IMPORTANT:
-            // Use the EXACT value from DtEntries
-            opt.value = commodity;
-
-            opt.textContent = gettext(commodity);
-
-            optgroup.appendChild(opt);
-          });
-
-
-        if (optgroup.children.length > 0) {
-          select.appendChild(optgroup);
+    try {
+        if (spinner) {
+            spinner.style.display = 'block';
         }
 
-      });
+        // 1. Fetch actual commodities from DtEntries.
+        const resEntries = await fetch('/api/DtEntries/');
 
-  } catch (err) {
+        if (!resEntries.ok) {
+            throw new Error(
+                'Failed to fetch DtEntries: ' + resEntries.status
+            );
+        }
 
-    console.error("Error loading commodities:", err);
+        const entries = await resEntries.json();
 
-  }
+        const uniqueCommodities = [
+            ...new Set(
+                entries
+                    .map(entry => entry.sale_commodity)
+                    .filter(Boolean)
+                    .map(commodity => commodity.trim())
+                    .filter(Boolean)
+            )
+        ];
+
+        // 2. Fetch the commodity master.
+        const resMaster = await fetch('/api/commodities/');
+
+        if (!resMaster.ok) {
+            throw new Error(
+                'Failed to fetch commodity master: ' + resMaster.status
+            );
+        }
+
+        const masterData = await resMaster.json();
+
+        // 3. Create a lookup using the master commodity name.
+        const masterLookup = {};
+
+        masterData.forEach(item => {
+            if (item.name) {
+                masterLookup[item.name.trim().toLowerCase()] = {
+                    name: item.name.trim(),
+                    type: item.type || 'Other'
+                };
+            }
+        });
+
+        // 4. Group actual listing commodities by master type.
+        groupedCommodities = {};
+
+        uniqueCommodities.forEach(commodity => {
+            const key = commodity.toLowerCase();
+
+            const type = masterLookup[key]
+                ? masterLookup[key].type
+                : 'Other';
+
+            if (!groupedCommodities[type]) {
+                groupedCommodities[type] = [];
+            }
+
+            groupedCommodities[type].push(commodity);
+        });
+
+        // 5. Connect the category tabs.
+        const tabs = document.querySelectorAll('.commodity-tab');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                tabs.forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                this.classList.add('active');
+
+                renderCommodityList(this.dataset.category);
+            });
+        });
+
+        // 6. Display Vegetables when the page loads.
+        renderCommodityList('vegetable');
+
+    } catch (error) {
+        console.error('Error loading commodities:', error);
+
+        if (list) {
+            list.textContent =
+                'Unable to load commodities. Please refresh the page.';
+        }
+
+    } finally {
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
 }
+function renderCommodityList(category) {
+    const list = document.getElementById('commodityList');
+    const addFodderButton = document.getElementById('addFodderButton');
+
+    if (!list) {
+        console.error('commodityList element not found');
+        return;
+    }
+
+    // Show the Add Fodder Crop button only on the Fodder tab.
+    if (addFodderButton) {
+        addFodderButton.style.display =
+            category === 'fodder' ? 'inline-flex' : 'none';
+    }
+
+    // Clear only the commodity list.
+    list.innerHTML = '';
+
+    const commodities = [];
+
+    Object.keys(groupedCommodities).forEach(type => {
+        if (getTabCategory(type) === category) {
+            commodities.push(...groupedCommodities[type]);
+        }
+    });
+
+    const uniqueNames = [...new Set(commodities)];
+    uniqueNames.sort((a, b) => a.localeCompare(b));
+
+    if (uniqueNames.length === 0) {
+        list.textContent = 'No commodities available in this category.';
+        return;
+    }
+
+    uniqueNames.forEach(commodity => {
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'commodity-item';
+        button.textContent = gettext(commodity);
+
+        if (commodity === selectedCommodity) {
+            button.classList.add('selected');
+        }
+
+        button.addEventListener('click', function () {
+            selectedCommodity = commodity;
+
+            list.querySelectorAll('.commodity-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            button.classList.add('selected');
+            selectCommodity(commodity);
+        });
+
+        list.appendChild(button);
+    });
+}
+
+
+// Called when a commodity button is clicked.
+// Show markers for the selected commodity.
+function selectCommodity(commodity) {
+    console.log('Selected commodity:', commodity);
+
+    showCommodityMarkers(commodity);
+}
+
+
+// Start loading after the page DOM is ready.
+
 
 async function refreshPopup(entryId) {
     try {
