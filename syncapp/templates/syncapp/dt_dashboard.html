@@ -659,6 +659,11 @@ body {
                     data-category="fodder">
                 🌾 {% trans "Fodder" %}
             </button>
+             <button type="button"
+                    class="commodity-tab"
+                    data-category="other">
+                🧺 {% trans "Other" %}
+            </button>
 
         </div>
 
@@ -793,6 +798,57 @@ body {
             attribution: "&copy; Google"
         }
     ).addTo(map);
+
+    // GeoServer WMS endpoint
+    const geoserverWMS =
+        "https://geonode.communitygis.in/geoserver/geonode/wms";
+
+    // India boundary
+    const indiaBoundary = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:india_boundary",
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
+
+    // State boundaries
+    const stateBoundary = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:state_boundary",
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
+
+    // District boundaries
+    const districtBoundary = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:district_boundary",
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
+
+    // Village boundaries
+    const villageBoundary = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:mahavillages_clean",
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
+
+    // Add overlays to the existing Layers control
+    const boundaryOverlays = {
+        "India Boundary": indiaBoundary,
+        "State Boundaries": stateBoundary,
+        "District Boundaries": districtBoundary,
+        "Village Boundaries": villageBoundary
+    };
+
+// Add to your existing layer control if one already exists.
+// Otherwise, create a new control:
+    L.control.layers(null, boundaryOverlays, {
+        collapsed: true,
+        position: "topright"
+    }).addTo(map);
 
     var baseMaps = {
         "OpenStreetMap": osmLayer,
@@ -1291,8 +1347,8 @@ async function updateProduce(id) {
 
 //   }
 // }
-let groupedCommodities = {};
-let selectedCommodity = null;
+// let groupedCommodities = {};
+// slet selectedCommodity = null;
 
 
 // Map master category names to the three tabs.
@@ -1316,6 +1372,9 @@ function getTabCategory(type) {
 
 
 // Load commodities from the existing APIs.
+let groupedCommodities = {};
+let selectedCommodity = null;
+
 async function loadCommodities() {
     const spinner = document.getElementById('loadingSpinner');
     const list = document.getElementById('commodityList');
@@ -1325,28 +1384,28 @@ async function loadCommodities() {
             spinner.style.display = 'block';
         }
 
-        // 1. Fetch actual commodities from DtEntries.
+        // 1. Fetch produce listings.
+        // This endpoint should return records from dt_produce.
         const resEntries = await fetch('/api/DtEntries/');
 
         if (!resEntries.ok) {
             throw new Error(
-                'Failed to fetch DtEntries: ' + resEntries.status
+                'Failed to fetch produce listings: ' + resEntries.status
             );
         }
 
         const entries = await resEntries.json();
 
+        // Get unique sale_commodity names from dt_produce.
         const uniqueCommodities = [
             ...new Set(
                 entries
-                    .map(entry => entry.sale_commodity)
-                    .filter(Boolean)
-                    .map(commodity => commodity.trim())
+                    .map(entry => String(entry.sale_commodity || '').trim())
                     .filter(Boolean)
             )
         ];
 
-        // 2. Fetch the commodity master.
+        // 2. Fetch the commodity master table.
         const resMaster = await fetch('/api/commodities/');
 
         if (!resMaster.ok) {
@@ -1357,52 +1416,70 @@ async function loadCommodities() {
 
         const masterData = await resMaster.json();
 
-        // 3. Create a lookup using the master commodity name.
-        const masterLookup = {};
+        // 3. Build a lookup using commodity.name.
+        // Case-insensitive matching avoids mismatches such as "Ghee" vs "ghee".
+        const masterLookup = new Map();
 
         masterData.forEach(item => {
-            if (item.name) {
-                masterLookup[item.name.trim().toLowerCase()] = {
-                    name: item.name.trim(),
-                    type: item.type || 'Other'
-                };
+            const name = String(item.name || '').trim();
+
+            if (name) {
+                masterLookup.set(name.toLowerCase(), {
+                    name: name,
+                    type: String(item.type || '').trim()
+                });
             }
         });
 
-        // 4. Group actual listing commodities by master type.
-        groupedCommodities = {};
+        // 4. Classify each produce commodity.
+        groupedCommodities = {
+            vegetable: [],
+            fruit: [],
+            fodder: [],
+            other: []
+        };
 
         uniqueCommodities.forEach(commodity => {
             const key = commodity.toLowerCase();
 
-            const type = masterLookup[key]
-                ? masterLookup[key].type
-                : 'Other';
+            // Check whether sale_commodity exists in commodity.name.
+            const masterItem = masterLookup.get(key);
 
-            if (!groupedCommodities[type]) {
-                groupedCommodities[type] = [];
+            let category = 'other';
+
+            if (masterItem) {
+                // Matching name found: classify using the master type.
+                category = getTabCategory(masterItem.type);
             }
 
-            groupedCommodities[type].push(commodity);
+            // No matching name, or an unrecognized master type:
+            // category remains "other".
+            groupedCommodities[category].push(commodity);
         });
 
-        // 5. Connect the category tabs.
+        // 5. Connect category tabs.
         const tabs = document.querySelectorAll('.commodity-tab');
 
         tabs.forEach(tab => {
-            tab.addEventListener('click', function () {
-                tabs.forEach(item => {
-                    item.classList.remove('active');
-                });
+            // Avoid registering the same listener repeatedly.
+            if (tab.dataset.listenerAdded === 'true') {
+                return;
+            }
 
+            tab.dataset.listenerAdded = 'true';
+
+            tab.addEventListener('click', function () {
+                tabs.forEach(item => item.classList.remove('active'));
                 this.classList.add('active');
 
                 renderCommodityList(this.dataset.category);
             });
         });
 
-        // 6. Display Vegetables when the page loads.
+        // 6. Show Vegetables by default.
         renderCommodityList('vegetable');
+
+        console.log('Commodity classification:', groupedCommodities);
 
     } catch (error) {
         console.error('Error loading commodities:', error);
@@ -1418,6 +1495,7 @@ async function loadCommodities() {
         }
     }
 }
+
 function renderCommodityList(category) {
     const list = document.getElementById('commodityList');
     const addFodderButton = document.getElementById('addFodderButton');
@@ -1427,22 +1505,15 @@ function renderCommodityList(category) {
         return;
     }
 
-    // Show the Add Fodder Crop button only on the Fodder tab.
+    // Show the Add Fodder button only on the Fodder tab.
     if (addFodderButton) {
         addFodderButton.style.display =
             category === 'fodder' ? 'inline-flex' : 'none';
     }
 
-    // Clear only the commodity list.
     list.innerHTML = '';
 
-    const commodities = [];
-
-    Object.keys(groupedCommodities).forEach(type => {
-        if (getTabCategory(type) === category) {
-            commodities.push(...groupedCommodities[type]);
-        }
-    });
+    const commodities = groupedCommodities[category] || [];
 
     const uniqueNames = [...new Set(commodities)];
     uniqueNames.sort((a, b) => a.localeCompare(b));
@@ -1471,6 +1542,7 @@ function renderCommodityList(category) {
             });
 
             button.classList.add('selected');
+
             selectCommodity(commodity);
         });
 
@@ -1634,9 +1706,9 @@ async function refreshPopup(entryId) {
 
 
   // Show markers
-  document.getElementById('commoditySelect').addEventListener('change', e=>{
-    showCommodityMarkers(e.target.value);
-  });
+//   document.getElementById('commoditySelect').addEventListener('change', e=>{
+//     showCommodityMarkers(e.target.value);
+//   });
 
   async function showCommodityMarkers(commodity){
     const i18n = {
