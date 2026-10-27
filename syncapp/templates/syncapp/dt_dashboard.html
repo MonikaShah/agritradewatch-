@@ -813,15 +813,17 @@ body {
 
     // State boundaries
     const stateBoundary = L.tileLayer.wms(geoserverWMS, {
-        layers: "geonode:state_boundary",
+        layers: "geonode:states_in_india",
         format: "image/png",
+        CQL_FILTER:"state='Maharashtra'",
         transparent: true,
         version: "1.1.1"
     });
 
     // District boundaries
     const districtBoundary = L.tileLayer.wms(geoserverWMS, {
-        layers: "geonode:district_boundary",
+        layers: "geonode:maharashtra_districts",
+        styles:"",
         format: "image/png",
         transparent: true,
         version: "1.1.1"
@@ -829,33 +831,36 @@ body {
 
     // Village boundaries
     const villageBoundary = L.tileLayer.wms(geoserverWMS, {
-        layers: "geonode:mahavillages_clean",
+        layers: "geonode:mh_village",
         format: "image/png",
         transparent: true,
         version: "1.1.1"
     });
 
-    // Add overlays to the existing Layers control
-    const boundaryOverlays = {
-        "India Boundary": indiaBoundary,
-        "State Boundaries": stateBoundary,
-        "District Boundaries": districtBoundary,
-        "Village Boundaries": villageBoundary
-    };
+    // Village boundaries
+    const roadnetwork = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:maharashtra_roads",
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
 
+   
 // Add to your existing layer control if one already exists.
+const overlays = {
+    "India Boundary": indiaBoundary,
+    "State Boundaries": stateBoundary,
+    "District Boundaries": districtBoundary,
+    "Village Boundaries": villageBoundary,
+    "Road Network": roadnetwork
+};
 // Otherwise, create a new control:
-    L.control.layers(null, boundaryOverlays, {
+    L.control.layers(null, overlays, {
         collapsed: true,
         position: "topright"
     }).addTo(map);
 
-    var baseMaps = {
-        "OpenStreetMap": osmLayer,
-        "Google Hybrid": googleHybrid
-    };
 
-    L.control.layers(baseMaps).addTo(map);
 
     loadCommodities();
     locateUser();
