@@ -22,7 +22,7 @@ from django.contrib import messages
 from django.db import transaction
 from .forms import DamageForm,DtProduceForm,UserProfilePhotoForm
 from django.db.models import OuterRef, Subquery
-from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce
+from .models import Consumer1, User1, Farmer1, WebData, Commodity,APMC_Master,APMC_Market_Prices, MahaVillage,DamageCrop,DtProduce,FodderListing
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -40,6 +40,9 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.views.decorators.http import require_GET
+from django.contrib.auth.decorators import login_required
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -1287,3 +1290,67 @@ def damage_crop_list(request):
         "syncapp/damage_list.html",
         {"damages": damages}
     )
+
+@require_GET
+@login_required(login_url='/login/')
+def fodder_listings_api(request):
+    """
+    Return active fodder listings as JSON for the MandiGo dashboard.
+    Consumers, farmers and retailers can view active listings.
+    """
+
+    crop_name = request.GET.get("crop_name", "").strip()
+
+    listings = FodderListing.objects.filter(
+        is_active=True
+    )
+
+    if crop_name:
+        listings = listings.filter(
+            crop_name__iexact=crop_name
+        )
+
+    results = []
+
+    for item in listings:
+        results.append({
+            "id": item.id,
+            "crop_name": item.crop_name,
+            "variety": item.variety,
+
+            "latitude": float(item.latitude),
+            "longitude": float(item.longitude),
+
+            "state": item.state,
+            "district": item.district,
+            "tehsil": item.tehsil,
+            "village": item.village,
+
+            "available_at": item.available_at,
+            "expected_tonnes": float(item.expected_tonnes),
+
+            "price": float(item.price),
+            "price_basis": item.price_basis,
+
+            "harvesting_included": item.harvesting_included,
+            "harvesting_cost": (
+                float(item.harvesting_cost)
+                if item.harvesting_cost is not None
+                else None
+            ),
+
+            "expected_harvest_date": (
+                item.expected_harvest_date.isoformat()
+                if item.expected_harvest_date
+                else None
+            ),
+
+            "description": item.description,
+            "seller_id": item.seller_id,
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "count": len(results),
+        "results": results,
+    })

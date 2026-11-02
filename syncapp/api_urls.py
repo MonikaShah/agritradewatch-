@@ -51,5 +51,7 @@ urlpatterns = [
     path('get_tehsils/', api_views.get_tehsils, name='get_tehsils'),
     path('get_villages/', api_views.get_villages, name='get_villages'),
     
+    # Fodder
+    path("fodder-listings/",api_views.fodder_listings_api,name="fodder_listings_api"),
     
 ]

@@ -412,27 +412,27 @@ class FodderListingForm(forms.ModelForm):
         required=True,
         label="Plantation Year",
     )
-    harvesting_included = forms.TypedChoiceField(
-                choices=[
-                    ("True", "Yes"),
-                    ("False", "No"),
-                ],
-                coerce=lambda value: value == "True",
-                widget=forms.RadioSelect,
-                required=True,
-                label="Harvesting Included?",
-            )
+        # harvesting_included = forms.TypedChoiceField(
+        #             choices=[
+        #                 ("True", "Yes"),
+        #                 ("False", "No"),
+        #             ],
+        #             coerce=lambda value: value == "True",
+        #             widget=forms.RadioSelect,
+        #             required=True,
+        #             label="Harvesting Included?",
+        #         )
 
-    transportation_needed = forms.TypedChoiceField(
-                choices=[
-                    ("True", "Yes"),
-                    ("False", "No"),
-                ],
-                coerce=lambda value: value == "True",
-                widget=forms.RadioSelect,
-                required=False,
-                label="Transportation Needed?",
-            )
+        # transportation_needed = forms.TypedChoiceField(
+        #             choices=[
+        #                 ("True", "Yes"),
+        #                 ("False", "No"),
+        #             ],
+        #             coerce=lambda value: value == "True",
+        #             widget=forms.RadioSelect,
+        #             required=False,
+        #             label="Transportation Needed?",
+        #         )
 
     class Meta:
         model = FodderListing
@@ -450,10 +450,10 @@ class FodderListingForm(forms.ModelForm):
             "expected_harvest_date",
             "price_basis",
             "price",
-            "harvesting_included",
-            "harvesting_cost",
-            "transportation_needed",
-            "transportation_charge_per_km",
+            # "harvesting_included",
+            # "harvesting_cost",
+            # "transportation_needed",
+            # "transportation_charge_per_km",
             "description",
         ]
 
@@ -495,25 +495,31 @@ class FodderListingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        harvesting_included = cleaned_data.get("harvesting_included")
-        harvesting_cost = cleaned_data.get("harvesting_cost")
+        # harvesting_included = cleaned_data.get("harvesting_included")
+        # harvesting_cost = cleaned_data.get("harvesting_cost")
 
-        # If harvesting is included, no separate cost is needed.
-        if harvesting_included is True:
-            cleaned_data["harvesting_cost"] = None
+        # # If harvesting is included, no separate cost is needed.
+        # if harvesting_included is True:
+        #     cleaned_data["harvesting_cost"] = None
 
-        # If harvesting is not included, require a cost.
-        elif harvesting_included is False:
-            if harvesting_cost is None:
-                self.add_error(
-                    "harvesting_cost",
-                    "Please enter the harvesting cost because harvesting is not included."
-                )
+        # # If harvesting is not included, require a cost.
+        # elif harvesting_included is False:
+        #     if harvesting_cost is None:
+        #         self.add_error(
+        #             "harvesting_cost",
+        #             "Please enter the harvesting cost because harvesting is not included."
+        #         )
 
-        # Transportation question is not displayed.
-        # Default to False when no value is submitted.
-        if not cleaned_data.get("transportation_needed"):
-            cleaned_data["transportation_needed"] = False
+        # # Transportation question is not displayed.
+        # # Default to False when no value is submitted.
+        # if not cleaned_data.get("transportation_needed"):
+        #     cleaned_data["transportation_needed"] = False
+        # ==========================
+         # Default harvesting and transportation settings.
+        cleaned_data["harvesting_included"] = False
+        cleaned_data["harvesting_cost"] = None
+        cleaned_data["transportation_needed"] = False
+        cleaned_data["transportation_charge_per_km"] = None
 
         return cleaned_data
         
@@ -528,8 +534,6 @@ class FodderOrderForm(forms.ModelForm):
             "buyer_phone",
             "requested_tonnes",
             "requested_acres",
-            "harvesting_required",
-            "transportation_required",
             "buyer_message",
             "destination_latitude",
             "destination_longitude",
@@ -545,18 +549,11 @@ class FodderOrderForm(forms.ModelForm):
             "buyer_message": forms.Textarea(
                 attrs={"rows": 3}
             ),
-            "transportation_required": forms.RadioSelect(
-                choices=[
-                    (True, "Yes"),
-                    (False, "No"),
-                ]
-            ),
         }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("buyer_user", None)
         self.listing = kwargs.pop("listing", None)
-
 
         super().__init__(*args, **kwargs)
 
@@ -570,38 +567,21 @@ class FodderOrderForm(forms.ModelForm):
 
         for field in self.fields.values():
             if not isinstance(field.widget, forms.HiddenInput):
-                field.widget.attrs.setdefault(
-                    "class", "form-control"
-                )
+                field.widget.attrs.setdefault("class", "form-control")
 
         # Populate buyer details for a new order.
         if user and not self.instance.pk:
             self.fields["buyer_name"].initial = (
-                getattr(user, "name", "")
-                or user.get_full_name()
+                getattr(user, "name", "") or user.get_full_name()
             )
-
             self.fields["buyer_email"].initial = user.email
-
-            self.fields["buyer_phone"].initial = (
-                getattr(user, "mobile", "")
-            )
-        # If the seller includes harvesting, the buyer does not
-        # need to choose whether harvesting is required.
-        if self.listing and self.listing.harvesting_included:
-            self.fields["harvesting_required"].required = False
-            self.fields["harvesting_required"].initial = True
-
-        # Transportation must be explicitly selected.
-        self.fields["transportation_required"].required = True
+            self.fields["buyer_phone"].initial = getattr(user, "mobile", "")
 
     def clean(self):
         cleaned_data = super().clean()
 
-        listing = self.initial.get("listing")
-
-        if listing:
-            if listing.price_basis == "tonne":
+        if self.listing:
+            if self.listing.price_basis == "tonne":
                 cleaned_data["requested_acres"] = None
 
                 if not cleaned_data.get("requested_tonnes"):
@@ -610,7 +590,7 @@ class FodderOrderForm(forms.ModelForm):
                         "Please enter the requested tonnes."
                     )
 
-            elif listing.price_basis == "acre":
+            elif self.listing.price_basis == "acre":
                 cleaned_data["requested_tonnes"] = None
 
                 if not cleaned_data.get("requested_acres"):
@@ -618,37 +598,33 @@ class FodderOrderForm(forms.ModelForm):
                         "requested_acres",
                         "Please enter the requested acres."
                     )
-        if self.listing and self.listing.harvesting_included:
-            cleaned_data["harvesting_required"] = True
-
-        
 
         return cleaned_data
 
-        def clean_requested_acres(self):
-            requested_acres = self.cleaned_data.get("requested_acres")
+    def clean_requested_acres(self):
+        requested_acres = self.cleaned_data.get("requested_acres")
 
-            if requested_acres is None:
-                return requested_acres
+        if requested_acres is None:
+            return requested_acres
 
-            if self.listing is None:
-                return requested_acres
+        if self.listing is None:
+            return requested_acres
 
-            total_acres = self.listing.sugarcane_area_acres
+        total_acres = self.listing.sugarcane_area_acres
 
-            if total_acres is None:
-                raise forms.ValidationError(
-                    "The seller has not specified the total available acres."
-                )
+        if total_acres is None:
+            raise forms.ValidationError(
+                "The seller has not specified the total available acres."
+            )
 
-            if requested_acres <= 0:
-                raise forms.ValidationError(
-                    "Requested acres must be greater than zero."
-                )
+        if requested_acres <= 0:
+            raise forms.ValidationError(
+                "Requested acres must be greater than zero."
+            )
 
-            if requested_acres > total_acres:
-                raise forms.ValidationError(
-                    f"You can request at most {total_acres} acres."
-                )
+        if requested_acres > total_acres:
+            raise forms.ValidationError(
+                f"You can request at most {total_acres} acres."
+            )
 
         return requested_acres

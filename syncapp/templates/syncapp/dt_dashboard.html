@@ -823,7 +823,7 @@ body {
     // District boundaries
     const districtBoundary = L.tileLayer.wms(geoserverWMS, {
         layers: "geonode:maharashtra_districts",
-        styles:"",
+        //styles:"",
         format: "image/png",
         transparent: true,
         version: "1.1.1"
@@ -1385,23 +1385,17 @@ async function loadCommodities() {
     const list = document.getElementById('commodityList');
 
     try {
-        if (spinner) {
-            spinner.style.display = 'block';
-        }
+        if (spinner) spinner.style.display = 'block';
 
-        // 1. Fetch produce listings.
-        // This endpoint should return records from dt_produce.
+        // 1. Fetch regular produce listings.
         const resEntries = await fetch('/api/DtEntries/');
 
         if (!resEntries.ok) {
-            throw new Error(
-                'Failed to fetch produce listings: ' + resEntries.status
-            );
+            throw new Error('Failed to fetch produce listings: ' + resEntries.status);
         }
 
         const entries = await resEntries.json();
 
-        // Get unique sale_commodity names from dt_produce.
         const uniqueCommodities = [
             ...new Set(
                 entries
@@ -1410,19 +1404,15 @@ async function loadCommodities() {
             )
         ];
 
-        // 2. Fetch the commodity master table.
+        // 2. Fetch commodity master.
         const resMaster = await fetch('/api/commodities/');
 
         if (!resMaster.ok) {
-            throw new Error(
-                'Failed to fetch commodity master: ' + resMaster.status
-            );
+            throw new Error('Failed to fetch commodity master: ' + resMaster.status);
         }
 
         const masterData = await resMaster.json();
 
-        // 3. Build a lookup using commodity.name.
-        // Case-insensitive matching avoids mismatches such as "Ghee" vs "ghee".
         const masterLookup = new Map();
 
         masterData.forEach(item => {
@@ -1436,7 +1426,7 @@ async function loadCommodities() {
             }
         });
 
-        // 4. Classify each produce commodity.
+        // 3. Initialize categories.
         groupedCommodities = {
             vegetable: [],
             fruit: [],
@@ -1444,32 +1434,50 @@ async function loadCommodities() {
             other: []
         };
 
+        // 4. Classify regular produce.
         uniqueCommodities.forEach(commodity => {
-            const key = commodity.toLowerCase();
-
-            // Check whether sale_commodity exists in commodity.name.
-            const masterItem = masterLookup.get(key);
+            const masterItem = masterLookup.get(commodity.toLowerCase());
 
             let category = 'other';
 
             if (masterItem) {
-                // Matching name found: classify using the master type.
                 category = getTabCategory(masterItem.type);
             }
 
-            // No matching name, or an unrecognized master type:
-            // category remains "other".
-            groupedCommodities[category].push(commodity);
+            // Fodder is loaded separately from dt_fodder_cart.
+            if (category !== 'fodder') {
+                groupedCommodities[category].push(commodity);
+            }
         });
 
-        // 5. Connect category tabs.
+        // 5. Fetch fodder listings separately.
+        const resFodder = await fetch('/api/fodder-listings/');
+
+        if (!resFodder.ok) {
+            throw new Error('Failed to fetch fodder listings: ' + resFodder.status);
+        }
+
+        const fodderData = await resFodder.json();
+
+        const fodderListings = fodderData.results || [];
+
+        // Get unique fodder crop names from actual listings.
+        groupedCommodities.fodder = [
+            ...new Set(
+                fodderListings
+                    .map(item => String(item.crop_name || '').trim())
+                    .filter(Boolean)
+            )
+        ];
+
+        console.log('Fodder listings:', fodderListings);
+        console.log('Commodity classification:', groupedCommodities);
+
+        // 6. Connect category tabs.
         const tabs = document.querySelectorAll('.commodity-tab');
 
         tabs.forEach(tab => {
-            // Avoid registering the same listener repeatedly.
-            if (tab.dataset.listenerAdded === 'true') {
-                return;
-            }
+            if (tab.dataset.listenerAdded === 'true') return;
 
             tab.dataset.listenerAdded = 'true';
 
@@ -1481,27 +1489,22 @@ async function loadCommodities() {
             });
         });
 
-        // 6. Show Vegetables by default.
+        // 7. Show Vegetables by default.
         renderCommodityList('vegetable');
-
-        console.log('Commodity classification:', groupedCommodities);
 
     } catch (error) {
         console.error('Error loading commodities:', error);
 
         if (list) {
-            list.textContent =
-                'Unable to load commodities. Please refresh the page.';
+            list.textContent = 'Unable to load commodities. Please refresh the page.';
         }
 
     } finally {
-        if (spinner) {
-            spinner.style.display = 'none';
-        }
+        if (spinner) spinner.style.display = 'none';
     }
 }
-
 function renderCommodityList(category) {
+    window.currentCommodityCategory = category;
     const list = document.getElementById('commodityList');
     const addFodderButton = document.getElementById('addFodderButton');
 
@@ -1715,143 +1718,353 @@ async function refreshPopup(entryId) {
 //     showCommodityMarkers(e.target.value);
 //   });
 
-  async function showCommodityMarkers(commodity){
+ async function showCommodityMarkers(commodity) {
+
     const i18n = {
-      showing: "{% trans 'Showing' %}",
-      entries_for: "{% trans 'entries for' %}",
-      no_entries: "{% trans 'No entries found for this commodity.' %}"
+        showing: "{% trans 'Showing' %}",
+        entries_for: "{% trans 'entries for' %}",
+        no_entries: "{% trans 'No entries found for this commodity.' %}"
     };
 
-    if(!commodity) return;
+    if (!commodity) return;
+
     currentCommodity = commodity;
+
     const spinner = document.getElementById('loadingSpinner');
-    spinner.style.display = 'inline';  // show spinner
 
-    const res = await fetch(`/api/DtEntries/?sale_commodity=${commodity}`);
-    const data = await res.json();
-    console.log("All entries for", commodity, data);
+    if (spinner) spinner.style.display = 'inline';
 
-    markers.forEach(m=>map.removeLayer(m));
-    markers=[];
+    try {
 
-    const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
-    const iconExists = await checkImageExists(iconPath);
+        let data = [];
+        let isFodder = window.currentCommodityCategory === 'fodder';
 
-    data.forEach(entry=>{
-      if(entry.latitude && entry.longitude){
-        let marker;
-        if(iconExists){
-          const icon = L.icon({
-            iconUrl: iconPath,
-            iconSize: [40,40],
-            iconAnchor: [20,40],
-            popupAnchor: [0,-40]
-          });
-          marker = L.marker([entry.latitude,entry.longitude],{icon});
+        // =========================================
+        // 1. FETCH DATA
+        // =========================================
+
+        if (isFodder) {
+
+            // Fodder comes from dt_fodder_cart.
+            const res = await fetch(
+                `/api/fodder-listings/?crop_name=${encodeURIComponent(commodity)}`
+            );
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch fodder listings: ' + res.status);
+            }
+
+            const response = await res.json();
+
+            data = response.results || [];
+
         } else {
-          marker = L.circleMarker([entry.latitude, entry.longitude],{
-            radius:12,color:"#155724",       // darker border
-            fillColor:"#28a745",   // fill color
-            fillOpacity:0.9
-          });
+
+            // Regular produce comes from dt_produce.
+            const res = await fetch(
+                `/api/DtEntries/?sale_commodity=${encodeURIComponent(commodity)}`
+            );
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch produce listings: ' + res.status);
+            }
+
+            data = await res.json();
         }
 
-        const popupHTML = `
-          <div>
-            <a href="#" class="view-profile-link" data-username-id="${entry.username_id}" 
-              style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
-              👤 ${entry.username_id} - {% trans "View Profile" %}
-            </a>
-            <br><br>
-            <b>{% trans "Commodity" %}:</b> ${entry.sale_commodity}<br>
-            <b>{% trans "Price" %}:</b> ${entry.cost} / ${entry.unit}<br><br>
-            <a href="#" class="toggle-details" style="color:#0d6efd;text-decoration:underline;">🔍 {% trans "More Details" %}</a>
-            <div class="more-details" style="max-height:0; overflow:hidden; transition: max-height 0.5s ease; margin-top:5px;">
-              <b>{% trans "Updated on" %}:</b> ${new Date(entry.created_at).toLocaleDateString()}<br>
-              <b>{% trans "Variety" %}:</b> ${entry.variety_name}<br>
-              
-              
-             
-              <b>{% trans "Quantity" %}:</b> ${entry.quantity_for_sale} ${entry.unit}<br>
-              ${entry.photo_or_video
-                ? (entry.photo_or_video.endsWith('.mp4')
-                    ? `<video src="/media/${entry.photo_or_video}" controls width="100" height="60" style="margin-top:5px;"></video>`
-                    : `<img src="/media/${entry.photo_or_video}" style="width:60px; height:60px; object-fit:cover; border-radius:6px; margin-top:5px;" />`)
-                : ''}
-            </div>
-          </div>
-        `;
+        console.log(
+            isFodder ? 'Fodder listings:' : 'Produce entries:',
+            commodity,
+            data
+        );
 
-        marker.addTo(map).bindPopup(popupHTML);
-        
-        marker._entryId = entry.id;  // store for later
+        // =========================================
+        // 2. CLEAR OLD MARKERS
+        // =========================================
 
-        marker.on("popupopen", e=>{
-          currentOpenMarker = e.popup._source;  // store marker
-          const popup = e.popup._contentNode;
-          // More details toggle
-          const toggle = popup.querySelector('.toggle-details');
-          const details = popup.querySelector('.more-details');
-          if(toggle && details){
-            toggle.addEventListener('click', ev=>{
-              ev.preventDefault();
-              if(details.style.maxHeight && details.style.maxHeight !== '0px'){
-                details.style.maxHeight='0';
-                toggle.textContent='🔍 More Details';
-              } else {
-                details.style.maxHeight=details.scrollHeight+'px';
-                toggle.textContent='🔽 Hide Details';
-              }
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        // =========================================
+        // 3. ICON
+        // =========================================
+
+        const iconPath = `/static/${commodity.toLowerCase().replace(/\s+/g, "_")}.png`;
+
+        const iconExists = await checkImageExists(iconPath);
+
+        let icon = null;
+
+        if (iconExists) {
+            icon = L.icon({
+                iconUrl: iconPath,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
             });
-          }
-          
-          // View profile
-          const profileLink = popup.querySelector('.view-profile-link');
-          if(profileLink){
-            profileLink.addEventListener('click', async ev => {
-              ev.preventDefault();
-              // username from marker popup attribute (this is the DB username_id)
-              const usernameFromLink = profileLink.dataset.usernameId;
-              if (!usernameFromLink) {
-                alert(gettext("Username not available!"));
+        }
+
+        // =========================================
+        // 4. CREATE MARKERS
+        // =========================================
+
+        data.forEach(entry => {
+
+            if (
+                entry.latitude === null ||
+                entry.latitude === undefined ||
+                entry.longitude === null ||
+                entry.longitude === undefined
+            ) {
                 return;
-              }
+            }
 
-              try {
-                const res = await fetch(`/api/profile/${encodeURIComponent(usernameFromLink)}/`);
-                const profile = await res.json();
-                console.log("Profile fetched:", profile);
-                // IMPORTANT: pass both profile object AND the original username id from the popup
-                showProfileAboveLegend(profile, usernameFromLink);
-              } catch(err) {
-                console.error(err);
-                alert(gettext("Could not load profile."));
-              } finally {
-                spinner.style.display = 'none';
-              }
-            });
+            let marker;
 
-          }
+            if (icon) {
+                marker = L.marker(
+                    [entry.latitude, entry.longitude],
+                    { icon: icon }
+                );
+
+            } else {
+                marker = L.circleMarker(
+                    [entry.latitude, entry.longitude],
+                    {
+                        radius: 12,
+                        color: "#155724",
+                        fillColor: "#28a745",
+                        fillOpacity: 0.9
+                    }
+                );
+            }
+
+            // =====================================
+            // FODDER POPUP
+            // =====================================
+
+            if (isFodder) {
+
+                const priceBasis =
+                    entry.price_basis === 'acre' ? 'acre' : 'tonne';
+
+                const popupHTML = `
+                    <div style="min-width:220px;">
+
+                        <b>{% trans "Fodder Crop" %}:</b>
+                        ${entry.crop_name || ''}<br>
+
+                        <b>{% trans "Variety" %}:</b>
+                        ${entry.variety || 'N/A'}<br>
+
+                        <b>{% trans "Price" %}:</b>
+                        ₹${entry.price} / ${priceBasis}<br>
+
+                        <b>{% trans "Expected Quantity" %}:</b>
+                        ${entry.expected_tonnes || 'N/A'} tonnes<br>
+
+                        <b>{% trans "Location" %}:</b>
+                        ${entry.village || ''},
+                        ${entry.tehsil || ''},
+                        ${entry.district || ''}<br>
+
+                        <b>{% trans "Available At" %}:</b>
+                        ${entry.available_at === 'farm' ? 'At farm' : 'At home'}<br>
+
+                        <b>{% trans "Harvesting Included" %}:</b>
+                        ${entry.harvesting_included ? 'Yes' : 'No'}<br>
+
+                        ${entry.harvesting_cost !== null &&
+                          entry.harvesting_cost !== undefined &&
+                          !entry.harvesting_included
+                            ? `<b>{% trans "Harvesting Cost" %}:</b> ₹${entry.harvesting_cost}<br>`
+                            : ''
+                        }
+
+                        ${entry.expected_harvest_date
+                            ? `<b>{% trans "Expected Harvest Date" %}:</b>
+                               ${entry.expected_harvest_date}<br>`
+                            : ''
+                        }
+
+                        ${entry.description
+                            ? `<br><b>{% trans "Description" %}:</b><br>
+                               ${entry.description}`
+                            : ''
+                        }
+
+                        <br><br>
+
+                        <a href="/fodder/order/${entry.id}/"
+                           style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+                            {% trans "View / Place Order" %}
+                        </a>
+
+                    </div>
+                `;
+
+                marker.addTo(map).bindPopup(popupHTML);
+
+            } else {
+
+                // =================================
+                // REGULAR PRODUCE POPUP
+                // =================================
+
+                const popupHTML = `
+                    <div>
+
+                        <a href="#" class="view-profile-link"
+                           data-username-id="${entry.username_id}"
+                           style="color:#0d6efd;text-decoration:underline;font-weight:bold;">
+                            👤 ${entry.username_id} - {% trans "View Profile" %}
+                        </a>
+
+                        <br><br>
+
+                        <b>{% trans "Commodity" %}:</b>
+                        ${entry.sale_commodity}<br>
+
+                        <b>{% trans "Price" %}:</b>
+                        ${entry.cost} / ${entry.unit}<br><br>
+
+                        <a href="#" class="toggle-details"
+                           style="color:#0d6efd;text-decoration:underline;">
+                            🔍 {% trans "More Details" %}
+                        </a>
+
+                        <div class="more-details"
+                             style="max-height:0;overflow:hidden;transition:max-height 0.5s ease;margin-top:5px;">
+
+                            <b>{% trans "Updated on" %}:</b>
+                            ${new Date(entry.created_at).toLocaleDateString()}<br>
+
+                            <b>{% trans "Variety" %}:</b>
+                            ${entry.variety_name}<br>
+
+                            <b>{% trans "Quantity" %}:</b>
+                            ${entry.quantity_for_sale} ${entry.unit}<br>
+
+                            ${entry.photo_or_video
+                                ? (entry.photo_or_video.endsWith('.mp4')
+                                    ? `<video src="/media/${entry.photo_or_video}"
+                                        controls width="100" height="60"></video>`
+                                    : `<img src="/media/${entry.photo_or_video}"
+                                        style="width:60px;height:60px;object-fit:cover;border-radius:6px;">`)
+                                : ''
+                            }
+
+                        </div>
+                    </div>
+                `;
+
+                marker.addTo(map).bindPopup(popupHTML);
+
+                marker._entryId = entry.id;
+
+                marker.on("popupopen", e => {
+
+                    currentOpenMarker = e.popup._source;
+
+                    const popup = e.popup._contentNode;
+
+                    // More details toggle.
+                    const toggle = popup.querySelector('.toggle-details');
+                    const details = popup.querySelector('.more-details');
+
+                    if (toggle && details) {
+                        toggle.addEventListener('click', ev => {
+                            ev.preventDefault();
+
+                            if (
+                                details.style.maxHeight &&
+                                details.style.maxHeight !== '0px'
+                            ) {
+                                details.style.maxHeight = '0';
+                                toggle.textContent = '🔍 More Details';
+
+                            } else {
+                                details.style.maxHeight = details.scrollHeight + 'px';
+                                toggle.textContent = '🔽 Hide Details';
+                            }
+                        });
+                    }
+
+                    // View profile.
+                    const profileLink = popup.querySelector('.view-profile-link');
+
+                    if (profileLink) {
+                        profileLink.addEventListener('click', async ev => {
+
+                            ev.preventDefault();
+
+                            const usernameFromLink =
+                                profileLink.dataset.usernameId;
+
+                            if (!usernameFromLink) {
+                                alert(gettext("Username not available!"));
+                                return;
+                            }
+
+                            try {
+                                const res = await fetch(
+                                    `/api/profile/${encodeURIComponent(usernameFromLink)}/`
+                                );
+
+                                if (!res.ok) {
+                                    throw new Error(res.statusText);
+                                }
+
+                                const profile = await res.json();
+
+                                showProfileAboveLegend(profile, usernameFromLink);
+
+                            } catch (err) {
+                                console.error(err);
+                                alert(gettext("Could not load profile."));
+                            }
+                        });
+                    }
+                });
+            }
+
+            markers.push(marker);
         });
 
-        markers.push(marker);
-      }
-      // ⭐ AUTO-FOCUS MAP TO ALL MARKERS FOR SELECTED COMMODITY
-if (markers.length > 0) {
-    const group = L.featureGroup(markers);
-    map.fitBounds(group.getBounds(), {
-        padding: [40, 40],
-        maxZoom: 15,
-        animate: true
-    });
-}
+        // =========================================
+        // 5. AUTO-FOCUS MAP
+        // =========================================
 
-// spinner.style.display = 'none';
+        if (markers.length > 0) {
 
-    });
-    
-        // ✅ Add legend after markers
-    updateLegend(commodity, data.length, iconExists, iconPath);
+            const group = L.featureGroup(markers);
+
+            map.fitBounds(group.getBounds(), {
+                padding: [40, 40],
+                maxZoom: 15,
+                animate: true
+            });
+
+        } else {
+            console.log('No map locations found for:', commodity);
+        }
+
+        // =========================================
+        // 6. UPDATE LEGEND
+        // =========================================
+
+        updateLegend(commodity, data.length, iconExists, iconPath);
+
+    } catch (error) {
+
+        console.error('Error showing commodity markers:', error);
+
+    } finally {
+
+        if (spinner) spinner.style.display = 'none';
+
+    }
+
 
 
     document.getElementById('statusMsg').textContent =
