@@ -1541,34 +1541,27 @@ Buyer ID: {order.buyer_id}
 Email: {order.buyer_email}
 Phone: {order.buyer_phone}
 
-HARVESTING
-----------
-Seller includes harvesting: {
-    "Yes" if listing.harvesting_included else "No"
-}
-Buyer requests harvesting: {
-    "Yes" if harvesting_required else "No"
-}
-Harvesting cost: Rs. {harvesting_cost:.2f}
+# HARVESTING
+# ----------
+# Seller includes harvesting: {      "Yes" if listing.harvesting_included else "No"  }
+# Buyer requests harvesting: { "Yes" if harvesting_required else "No" }
+# Harvesting cost: Rs. {harvesting_cost:.2f}
 
-TRANSPORTATION
---------------
-Transportation requested: {
-    "Yes" if transportation_required else "No"
-}
-Estimated straight-line distance: {distance_text}
-Transportation rate: Rs. {
-    Decimal(str(listing.transportation_charge_per_km or 0))
-} per km
-Travel cost: Rs. {travel_cost:.2f}
+# TRANSPORTATION
+# --------------
+# Transportation requested: {    "Yes" if transportation_required else "No"  }
+# Estimated straight-line distance: {distance_text}
+# Transportation rate: Rs. {     Decimal(str(listing.transportation_charge_per_km or 0))  } per km
+# Travel cost: Rs. {travel_cost:.2f}
 
 COST SUMMARY
 ------------
 Produce cost: Rs. {produce_cost:.2f}
-Harvesting cost: Rs. {harvesting_cost:.2f}
-Net cost: Rs. {net_cost:.2f}
-Travel cost: Rs. {travel_cost:.2f}
-TOTAL COST: Rs. {total_cost:.2f}
+# Harvesting cost: Rs. {harvesting_cost:.2f}
+# Net cost: Rs. {net_cost:.2f}
+# Travel cost: Rs. {travel_cost:.2f}
+# TOTAL COST: Rs. {total_cost:.2f}
+TOTAL COST: Needs to be discused with the seller. 
 
 DELIVERY LOCATION
 -----------------
@@ -1604,8 +1597,8 @@ Note: Travel cost uses straight-line distance, not road distance.
             (
                 f"Order placed successfully. "
                 f"Net cost: ₹{net_cost:,.2f}; "
-                f"Travel cost: ₹{travel_cost:,.2f}; "
-                f"Total cost: ₹{total_cost:,.2f}."
+                # f"Travel cost: ₹{travel_cost:,.2f}; "
+                # f"Total cost: ₹{total_cost:,.2f}."
             ),
         )
 
