@@ -1292,7 +1292,7 @@ def damage_crop_list(request):
     )
 
 @require_GET
-@login_required(login_url='/login/')
+# @login_required(login_url='/login/')
 def fodder_listings_api(request):
     """
     Return active fodder listings as JSON for the MandiGo dashboard.
