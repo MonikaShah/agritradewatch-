@@ -838,7 +838,7 @@ body {
         version: "1.1.1"
     });
 
-    // Village boundaries
+    // Road Network OSM
     const roadnetwork = L.tileLayer.wms(geoserverWMS, {
         layers: "geonode:maharashtra_roads",
         format: "image/png",
@@ -846,6 +846,14 @@ body {
         version: "1.1.1"
     });
 
+   // APMC Locations
+    const apmc = L.tileLayer.wms(geoserverWMS, {
+        layers: "geonode:maha_apmc_master",
+        
+        format: "image/png",
+        transparent: true,
+        version: "1.1.1"
+    });
    
 // Add to your existing layer control if one already exists.
 const overlays = {
@@ -853,7 +861,8 @@ const overlays = {
     "State Boundaries": stateBoundary,
     "District Boundaries": districtBoundary,
     "Village Boundaries": villageBoundary,
-    "Road Network": roadnetwork
+    "Road Network": roadnetwork,
+    "APMC Locations":apmc
 };
 // Otherwise, create a new control:
     L.control.layers(null, overlays, {
