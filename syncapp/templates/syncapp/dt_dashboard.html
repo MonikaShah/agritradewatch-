@@ -771,7 +771,14 @@ body {
   let currentCommodity = null;
   const loggedInUser = "{{ thela_username }}";   // empty string if not logged in
   let currentOpenMarker = null;
+  let groupedCommodities = {
+        vegetable: [],
+        fruit: [],
+        fodder: [],
+        other: []
+    };
 
+  let selectedCommodity = null;
   const TXT_NO_ITEMS = "{% trans 'No items found.' %}";
   const TXT_LOADING = "{% trans 'Loading...' %}";
   const TXT_NO_OTHER = "{% trans 'No other items.' %}";
@@ -782,7 +789,7 @@ body {
   const TXT_PAYMENT = "{% trans 'Payment Option:' %}";
   const TXT_QUANTITY_SALE ="{% trans 'Quantity for sale' %}";
   const TXT_NO_SELECTED = "{% trans 'No selected items' %}"
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   
     map = L.map('map').setView([20.5937, 78.9629], 8);
@@ -855,26 +862,169 @@ body {
         version: "1.1.1"
     });
    
-// Add to your existing layer control if one already exists.
-const overlays = {
-    "India Boundary": indiaBoundary,
-    "State Boundaries": stateBoundary,
-    "District Boundaries": districtBoundary,
-    "Village Boundaries": villageBoundary,
-    "Road Network": roadnetwork,
-    "APMC Locations":apmc
-};
-// Otherwise, create a new control:
+    // Add to your existing layer control if one already exists.
+    const overlays = {
+        "India Boundary": indiaBoundary,
+        "State Boundaries": stateBoundary,
+        "District Boundaries": districtBoundary,
+        "Village Boundaries": villageBoundary,
+        "Road Network": roadnetwork,
+        "APMC Locations":apmc
+    };
+    // Otherwise, create a new control:
     L.control.layers(null, overlays, {
         collapsed: true,
         position: "topright"
     }).addTo(map);
 
+    // ========================================
+    // APMC WMS CLICK INFORMATION
+    // ========================================
 
+    // ==========================================
+    // APMC WMS - CLICK FOR FEATURE INFORMATION
+    // ==========================================
 
+    map.on('click', function (e) {
+
+        // Check whether APMC layer is currently visible
+        if (!map.hasLayer(apmc)) {
+            return;
+        }
+
+        const point = map.latLngToContainerPoint(e.latlng, map.getZoom());
+        const size = map.getSize();
+        const bounds = map.getBounds();
+
+        const sw = map.options.crs.project(bounds.getSouthWest());
+        const ne = map.options.crs.project(bounds.getNorthEast());
+
+        const params = {
+            service: 'WMS',
+            version: '1.1.1',
+            request: 'GetFeatureInfo',
+
+            layers: 'geonode:maha_apmc_master',
+            query_layers: 'geonode:maha_apmc_master',
+
+            styles: '',
+            bbox: [
+                sw.x,
+                sw.y,
+                ne.x,
+                ne.y
+            ].join(','),
+
+            width: size.x,
+            height: size.y,
+
+            srs: 'EPSG:3857',
+
+            info_format: 'application/json',
+            feature_count: 10,
+
+            x: Math.round(point.x),
+            y: Math.round(point.y),
+
+            buffer: 10
+        };
+
+        const url = geoserverWMS + '?' +
+            new URLSearchParams(params).toString();
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('WMS request failed: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                if (!data.features || data.features.length === 0) {
+
+                    L.popup()
+                        .setLatLng(e.latlng)
+                        .setContent('<b>No APMC information found here.</b>')
+                        .openOn(map);
+
+                    return;
+                }
+
+                let html = `
+                    <div style="min-width:250px; max-width:350px;">
+                        <h3 style="
+                            color:#26734d;
+                            margin:0 0 12px 0;
+                            border-bottom:1px solid #ddd;
+                            padding-bottom:8px;">
+                            APMC Information
+                        </h3>
+                `;
+
+                data.features.forEach((feature, index) => {
+
+                const properties = feature.properties || {};
+
+                // Display only these three fields
+                const apmcName = properties['apmc name'] || properties.apmc_name || '';
+                const marketName = properties['market_nam'] || properties.market_name || '';
+                const district = properties.district || '';
+
+                if (data.features.length > 1) {
+                    html += `<h4>APMC ${index + 1}</h4>`;
+                }
+
+                html += `
+                    <div style="font-size:13px; line-height:1.8;">
+
+                        ${apmcName ? `
+                            <div>
+                                <b>APMC Name:</b> ${apmcName}
+                            </div>
+                        ` : ''}
+
+                        ${marketName ? `
+                            <div>
+                                <b>Market Name:</b> ${marketName}
+                            </div>
+                        ` : ''}
+
+                        ${district ? `
+                            <div>
+                                <b>District:</b> ${district}
+                            </div>
+                        ` : ''}
+
+                    </div>
+                `;
+
+                    if (index < data.features.length - 1) {
+                        html += '<hr>';
+                    }
+
+                });
+
+                html += '</div>';
+
+                L.popup({
+                    maxWidth: 380,
+                    maxHeight: 350
+                })
+                    .setLatLng(e.latlng)
+                    .setContent(html)
+                    .openOn(map);
+
+            })
+            .catch(error => {
+                console.error('APMC GetFeatureInfo Error:', error);
+            });
+
+    });
+    
     loadCommodities();
     locateUser();
-  });
+});
 
   // Shrink map & show profile
   function showProfileAboveLegend(profile, usernameIdFromPopup) {
@@ -1262,108 +1412,7 @@ async function updateProduce(id) {
     }
 }
 
-// async function loadCommodities() {
-//   try {
 
-//     // 1️⃣ Fetch actual commodities from DtEntries
-//     const resEntries = await fetch('/api/DtEntries/');
-//     const entries = await resEntries.json();
-
-//     const uniqueCommodities = [
-//       ...new Set(
-//         entries
-//           .map(e => e.sale_commodity)
-//           .filter(Boolean)
-//           .map(x => x.trim())
-//       )
-//     ];
-
-
-//     // 2️⃣ Fetch Commodity master
-//     const resMaster = await fetch('/api/commodities/');
-//     const masterData = await resMaster.json();
-
-
-//     // 3️⃣ Create master lookup
-//     // Used only to get the commodity TYPE
-//     const masterLookup = {};
-
-//     masterData.forEach(item => {
-//       if (item.name) {
-//         masterLookup[item.name.trim().toLowerCase()] = {
-//           name: item.name.trim(),
-//           type: item.type || "Other"
-//         };
-//       }
-//     });
-
-
-//     // 4️⃣ Group ACTUAL DtEntries commodities
-//     const grouped = {};
-
-//     uniqueCommodities.forEach(commodity => {
-
-//       const key = commodity.toLowerCase();
-
-//       // If commodity exists in master, use its type
-//       // Otherwise put it under "Other"
-//       const type = masterLookup[key]
-//         ? masterLookup[key].type
-//         : "Other";
-
-//       if (!grouped[type]) {
-//         grouped[type] = [];
-//       }
-
-//       grouped[type].push(commodity);
-//     });
-
-
-//     // 5️⃣ Build dropdown
-//     const select = document.getElementById('commoditySelect');
-
-//     select.innerHTML =
-//       '<option value="">-- Select --</option>';
-
-
-//     Object.keys(grouped)
-//       .sort()
-//       .forEach(type => {
-
-//         const optgroup = document.createElement('optgroup');
-
-//         optgroup.label = type;
-
-//         grouped[type]
-//           .sort((a, b) => a.localeCompare(b))
-//           .forEach(commodity => {
-
-//             const opt = document.createElement('option');
-
-//             // IMPORTANT:
-//             // Use the EXACT value from DtEntries
-//             opt.value = commodity;
-
-//             opt.textContent = gettext(commodity);
-
-//             optgroup.appendChild(opt);
-//           });
-
-
-//         if (optgroup.children.length > 0) {
-//           select.appendChild(optgroup);
-//         }
-
-//       });
-
-//   } catch (err) {
-
-//     console.error("Error loading commodities:", err);
-
-//   }
-// }
-// let groupedCommodities = {};
-// slet selectedCommodity = null;
 
 
 // Map master category names to the three tabs.
@@ -1387,8 +1436,7 @@ function getTabCategory(type) {
 
 
 // Load commodities from the existing APIs.
-let groupedCommodities = {};
-let selectedCommodity = null;
+
 
 async function loadCommodities() {
     const spinner = document.getElementById('loadingSpinner');
