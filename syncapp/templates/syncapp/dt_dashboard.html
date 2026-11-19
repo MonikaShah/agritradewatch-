@@ -219,7 +219,7 @@ body {
     flex-direction: row;
     width: 100%;
     min-height: 0;
-    height: calc(100dvh - 60px);
+    height: auto;
     transition: all 0.4s ease;
 }
 
@@ -420,12 +420,206 @@ body {
     }
 }
 
+    /* =======================================
+    DYNAMIC MAP LEGEND
+    ======================================= */
+
+    .dynamic-map-legend {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 10px 14px;
+        border-radius: 8px;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+        font-size: 12px;
+        line-height: 1.8;
+        min-width: 155px;
+        color: #333;
+    }
+
+    .dynamic-map-legend b {
+        font-size: 14px;
+        color: #26734d;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 3px 0;
+    }
+
+    /* APMC marker */
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .apmc-dot {
+        background: #F8E71C;
+        border: 2px solid #130101;
+        box-shadow: 0 0 2px #333;
+    }
+
+    /* User location */
+    .user-dot {
+        background: #007bff;
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 2px #333;
+    }
+
+    /* Overlay line symbols */
+    .legend-line {
+        width: 20px;
+        height: 0;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .india-line {
+        border-top: 3px solid #555;
+    }
+
+    .state-line {
+        border-top: 3px solid #0b0501;
+    }
+
+    .district-line {
+        border-top: 2px solid #8e44ad;
+    }
+
+    .village-line {
+        border-top: 2px dashed #26734d;
+    }
+
+    .road-line {
+        border-top: 2px solid #555;
+    }
+    /* Compact Map Legend */
+/* Compact Map Legend */
+#dynamicMapLegend {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    width: 145px !important;
+    
+    max-width: 145px !important;
+
+    max-height: 210px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    padding: 7px 9px !important;
+    box-sizing: border-box !important;
+
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #333 !important;
+
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+
+    font-size: 11px !important;
+    line-height: 15px !important;
+}
+.leaflet-control.dynamic-map-legend {
+    margin-bottom: 10px !important;
+    margin-left: 8px !important;
+}
+/* Legend heading */
+#dynamicMapLegend div:first-child {
+    font-size: 12px !important;
+    font-weight: bold;
+    margin-bottom: 3px !important;
+}
+
+/* Legend rows */
+#dynamicMapLegend .legend-item,
+#dynamicMapLegend div {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+
+
+/* Scrollbar */
+#dynamicMapLegend::-webkit-scrollbar {
+    width: 4px;
+}
+
+#dynamicMapLegend::-webkit-scrollbar-thumb {
+    background: #aaa;
+    border-radius: 4px;
+}
+
+    /* Legend heading */
+    #dynamicMapLegend div:first-child {
+        font-size: 12px !important;
+        font-weight: bold;
+        margin-bottom: 3px !important;
+    }
+
+    /* Legend rows */
+    #dynamicMapLegend .legend-item,
+    #dynamicMapLegend div {
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+
+  
+
+    /* Scrollbar */
+    #dynamicMapLegend::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #dynamicMapLegend::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 4px;
+    }
+
+
+/* =========================================
+   10. Desktop layout
+   ========================================= */
 
 /* =========================================
    10. Desktop layout
    ========================================= */
 
 @media (min-width: 769px) {
+
+    #dashboard-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: calc(100dvh - 90px);
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #topPanel {
+        flex: 0 0 auto;
+    }
+
+    #mapContainer {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #map {
+        flex: 1 1 0;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
     #rightPanel {
         position: relative;
         bottom: auto;
@@ -453,7 +647,10 @@ body {
 
 @media (max-width: 768px) {
     #dashboard-container {
-        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: calc(100dvh - 90px);
         min-height: 0;
         overflow: hidden;
     }
@@ -514,18 +711,22 @@ body {
     }
 
     #mapContainer {
-        flex: 1 1 auto;
-        flex-direction: column;
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: row;
         width: 100%;
-        min-height: 0;
         height: auto;
+        min-height: 0;
+        overflow: hidden;
+        transition: all 0.4s ease;
     }
 
     #map {
-        flex: 1 1 auto;
+        flex: 1 1 0;
         width: 100% !important;
-        height: auto !important;
-        min-height: 300px;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
     }
 
     #rightPanel {
@@ -596,6 +797,21 @@ body {
     .leaflet-popup-content video {
         max-width: 100%;
         height: auto;
+    }
+    /* Keep Leaflet controls visible above the map */
+    .leaflet-bottom {
+        z-index: 10000 !important;
+    }
+
+    /* Dynamic map legend */
+    .leaflet-bottom.leaflet-left .dynamic-map-legend {
+        margin-bottom: 20px !important;
+        margin-left: 10px !important;
+    }
+
+    /* Avoid applying extra margins to every Leaflet control */
+    .leaflet-bottom .leaflet-control {
+        margin-bottom: 10px;
     }
 
     #resizer {
@@ -825,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
         CQL_FILTER:"state='Maharashtra'",
         transparent: true,
         version: "1.1.1"
-    });
+    }).addTo(map);
 
     // District boundaries
     const districtBoundary = L.tileLayer.wms(geoserverWMS, {
@@ -860,7 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
         format: "image/png",
         transparent: true,
         version: "1.1.1"
-    });
+    }).addTo(map);
    
     // Add to your existing layer control if one already exists.
     const overlays = {
@@ -876,8 +1092,135 @@ document.addEventListener("DOMContentLoaded", () => {
         collapsed: true,
         position: "topright"
     }).addTo(map);
+    
 
-    // ========================================
+    // =======================================
+    // DYNAMIC MAP LEGEND
+    // =======================================
+
+    const overlayLegendItems = [
+        {
+            name: "APMC Locations",
+            layer: apmc,
+            symbol: '<span class="legend-dot apmc-dot"></span>'
+        },
+        {
+            name: "India Boundary",
+            layer: indiaBoundary,
+            symbol: '<span class="legend-line india-line"></span>'
+        },
+        {
+            name: "State Boundaries",
+            layer: stateBoundary,
+            symbol: '<span class="legend-line state-line"></span>'
+        },
+        {
+            name: "District Boundaries",
+            layer: districtBoundary,
+            symbol: '<span class="legend-line district-line"></span>'
+        },
+        {
+            name: "Village Boundaries",
+            layer: villageBoundary,
+            symbol: '<span class="legend-line village-line"></span>'
+        },
+        {
+            name: "Road Network",
+            layer: roadnetwork,
+            symbol: '<span class="legend-line road-line"></span>'
+        }
+    ];
+
+    const mapLegend = L.control({
+        position: 'bottomright'
+    });
+
+    mapLegend.onAdd = function () {
+
+        const div = L.DomUtil.create('div', 'dynamic-map-legend');
+
+        div.id = 'dynamicMapLegend';
+        div.style.width = "155px";
+        div.style.minWidth = "155px";
+        div.style.maxWidth = "155px";
+        div.style.maxHeight = "210px";
+        div.style.overflowY = "auto";
+        div.style.overflowX = "hidden";
+        div.style.padding = "7px 9px";
+        div.style.fontSize = "11px";
+        div.style.lineHeight = "17px";
+        div.style.background = "rgba(255,255,255,0.96)";
+        div.style.borderRadius = "6px";
+        div.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        div.style.color = "#333";
+
+        return div;
+    };
+
+    mapLegend.addTo(map);
+    console.log("Legend control added:", document.getElementById("dynamicMapLegend"));
+
+    // Update legend according to selected layers
+    window.updateMapLegend = function () {
+
+        const div = document.getElementById('dynamicMapLegend');
+
+        if (!div) return;   
+
+        let html = `    <div style="font-weight:bold;font-size:14px;color:#26734d;margin-bottom:5px;">
+            Map Legend
+        </div>
+        <hr style="margin:4px 0 8px 0;">
+    `;
+
+        let hasItems = false;
+
+        // Your current location
+        if (userMarker && map.hasLayer(userMarker)) {
+
+            html += `
+                <div class="legend-item">
+                    <span class="legend-dot user-dot"></span>
+                    Your Location
+                </div>
+            `;
+
+            hasItems = true;
+        }
+
+        // Selected overlay layers
+        overlayLegendItems.forEach(item => {
+
+            if (map.hasLayer(item.layer)) {
+
+                html += `
+                    <div class="legend-item">
+                        ${item.symbol}
+                        ${item.name}
+                    </div>
+                `;
+
+                hasItems = true;
+            }
+
+        });
+
+        if (!hasItems) {
+            html += '<small>No layers selected</small>';
+        }
+
+        div.innerHTML = html;
+    };
+
+
+    // Update whenever an overlay is selected or removed
+    map.on('overlayadd', window.updateMapLegend);
+    map.on('overlayremove', window.updateMapLegend);
+
+    map.on('legendrefresh', window.updateMapLegend);
+
+    window.updateMapLegend();
+        // ========================================
     // APMC WMS CLICK INFORMATION
     // ========================================
 
@@ -1760,6 +2103,11 @@ async function refreshPopup(entryId) {
             fillColor: "#007bff",
             fillOpacity: 0.9
         }).addTo(map);
+
+        // Refresh legend after locating user
+        if (typeof window.updateMapLegend === 'function') {
+            window.updateMapLegend();
+        }
 
         // ⭐ Hide spinner AFTER map focuses
         setTimeout(() => loader.style.display = "none", 500);
