@@ -91,7 +91,7 @@
             <!-- Buyer details -->
             {% for field in form %}
 
-                {% if field.name == "buyer_name" or field.name == "buyer_email" or field.name == "buyer_phone" or field.name == "buyer_message" %}
+                {% if field.name == "buyer_name" or field.name == "buyer_email"  or field.name == "buyer_message" %}
 
                     <div class="col-md-6 mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">

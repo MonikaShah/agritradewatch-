@@ -553,9 +553,16 @@ class FodderOrderForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("buyer_user", None)
+        self.buyer_user = user
+
         self.listing = kwargs.pop("listing", None)
 
         super().__init__(*args, **kwargs)
+
+          # Buyer phone is hidden from the order page.
+        # Keep it optional because it is populated from the user's profile.
+        self.fields["buyer_phone"].required = False
+        self.fields["buyer_phone"].widget = forms.HiddenInput()
 
         if self.listing and self.listing.sugarcane_area_acres is not None:
             self.fields["requested_acres"].widget.attrs["max"] = (
@@ -600,6 +607,15 @@ class FodderOrderForm(forms.ModelForm):
                     )
 
         return cleaned_data
+
+
+    def clean_buyer_phone(self):
+    # Always use the registered mobile number.
+        if self.buyer_user:
+          return getattr(self.buyer_user, "mobile", "") or ""
+
+        return self.cleaned_data.get("buyer_phone", "")
+
 
     def clean_requested_acres(self):
         requested_acres = self.cleaned_data.get("requested_acres")
