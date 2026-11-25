@@ -1539,7 +1539,7 @@ BUYER DETAILS
 Name: {order.buyer_name}
 Buyer ID: {order.buyer_id}
 Email: {order.buyer_email}
-Phone: {order.buyer_phone}
+# Phone: {order.buyer_phone}
 
 # HARVESTING
 # ----------
