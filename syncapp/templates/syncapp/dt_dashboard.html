@@ -1410,45 +1410,45 @@ console.log("Viewed profile user (JS API response):", viewedUser);
 console.log("Is owner check result:", isOwner);
 console.log("Is loggedIn check result:", loggedInUser);
 
-if (profile.profile_pic) {
-  profileImgHTML = `
-    <div style="position:relative; width:80px; height:80px; margin:auto;">
-        <img src="${profile.profile_pic}" 
-             class="profile-pic"
-             style="object-fit:cover; width:80px; height:80px; border-radius:50%;" />
+// if (profile.profile_pic) {
+//   profileImgHTML = `
+//     <div style="position:relative; width:80px; height:80px; margin:auto;">
+//         <img src="${profile.profile_pic}" 
+//              class="profile-pic"
+//              style="object-fit:cover; width:80px; height:80px; border-radius:50%;" />
 
-        ${isOwner ? `
-        <label for="profilePicInput"
-            style="position:absolute; bottom:0; right:0; background:#198754; color:white;
-                  width:28px; height:28px; border-radius:50%; display:flex;
-                  align-items:center; justify-content:center; cursor:pointer;
-                  font-size:16px; border:2px solid #fff;">✏</label>
+//         ${isOwner ? `
+//         <label for="profilePicInput"
+//             style="position:absolute; bottom:0; right:0; background:#198754; color:white;
+//                   width:28px; height:28px; border-radius:50%; display:flex;
+//                   align-items:center; justify-content:center; cursor:pointer;
+//                   font-size:16px; border:2px solid #fff;">✏</label>
 
-        <input type="file" id="profilePicInput" accept="image/*"
-            style="display:none;" onchange="uploadProfilePhotoOwnerOnly()" /> 
-        ` : ``}
-    </div>
-  `;
-}else {
-  profileImgHTML = `
-    <div style="position:relative; width:80px; height:80px; margin:auto;">
-        <div style="width:80px; height:80px; background:#ddd; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            font-size:30px; color:#777;">👤</div>
+//         <input type="file" id="profilePicInput" accept="image/*"
+//             style="display:none;" onchange="uploadProfilePhotoOwnerOnly()" /> 
+//         ` : ``}
+//     </div>
+//   `;
+// }else {
+//   profileImgHTML = `
+//     <div style="position:relative; width:80px; height:80px; margin:auto;">
+//         <div style="width:80px; height:80px; background:#ddd; border-radius:50%;
+//             display:flex; align-items:center; justify-content:center;
+//             font-size:30px; color:#777;">👤</div>
 
-        ${isOwner ? `
-        <label for="profilePicInput"
-            style="position:absolute; bottom:0; right:0; background:#198754; color:white;
-                  width:28px; height:28px; border-radius:50%; display:flex;
-                  align-items:center; justify-content:center; cursor:pointer;
-                  font-size:16px; border:2px solid #fff;">✏</label>
+//         ${isOwner ? `
+//         <label for="profilePicInput"
+//             style="position:absolute; bottom:0; right:0; background:#198754; color:white;
+//                   width:28px; height:28px; border-radius:50%; display:flex;
+//                   align-items:center; justify-content:center; cursor:pointer;
+//                   font-size:16px; border:2px solid #fff;">✏</label>
 
-        <input type="file" id="profilePicInput" accept="image/*"
-            style="display:none;" onchange="uploadProfilePhotoOwnerOnly()" /> 
-        ` : ``}
-    </div>
-  `;
-}
+//         <input type="file" id="profilePicInput" accept="image/*"
+//             style="display:none;" onchange="uploadProfilePhotoOwnerOnly()" /> 
+//         ` : ``}
+//     </div>
+//   `;
+// }
 
 
     contentDiv.innerHTML = `
@@ -1469,20 +1469,7 @@ if (profile.profile_pic) {
                 <span class="profile-value">${profile.email || 'N/A'}</span>
             </div>
 
-            <div class="profile-row">
-                <span class="profile-label">{% trans "Mobile" %}:</span>
-                <span class="profile-value">${profile.mobile || profile.phone || 'N/A'}</span>
-            </div>
-            ${profile.mobile ? `
-            <div class="profile-row">
-                <span class="profile-label">{% trans "WhatsApp" %}:</span>
-                <span class="profile-value">
-                    <a href="https://wa.me/${profile.mobile.replace(/\\D/g,'')}" target="_blank" 
-                      style="color:#25D366; font-weight:bold; text-decoration:underline;">
-                      {% trans "Leave message on WhatsApp" %}
-                    </a>
-                </span>
-            </div>` : ''}
+            
             <div class="profile-row">
                 <span class="profile-label">{% trans "Payment Option" %}:</span>
                 <span class="profile-value">{% trans "Cash" %}</span>
